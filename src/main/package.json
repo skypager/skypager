@@ -1,0 +1,14 @@
+{
+  "name": "skypager",
+  "version": "40.0.0",
+  "main": "universal.js",
+  "browser": "web.js",
+  "react-native": "native.js",
+  "license": "MIT",
+  "author": "Jon Soeder <jon@chicago.com>",
+  "dependencies": {
+    "@skypager/web": "0.0.7",
+    "@skypager/node": "0.0.7",
+    "@skypager/cli": "0.0.7"
+  }
+}

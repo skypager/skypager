@@ -1,0 +1,6 @@
+*
+!src/**
+!lib/**
+!config/**
+!README.md
+!LICENSE.md

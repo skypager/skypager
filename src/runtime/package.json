@@ -1,0 +1,38 @@
+{
+  "name": "@skypager/runtime",
+  "version": "0.0.7",
+  "description": "universal javascript application runtime",
+  "main": "lib/index.js",
+  "browser": "lib/skypager-runtime.min.js",
+  "react-native": "lib/skypager-runtime.js",
+  "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
+  "license": "MIT",
+  "scripts": {
+    "build": "NODE_ENV=production webpack --config webpack.config.js",
+    "prepare": "yarn build",
+    "test": "skypager test"
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.0.0.beta49",
+    "lodash": "^4.17.4",
+    "mobx": "3.3.1",
+    "qbus": "^0.9.7",
+    "uuid": "^3.0.1",
+    "vm-browserify": "^1.1.0"
+  },
+  "devDependencies": {
+    "@skypager/cli": "^0.0.7",
+    "@skypager/webpack": "^0.0.7"
+  },
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/skypager/skypager"
+  },
+  "skypager": {
+    "webpack": {
+      "babel": {
+        "lodash": false
+      }
+    }
+  }
+}

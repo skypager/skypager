@@ -1,0 +1,32 @@
+{
+  "name": "@skypager/helpers-server",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "0.0.7",
+  "description": "skypager server helper",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "skypager build",
+    "prepare": "yarn build"
+  },
+  "skypager": {
+    "webpack": {
+      "build": "webpack.config.js"
+    }
+  },
+  "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
+  "license": "MIT",
+  "dependencies": {
+    "@skypager/node": "^0.0.7",
+    "body-parser": "^1.18.3",
+    "cors": "^2.8.4",
+    "express": "^4.15.2",
+    "express-history-api-fallback": "^2.2.1"
+  },
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/skypager/skypager"
+  },
+  "homepage": "https://skypager.io"
+}

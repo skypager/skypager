@@ -1,0 +1,7 @@
+*
+!src/**
+!lib/**
+!README.md
+!LICENSE.md
+!scripts/**
+!skypager-cli.js

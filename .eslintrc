@@ -1,0 +1,46 @@
+{
+  "parser": "babel-eslint",
+  "globals": {
+    "skypager": true
+  },
+  "env": {
+    "node": true,
+    "browser": true,
+    "mocha": true
+  },
+  "extends": [
+    "prettier",
+    "prettier-standard",
+    "standard-jsx",
+    "prettier/react"
+  ],
+  "plugins": [
+    "class-property"
+  ],
+  "overrides": [{
+    "files": [
+      "*.spec.js"
+    ],
+    "rules": {
+      "no-unused-expressions": 0
+    },
+    "globals": {
+      "skypager": true
+    }
+  }],
+  "rules": {
+    "jsx-quotes": 0,
+    "prettier/prettier": [
+      "error",
+      {
+        "semi": false,
+        "printWidth": 100,
+        "parser": "flow",
+        "singleQuote": true,
+        "tabWidth": 2,
+        "trailingComma": "es5",
+        "bracketSpacing": true
+      }
+    ]
+  }
+}

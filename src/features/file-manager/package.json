@@ -1,0 +1,32 @@
+{
+  "name": "@skypager/features-file-manager",
+  "version": "0.0.7",
+  "description": "an observable state machine for a projects files",
+  "main": "lib/index.js",
+  "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "skypager build",
+    "prepare": "yarn build",
+    "test": "skypager test"
+  },
+  "skypager": {
+    "webpack": {
+      "build": "webpack.config.js"
+    }
+  },
+  "dependencies": {
+    "fs-extra-promise": "^0.4.1",
+    "gaze": "^1.1.2",
+    "md5-file": "3.1.1",
+    "memory-fs": "^0.4.1",
+    "skywalker": "^0.3.2"
+  },
+  "devDependencies": {
+    "@skypager/cli": "^0.0.7",
+    "@skypager/webpack": "^0.0.7"
+  }
+}

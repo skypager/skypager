@@ -1,0 +1,42 @@
+{
+  "name": "@skypager/portfolio",
+  "private": true,
+  "version": "1.0.0",
+  "description": "The Skypager Framework Monorepo",
+  "main": "index.js",
+  "resolutions": {
+    "eslint-scope": "3.7.1"
+  },
+  "scripts": {
+    "start": "node scripts/start.js",
+    "build": "node scripts/build.js",
+    "preinstall": "node scripts/preinstall.js",
+    "watch": "node scripts/watch.js",
+    "prettify": "node scripts/prettify.js",
+    "new": "skypager create",
+    "link:devDependencies": "node scripts/link-dev-dependencies.js",
+    "console": "node scripts/console.js",
+    "bump": "npm --no-git-tag-version version patch",
+    "prerelease": "yarn ci && git add -A && git commit -m screenshots",
+    "release": "lerna publish patch --no-push --yes",
+    "publish:npm": "node scripts/publish-to-npm.js --outdated",
+    "publish:docs": "node scripts/publish-docs.js",
+    "postrelease": "yarn bump && yarn publish:docs && yarn update:git",
+    "update:git": "git add package.json && git commit -m 'published release' && git push",
+    "test": "lerna run test"
+  },
+  "keywords": [
+    "Skypager"
+  ],
+  "author": "Jon Soeder <jon@chicago.com>",
+  "license": "MIT",
+  "workspaces": [
+    "src/devtools/*",
+    "src/runtime",
+    "src/runtimes/*",
+    "src/features/*",
+    "src/helpers/*",
+    "src/servers/*",
+    "src/main"
+  ]
+}

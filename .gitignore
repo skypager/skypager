@@ -1,0 +1,25 @@
+*.DS_Store
+config/development.js
+config/production.js
+npm-debug.log
+node_modules/
+.tmp/
+*.log
+secrets/
+# Editors/IDEs
+.idea
+*.iml
+.vscode
+.env
+test-results-*.xml
+out/
+tmp/
+lib/
+coverage/
+.nyc_output/
+
+# build folders
+/build/
+/dist/*
+/.npmrc
+stats.json

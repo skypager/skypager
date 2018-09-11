@@ -1,0 +1,28 @@
+{
+  "lerna": "2.11.0",
+  "registry": "https://registry.npmjs.org/",
+  "packages": [
+    "src/devtools/*",
+    "src/runtime",
+    "src/runtimes/*",
+    "src/features/*",
+    "src/helpers/*",
+    "src/servers/*"
+  ],
+  "command": {
+    "publish": {
+      "allowBranch": [
+        "develop",
+        "master"
+      ],
+      "ignoreChanges": [
+        "**/*.md",
+        "**/*.spec.js"
+      ]
+    },
+    "run": {
+      "npmClient": "yarn"
+    }
+  },
+  "version": "0.0.7"
+}
