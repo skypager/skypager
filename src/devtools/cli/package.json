@@ -2,7 +2,7 @@
   "name": "@skypager/cli",
   "homepage": "https://skypager-cli.skypager.io",
   "license": "SEE LICENSE IN LICENSE.md",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "the skypager CLI",
   "scripts": {
     "build": "exit 0"
@@ -11,6 +11,6 @@
     "skypager": "./skypager-cli.js"
   },
   "dependencies": {
-    "@skypager/devtools": "^0.0.8"
+    "@skypager/devtools": "^0.0.9"
   }
 }
