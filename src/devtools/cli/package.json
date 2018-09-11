@@ -11,6 +11,7 @@
     "skypager": "./skypager-cli.js"
   },
   "dependencies": {
-    "@skypager/devtools": "^0.0.9"
+    "@skypager/webpack": "^0.0.9",
+    "@skypager/node": "^0.0.9"
   }
 }

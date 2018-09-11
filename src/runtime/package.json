@@ -20,10 +20,6 @@
     "uuid": "^3.0.1",
     "vm-browserify": "^1.1.0"
   },
-  "devDependencies": {
-    "@skypager/cli": "^0.0.9",
-    "@skypager/webpack": "^0.0.8"
-  },
   "repository": {
     "type": "github",
     "url": "https://github.com/skypager/skypager"

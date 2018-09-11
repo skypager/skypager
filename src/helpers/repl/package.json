@@ -5,6 +5,9 @@
   "main": "lib/index.js",
   "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "skypager build"
   },
