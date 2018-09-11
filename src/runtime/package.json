@@ -13,7 +13,7 @@
     "test": "skypager test"
   },
   "dependencies": {
-    "@babel/polyfill": "^7.0.0.beta49",
+    "@babel/polyfill": "^7.0.0",
     "lodash": "^4.17.4",
     "mobx": "3.3.1",
     "qbus": "^0.9.7",

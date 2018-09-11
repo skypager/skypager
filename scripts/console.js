@@ -2,6 +2,7 @@ const run = require('./shared/run')
 
 run(
   async runtime => {
+    await runtime.fileManager.startAsync()
     await runtime.packageManager.startAsync()
     await runtime
       .repl('interactive')
