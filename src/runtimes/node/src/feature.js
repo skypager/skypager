@@ -145,7 +145,7 @@ export function enabledHook(options = {}) {
     return downloader
   })
 
-  if (disableFileManager) {
+  if (!disableFileManager) {
     runtime.lazy('fileManager', () => {
       try {
         runtime.invoke('profiler.profileStart', 'fileManagerEnabled')

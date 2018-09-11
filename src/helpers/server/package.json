@@ -18,7 +18,6 @@
   "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
   "license": "MIT",
   "dependencies": {
-    "@skypager/node": "^0.0.8",
     "body-parser": "^1.18.3",
     "cors": "^2.8.4",
     "express": "^4.15.2",
