@@ -1,6 +1,6 @@
 {
   "name": "@skypager/runtime",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "universal javascript application runtime",
   "main": "lib/index.js",
   "browser": "lib/skypager-runtime.min.js",
@@ -21,8 +21,8 @@
     "vm-browserify": "^1.1.0"
   },
   "devDependencies": {
-    "@skypager/cli": "^0.0.7",
-    "@skypager/webpack": "^0.0.7"
+    "@skypager/cli": "^0.0.8",
+    "@skypager/webpack": "^0.0.8"
   },
   "repository": {
     "type": "github",

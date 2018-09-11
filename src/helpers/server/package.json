@@ -3,7 +3,7 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "skypager server helper",
   "main": "lib/index.js",
   "scripts": {
@@ -18,7 +18,7 @@
   "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
   "license": "MIT",
   "dependencies": {
-    "@skypager/node": "^0.0.7",
+    "@skypager/node": "^0.0.8",
     "body-parser": "^1.18.3",
     "cors": "^2.8.4",
     "express": "^4.15.2",
