@@ -1,6 +1,6 @@
 {
   "name": "@skypager/helpers-client",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "skypager client helper",
   "main": "lib/index.js",
   "browser": "lib/skypager-helpers-client.min.js",
@@ -10,7 +10,7 @@
   },
   "publishConfig": {
     "access": "public"
-  },  
+  },
   "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
   "license": "MIT",
   "dependencies": {
