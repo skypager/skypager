@@ -51,10 +51,14 @@ if (ARGV.debug) {
   args.unshift('--inspect')
 }
 
-const { exitCode } = spawnSync('node', args, {
-  cwd: paths.appRoot,
-  env: spawnEnv,
-  stdio: 'inherit',
-})
+try {
+  const result = spawnSync('node', args, {
+    cwd: paths.appRoot,
+    env: spawnEnv,
+    stdio: 'inherit',
+  })
 
-process.exit(exitCode)
+  process.exit(result.status)
+} catch (error) {
+  process.exit(1)
+}

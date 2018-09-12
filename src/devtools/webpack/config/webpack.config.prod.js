@@ -123,7 +123,8 @@ const webpackConfig = configMerge(commonConfig, {
     // if (process.env.NODE_ENV === 'production') { ... }. See `./env.js`.
     // It is absolutely essential that NODE_ENV was set to production here.
     // Otherwise React will be compiled in the very slow development mode.
-    new webpack.DefinePlugin(env.stringified),
+    !process.env.DISABLE_ENV_INJECTION && new webpack.DefinePlugin(env.stringified),
+
     // Minify the code.
     new UglifyJsPlugin({
       cache: true,
