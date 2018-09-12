@@ -16,11 +16,7 @@ export const defaultPackageContent = {
   description: 'houses the internal skypager package system',
   version: '1.0.0',
   dependencies: {
-    skypager: 'latest',
-    'skypager-cli': 'latest',
-    'skypager-document-types-babel': 'latest',
-    'babel-register': 'latest',
-    'babel-runtime': 'latest',
+    '@skypager/node': require('@skypager/node/package.json').version,
   },
 }
 
@@ -93,8 +89,6 @@ export async function initializeHomeFolder(options = {}, context = {}) {
 
 export async function createShortcuts(options = {}) {
   const { isEmpty } = this.lodash
-
-  return
 }
 
 export function getHomeFolder(options = {}, context = {}) {

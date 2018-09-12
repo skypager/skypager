@@ -27,7 +27,7 @@ export function enabledHook(options = {}) {
 
   const {
     disableHelpers = process.env.DISABLE_SKYPAGER_HELPERS || '',
-    disableFileManager = !!process.env.DISABLE_FILE_MANAGER,
+    disableFileManager = !!process.env.DISABLE_SKYPAGER_FILE_MANAGER,
   } = runtime.argv
 
   if (runtime.argv.profile) {

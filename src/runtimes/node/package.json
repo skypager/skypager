@@ -5,6 +5,8 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "skypager build",
+    "watch": "skypager watch",
+    "console": "skypager console",
     "prepare": "skypager build --force",
     "test": "skypager test --webpack-config webpack.config.test.js"
   },

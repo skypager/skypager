@@ -5,6 +5,7 @@ const { name, version } = require('./package.json')
 const { DefinePlugin } = require('webpack')
 const SourceMapSupport = require('webpack-source-map-support')
 
+process.env.DISABLE_ENV_INJECTION = true
 const production = require('@skypager/webpack/config/webpack.config.prod')
 
 production.plugins = production.plugins.filter(
