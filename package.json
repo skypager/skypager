@@ -37,5 +37,8 @@
     "src/helpers/*",
     "src/servers/*",
     "src/main"
-  ]
+  ],
+  "devDependencies": {
+      "lerna": "^2.1.4"
+  }
 }
