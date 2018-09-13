@@ -9,6 +9,7 @@ const ManifestPlugin = require('webpack-manifest-plugin')
 const configMerge = require('webpack-merge')
 const upperFirst = require('lodash/upperFirst')
 const camelCase = require('lodash/camelCase')
+const mapKeys = require('lodash/mapKeys')
 
 const getClientEnvironment = require('./env')
 const paths = require('./paths')
@@ -21,6 +22,8 @@ const publicPath = paths.servedPath
 
 // Source maps are resource heavy and can cause out of memory issue for large source files.
 const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== 'false'
+const shouldMinify = process.argv.find(i => i === '--minify')
+
 // `publicUrl` is just like `publicPath`, but we will provide it to our app
 // as %PUBLIC_URL% in `index.html` and `process.env.PUBLIC_URL` in JavaScript.
 // Omit trailing slash as %PUBLIC_URL%/xyz looks better than %PUBLIC_URL%xyz.
@@ -69,7 +72,7 @@ if (availableHtmlFiles.length) {
 const frameworkName = (manifest.skypager && manifest.skypager.frameworkName) || 'index'
 const appName = (manifest.skypager && manifest.skypager.appName) || 'app'
 
-const entry = {}
+let entry = {}
 
 if (fs.existsSync(paths.frameworkIndexJs)) {
   entry[frameworkName] = paths.frameworkIndexJs
@@ -77,6 +80,10 @@ if (fs.existsSync(paths.frameworkIndexJs)) {
 
 if (fs.existsSync(paths.appIndexJs)) {
   entry[appName] = paths.appIndexJs
+}
+
+if (shouldMinify) {
+  entry = mapKeys(entry, (v, k) => `${k}.min`)
 }
 
 // This is the production configuration.
@@ -119,37 +126,33 @@ const webpackConfig = configMerge(commonConfig, {
 
     ...htmlPlugins,
 
-    // Makes some environment variables available to the JS code, for example:
-    // if (process.env.NODE_ENV === 'production') { ... }. See `./env.js`.
-    // It is absolutely essential that NODE_ENV was set to production here.
-    // Otherwise React will be compiled in the very slow development mode.
-    !process.env.DISABLE_ENV_INJECTION && new webpack.DefinePlugin(env.stringified),
-
     // Minify the code.
-    new UglifyJsPlugin({
-      cache: true,
-      sourceMap: shouldUseSourceMap,
-      uglifyOptions: {
-        compress: {
-          warnings: false,
-          // Disabled because of an issue with Uglify breaking seemingly valid code:
-          // https://github.com/facebookincubator/create-react-app/issues/2376
-          // Pending further investigation:
-          // https://github.com/mishoo/UglifyJS2/issues/2011
-          comparisons: false,
+    shouldMinify &&
+      new UglifyJsPlugin({
+        cache: true,
+        sourceMap: shouldUseSourceMap,
+        uglifyOptions: {
+          compress: {
+            warnings: false,
+            // Disabled because of an issue with Uglify breaking seemingly valid code:
+            // https://github.com/facebookincubator/create-react-app/issues/2376
+            // Pending further investigation:
+            // https://github.com/mishoo/UglifyJS2/issues/2011
+            comparisons: false,
+          },
+          mangle: {
+            safari10: true,
+            keep_fnames: true,
+          },
+          output: {
+            comments: false,
+            // Turned on because emoji and regex is not minified properly using default
+            // https://github.com/facebookincubator/create-react-app/issues/2488
+            ascii_only: true,
+          },
         },
-        mangle: {
-          safari10: true,
-          keep_fnames: true,
-        },
-        output: {
-          comments: false,
-          // Turned on because emoji and regex is not minified properly using default
-          // https://github.com/facebookincubator/create-react-app/issues/2488
-          ascii_only: true,
-        },
-      },
-    }),
+      }),
+
     // Generate a manifest file which contains a mapping of all asset filenames
     // to their corresponding output file so that tools can pick it up without
     // having to parse `index.html`.

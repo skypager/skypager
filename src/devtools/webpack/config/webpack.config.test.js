@@ -16,6 +16,14 @@ const config = require('./webpack.config.builder')({
 
 const { name, version } = require(paths.appPackageJson)
 
+config.plugins = config.plugins.filter(p => {
+  if (p.constructor && p.constructor.name === 'DefinePlugin' && p.definitions['process.env']) {
+    return true
+  } else {
+    return true
+  }
+})
+
 const webpackConfig = merge(config, {
   context: paths.appRoot,
   devtool: '#cheap-module-eval-source-map',

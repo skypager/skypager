@@ -11,7 +11,7 @@
   "scripts": {
     "build": "skypager build",
     "prepare": "yarn build",
-    "test": "skypager test"
+    "test": "DISABLE_SKYPAGER_FILE_MANAGER=true skypager test"
   },
   "skypager": {
     "webpack": {

@@ -166,14 +166,16 @@ module.exports = function({ paths, ...options } = {}) {
     },
     // Some libraries import Node modules but don't use them in the browser.
     // Tell Webpack to provide empty mocks for them so importing them works.
-    node:
-      target === 'web'
+    node: options.node
+      ? options.node
+      : target === 'web'
         ? {
             dgram: 'empty',
             fs: 'empty',
             net: 'empty',
             tls: 'empty',
             child_process: 'empty',
+            process: false,
           }
         : { __filename: false, __dirname: false, process: false },
     plugins: plugins,

@@ -1,5 +1,6 @@
 const fs = require('fs')
 const path = require('path')
+const pick = require('lodash/pick')
 
 const NODE_ENV = process.env.NODE_ENV
 
@@ -23,30 +24,28 @@ process.env.NODE_PATH = (process.env.NODE_PATH || '')
   .map(folder => path.resolve(appDirectory, folder))
   .join(path.delimiter)
 
+const manifest = require(`${process.cwd()}/package.json`)
+
 function getClientEnvironment(publicUrl) {
-  const raw = Object.keys(process.env)
-    .reduce(
-      (env, key) => {
-        env[key] = process.env[key] // eslint-disable-line no-param-reassign
-        return env
-      },
-      {
-        // Useful for determining whether we’re running in production mode.
-        // Most importantly, it switches React into the correct mode.
-        NODE_ENV: process.env.NODE_ENV || 'development',
-        // Useful for resolving the correct path to static assets in `public`.
-        // For example, <img src={process.env.PUBLIC_URL + '/img/logo.png'} />.
-        // This should only be used as an escape hatch. Normally you would put
-        // images into the `src` and `import` them in code to get their paths.
-        PUBLIC_URL: publicUrl,
-      }
-    )
+  const raw = Object.keys(process.env).reduce(
+    (env, key) => {
+      env[key] = process.env[key] // eslint-disable-line no-param-reassign
+      return env
+    },
+    {
+      // Useful for determining whether we’re running in production mode.
+      // Most importantly, it switches React into the correct mode.
+      NODE_ENV: process.env.NODE_ENV || 'development',
+      // Useful for resolving the correct path to static assets in `public`.
+      // For example, <img src={process.env.PUBLIC_URL + '/img/logo.png'} />.
+      // This should only be used as an escape hatch. Normally you would put
+      // images into the `src` and `import` them in code to get their paths.
+      PUBLIC_URL: publicUrl,
+    }
+  )
   // Stringify all values so we can feed into Webpack DefinePlugin
   const stringified = {
-    'process.env': Object.keys(raw).filter(key => key === 'NODE_ENV' || key === 'PUBLIC_URL').reduce((env, key) => {
-      env[key] = JSON.stringify(raw[key]) // eslint-disable-line no-param-reassign
-      return env
-    }, {}),
+    'process.env': JSON.stringify(pick(raw, ['NODE_ENV', 'PUBLIC_URL'])),
   }
 
   return { raw, stringified }

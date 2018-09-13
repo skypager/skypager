@@ -1,3 +1,8 @@
+import runtime from '@skypager/runtime'
+import * as features from './features'
+
+runtime.use(features)
+
 export const hostMethods = ['parseArgv']
 
 /**
@@ -44,8 +49,6 @@ export function enabledHook(options = {}) {
     runtime.invoke('profiler.profileEnd', 'helperCommandEnabled')
   }
   */
-
-  runtime.features.add(require.context('./features', false, /\.js$/))
 
   runtime.invoke('profiler.profileStart', 'osAdaptersEnabled')
   runtime.feature('fs-adapter').enable()

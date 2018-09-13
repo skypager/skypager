@@ -11,6 +11,14 @@ production.plugins = production.plugins.filter(
   p => !p.constructor || (p.constructor && p.constructor.name !== 'UglifyJsPlugin')
 )
 
+production.plugins = production.plugins.filter(p => {
+  if (p.constructor && p.constructor.name === 'DefinePlugin' && p.definitions['process.env']) {
+    return false
+  } else {
+    return true
+  }
+})
+
 module.exports = merge.strategy({ entry: 'replace', node: 'replace', externals: 'replace' })(
   production,
   {
