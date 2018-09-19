@@ -99,6 +99,10 @@ export async function listSpreadsheets(runtime, options = {}) {
     query = `${query} and sharedWithMe`
   }
 
+  if (typeof options.query === 'string') {
+    query = `and (${options.query})`
+  }
+
   const files = await drive.files.list({ maxResults, q: query }).then(r => r.data)
 
   const { pick } = this.lodash

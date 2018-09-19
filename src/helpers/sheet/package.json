@@ -6,7 +6,8 @@
   "browser": "lib/skypager-helpers-sheet.min.js",
   "react-native": "lib/index.js",
   "scripts": {
-    "build": "NODE_ENV=production webpack --config webpack.config.js"
+    "build": "NODE_ENV=production webpack --config webpack.config.js",
+    "test": "skypager test"
   },
   "publishConfig": {
     "access": "public"
