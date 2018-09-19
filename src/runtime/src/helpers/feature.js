@@ -117,8 +117,9 @@ export class Feature extends Helper {
           cfg,
           options: this.options,
         })
-        this.runtime.error(`Error while enabling feature`, feature, error)
-        return this
+        this.runtime.error(`Error while enabling feature`, this, error.message)
+
+        throw error
       })
   }
 
