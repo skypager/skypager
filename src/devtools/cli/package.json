@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@skypager/node": "^0.0.12",
-    "@skypager/webpack": "^0.0.9"
+    "@skypager/webpack": "^0.0.9",
+    "esm": "^3.0.84"
   }
 }
