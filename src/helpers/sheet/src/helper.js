@@ -17,6 +17,18 @@ export function attach(runtime) {
       this.hide('spreadsheet', this.createSpreadsheet())
       await this.authorize()
       await this.getInfo()
+
+      const { pickBy, isFunction } = this.lodash
+
+      try {
+        this.applyInterface(pickBy({ ...this.provider, ...this.options }, v => isFunction(v)), {
+          partial: [],
+          insertOptions: false,
+        })
+      } catch (error) {
+        this.runtime.error(`Error while applying sheet interface`, error.message)
+      }
+
       return this.authorized
     }
 

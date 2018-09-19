@@ -106,7 +106,7 @@ export async function listSpreadsheets(runtime, options = {}) {
   const records = files.items.map(i => ({
     ...pick(i, 'id', 'title', 'modifiedDate', 'lastModifyingUserName'),
     sheetId: i.id,
-    ...{ driveFile: () => i },
+    ...{ getDriveFile: () => i },
   }))
 
   return records
