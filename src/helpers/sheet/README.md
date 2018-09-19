@@ -56,6 +56,50 @@ async () => {
 }
 ```
 
+## Building an interface for working with your sheet
+
+When you write a module for the SheetHelper to wrap, you can export functions to make working
+with the sheet data more user friendly
+
+```javascript
+export const sheetId = 'my-users-spreadsheet-id'
+
+// will automatically call loadAll() and cache it on this.data when the helper instance initializes
+export const eagerLoaded = true
+
+export function getKeyedById() {
+  return this.lodash.keyBy(this.data, 'id')
+}
+
+export function getGroupedByRole() {
+  return this.lodash.groupBy(this.data, 'role') 
+}
+
+export async function addUser(userData = {}) {
+  await this.spreadsheet.addRow(
+    this.spreadsheet.worksheets[0].id,
+    Object.values(userData)
+  )
+}
+```
+
+Now when you work with this sheet helper instance, these will be available as properties
+
+```javascript
+const users = runtime.sheet('users')
+
+async function main() {
+  await users.whenReady()
+  const { groupedByRole, keyedById } = users
+
+  await users.addUser({ name: 'Jon Soeder', role: 'Baller', id: 'soederpop' })
+  // do something
+}
+```
+
+
+
+
 ## Internals
 
 Internally, this library uses the [Node Google Spreadsheet](https://github.com/theoephraim/node-google-spreadsheet) library, as well as the official googleapis
