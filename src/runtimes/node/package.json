@@ -1,6 +1,6 @@
 {
   "name": "@skypager/node",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "the skypager node runtime",
   "main": "lib/index.js",
   "scripts": {
@@ -16,7 +16,7 @@
     "@skypager/features-file-manager": "^0.0.12",
     "@skypager/helpers-client": "^0.0.10",
     "@skypager/helpers-repl": "^0.0.12",
-    "@skypager/runtime": "^0.0.12",
+    "@skypager/runtime": "^0.0.13",
     "bluebird": "^3.5.0",
     "child-process-promise": "^2.2.1",
     "cli-spinner": "^0.2.8",
