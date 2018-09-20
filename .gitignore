@@ -21,6 +21,7 @@ coverage/
 # build folders
 /build/
 /dist/*
+**/dist/**
 /.npmrc
 stats.json
 .history

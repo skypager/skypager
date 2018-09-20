@@ -15,13 +15,9 @@
     "new": "skypager create",
     "link:devDependencies": "node scripts/link-dev-dependencies.js",
     "console": "node scripts/console.js",
-    "bump": "npm --no-git-tag-version version patch",
-    "prerelease": "yarn ci && git add -A && git commit -m screenshots",
-    "release": "lerna publish patch --no-push --yes",
-    "publish:npm": "node scripts/publish-to-npm.js --outdated",
-    "publish:docs": "node scripts/publish-docs.js",
-    "postrelease": "yarn bump && yarn publish:docs && yarn update:git",
-    "update:git": "git add package.json && git commit -m 'published release' && git push",
+    "release": "lerna publish patch --yes",
+    "prerelease": "yarn test",
+    "postrelease": "skypager update-main-package && cd src/main && npm version patch --skip-git && npm publish",
     "test": "lerna run test --stream"
   },
   "keywords": [

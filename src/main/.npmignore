@@ -1,0 +1,6 @@
+*
+!dist/**
+!native.js
+!node.js
+!web.js
+!universal.js
