@@ -33,11 +33,9 @@ export function attach(runtime, options = {}) {
     base: baseFolder,
   }
 
-  runtime.feature('file-manager', fileManagerOptions).enable(fileManagerOptions)
+  const fileManager = runtime.feature('file-manager', fileManagerOptions)
 
-  if (runtime.commands) {
-    runtime.commands.register('fileManager', () => require('./commands/fileManager'))
-  }
+  fileManager.enable(fileManagerOptions)
 
   if (runtime.argv.moduleManager !== false) {
     runtime.feature('module-manager').enable()
@@ -48,12 +46,28 @@ export function attach(runtime, options = {}) {
   }
 
   if (runtime.argv.startFileManager) {
-    runtime.fileManager
+    fileManager
       .startAsync(runtime.argv)
       .then(() => runtime.argv.packageManager && runtime.packageManager.startAsync())
       .then(() => runtime.argv.moduleManager && runtime.moduleManager.startAsync())
       .catch(e => {
         this.runtime.debug('File Manager Failed to Start Automatically', { message: e.message })
       })
+  }
+
+  function onRegister(runtime, helperClass, options = {}) {
+    const { registry } = options
+    if (registry.name === 'servers') {
+      registry.register('file-manager', () => require('./servers/file-manager'))
+      registry.register('package-manager', () => require('./servers/package-manager'))
+      runtime.Helper.events.off('registered', onRegister)
+    }
+  }
+
+  if (fileManager.runtime.has('servers')) {
+    onRegister({ name: 'server' })
+  } else {
+    console.log('setting up event binding')
+    fileManager.runtime.Helper.events.on('attached', onRegister)
   }
 }

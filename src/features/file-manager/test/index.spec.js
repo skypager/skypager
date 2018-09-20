@@ -10,10 +10,6 @@ describe('The File Manager Feature', function() {
     await runtime.start()
   })
 
-  it('is not enabled by default', function() {
-    runtime.has('fileManager').should.equal(false)
-  })
-
   it('gets registered in the runtime', function() {
     runtime.use(FileManagerFeature).features.available.should.contain('file-manager')
   })

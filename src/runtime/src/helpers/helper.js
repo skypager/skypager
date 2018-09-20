@@ -180,7 +180,9 @@ export class Helper {
    */
   static attach(host, helperClass, options) {
     Helper.events.emit('attach', host, helperClass, options)
-    return attach(host, helperClass, options)
+    const result = attach(host, helperClass, options)
+    Helper.events.emit('attached', host, helperClass, options)
+    return result
   }
 
   static attachAll(host, options = {}) {

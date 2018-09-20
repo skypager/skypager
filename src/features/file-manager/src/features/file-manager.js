@@ -90,6 +90,10 @@ export const featureMethods = [
   'activationEventWasFired',
 
   // Sync the memory file system
+  'lazyMemoryFileSystem',
+
+  'createMemoryFileSystem',
+
   'syncMemoryFileSystem',
 
   'wrapMemoryFileSystem',
@@ -232,42 +236,41 @@ export function featureWasEnabled(options = {}) {
 }
 
 export async function syncMemoryFileSystem(options = {}) {
-  const { runtime, memoryFileSystem: fs } = this
+  const { fs = this.memoryFileSystem } = options
+  const { runtime } = this
   const { fileObjects, directoryObjects } = this
   const { dirname } = this.runtime.pathUtils
 
   if (options.content) {
-    await this.updateContent(options)
+    await this.readContent(options)
   }
 
-  this.chain
+  const directoryPaths = this.chain
     .plant(directoryObjects)
     .uniqBy(d => d.path)
     .sortBy(d => d.path.length)
-    .forEach(d => {
-      if (!fs.existsSync(d.path)) {
-        fs.mkdirpSync(d.path)
+
+  directoryPaths.forEach(d => {
+    if (!fs.existsSync(d.path)) {
+      fs.mkdirpSync(d.path)
+    }
+  })
+
+  fileObjects.forEach(f => {
+    const fileDir = dirname(f.path)
+    fs.mkdirpSync(fileDir)
+
+    if (!fs.existsSync(f.path)) {
+      const content = (f.content || '').toString()
+      try {
+        fs.writeFileSync(f.path, content && content.length ? content : '\n')
+      } catch (error) {
+        runtime.error('Error syncing file', { path: f.path, message: error.message })
       }
+    }
+  })
 
-      return d
-    })
-    .plant(fileObjects)
-    .forEach(f => {
-      fs.mkdirpSync(dirname(f.path))
-
-      if (!fs.existsSync(f.path)) {
-        try {
-          fs.writeFileSync(f.path, (f.content || '').toString())
-        } catch (error) {
-          runtime.error('Error syncing file', { path: f.path, message: error.message })
-        }
-      }
-
-      return f
-    })
-    .value()
-
-  return this.wrapMemoryFileSystem()
+  return this.wrapMemoryFileSystem(options)
 }
 
 export const getPathMatcher = () => pathMatcher
@@ -563,8 +566,12 @@ export function getModifiedDirectories(options = {}) {
     .value()
 }
 
-export function lazyMemoryFileSystem(options = {}) {
+export function createMemoryFileSystem(options = {}) {
   return new Memory()
+}
+
+export function lazyMemoryFileSystem(options = {}) {
+  return this.createMemoryFileSystem(options)
 }
 
 export function start(...args) {
@@ -599,7 +606,7 @@ export function start(...args) {
 
 export async function startAsync(options = {}) {
   if (this.has('git') && this.get('git.files')) {
-    return await startGitMode.call(this, options).catch(error => {
+    return startGitMode.call(this, options).catch(error => {
       this.fireHook(DID_FAIL, error)
       this.status = FAILED
       this.error = error
@@ -709,7 +716,7 @@ export function activationEventWasFired(options = {}) {
     f.once(DID_FAIL, err => notOk(reject, err)())
   })
     .timeout(timeout)
-    .catch(error => f)
+    .catch(error => f) // eslint-disable-line
     .then(() => f)
 }
 
@@ -731,66 +738,154 @@ export async function whenActivated(options = {}) {
   return this
 }
 
-export function wrapMemoryFileSystem() {
+export function wrapMemoryFileSystem(options = {}) {
   const { promisify } = require('bluebird')
-  const { runtime, memoryFileSystem: memfs } = this
+  const { memfs = this.memoryFileSystem } = options
+  const { runtime } = this
 
-  runtime.hide(
-    'fsm',
-    {
-      exists: memfs.exists.bind(memfs),
-      mkdir: memfs.mkdir.bind(memfs),
-      mkdirp: memfs.mkdirp.bind(memfs),
-      readFile: memfs.readFile.bind(memfs),
-      readdir: memfs.readdir.bind(memfs),
-      readlink: memfs.readlink.bind(memfs),
-      rmdir: memfs.rmdir.bind(memfs),
-      stat: memfs.stat.bind(memfs),
-      unlink: memfs.unlink.bind(memfs),
-      writeFile: memfs.writeFile.bind(memfs),
+  const memoryOnlyFunctions = {
+    exists: memfs.exists.bind(memfs),
+    mkdir: memfs.mkdir.bind(memfs),
+    mkdirp: memfs.mkdirp.bind(memfs),
+    readFile: memfs.readFile.bind(memfs),
+    readdir: memfs.readdir.bind(memfs),
+    readlink: memfs.readlink.bind(memfs),
+    rmdir: memfs.rmdir.bind(memfs),
+    stat: memfs.stat.bind(memfs),
+    unlink: memfs.unlink.bind(memfs),
+    writeFile: memfs.writeFile.bind(memfs),
 
-      existsAsync: promisify(memfs.exists.bind(memfs)),
-      mkdirAsync: promisify(memfs.mkdir.bind(memfs)),
-      mkdirpAsync: promisify(memfs.mkdirp.bind(memfs)),
-      readFileAsync: promisify(memfs.readFile.bind(memfs)),
-      readdirAsync: promisify(memfs.readdir.bind(memfs)),
-      readlinkAsync: promisify(memfs.readlink.bind(memfs)),
-      rmdirAsync: promisify(memfs.rmdir.bind(memfs)),
-      statAsync: promisify(memfs.stat.bind(memfs)),
-      unlinkAsync: promisify(memfs.unlink.bind(memfs)),
-      writeFileAsync: promisify(memfs.writeFile.bind(memfs)),
+    existsAsync: promisify(memfs.exists.bind(memfs)),
+    mkdirAsync: promisify(memfs.mkdir.bind(memfs)),
+    mkdirpAsync: promisify(memfs.mkdirp.bind(memfs)),
+    readFileAsync: promisify(memfs.readFile.bind(memfs)),
+    readdirAsync: promisify(memfs.readdir.bind(memfs)),
+    readlinkAsync: promisify(memfs.readlink.bind(memfs)),
+    rmdirAsync: promisify(memfs.rmdir.bind(memfs)),
+    statAsync: promisify(memfs.stat.bind(memfs)),
+    unlinkAsync: promisify(memfs.unlink.bind(memfs)),
+    writeFileAsync: promisify(memfs.writeFile.bind(memfs)),
 
-      existsSync: memfs.existsSync.bind(memfs),
-      mkdirSync: memfs.mkdirSync.bind(memfs),
-      mkdirpSync: memfs.mkdirpSync.bind(memfs),
-      readFileSync: memfs.readFileSync.bind(memfs),
-      readdirSync: memfs.readdirSync.bind(memfs),
-      readlinkSync: memfs.readlinkSync.bind(memfs),
-      rmdirSync: memfs.rmdirSync.bind(memfs),
-      statSync: memfs.statSync.bind(memfs),
-      unlinkSync: memfs.unlinkSync.bind(memfs),
-      writeFileSync: memfs.writeFileSync.bind(memfs),
+    existsSync: memfs.existsSync.bind(memfs),
+    mkdirSync: memfs.mkdirSync.bind(memfs),
+    mkdirpSync: memfs.mkdirpSync.bind(memfs),
+    readFileSync: memfs.readFileSync.bind(memfs),
+    readdirSync: memfs.readdirSync.bind(memfs),
+    readlinkSync: memfs.readlinkSync.bind(memfs),
+    rmdirSync: memfs.rmdirSync.bind(memfs),
+    statSync: memfs.statSync.bind(memfs),
 
-      readJsonAsync(path) {
-        return Promise.resolve(JSON.parse(memfs.readFileSync(path).toString()))
-      },
+    unlinkSync: memfs.unlinkSync.bind(memfs),
+    writeFileSync: memfs.writeFileSync.bind(memfs),
 
-      readJsonSync(path) {
-        return JSON.parse(memfs.readFileSync(path).toString())
-      },
-
-      readJson(path, cb) {
-        try {
-          cb(memfs.readFileSync(path))
-        } catch (error) {
-          cb(error)
-        }
-      },
+    writeJsonAsync(path, data) {
+      return Promise.resolve(JSON.parse(memfs.writeFileSync(path, JSON.stringify(data)).toString()))
     },
-    true
-  )
 
-  return memfs
+    writeJsonSync(path, data) {
+      return JSON.parse(memfs.writeFileSync(path, JSON.stringify(data)).toString())
+    },
+
+    writeJson(path, data, cb) {
+      try {
+        memfs.writeFileSync(path, JSON.stringify(data))
+        cb()
+      } catch (error) {
+        cb(error)
+      }
+    },
+
+    readJsonAsync(path) {
+      return Promise.resolve(JSON.parse(memfs.readFileSync(path).toString()))
+    },
+
+    readJsonSync(path) {
+      return JSON.parse(memfs.readFileSync(path).toString())
+    },
+
+    readJson(path, cb) {
+      try {
+        cb(JSON.parse(memfs.readFileSync(path).toString()))
+      } catch (error) {
+        cb(error)
+      }
+    },
+  }
+
+  if (options.fallback) {
+    const readMethods = ['exists', 'readFile', 'readdir', 'readlink', 'stat']
+
+    readMethods.forEach(methodName => {
+      const sync = memoryOnlyFunctions[`${methodName}Sync`]
+      const promise = memoryOnlyFunctions[`${methodName}Async`]
+      const callback = memoryOnlyFunctions[methodName]
+
+      // reads performed on the memory file system for files which don't yet exist
+      memoryOnlyFunctions[`${methodName}Sync`] = function(...args) {
+        if (!memfs.existsSync(args[0])) {
+          return runtime.fsx[`${methodName}Async`](...args)
+        }
+
+        try {
+          return sync(...args)
+        } catch (error) {
+          console.error(`Error in ${methodName}Sync`)
+          const response = runtime.fsx[`${methodName}Sync`](...args)
+          return response
+        }
+      }
+
+      // reads performed on the memory file system for files which don't yet exist
+      memoryOnlyFunctions[`${methodName}Async`] = async function(...args) {
+        const exists = memfs.existsSync(args[0])
+
+        if (!exists) {
+          const value = await Promise.resolve(runtime.fsx[`${methodName}Async`](...args))
+          return value
+        }
+
+        try {
+          const response = await promise(...args)
+          return response
+        } catch (error) {
+          const response = await runtime.fsx[`${methodName}Async`](...args)
+          return response
+        }
+      }
+
+      memoryOnlyFunctions[methodName] = function(...args) {
+        if (!memfs.existsSync(args[0])) {
+          runtime.fsx[methodName](...args)
+          return
+        }
+
+        const cb = typeof args[args.length - 1] === 'function' ? args.pop() : undefined
+
+        if (!cb) {
+          throw new Error(`Must supply a callback argument`)
+        }
+
+        const hijacked = (err, ...response) => {
+          if (err) {
+            console.error(`Error in ${methodName}`)
+            runtime.fsx[methodName](...args)
+          } else {
+            cb(null, ...response)
+          }
+        }
+
+        const hijackedArgs = [...args.slice(0, args.length - 1), hijacked]
+
+        callback(...hijackedArgs) // eslint-disable-line
+      }
+    })
+  }
+
+  const { alias = 'fsm' } = options
+
+  this.runtime[alias] = memoryOnlyFunctions
+
+  return Object.assign({}, memfs, memoryOnlyFunctions)
 }
 
 export const CREATED = 'CREATED'
