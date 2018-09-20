@@ -16,4 +16,5 @@ jobs:
           paths:
             - node_modules
           key: 'v1-dependencies-{{ checksum "package.json" }}'
+      - run: 'mkdir -p src/helpers/sheet/secrets && echo $SERVICE_ACCOUNT_DATA > src/helpers/sheet/secrets/serviceAccount.json'
       - run: yarn test
