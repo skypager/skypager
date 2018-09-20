@@ -22,7 +22,7 @@
     "publish:docs": "node scripts/publish-docs.js",
     "postrelease": "yarn bump && yarn publish:docs && yarn update:git",
     "update:git": "git add package.json && git commit -m 'published release' && git push",
-    "test": "lerna run test"
+    "test": "lerna run test --stream"
   },
   "keywords": [
     "Skypager"
