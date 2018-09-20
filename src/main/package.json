@@ -12,8 +12,10 @@
     "@skypager/cli": "^0.0.16",
     "@skypager/runtime": "^0.0.13"
   },
-  "keywords": [],
-  "description": "",
-  "contributors": [],
-  "scripts": {}
+  "keywords": ["skypager"],
+  "description": "universal javascript framework",
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/skypager/skypager"
+  }
 }
