@@ -1,0 +1,26 @@
+{
+  "name": "@skypager/sheets-server",
+  "version": "0.0.13",
+  "description": "a google sheets api server",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "skypager build",
+    "watch": "skypager watch",
+    "console": "skypager console",
+    "prepare": "skypager build --force",
+    "test": "skypager test --webpack-config webpack.config.test.js"
+  },
+  "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
+  "license": "MIT",
+  "dependencies": {
+    "@skypager/helpers-server": "^0.0.12",
+    "@skypager/helpers-sheet": "^0.0.14",
+    "@skypager/node": "^0.0.13"
+  },
+  "skypager": {
+    "webpack": {
+      "build": "webpack.config.js",
+      "scopeModules": false
+    }
+  }
+}

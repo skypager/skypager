@@ -801,19 +801,27 @@
   resolved "https://registry.yarnpkg.com/@sinonjs/samsam/-/samsam-2.0.0.tgz#9163742ac35c12d3602dece74317643b35db6a80"
 
 "@skypager/cli@0.0.7":
-  version "0.0.12"
+  version "0.0.13"
   dependencies:
-    "@skypager/node" "^0.0.12"
+    "@skypager/node" "^0.0.13"
     "@skypager/webpack" "^0.0.9"
     esm "^3.0.84"
 
+"@skypager/helpers-server@^0.0.12":
+  version "0.0.9"
+  dependencies:
+    body-parser "^1.18.3"
+    cors "^2.8.4"
+    express "^4.15.2"
+    express-history-api-fallback "^2.2.1"
+
 "@skypager/node@0.0.7":
-  version "0.0.12"
+  version "0.0.13"
   dependencies:
     "@skypager/features-file-manager" "^0.0.12"
     "@skypager/helpers-client" "^0.0.10"
     "@skypager/helpers-repl" "^0.0.12"
-    "@skypager/runtime" "^0.0.12"
+    "@skypager/runtime" "^0.0.13"
     bluebird "^3.5.0"
     child-process-promise "^2.2.1"
     cli-spinner "^0.2.8"
@@ -834,9 +842,9 @@
     winston "^2.3.1"
 
 "@skypager/web@0.0.7":
-  version "0.0.12"
+  version "0.0.13"
   dependencies:
-    "@skypager/runtime" "^0.0.12"
+    "@skypager/runtime" "^0.0.13"
 
 "@skypager/webpack@^0.0.9":
   version "0.0.12"
