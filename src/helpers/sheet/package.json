@@ -7,8 +7,9 @@
   "react-native": "lib/index.js",
   "scripts": {
     "build": "NODE_ENV=production webpack --config webpack.config.js",
+    "postbuild": "yarn smoke-test",
     "smoke-test": "skypager smoke-test",
-    "test:local": "skypager test"
+    "test": "skypager test"
   },
   "publishConfig": {
     "access": "public"
