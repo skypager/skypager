@@ -4,6 +4,7 @@
   "description": "a google sheets api server",
   "main": "lib/index.js",
   "scripts": {
+    "start": "skypager start --esm",
     "build": "skypager build",
     "watch": "skypager watch",
     "console": "skypager console",

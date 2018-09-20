@@ -26,6 +26,10 @@ async function main() {
 
   const server = runtime.server('app')
 
+  if (runtime.argv.open) {
+    runtime.opener.openInBrowser(`http://${server.hostname}:${server.port}`)
+  }
+
   return server.start()
 }
 
