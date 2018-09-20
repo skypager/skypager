@@ -39,7 +39,7 @@ export async function featureWasEnabled(options = {}) {
     googleProject: process.env.GCLOUD_PROJECT,
     serviceAccount:
       process.env.GOOGLE_APPLICATION_CREDENTIALS ||
-      this.runtime.resolve('secrests', 'serviceAccount.json'),
+      this.runtime.resolve('secrets', 'serviceAccount.json'),
     ...this.runtime.argv,
     ...this.options,
     ...options,
