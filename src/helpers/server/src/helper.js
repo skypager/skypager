@@ -21,7 +21,15 @@ export class Server extends Helper {
   }
 
   createServer(options = {}, context = {}) {
-    const { appWillMount, createServer } = this.provider
+    const {
+      appWillMount = this.options.appWillMount || this.provider.appWillMount,
+      appDidMount = this.options.appDidMount || this.provider.appDidMount,
+      createServer = this.options.createServer || this.provider.createServer,
+    } = options
+
+    let history = this.tryResult('history', () => false)
+    let serveStatic = this.tryResult('serveStatic', () => false)
+    let cors = this.tryResult('cors')
 
     let app
 
@@ -31,8 +39,24 @@ export class Server extends Helper {
       app = this.framework()
     }
 
+    if (cors) {
+      setupCors.call(this, app, cors)
+    }
+
     if (appWillMount) {
-      appWillMount.call(this, app)
+      appWillMount.call(this, app, options, context)
+    }
+
+    if (appDidMount) {
+      appDidMount.call(this, app, options, context)
+    }
+
+    if (serveStatic) {
+      setupStaticServer.call(this, app, serveStatic)
+    }
+
+    if (history) {
+      setupHistoryFallback.call(this, app, history)
     }
 
     return app
@@ -43,13 +67,9 @@ export class Server extends Helper {
     const { debug, error } = this.runtime.logger
     const { serverDidFail, serverWillStart } = this.provider
 
-    debug('Server will start', { providesMethod: typeof serverWillStart === 'function' })
-
     if (serverWillStart) {
       await serverWillStart.call(this, this.options, this.context)
     }
-
-    debug('Server starting', { args })
 
     try {
       await this.startServer(...args)
@@ -58,34 +78,20 @@ export class Server extends Helper {
       this.stats.set('started', false)
       this.stats.set('failed', true)
 
-      /*
+      console.error(err)
+      throw err
       if (serverDidFail) {
         await serverDidFail.call(this, { error: err }, this.context)
       }
-      */
     }
 
     return this
   }
 
   startServer(...args) {
-    const { debug, error } = this.runtime.logger
-
     return new Promise((resolve, reject) => {
-      const handler = this.starter(
-        ...args.push(err => {
-          err
-            ? error('error while starting', { error: err })
-            : debug('started server', {
-                port: this.port,
-                hostname: this.hostname,
-                id: this.id,
-                name: this.name,
-              })
-          err ? reject(err) : resolve(this)
-        })
-      )
-
+      const handler = this.starter.bind(this, ...args)
+      handler(err => (err ? reject(err) : resolve(this)))
       this.hide('handler', handler)
     })
   }
@@ -103,8 +109,17 @@ export class Server extends Helper {
   }
 
   get starter() {
-    const fn = this.tryGet('provider.start', function(...args) {
-      return this.app.listen(this.port, this.hostname, ...args)
+    const fn = this.tryGet('provider.start', function(cb) {
+      return this.app.listen(this.port, this.hostname, err => {
+        if (err) {
+          this.runtime.error(`Server failed to start: ${err.message}`)
+          cb(err)
+          return
+        }
+
+        this.runtime.info(`Server is listening on ${this.hostname}:${this.port}`)
+        cb()
+      })
     })
 
     return fn.bind(this)
@@ -136,3 +151,57 @@ export const registerHelper = () => Helper.registerHelper('server', () => Server
 
 export default Server
 export const attach = Server.attach
+
+function setupHistoryFallback(app, historyOptions) {
+  const { runtime } = this
+  const history = require('express-history-api-fallback')
+
+  if (historyOptions === true) {
+    app.use(
+      history(runtime.resolve('build', 'index.html'), {
+        root: runtime.resolve('build'),
+      })
+    )
+  } else if (typeof historyOptions === 'object') {
+    let { htmlFile = runtime.resolve('build', 'index.html') } = historyOptions
+
+    htmlFile = runtime.resolve(htmlFile)
+
+    app.use(
+      history(htmlFile, {
+        root: runtime.resolve(historyOptions.root || runtime.pathUtils.dirname(htmlFile)),
+      })
+    )
+  }
+
+  return app
+}
+
+function setupCors(app, corsOptions) {
+  const cors = require('cors')
+
+  if (corsOptions === true) {
+    app.use(cors({ origin: '*', optionSuccessStatus: 200 }))
+  } else if (typeof corsOptions === 'object') {
+    app.use(cors(corsOptions))
+  }
+
+  return app
+}
+
+function setupStaticServer(app, staticOptions) {
+  const { runtime, express } = this
+  const { isArray } = this.lodash
+
+  if (typeof staticOptions === 'string') {
+    app.use(express.static(runtime.resolve(staticOptions)))
+  } else if (staticOptions === true) {
+    app.use(express.static(runtime.resolve('build')))
+  } else if (typeof staticOptions === 'object') {
+    app.use(express.static(runtime.resolve(staticOptions.path || staticOptions.root)))
+  } else if (isArray(staticOptions)) {
+    staticOptions.map(option => setupStaticServer.call(this, app, option))
+  }
+
+  return app
+}
