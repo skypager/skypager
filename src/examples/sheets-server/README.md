@@ -3,13 +3,15 @@
 This example uses the `@skypager/helpers-server` and `@skypager/helpers-sheet` to create a REST API
 that lets you discover some available google sheets, and get the data from those sheets as JSON.
 
-## Getting Started 
+## Requirements 
 
-You will need a service account JSON file that you download from Google Cloud for one of your projects.  
+- You will need a service account JSON file that you download from Google Cloud for one of your projects.  
+- This Google Cloud project needs to have enabled the google drive and google sheets APIs.
+- You will need to share some spreadsheets with the email address found in your service account client_email property
 
-This Google Cloud project needs to have enabled the google drive and google sheets APIs.
+## Getting Started
 
-Once you have this file, you can put it in the secrets folder which is the default location
+If you have the service account json, you can copy it into the secrets folder and we'll automatically find it
 
 ```shell
 $ mkdir -p secrets
