@@ -675,6 +675,12 @@
     pirates "^4.0.0"
     source-map-support "^0.5.9"
 
+"@babel/runtime@^7.0.0":
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/@babel/runtime/-/runtime-7.0.0.tgz#adeb78fedfc855aa05bc041640f3f6f98e85424c"
+  dependencies:
+    regenerator-runtime "^0.12.0"
+
 "@babel/template@7.0.0-beta.44":
   version "7.0.0-beta.44"
   resolved "http://registry.npmjs.org/@babel/template/-/template-7.0.0-beta.44.tgz#f8832f4fdcee5d59bf515e595fc5106c529b394f"
@@ -800,23 +806,31 @@
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/@sinonjs/samsam/-/samsam-2.0.0.tgz#9163742ac35c12d3602dece74317643b35db6a80"
 
-"@skypager/cli@0.0.7":
-  version "0.0.13"
+"@skypager/helpers-client@^0.0.10":
+  version "0.0.10"
+  resolved "https://registry.yarnpkg.com/@skypager/helpers-client/-/helpers-client-0.0.10.tgz#e99e3d794b9af2879d22c740ccd3a112e710bf16"
   dependencies:
-    "@skypager/node" "^0.0.13"
-    "@skypager/webpack" "^0.0.9"
-    esm "^3.0.84"
+    axios "github:axios/axios"
 
 "@skypager/helpers-server@^0.0.12":
-  version "0.0.9"
+  version "0.0.16"
   dependencies:
     body-parser "^1.18.3"
     cors "^2.8.4"
     express "^4.15.2"
     express-history-api-fallback "^2.2.1"
 
-"@skypager/node@0.0.7":
+"@skypager/helpers-sheet@^0.0.14":
+  version "0.0.14"
+  resolved "https://registry.yarnpkg.com/@skypager/helpers-sheet/-/helpers-sheet-0.0.14.tgz#91c17e5c4834dc7534e99055baaa952597ac5a60"
+  dependencies:
+    axios "github:axios/axios"
+    google-spreadsheet "^2.0.5"
+    googleapis "^33.0.0"
+
+"@skypager/node@^0.0.13":
   version "0.0.13"
+  resolved "https://registry.yarnpkg.com/@skypager/node/-/node-0.0.13.tgz#5e56ecec9ded18f03b6c44b0872556d28f5af9fa"
   dependencies:
     "@skypager/features-file-manager" "^0.0.12"
     "@skypager/helpers-client" "^0.0.10"
@@ -840,11 +854,6 @@
     prompt "^1.0.0"
     semver "^5.3.0"
     winston "^2.3.1"
-
-"@skypager/web@0.0.7":
-  version "0.0.13"
-  dependencies:
-    "@skypager/runtime" "^0.0.13"
 
 "@skypager/webpack@^0.0.9":
   version "0.0.12"
@@ -7830,6 +7839,10 @@ regenerator-runtime@^0.10.5:
 regenerator-runtime@^0.11.0, regenerator-runtime@^0.11.1:
   version "0.11.1"
   resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.11.1.tgz#be05ad7f9bf7d22e056f9726cee5017fbf19e2e9"
+
+regenerator-runtime@^0.12.0:
+  version "0.12.1"
+  resolved "https://registry.yarnpkg.com/regenerator-runtime/-/regenerator-runtime-0.12.1.tgz#fa1a71544764c036f8c49b13a08b2594c9f8a0de"
 
 regenerator-transform@^0.13.3:
   version "0.13.3"

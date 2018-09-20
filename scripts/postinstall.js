@@ -1,3 +1,22 @@
+require('@babel/register')({
+  presets: [
+    [
+      '@babel/preset-env',
+      {
+        modules: 'commonjs',
+        targets: {
+          node: '6.11.1',
+        },
+      },
+    ]
+  ],
+  plugins: [
+    '@babel/plugin-proposal-class-properties',
+    '@babel/plugin-proposal-object-rest-spread',
+    '@babel/plugin-transform-runtime',
+  ],
+})
+
 const MultiSpinner = require('multispinner')
 const { resolve } = require('path')
 const skypager = require('@skypager/node')
@@ -10,7 +29,9 @@ const stageOne = [['@skypager/runtime', 'src/runtime', 'lib']]
 
 const stageTwo = [
   ['@skypager/node', 'src/runtimes/node', 'lib'],
-  ['@skypager/features-file-manager', 'src/features-file-manager', 'lib'],
+  ['@skypager/features-file-manager', 'src/features/file-manager', 'lib'],
+  ['@skypager/helpers-client', 'src/helpers/client', 'lib'],
+  ['@skypager/helpers-server', 'src/helpers/server', 'lib'],
 ]
 
 const first = stageOne
