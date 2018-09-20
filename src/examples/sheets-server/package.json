@@ -14,7 +14,7 @@
   "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
   "license": "MIT",
   "dependencies": {
-    "@skypager/helpers-server": "^0.0.12",
+    "@skypager/helpers-server": "^0.0.16",
     "@skypager/helpers-sheet": "^0.0.14",
     "@skypager/node": "^0.0.13"
   },

@@ -11,7 +11,7 @@
   "scripts": {
     "build": "skypager build",
     "prepare": "yarn build",
-    "test": "DISABLE_SKYPAGER_FILE_MANAGER=true skypager test"
+    "test": "DISABLE_SKYPAGER_FILE_MANAGER=true skypager test --timeout 30000"
   },
   "skypager": {
     "webpack": {

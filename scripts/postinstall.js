@@ -8,28 +8,32 @@ require('@babel/register')({
           node: '6.11.1',
         },
       },
-    ]
+    ],
   ],
-  plugins: [
-    '@babel/plugin-proposal-class-properties',
-    '@babel/plugin-proposal-object-rest-spread',
-    '@babel/plugin-transform-runtime',
-  ],
+  plugins: ['@babel/plugin-proposal-object-rest-spread', '@babel/plugin-transform-runtime'],
 })
 
+require('child_process').spawnSync('yarn', ['build'], {
+  cwd: require('path').resolve(__dirname, '..', 'src', 'runtime'),
+  stdio: 'inherit',
+})
+
+require('child_process').spawnSync('yarn', ['build'], {
+  cwd: require('path').resolve(__dirname, '..', 'src', 'runtimes', 'node'),
+  stdio: 'inherit',
+})
+
+const skypager = require('@skypager/node')
 const MultiSpinner = require('multispinner')
 const { resolve } = require('path')
-const skypager = require('@skypager/node')
 const { spawn } = skypager.proc.async
 const { spawnSync } = skypager.proc
 const { randomBanner, print, clear } = skypager.cli
 const { red, dim, blue, magenta, green } = skypager.cli.colors
 
-const stageOne = [['@skypager/runtime', 'src/runtime', 'lib']]
+const stageOne = [['@skypager/features-file-manager', 'src/features/file-manager', 'lib']]
 
 const stageTwo = [
-  ['@skypager/node', 'src/runtimes/node', 'lib'],
-  ['@skypager/features-file-manager', 'src/features/file-manager', 'lib'],
   ['@skypager/helpers-client', 'src/helpers/client', 'lib'],
   ['@skypager/helpers-server', 'src/helpers/server', 'lib'],
 ]
