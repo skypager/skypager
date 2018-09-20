@@ -23,6 +23,8 @@ require('child_process').spawnSync('yarn', ['build'], {
   stdio: 'inherit',
 })
 
+// process.env.DISABLE_SKYPAGER_FILE_MANAGER = true
+
 const skypager = require('@skypager/node')
 const MultiSpinner = require('multispinner')
 const { resolve } = require('path')
@@ -123,8 +125,8 @@ async function main() {
 main()
   .then(() => {
     print('Creating dev dependency symlinks in each of our local projects.')
-    return spawn('yarn', ['link:devDependencies'], {
-      stdio: 'ignore',
+    return spawn('node', ['scripts/link-dev-dependencies.js'], {
+      stdio: 'inherit',
     })
   })
   .then(() => {
