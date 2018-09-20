@@ -2,7 +2,7 @@
 
 const path = require('path')
 const { existsSync } = require('fs')
-const args = process.argv.slice(2)
+let args = process.argv.slice(2)
 const spawnSync = require('child_process').spawnSync
 const script = args.shift()
 const scriptFilename = `${script}.js`.replace(/\.js\.js/, '.js')
@@ -24,8 +24,22 @@ if (!existsSync(scriptPath)) {
   process.exit(1)
 }
 
+const runtimeArgs = []
+
+if (args.indexOf('--esm') !== -1) {
+  runtimeArgs.push('--require')
+  runtimeArgs.push('esm')
+  args = args.filter(arg => arg !== '--esm')
+}
+
+if (args.indexOf('--babel') !== -1) {
+  runtimeArgs.push('--require')
+  runtimeArgs.push('@babel/register')
+  args = args.filter(arg => arg !== '--babel')
+}
+
 try {
-  const result = spawnSync('node', [scriptPath].concat(args), {
+  const result = spawnSync('node', [...runtimeArgs, scriptPath].concat(args), {
     cwd: process.cwd(),
     stdio: 'inherit',
   })
