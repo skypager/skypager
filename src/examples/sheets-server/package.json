@@ -5,6 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "start": "skypager start --esm",
+    "prestart": "yarn build",
     "build": "webpack --config webpack.config.js",
     "watch": "skypager watch",
     "console": "skypager console",
