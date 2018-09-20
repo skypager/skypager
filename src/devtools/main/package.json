@@ -2,11 +2,11 @@
   "name": "@skypager/devtools",
   "homepage": "https://devtools.skypager.io",
   "license": "SEE LICENSE IN LICENSE.md",
-  "version": "0.0.13",
+  "version": "0.0.15",
   "description": "skypager framework developer tools",
   "main": "index.js",
   "dependencies": {
-    "@skypager/node": "^0.0.13",
+    "@skypager/node": "^0.0.15",
     "@skypager/webpack": "^0.0.12",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
