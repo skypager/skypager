@@ -32,6 +32,8 @@ export function appWillMount(app, options = {}, context = {}) {
         .then(() => (!req.params.refresh && sheet.has('data') ? sheet.data : sheet.loadAll()))
         .then(data => res.status(200).json(data))
         .catch(error => {
+          runtime.error(error.message)
+          console.log(error.stack)
           res.status(500).send('<pre>' + error.message + '\n' + error.stack + '</pre>')
         })
     }
@@ -41,6 +43,7 @@ export function appWillMount(app, options = {}, context = {}) {
     const { worksheetId, sheetName } = req.params
 
     if (!sheetName || !sheetName.length || !runtime.sheets.checkKey(req.params.sheetName)) {
+      runtime.error(`404 ${req.method} ${req.url}`)
       res.status(404).json({ notFound: true, error: true, sheetName })
     } else {
       const sheet = runtime.sheet(sheetName)
@@ -58,6 +61,8 @@ export function appWillMount(app, options = {}, context = {}) {
           }
         })
         .catch(error => {
+          runtime.error(`500 ${req.method} ${req.url}`, error.message)
+          console.log(error.stack)
           res.status(500).send('<pre>' + error.message + '\n' + error.stack + '</pre>')
         })
     }

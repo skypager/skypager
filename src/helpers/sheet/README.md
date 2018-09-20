@@ -97,9 +97,6 @@ async function main() {
 }
 ```
 
-
-
-
 ## Internals
 
 Internally, this library uses the [Node Google Spreadsheet](https://github.com/theoephraim/node-google-spreadsheet) library, as well as the official googleapis

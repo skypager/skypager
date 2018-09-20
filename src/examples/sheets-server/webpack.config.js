@@ -8,12 +8,17 @@ const SourceMapSupport = require('webpack-source-map-support')
 process.env.DISABLE_ENV_INJECTION = true
 const production = require('@skypager/webpack/config/webpack.config.prod')
 
-production.plugins = production.plugins.filter(
-  p => !p.constructor || (p.constructor && p.constructor.name !== 'UglifyJsPlugin')
-)
-
-module.exports = merge.strategy({ entry: 'replace', node: 'replace', externals: 'replace' })(
-  production,
+const nodeConfig = merge.strategy({ entry: 'replace', node: 'replace', externals: 'replace' })(
+  Object.assign({}, production, {
+    plugins: production.plugins.filter(
+      p =>
+        !p.constructor ||
+        (p.constructor &&
+          p.constructor.name !== 'UglifyJsPlugin' &&
+          p.constructor.name !== 'ManifestPlugin' &&
+          p.constructor.name !== 'HtmlWebpackPlugin')
+    ),
+  }),
   {
     name: 'node',
     target: 'node',
@@ -42,3 +47,14 @@ module.exports = merge.strategy({ entry: 'replace', node: 'replace', externals: 
     ],
   }
 )
+
+const webConfig = merge.strategy({ entry: 'replace' })(production, {
+  entry: {
+    app: [path.resolve(__dirname, 'src', 'launch.js')],
+  },
+  output: {
+    path: path.resolve(__dirname, 'build'),
+  },
+})
+
+module.exports = [webConfig, nodeConfig]
