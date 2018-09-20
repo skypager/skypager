@@ -29,9 +29,9 @@ const minifiedWebConfig = merge.strategy({ entry: 'replace' })(
     externals: [
       {
         '@skypager/runtime': {
-          commonjs2: 'commonjs2 @skypager/runtime',
-          commonjs: 'commonjs @skypager/runtime',
-          umd: 'commonjs @skypager/runtime',
+          commonjs2: '@skypager/runtime',
+          commonjs: '@skypager/runtime',
+          umd: '@skypager/runtime',
           var: 'global skypager',
         },
       },
@@ -55,7 +55,7 @@ const nodeConfig = merge(require('@skypager/webpack/config/webpack.config.common
     path: path.resolve(cwd, 'lib'),
   },
   externals: [
-    { '@skypager/runtime': 'commonjs2 @skypager/runtime' },
+    { '@skypager/runtime': 'commonjs @skypager/runtime' },
     nodeExternals({
       modulesFromFile: true,
     }),
