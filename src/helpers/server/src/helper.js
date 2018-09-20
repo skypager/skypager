@@ -79,10 +79,12 @@ export class Server extends Helper {
       this.stats.set('failed', true)
 
       console.error(err)
-      throw err
+
       if (serverDidFail) {
         await serverDidFail.call(this, { error: err }, this.context)
       }
+
+      throw err
     }
 
     return this
@@ -116,8 +118,6 @@ export class Server extends Helper {
           cb(err)
           return
         }
-
-        this.runtime.info(`Server is listening on ${this.hostname}:${this.port}`)
         cb()
       })
     })

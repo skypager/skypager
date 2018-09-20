@@ -8,7 +8,9 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "skypager build",
-    "prepare": "yarn build"
+    "prepare": "yarn build",
+    "test": "skypager test",
+    "postbuild": "skypager smoke-test"
   },
   "skypager": {
     "webpack": {
