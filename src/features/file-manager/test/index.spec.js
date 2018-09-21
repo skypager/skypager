@@ -43,4 +43,9 @@ describe('The File Manager Feature', function() {
       .that.is.an('object')
       .that.has.property('name').that.is.not.empty
   })
+
+  it('is based on the underlying git feature of the node runtime', function() {
+    runtime.fileManager.directoryIds.length.should.equal(runtime.git.directoryIds.length)
+    runtime.fileManager.fileIds.length.should.equal(runtime.git.fileIds.length)
+  })
 })

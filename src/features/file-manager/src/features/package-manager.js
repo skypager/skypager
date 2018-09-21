@@ -452,7 +452,8 @@ export async function loadManifests(options = {}) {
 
   const include = compact(flatten([...absolute, ...castArray(options.include || [])]))
 
-  const results = await this.fileManager.readContent({
+  const results = await this.fileManager.readAllContent({
+    hash: true,
     ...options,
     include: p => include.indexOf(p) >= 0,
   })

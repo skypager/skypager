@@ -1,20 +1,28 @@
 import * as fileManager from './file-manager'
 
-export async function serverWillStart(...args) {
-  await fileManager.serverWillStart.call(this, ...args)
-  await this.runtime.packageManager.startAsync()
+export async function appDidMount(...args) {
+  await fileManager.appDidMount.call(this, ...args)
+  await this.packageManager.startAsync()
 }
 
 export function appWillMount(app, ...args) {
   const { runtime } = this
   const { fsm } = runtime
 
-  fileManager.appWillMount(app, ...args)
+  const packageManager = (this.packageManager = runtime.feature('package-manager'))
 
-  app.get(`/api/package-manager/:pathParts`, (req, res) => {
+  fileManager.appWillMount.call(this, app, ...args)
+
+  app.get('/api/package-manager', (req, res) => {
     res.json({
-      pathParts: req.params.pathParts,
+      packageIds: packageManager.packageIds,
     })
+  })
+
+  app.get('/api/package-manager/package/*', (req, res) => {
+    const id = req.params['0']
+    const pkg = packageManager.findByName(id)
+    pkg ? res.json(pkg) : res.status(404).json({ error: true, notFound: true, id })
   })
 
   return app

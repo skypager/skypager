@@ -55,19 +55,21 @@ export function attach(runtime, options = {}) {
       })
   }
 
+  runtime.clients.register('file-manager', () => require('./clients/file-manager'))
+  runtime.clients.register('package-manager', () => require('./clients/file-manager'))
+
   function onRegister(runtime, helperClass, options = {}) {
     const { registry } = options
-    if (registry.name === 'servers') {
+
+    if (registry.name === 'servers' && !registry.checkKey('file-manager')) {
       registry.register('file-manager', () => require('./servers/file-manager'))
       registry.register('package-manager', () => require('./servers/package-manager'))
-      runtime.Helper.events.off('registered', onRegister)
     }
   }
 
   if (fileManager.runtime.has('servers')) {
     onRegister({ name: 'server' })
   } else {
-    console.log('setting up event binding')
     fileManager.runtime.Helper.events.on('attached', onRegister)
   }
 }

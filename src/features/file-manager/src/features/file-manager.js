@@ -58,7 +58,7 @@ export const featureMethods = [
   'hashFiles',
 
   // Read the content of all files within a given subtree
-  'readContent',
+  'readAllContent',
 
   // Access to all of the observable file paths
   'getFileIds',
@@ -198,7 +198,6 @@ export function file(options = {}) {
   @param {Boolean} autoStart
 */
 export function featureWasEnabled(options = {}) {
-  this.hide('memoryFileSystem', new Memory(), false)
   this.hideGetter('fs', () => this.memoryFileSystem)
 
   this.hide('actions', actions)
@@ -231,6 +230,9 @@ export function featureWasEnabled(options = {}) {
         this.emit(DID_FAIL, error)
         this.status = FAILED
         this.runtime.error(`File Manager Failed to start`, { message: error.message })
+        if (this.options.abort || this.runtime.argv.abort) {
+          throw error
+        }
       })
   }
 }
@@ -242,7 +244,11 @@ export async function syncMemoryFileSystem(options = {}) {
   const { dirname } = this.runtime.pathUtils
 
   if (options.content) {
-    await this.readContent(options)
+    const resp = await this.readAllContent({
+      include: [/.*/],
+      hash: true,
+      ...options,
+    })
   }
 
   const directoryPaths = this.chain
@@ -461,7 +467,7 @@ export function updateFileContent(fileId, content) {
   return this
 }
 
-export async function readContent(options = {}) {
+export async function readAllContent(options = {}) {
   const { include = [], exclude = [] } = options
 
   const toFileId = path => this.runtime.relative(path)
@@ -485,7 +491,6 @@ export async function readContent(options = {}) {
             const [fileId, content] = entry
             this.fireHook(RECEIVED_FILE_CONTENT, fileId, content, this.files.get(fileId))
             this.updateFileContent(fileId, content)
-
             return options.hash ? this.hashFile(fileId).then(() => entry) : entry
           })
       )

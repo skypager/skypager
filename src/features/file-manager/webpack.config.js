@@ -35,6 +35,7 @@ module.exports = merge.strategy({ entry: 'replace', node: 'replace', externals: 
       },
     },
     externals: [
+      { '@skypager/helpers-server': 'commonjs @skypager/helpers-server' },
       nodeExternals({ modulesDir: path.resolve(__dirname, 'node_modules') }),
       nodeExternals({ modulesDir: path.resolve(__dirname, '..', '..', '..', 'node_modules') }),
     ],
