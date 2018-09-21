@@ -73,13 +73,8 @@ export function enabledHook(options = {}) {
 
   runtime.invoke('profiler.profileEnd', 'osAdaptersEnabled')
 
-  if (runtime.argv.logging || process.env.USE_SKYPAGER_LOGGING) {
-    runtime.invoke('profiler.profileStart', 'loggerEnabled')
-    runtime.feature('logging').enable()
-    runtime.invoke('profiler.profileEnd', 'loggerEnabled')
-  } else {
-    runtime.lazy('logger', () => console)
-  }
+  runtime.feature('logging').enable()
+  runtime.lazy('logging', () => runtime.feature('logging'))
 
   runtime.lazy('opener', () => {
     const opener = runtime.feature('opener')

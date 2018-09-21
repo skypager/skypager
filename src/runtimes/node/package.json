@@ -5,10 +5,11 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "skypager build",
-    "watch": "skypager watch",
+    "watch": "webpack --config webpack.config.js --watch",
     "console": "skypager console",
     "prepare": "skypager build --force",
-    "test": "skypager test --webpack-config webpack.config.test.js"
+    "test": "skypager test --webpack-config webpack.config.test.js",
+    "test:watch": "skypager test --webpack-config webpack.config.test.js --watch"
   },
   "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
   "license": "MIT",
