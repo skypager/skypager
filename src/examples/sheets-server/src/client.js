@@ -1,4 +1,4 @@
-export const interfaceMethods = ['listSheets', 'showFullSheet', 'showWorksheet', 'getBaseUrl']
+export const interfaceMethods = ['listSheets', 'showFullSheet', 'showWorksheet']
 
 export function listSheets(query = {}) {
   const { baseURL } = this

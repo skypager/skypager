@@ -10,21 +10,22 @@ process.on('unhandledRejection', err => {
 })
 
 // Ensure environment variables are read.
-require('../config/env')
+require('@skypager/webpack/config/env')
 
 const path = require('path')
-const chalk = require('chalk')
+const argv = require('minimist')(process.argv.slice(0, 2))
 const fs = require('fs-extra')
 const webpack = require('webpack')
-const config = require('../config/webpack.config.prod')
-const paths = require('../config/paths')
+const config = require('@skypager/webpack/config/webpack.config.prod')
+const paths = require('@skypager/webpack/config/paths')
 const checkRequiredFiles = require('react-dev-utils/checkRequiredFiles')
 const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages')
 const get = require('lodash/get')
+const isArray = require('lodash/isArray')
 const configMerge = require('webpack-merge')
 
 // Warn and crash if required files are missing
-if (!checkRequiredFiles([paths.appHtml, paths.appIndexJs])) {
+if (!checkRequiredFiles([paths.frameworkIndexJs])) {
   process.exit(1)
 }
 
@@ -36,22 +37,28 @@ copyPublicFolder()
 watch()
 
 // Create the production build and print the deployment instructions.
-function watch() {
+async function watch() {
   let webpackConfig = config
 
   if (get(manifest, 'skypager.webpack.build')) {
-    webpackConfig = configMerge(
-      webpackConfig,
-      require(path.resolve(
-        path.dirname(paths.appPackageJson),
-        get(manifest, 'skypager.webpack.build')
-      ))
-    )
+    let configToMerge = require(path.resolve(
+      path.dirname(paths.appPackageJson),
+      get(manifest, 'skypager.webpack.build')
+    ))
+
+    if (typeof configToMerge === 'function') {
+      configToMerge = await Promise.resolve(configToMerge(argv.env || 'production', argv, config))
+    }
+
+    if (!isArray(configToMerge)) {
+      // we won't try and merge webpack config if it is an array
+      webpackConfig = configMerge(webpackConfig, configToMerge)
+    }
   }
 
   const compiler = webpack(webpackConfig)
 
-  compiler.watch((err, stats) => {
+  compiler.watch({ aggregateTimeout: 1000 }, (err, stats) => {
     if (err) {
       console.error(err)
       return
@@ -71,8 +78,9 @@ function watch() {
 }
 
 function copyPublicFolder() {
-  fs.copySync(paths.appPublic, paths.appBuild, {
-    dereference: true,
-    filter: file => file !== paths.appHtml,
-  })
+  fs.existsSync(paths.appPublic) &&
+    fs.copySync(paths.appPublic, paths.appBuild, {
+      dereference: true,
+      filter: file => file !== paths.appHtml,
+    })
 }
