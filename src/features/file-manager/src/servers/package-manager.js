@@ -7,7 +7,6 @@ export async function appDidMount(...args) {
 
 export function appWillMount(app, ...args) {
   const { runtime } = this
-  const { fsm } = runtime
 
   const packageManager = (this.packageManager = runtime.feature('package-manager'))
 

@@ -12,6 +12,7 @@ process.on('unhandledRejection', err => {
 // Ensure environment variables are read.
 require('@skypager/webpack/config/env')
 
+const argv = require('minimist')(process.argv.slice(0, 2))
 const path = require('path')
 const chalk = require('chalk')
 const fs = require('fs-extra')
@@ -24,6 +25,7 @@ const printHostingInstructions = require('react-dev-utils/printHostingInstructio
 const FileSizeReporter = require('react-dev-utils/FileSizeReporter')
 const printBuildError = require('react-dev-utils/printBuildError')
 const get = require('lodash/get')
+const isArray = require('lodash/isArray')
 const configMerge = require('webpack-merge')
 
 const manifest = require(paths.appPackageJson)
@@ -148,20 +150,29 @@ checkPreviousBuild(paths.appBuild)
   )
 
 // Create the production build and print the deployment instructions.
-function build(previousFileSizes) {
+async function build(previousFileSizes) {
   console.log(`${manifest.name}: Creating an optimized production build...`)
 
   // a project can opt to start
   let webpackConfig = get(manifest, 'skypager.webpack.merge') === false ? {} : config
 
-  if (typeof get(manifest, 'skypager.webpack.build') === 'string') {
-    webpackConfig = configMerge(
-      webpackConfig,
-      require(path.resolve(
-        path.dirname(paths.appPackageJson),
-        get(manifest, 'skypager.webpack.build')
-      ))
-    )
+  if (get(manifest, 'skypager.webpack.build')) {
+    console.log(`Using custom wepack config`)
+    let configToMerge = require(path.resolve(
+      path.dirname(paths.appPackageJson),
+      get(manifest, 'skypager.webpack.build')
+    ))
+
+    if (typeof configToMerge === 'function') {
+      configToMerge = await Promise.resolve(configToMerge(argv.env || 'production', argv, config))
+    }
+
+    if (!isArray(configToMerge)) {
+      // we won't try and merge webpack config if it is an array
+      webpackConfig = configMerge(webpackConfig, configToMerge)
+    } else {
+      console.log('Using multiple webpack configs')
+    }
   }
 
   const compiler = webpack(webpackConfig)

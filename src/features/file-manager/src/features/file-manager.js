@@ -245,7 +245,6 @@ export async function syncMemoryFileSystem(options = {}) {
 
   if (options.content) {
     const resp = await this.readAllContent({
-      include: [/.*/],
       hash: true,
       ...options,
     })
@@ -468,7 +467,7 @@ export function updateFileContent(fileId, content) {
 }
 
 export async function readAllContent(options = {}) {
-  const { include = [], exclude = [] } = options
+  const { include = [], exclude = [/secret/, /\.env/, /build\//] } = options
 
   const toFileId = path => this.runtime.relative(path)
 

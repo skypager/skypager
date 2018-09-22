@@ -9,7 +9,6 @@ export async function appDidMount() {
     fallback: true,
     content: true,
     hash: true,
-    include: [/.*/],
   })
   this.runtime.debug('file manager started')
   this.fm = fileManager
