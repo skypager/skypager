@@ -1,6 +1,6 @@
 {
   "name": "skypager",
-  "version": "40.0.1",
+  "version": "40.0.2",
   "main": "universal.js",
   "browser": "dist/skypager-runtimes-web.min.js",
   "react-native": "native.js",
