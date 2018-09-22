@@ -8,8 +8,8 @@
   "author": "Jon Soeder <jon@chicago.com>",
   "dependencies": {
     "@skypager/web": "^0.0.17",
-    "@skypager/node": "^0.0.18",
-    "@skypager/cli": "^0.0.18",
+    "@skypager/node": "^0.0.19",
+    "@skypager/cli": "^0.0.19",
     "@skypager/runtime": "^0.0.17"
   },
   "keywords": [
