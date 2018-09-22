@@ -1,0 +1,8 @@
+{
+  "name": "test-package-2",
+  "version": "0.0.1",
+  "description": "test package to be found by the package manager",
+  "dependencies": {
+    "test-package": "0.0.1"
+  }
+}
