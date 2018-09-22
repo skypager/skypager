@@ -18,9 +18,21 @@ if (!existsSync(scriptPath)) {
 }
 
 if (!existsSync(scriptPath)) {
-  console.error(
-    `Could not find a script: ${script} in either the local project scripts/ folder, in @skypager/cli/scripts folder, or in @skypager/devtools/scripts folder`
-  )
+  try {
+    scriptPath = require.resolve(`@skypager/webpack/scripts/${scriptFilename}`)
+  } catch (error) {}
+}
+
+const checkPaths = [
+  localScriptPath,
+  ourScriptPath,
+  `node_modules/@skypager/devtools/scripts/${scriptFilename}`,
+  `node_modules/@skypager/webpack/scripts/${scriptFilename}`,
+]
+
+if (!existsSync(scriptPath)) {
+  console.error(`Could not find script: ${script}\n\nskypager searched in:`)
+  checkPaths.map(p => `  - ${p}`).forEach(line => console.log(line))
   process.exit(1)
 }
 

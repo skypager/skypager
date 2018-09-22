@@ -13,6 +13,9 @@ require('@babel/register')({
   plugins: ['@babel/plugin-proposal-object-rest-spread', '@babel/plugin-transform-runtime'],
 })
 
+require('child_process').spawnSync('node', ['scripts/update-main-package.js'], {
+  stdio: 'inherit',
+})
 require('child_process').spawnSync('yarn', ['build'], {
   cwd: require('path').resolve(__dirname, '..', 'src', 'runtime'),
   stdio: 'inherit',

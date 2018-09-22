@@ -7,15 +7,19 @@
   "license": "MIT",
   "author": "Jon Soeder <jon@chicago.com>",
   "dependencies": {
-    "@skypager/web": "^0.0.15",
-    "@skypager/node": "^0.0.16",
-    "@skypager/cli": "^0.0.16",
-    "@skypager/runtime": "^0.0.13"
+    "@skypager/web": "^0.0.17",
+    "@skypager/node": "^0.0.18",
+    "@skypager/cli": "^0.0.18",
+    "@skypager/runtime": "^0.0.17"
   },
-  "keywords": ["skypager"],
+  "keywords": [
+    "skypager"
+  ],
   "description": "universal javascript framework",
   "repository": {
     "type": "github",
     "url": "https://github.com/skypager/skypager"
-  }
+  },
+  "contributors": [],
+  "scripts": {}
 }

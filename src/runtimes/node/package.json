@@ -15,6 +15,7 @@
   "license": "MIT",
   "dependencies": {
     "@skypager/features-file-manager": "^0.0.18",
+    "@skypager/helpers-server": "^0.0.17",
     "@skypager/helpers-client": "^0.0.16",
     "@skypager/helpers-repl": "^0.0.12",
     "@skypager/runtime": "^0.0.17",
