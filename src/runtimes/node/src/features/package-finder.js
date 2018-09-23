@@ -21,6 +21,7 @@ export const featureMethods = [
   'getCachedModuleIds',
   'getCurrentModule',
   'getCurrentModulePaths',
+  'findParentPackage',
 ]
 
 export function featureWasEnabled() {
@@ -71,16 +72,23 @@ export function getPackageFinder() {
   return this.feature('package-finder')
 }
 
-export async function findPackages(...args) {
+export function findPackages(...args) {
   return this.packageFinder.find(...args)
 }
 
-export async function findPackage(...args) {
+export function findPackage(...args) {
   return this.packageFinder.findByName(...args)
 }
 
-export async function findNearest(options = {}) {
+export function findNearest(options = {}) {
   return this.runtime.fsx.findUpAsync('package.json', options)
+}
+
+export function findParentPackage(options = {}) {
+  return this.runtime.fsx.findUpAsync('package.json', {
+    cwd: this.runtime.resolve('..'),
+    ...options,
+  })
 }
 
 export async function find(options = {}, context = {}) {
@@ -114,10 +122,10 @@ export async function find(options = {}, context = {}) {
 
   let packagePaths = await Promise.all(
     packageStores.map(baseFolder => this.findPackageFoldersIn(baseFolder))
-  )
+  ).then(flatten)
 
   if (parse === false) {
-    return flatten(packagePaths).filter(p => testPath(basename(p), rules))
+    return packagePaths.filter(p => testPath(basename(p), rules))
   } else if (parse === 'matches') {
     packagePaths = flatten(packagePaths).filter(p => testPath(basename(p), rules))
   } else if (parse === true) {
@@ -143,6 +151,7 @@ export async function find(options = {}, context = {}) {
   } = options
 
   return packageData.filter(p => {
+    if (!p.name) return false
     if (minimumOpt && !gt(p.version, clean(minimumOpt))) return false
     if (maximumOpt && !lt(p.version, clean(maximumOpt))) return false
     if (satisfiesOpt && !satisfies(p.version, clean(satisfiesOpt))) return false
@@ -183,7 +192,7 @@ export function testPath(pathToTest, rulesToTestWith) {
 }
 
 export function getSemver() {
-  return require('semver')
+  return semver
 }
 
 export async function findPackageLocations(options = {}) {

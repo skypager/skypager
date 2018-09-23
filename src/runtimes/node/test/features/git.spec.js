@@ -20,4 +20,13 @@ describe('The Git Adapter', function() {
       .that.is.an('array')
       .that.includes('src/index.js')
   })
+
+  it('creates files and directory getters on runtime', function() {
+    runtime.should.have.property('files')
+    runtime.should.have.property('directories')
+    runtime.should.have.property('fileObjects')
+    runtime.should.have.property('directoryObjects')
+    runtime.files.keys().should.not.be.empty
+    runtime.directories.keys().should.not.be.empty
+  })
 })

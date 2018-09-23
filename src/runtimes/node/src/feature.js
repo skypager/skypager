@@ -209,7 +209,7 @@ export function enabledHook(options = {}) {
     })
   }
 
-  if (disableHelpers.match(/server/)) {
+  if (!disableHelpers.match(/server/)) {
     lazyAttach('server', () => {
       runtime.invoke('profiler.profileStart', 'serverHelperEnabled')
       runtime.use(__non_webpack_require__('@skypager/helpers-server'))

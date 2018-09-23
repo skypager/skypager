@@ -1,5 +1,6 @@
 describe('The Package Finder', function() {
   const runtime = require('../../src/index')
+  const { packageFinder } = runtime
 
   it('is available on the runtime', function() {
     runtime.should.have
@@ -10,7 +11,78 @@ describe('The Package Finder', function() {
   })
 
   it('will attempt to resolve a package', function() {
-    runtime.packageFinder.attemptResolve('not_gon_find_it').should.equal(false)
-    runtime.packageFinder.attemptResolve('@skypager/node').should.be.a('string')
+    packageFinder.attemptResolve('not_gon_find_it').should.equal(false)
+    packageFinder.attemptResolve('@skypager/node').should.be.a('string')
+  })
+
+  it('provides access to the semver package as a utility', function() {
+    packageFinder.should.have.property('semver')
+    packageFinder.semver.should.have.property('gt').that.is.a('function')
+    packageFinder.semver.should.have.property('lt').that.is.a('function')
+  })
+
+  it('finds the nearest package.json', async function() {
+    const nearest = await packageFinder.findNearest()
+    nearest.should.equal(runtime.resolve('package.json'))
+  })
+
+  it('finds packages above the current one', async function() {
+    const parent = await packageFinder.findParentPackage()
+    parent.should.not.equal(runtime.resolve('package.json'))
+  })
+
+  it('tells us the current module info', function() {
+    packageFinder.should.have.property('currentModule')
+    packageFinder.should.have
+      .property('currentModulePaths')
+      .that.is.an('array')
+      .that.includes(runtime.join('node_modules'))
+  })
+
+  it('gives us all the cached module ids', function() {
+    packageFinder.should.have.property('cachedModuleIds').that.is.an('array').that.is.not.empty
+  })
+
+  it('finds package locations', async function() {
+    const packageStores = await packageFinder.findPackageLocations({
+      moduleFolderName: 'node_modules',
+    })
+
+    packageStores.should.be.an('array').that.is.not.empty
+  })
+
+  describe('finder method', function() {
+    it('can find package using a regex', async function() {
+      const packages = await packageFinder.find(/babel/)
+      packages
+        .filter(v =>
+          v
+            .split('/')
+            .pop()
+            .match(/babel/)
+        )
+        .length.should.equal(packages.length)
+    })
+    it('can find package using a string', async function() {
+      const packages = await packageFinder.find('babel')
+      packages
+        .filter(v =>
+          v
+            .split('/')
+            .pop()
+            .match(/babel/)
+        )
+        .length.should.equal(packages.length)
+    })
+    it('can find packages using a function', async function() {
+      const packages = await packageFinder.find(path => path.match(/babel/))
+      packages.filter(item => item.match(/babel/)).length.should.equal(packages.length)
+    })
+    it('can find package using an array of rules', async function() {
+      const packages = await packageFinder.find([/babel/, /eslint/])
+      packages
+        .filter(item => item.match(/babel/) && item.match(/eslint/))
+        .length.should.equal(packages.length)
+    })
   })
 })

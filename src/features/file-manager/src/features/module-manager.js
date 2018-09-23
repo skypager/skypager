@@ -1,64 +1,64 @@
-import Promise from "bluebird"
+import Promise from 'bluebird'
 
 export function normalizePackage(manifest) {
   const { defaults } = this.lodash
 
   return defaults(manifest, {
     keywords: [],
-    description: "",
-    author: "",
+    description: '',
+    author: '',
     contributors: [],
-    scripts: {}
+    scripts: {},
   })
 }
 
 export const featureMethods = [
-  "normalizePackage",
-  "getFinder",
-  "find",
-  "findBy",
-  "findByName",
-  "findDependentsOf",
-  "getPackageNames",
-  "getPackageIds",
-  "getPackageData",
-  "getEntries",
-  "getByName",
-  "pickAllBy",
-  "pickAll",
-  "findNodeModules",
-  "walkUp",
-  "walkUpSync",
-  "getLifeCycleHooks",
-  "getStatuses",
-  "whenActivated",
-  "activationEventWasFired",
-  "start",
-  "startAsync"
+  'normalizePackage',
+  'getFinder',
+  'find',
+  'findBy',
+  'findByName',
+  'findDependentsOf',
+  'getPackageNames',
+  'getPackageIds',
+  'getPackageData',
+  'getEntries',
+  'getByName',
+  'pickAllBy',
+  'pickAll',
+  'findNodeModules',
+  'walkUp',
+  'walkUpSync',
+  'getLifeCycleHooks',
+  'getStatuses',
+  'whenActivated',
+  'activationEventWasFired',
+  'start',
+  'startAsync',
 ]
 
-export const createGetter = "moduleManager"
+export const createGetter = 'moduleManager'
 
-export const CREATED = "CREATED"
-export const STARTING = "STARTING"
-export const FAILED = "FAILED"
-export const READY = "READY"
+export const CREATED = 'CREATED'
+export const STARTING = 'STARTING'
+export const FAILED = 'FAILED'
+export const READY = 'READY'
 
 export const STATUSES = {
   CREATED,
   READY,
   FAILED,
-  STARTING
+  STARTING,
 }
 
-export const DID_FAIL = "didFail"
-export const WAS_ACTIVATED = "wasActivated"
-export const WILL_START = "willStart"
+export const DID_FAIL = 'didFail'
+export const WAS_ACTIVATED = 'wasActivated'
+export const WILL_START = 'willStart'
 
 export const LIFECYCLE_HOOKS = {
   DID_FAIL,
   WAS_ACTIVATED,
-  WILL_START
+  WILL_START,
 }
 
 export const getStatuses = () => STATUSES
@@ -136,6 +136,8 @@ export async function startAsync(options = {}) {
     } catch (error) {
       this.fireHook(DID_FAIL, error)
       this.status = FAILED
+      this.state.set('error', error)
+      this.runtime.error(`Error starting module manager: ${error.message}`)
       return this
     }
   } else {
