@@ -168,7 +168,7 @@ export async function selectPackageTree(options = {}) {
   const pkg = this.find(name) || this.findByName(name)
 
   if (pkg && pkg._packageId) {
-    return await this.runtime
+    return this.runtime
       .select('files/tree', {
         rootNode: pkg._packageId.replace('/package.json', ''),
         readContents: true,
@@ -177,7 +177,7 @@ export async function selectPackageTree(options = {}) {
       })
       .then(tree => ({ name: pkg.name, manifest: pkg, tree }))
   } else {
-    return await this.runtime
+    return this.runtime
       .select('files/tree', {
         readContents: true,
         hashFiles: true,

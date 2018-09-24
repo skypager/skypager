@@ -1,12 +1,7 @@
-describe('Memory FileSystem', function() {
-  const { skypager: runtime } = global
-  let fileManager
+import runtime from './runtime'
 
-  before(function() {
-    fileManager = runtime.feature('file-manager', { session: 'memfs-test' })
-    fileManager.enable()
-    // runtime.hide('fileManager', fileManager)
-  })
+describe('Memory FileSystem', function() {
+  const { fileManager } = runtime
 
   it('exposes methods for creating an in memory file system', function() {
     fileManager.should.have.property('syncMemoryFileSystem').that.is.a('function')

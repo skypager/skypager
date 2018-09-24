@@ -1,17 +1,8 @@
-import baseRuntime from '@skypager/node'
-import * as FileManagerFeature from 'index.js'
+import runtime from './runtime'
 
 describe('The File Manager Feature', function() {
-  const runtime = baseRuntime.spawn({ cwd: baseRuntime.cwd })
-
-  before(async function() {
-    runtime.use('runtimes/node')
-
-    await runtime.start()
-  })
-
   it('gets registered in the runtime', function() {
-    runtime.use(FileManagerFeature).features.available.should.contain('file-manager')
+    runtime.features.available.should.contain('file-manager')
   })
 
   it('gets enabled automatically once used', function() {

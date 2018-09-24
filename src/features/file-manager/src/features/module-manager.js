@@ -146,17 +146,27 @@ export async function startAsync(options = {}) {
 }
 
 export async function findNodeModules(options = {}) {
-  const testPaths = await this.walkUp({ filename: "node_modules" })
+  let testPaths = await this.walkUp({ filename: 'node_modules' })
 
-  const packages = await this.finder.find(
-    {
-      testPaths: testPaths.concat(testPaths.map(p => p.replace("node_modules", ""))),
-      moduleFolderName: options.folderName || "node_modules",
-      ...options,
-      parse: true
-    },
-    this.context
-  )
+  testPaths = testPaths.concat(testPaths.map(p => p.replace('node_modules', '')))
+
+  this.state.set('testPaths', testPaths)
+
+  const packages = await this.finder
+    .find(
+      {
+        testPaths,
+        moduleFolderName: options.folderName || 'node_modules',
+        ...options,
+        parse: true,
+      },
+      this.context
+    )
+    .catch(error => {
+      this.runtime.error(`Error finding node modules under ${testPaths.join('\n')}`)
+      this.runtime.error(error.message)
+      throw error
+    })
 
   packages.forEach(pkg => {
     this.updateNodeModule(pkg)
@@ -171,7 +181,7 @@ export function getPackageIds() {
 
 export function getPackageData() {
   return this.chain
-    .result("manifests.values", [])
+    .result('manifests.values', [])
     .values()
     .map(v => Object.values(v))
     .flatten()
@@ -188,7 +198,10 @@ export function getEntries() {
 }
 
 export function getByName() {
-  return this.chain.get("packageData").keyBy(v => v.name).value()
+  return this.chain
+    .get('packageData')
+    .keyBy(v => v.name)
+    .value()
 }
 
 export function observables() {
@@ -197,49 +210,49 @@ export function observables() {
   return {
     status: CREATED,
 
-    manifests: ["shallowMap", {}],
+    manifests: ['shallowMap', {}],
 
-    remotes: ["shallowMap", []],
+    remotes: ['shallowMap', []],
 
     updateNodeModule: [
-      "action",
+      'action',
       function(pkg) {
         p.manifests.set(pkg.name, {
           ...(p.manifests.get(pkg.name) || {}),
-          [pkg.version]: p.normalizePackage(pkg)
+          [pkg.version]: p.normalizePackage(pkg),
         })
 
         return this
-      }
+      },
     ],
 
     updateRemote: [
-      "action",
+      'action',
       function(name, data) {
         p.remotes.set(name, p.normalizePackage(data))
-      }
+      },
     ],
 
     remoteData: [
-      "computed",
+      'computed',
       function() {
         return this.chain
-          .result("remotes.toJSON", {})
+          .result('remotes.toJSON', {})
           .mapValues(v => this.runtime.convertToJS(v))
           .value()
-      }
+      },
     ],
 
     checkRemoteStatus: [
-      "action",
+      'action',
       function(name) {
         return checkRepo.call(p, name).then(result => {
-          if (result && typeof result === "object" && result.name && result.version) {
+          if (result && typeof result === 'object' && result.name && result.version) {
             p.updateRemote(name, result)
           }
         })
-      }
-    ]
+      },
+    ],
   }
 }
 
@@ -260,7 +273,7 @@ export function find(name, version) {
   }
 
   if (data) {
-    return typeof version === "string" && version in data ? data[version] : Object.values(data)
+    return typeof version === 'string' && version in data ? data[version] : Object.values(data)
   }
 }
 
@@ -273,10 +286,10 @@ export function findByName(name) {
 }
 
 export function pickAllBy(fn) {
-  fn = typeof fn === "function" ? fn : v => v
+  fn = typeof fn === 'function' ? fn : v => v
 
   return this.chain
-    .get("packageData", [])
+    .get('packageData', [])
     .map(pkg => this.lodash.pickBy(pkg, fn))
     .reject(v => this.lodash.isEmpty(v))
     .value()
@@ -284,7 +297,7 @@ export function pickAllBy(fn) {
 
 export function pickAll(attributes, options = {}) {
   return this.chain
-    .get("packageData", [])
+    .get('packageData', [])
     .map(pkg => this.lodash.pick(pkg, this.lodash.castArray(attributes)))
     .reject(v => this.lodash.isEmpty(v))
     .value()
@@ -298,12 +311,12 @@ export function getDependenciesMap() {
   const { at, defaults } = this.lodash
 
   return this.chain
-    .invoke("manifests.values")
-    .keyBy("name")
+    .invoke('manifests.values')
+    .keyBy('name')
     .mapValues(v =>
       defaults(
         {},
-        ...at(v, "dependencies", "devDependencies", "optionalDependencies", "peerDependencies")
+        ...at(v, 'dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies')
       )
     )
     .value()
@@ -312,8 +325,8 @@ export function getDependenciesMap() {
 export function walkUp(options = {}) {
   const testPaths = findModulePaths({
     cwd: this.runtime.cwd,
-    filename: "package.json",
-    ...options
+    filename: 'package.json',
+    ...options,
   })
 
   return options.sync
@@ -324,29 +337,29 @@ export function walkUp(options = {}) {
 export function walkUpSync(options = {}) {
   const testPaths = findModulePaths({
     cwd: this.runtime.cwd,
-    filename: "package.json",
-    ...options
+    filename: 'package.json',
+    ...options,
   })
 
   return this.runtime.fsx.existingSync(...testPaths)
 }
 
 export function findModulePaths(options = {}) {
-  if (typeof options === "string") {
+  if (typeof options === 'string') {
     options = { cwd: options }
   }
 
   const cwd = options.cwd
-  const filename = options.filename || options.file || options.filename || "skypager.js"
+  const filename = options.filename || options.file || options.filename || 'skypager.js'
 
-  const parts = cwd.split("/").slice(1)
+  const parts = cwd.split('/').slice(1)
 
   parts[0] = `/${parts[0]}`
 
   const testPaths = []
 
   while (parts.length) {
-    testPaths.push([...parts, filename].join("/"))
+    testPaths.push([...parts, filename].join('/'))
     parts.pop()
   }
 

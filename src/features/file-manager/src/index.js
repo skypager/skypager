@@ -62,14 +62,8 @@ export function attach(runtime, options = {}) {
     const { registry = {} } = options
 
     if (registry.name === 'servers' && !registry.checkKey('file-manager')) {
-      registry.register('file-manager', () => ({
-        ...require('./servers/file-manager'),
-        fileManager: () => fileManager,
-      }))
-      registry.register('package-manager', () => ({
-        ...require('./servers/package-manager'),
-        fileManager: () => fileManager,
-      }))
+      registry.register('file-manager', () => require('./servers/file-manager'))
+      registry.register('package-manager', () => require('./servers/package-manager'))
     }
   }
 

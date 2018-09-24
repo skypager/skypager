@@ -203,37 +203,19 @@ export function featureWasEnabled(options = {}) {
   this.hide('actions', actions)
   this.hide('computedProperties', computedProperties)
 
+  this.hide('settings', {
+    ...this.runtime.argv,
+    ...this.options,
+    ...options,
+  })
+
   actions.attach.call(this)
   computedProperties.attach.call(this)
 
-  const { autoStart = false } = {
-    ...this.options,
-    ...options,
-  }
+  const { autoStart = !!this.settings.startFileManager } = this.settings
 
-  if (autoStart || this.runtime.argv.startFileManager) {
+  if (autoStart) {
     this.startAsync()
-      .then(() => {
-        if (this.packageManager && this.runtime.argv.startPackageManager) {
-          return this.packageManager
-            .startAsync()
-            .then(() => {
-              this.emit('packageManagerDidStart', this.packageManager)
-            })
-            .catch(error => {
-              this.emit('packageManagerDidFail', error, this.packageManager)
-            })
-        }
-      })
-      .catch(error => {
-        this.error = error
-        this.emit(DID_FAIL, error)
-        this.status = FAILED
-        this.runtime.error(`File Manager Failed to start`, { message: error.message })
-        if (this.options.abort || this.runtime.argv.abort) {
-          throw error
-        }
-      })
   }
 }
 
@@ -245,6 +227,7 @@ export async function syncMemoryFileSystem(options = {}) {
 
   if (options.content) {
     const resp = await this.readAllContent({
+      include: [/.*/],
       hash: true,
       ...options,
     })
@@ -608,15 +591,21 @@ export function start(...args) {
   }
 }
 
-export async function startAsync(options = {}) {
-  if (this.has('git') && this.get('git.files')) {
-    return startGitMode.call(this, options).catch(error => {
-      this.fireHook(DID_FAIL, error)
-      this.status = FAILED
-      this.error = error
-      throw error
+function startPackageManager() {
+  return this.packageManager
+    .startAsync()
+    .then(() => {
+      this.emit('packageManagerDidStart', this.packageManager)
     })
-  } else {
+    .catch(error => {
+      this.emit('packageManagerDidFail', error, this.packageManager)
+    })
+}
+
+export async function startAsync(options = {}) {
+  const { packages = this.settings.startPackageManager || this.settings.packages } = options
+
+  if (!this.has('git') || !this.get('git.files')) {
     const error = new Error(`FileManager depends on git`)
     this.error = error
     this.fireHook(DID_FAIL, error)
@@ -624,6 +613,29 @@ export async function startAsync(options = {}) {
     // We can use something besides git; I have a normal walker / skywalker feature
     // which is just a lot slower than git ls-files; it should be updated to behave similarly
     throw error
+  }
+
+  try {
+    const results = await startGitMode.call(this, options).catch(error => {
+      this.fireHook(DID_FAIL, error)
+      this.status = FAILED
+      this.error = error
+      throw error
+    })
+
+    if (packages || options.startPackageManager) {
+      await startPackageManager.call(this)
+    }
+
+    return results
+  } catch (error) {
+    this.error = error
+    this.emit(DID_FAIL, error)
+    this.status = FAILED
+    this.runtime.error(`File Manager Failed to start`, { message: error.message })
+    if (this.options.abort || this.runtime.argv.abort) {
+      throw error
+    }
   }
 }
 
