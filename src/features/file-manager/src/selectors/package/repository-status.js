@@ -1,8 +1,8 @@
-export default async function repositoryStatus(chain, options = {}) {
+export default (async function repositoryStatus(chain, options = {}) {
   const runtime = this
   const { fileManager } = runtime
 
-  if (typeof options === "string") {
+  if (typeof options === 'string') {
     options = { packages: [options] }
   }
 
@@ -14,11 +14,15 @@ export default async function repositoryStatus(chain, options = {}) {
       .catch(error => {
         return false
       })
-      .then(c => c.stdout.toString())
+      .then(c => {
+        c.stdout.toString()
+      })
 
   const results = await Promise.all(
     packages.map(packageName =>
-      checkRepo(packageName).then(data => [packageName, data]).catch(e => [packageName, e])
+      checkRepo(packageName)
+        .then(data => [packageName, data])
+        .catch(e => [packageName, e])
     )
   )
 
@@ -27,11 +31,11 @@ export default async function repositoryStatus(chain, options = {}) {
     .fromPairs()
     .mapValues(json => {
       try {
-        return typeof json === "string" ? JSON.parse(json) : json
+        return typeof json === 'string' ? JSON.parse(json) : json
       } catch (error) {
-        this.error("error checking package status")
+        this.error('error checking package status')
         return { error }
       }
     })
     .omitBy(v => !v)
-}
+})

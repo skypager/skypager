@@ -22,8 +22,6 @@ export const featureMethods = [
   'getPackageData',
   'getEntries',
   'getByName',
-  'loadProject',
-  'registerProjects',
   'pickAllBy',
   'pickAll',
   'selectModifiedPackages',
@@ -258,18 +256,6 @@ export function getLatestMap() {
     })
     .pickBy(v => v && v.length)
     .value()
-}
-
-export async function registerProjects() {
-  this.entries.forEach(e => {
-    this.runtime.projects.register(e[1].name, () => e[1])
-  })
-
-  return this
-}
-
-export async function loadProject(packageName, options = {}) {
-  return this.runtime.project(packageName, options)
 }
 
 export function getTarballUrls() {
