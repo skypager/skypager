@@ -1,6 +1,6 @@
 version: 2
 jobs:
-  build:
+  test:
     docker:
       - image: 'circleci/node:9.11.1'
     working_directory: ~/repo
@@ -16,5 +16,34 @@ jobs:
           paths:
             - node_modules
           key: 'v1-dependencies-{{ checksum "package.json" }}'
-      - run: 'mkdir -p src/helpers/sheet/secrets && echo $SERVICE_ACCOUNT_DATA > src/helpers/sheet/secrets/serviceAccount.json'
+      - run: >-
+          mkdir -p src/helpers/sheet/secrets && echo $SERVICE_ACCOUNT_DATA >
+          src/helpers/sheet/secrets/serviceAccount.json
       - run: yarn test
+      - persist_to_workspace:
+          root: ~/repo
+          paths: .
+  deploy:
+    docker:
+      - image: 'circleci/node:9.11.1'
+    working_directory: ~/repo
+    steps:
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Authenticate with registry
+          command: 'echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/repo/.npmrc'
+      - run:
+          name: Publish Package
+          command: yarn release
+workflows:
+  version: 2
+  test-deploy:
+    jobs:
+      - test
+      - deploy:
+          requires:
+            - test
+          filters:
+            branches:
+              only: /master/
