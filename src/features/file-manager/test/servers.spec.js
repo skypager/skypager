@@ -38,6 +38,20 @@ describe('Servers', function() {
       .an('object')
       .that.has.property('packageIds')
       .that.is.an('array')
+      .that.includes('@skypager/features-file-manager')
+    response.should.be
+      .an('object')
+      .that.has.property('versions')
+      .that.has.property('test-package', '0.0.1')
+  })
+
+  it('provides info about all the packages', async function() {
+    const response = await get('/api/package-manager/packages')
+    response.should.be.an('array')
+    const names = response.map(p => p.name)
+    names.should.include('@skypager/features-file-manager')
+    names.should.include('test-package')
+    names.should.include('test-package-2')
   })
 
   it('provides access to package info', async function() {

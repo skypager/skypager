@@ -14,8 +14,17 @@ export function appWillMount(app, ...args) {
 
   app.get('/api/package-manager', (req, res) => {
     res.json({
-      packageIds: packageManager.packageIds,
+      packageIds: packageManager.manifests.values().map(p => p.name),
+      versions: packageManager.manifests.values().reduce((memo, p) =>
+        Object.assign(memo, {
+          [p.name]: p.version,
+        })
+      ),
     })
+  })
+
+  app.get('/api/package-manager/packages', (req, res) => {
+    res.json(packageManager.manifests.values())
   })
 
   app.get('/api/package-manager/package/*', (req, res) => {
