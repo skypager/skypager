@@ -1,0 +1,19 @@
+version: '{build}'
+skip_tags: true
+environment:
+  matrix:
+    - nodejs_version: 9.11.1
+init:
+  - git config --global core.autocrlf input
+install:
+  - choco install -y googlechrome --ignore-checksums
+  - ps: 'Install-Product node $env:nodejs_version'
+  - set PATH=%APPDATA%\yarn;%PATH%
+  - yarn
+build: off
+test_script:
+  - node --version
+  - yarn test
+cache:
+  - '%LOCALAPPDATA%\Yarn'
+  - node_modules -> package.json
