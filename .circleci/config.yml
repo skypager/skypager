@@ -38,6 +38,8 @@ jobs:
       - add-ssh-keys:
           fingerprints:
             - 'f8:90:0c:73:97:e6:05:36:f8:c7:15:39:3b:46:9a:d0'
+            - 'd4:7c:3d:39:70:88:bc:59:da:19:83:c2:01:8a:52:39'
+            - '30:92:bd:d1:ee:3f:a4:07:22:c4:c0:11:24:1e:e9:3d'
       - run:
           name: Add known hosts
           command: >-
