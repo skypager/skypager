@@ -41,7 +41,7 @@ if (sig(next.dependencies) !== sig(current.dependencies)) {
   spawnSync('git', ['add', 'src', 'main'], {
     cwd: resolve(__dirname, '..'),
   })
-  spawnSync('git', ['commit', '-m', `Published skypager ${published.version}`], {
+  spawnSync('git', ['commit', '-am', `Published skypager ${published.version}`], {
     cwd: resolve(__dirname, '..'),
   })
 } else {
