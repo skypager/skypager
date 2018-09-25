@@ -17,7 +17,6 @@
     "console": "node scripts/console.js",
     "release": "lerna publish patch --yes",
     "postrelease": "node scripts/postrelease.js",
-    "prerelease": "yarn test",
     "test": "lerna run test --stream",
     "postinstall": "node scripts/postinstall.js"
   },

@@ -1,4 +1,6 @@
 version: 2
+environment:
+  PATH: '${PATH}:${HOME}/${CIRCLE_PROJECT_REPONAME}/node_modules/.bin'
 jobs:
   test:
     docker:
@@ -33,6 +35,22 @@ jobs:
       - run:
           name: Authenticate with registry
           command: 'echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/repo/.npmrc'
+      - add-ssh-keys:
+          fingerprints:
+            - 'f8:90:0c:73:97:e6:05:36:f8:c7:15:39:3b:46:9a:d0'
+      - run:
+          name: Add known hosts
+          command: >-
+            mkdir -p $HOME/.ssh && echo
+            "|1|SxUcfNX5Zjx+uif5Qyzwj2oupqs=|TV5bWbELoPdwWIAaqJ2QUq5Sa0M=
+            ssh-rsa
+            AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ=="
+            > $HOME/.ssh/known_hosts
+      - run:
+          name: Configure git defaults
+          command: >-
+            git config user.email "jon@dais.com" && git config user.name
+            "CircleCI"
       - run:
           name: Publish Package
           command: yarn release
