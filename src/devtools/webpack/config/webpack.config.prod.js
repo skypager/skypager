@@ -22,7 +22,7 @@ const publicPath = paths.servedPath
 
 // Source maps are resource heavy and can cause out of memory issue for large source files.
 const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== 'false'
-const shouldMinify = process.argv.find(i => i === '--minify')
+const shouldMinify = process.argv.find(i => i === '--minify') || process.env.MINIFY
 
 // `publicUrl` is just like `publicPath`, but we will provide it to our app
 // as %PUBLIC_URL% in `index.html` and `process.env.PUBLIC_URL` in JavaScript.

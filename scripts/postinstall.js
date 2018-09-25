@@ -28,25 +28,19 @@ require('child_process').spawnSync('yarn', ['build'], {
 
 // process.env.DISABLE_SKYPAGER_FILE_MANAGER = true
 
-const skypager = require('@skypager/node')
 const MultiSpinner = require('multispinner')
 const { resolve } = require('path')
-const { spawn } = skypager.proc.async
-const { spawnSync } = skypager.proc
-const { randomBanner, print, clear } = skypager.cli
-const { red, dim, blue, magenta, green } = skypager.cli.colors
 
 const stageOne = [['@skypager/features-file-manager', 'src/features/file-manager', 'lib']]
 
 const stageTwo = [
   ['@skypager/helpers-client', 'src/helpers/client', 'lib'],
   ['@skypager/helpers-server', 'src/helpers/server', 'lib'],
+  ['@skypager/helpers-repl', 'src/helpers/repl', 'lib'],
 ]
 
 const first = stageOne
 const rest = stageTwo
-
-clear()
 
 class CISpinner {
   constructor(projectNames) {
@@ -58,10 +52,10 @@ class CISpinner {
     this.projectNames.forEach(name => console.log(`  ${name}`))
   }
   success(name) {
-    console.log(`${green('Success')}: ${name}`)
+    console.log(`${skypager.cli.colors.green('Success')}: ${name}`)
   }
   error(name) {
-    console.log(`${red('ERROR')}: ${name}`)
+    console.log(`${skypager.cli.colors.red('ERROR')}: ${name}`)
   }
 }
 
@@ -71,6 +65,13 @@ async function main() {
   if (!first.length && !rest.length) {
     return
   }
+
+  const skypager = require('@skypager/node')
+
+  // skypager.cli.clear()
+
+  const { spawn } = skypager.proc.async
+  const { print } = skypager.cli
 
   const spinner = process.env.JOB_NAME
     ? new CISpinner(first.concat(rest).map(i => i[0]))
@@ -127,8 +128,8 @@ async function main() {
 
 main()
   .then(() => {
-    print('Creating dev dependency symlinks in each of our local projects.')
-    return spawn('node', ['scripts/link-dev-dependencies.js'], {
+    skypager.cli.print('Creating dev dependency symlinks in each of our local projects.')
+    return skypager.proc.async.spawn('node', ['scripts/link-dev-dependencies.js'], {
       stdio: 'inherit',
     })
   })
@@ -142,19 +143,22 @@ main()
   })
 
 function printUsageInstructions() {
-  clear()
-  randomBanner('Skypager')
+  skypager.cli.clear()
+  skypager.cli.randomBanner('Skypager')
 
-  print([`The Skypager Frontend Portfolio`, `Version: ${skypager.currentPackage.version}`], 0, 2, 2)
+  skypager.cli.print(
+    [`The Skypager Frontend Portfolio`, `Version: ${skypager.currentPackage.version}`],
+    0,
+    2,
+    2
+  )
 
-  spawnSync('lerna', ['ls'], {
+  require('child_process').spawnSync('lerna', ['ls'], {
     cwd: resolve(__dirname, '..'),
     stdio: 'inherit',
   })
-
+  const USAGE = `
+${skypager.cli.colors.green.bold('Good luck!')}
+`.trim()
   console.log(`\n\n${USAGE}\n\n`)
 }
-
-const USAGE = `
-${green.bold('Good luck!')}
-`.trim()

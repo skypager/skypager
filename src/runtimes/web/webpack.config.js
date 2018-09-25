@@ -5,11 +5,18 @@ const path = require('path')
 const { DefinePlugin } = require('webpack')
 const { name, version } = require('./package.json')
 
-const webConfig = merge.strategy({ entry: 'replace', node: 'replace' })(
-  require('@skypager/webpack/config/webpack.config.prod'),
+process.env.MINIFY = true
+const baseProdConfig = require('@skypager/webpack/config/webpack.config.prod')
+
+const webConfig = merge.strategy({ plugins: 'replace', entry: 'replace', node: 'replace' })(
+  baseProdConfig,
   {
     name: 'web',
-    node: false,
+    node: {
+      process: false,
+      global: false,
+      vm: false,
+    },
     resolve: {
       alias: {
         vm: 'vm-browserify',
@@ -18,43 +25,27 @@ const webConfig = merge.strategy({ entry: 'replace', node: 'replace' })(
     entry: {
       'skypager-runtimes-web': path.resolve(cwd, 'src', 'index.js'),
     },
-    plugins: [
-      new DefinePlugin({
-        __PACKAGE__: JSON.stringify({ name, version }),
-      }),
-    ],
+    plugins: baseProdConfig.plugins
+      .filter(p => !p.constructor || !p.constructor.name === 'UglifyJsPlugin')
+      .concat([
+        new DefinePlugin({
+          __PACKAGE__: JSON.stringify({ name, version }),
+        }),
+      ]),
   }
 )
 
-const minifiedWebConfig = merge.strategy({ entry: 'replace', node: 'replace' })(
-  require('@skypager/webpack/config/webpack.config.prod'),
-  {
-    name: 'web',
-    node: false,
-    resolve: {
-      alias: {
-        vm: 'vm-browserify',
-      },
+const minifiedWebConfig = merge.strategy({ entry: 'replace', node: 'replace' })(baseProdConfig, {
+  name: 'web',
+  node: false,
+  resolve: {
+    alias: {
+      vm: 'vm-browserify',
     },
-    entry: {
-      'skypager-runtimes-web.min': path.resolve(cwd, 'src', 'index.js'),
-    },
-    plugins: [
-      new DefinePlugin({
-        __PACKAGE__: JSON.stringify({ name, version }),
-      }),
-    ],
-  }
-)
-
-const nodeConfig = merge(require('@skypager/webpack/config/webpack.config.prod'), {
-  target: 'node',
-  name: 'node',
-  externals: [
-    nodeExternals({
-      modulesFromFile: true,
-    }),
-  ],
+  },
+  entry: {
+    'skypager-runtimes-web.min': path.resolve(cwd, 'src', 'index.js'),
+  },
   plugins: [
     new DefinePlugin({
       __PACKAGE__: JSON.stringify({ name, version }),
@@ -62,12 +53,21 @@ const nodeConfig = merge(require('@skypager/webpack/config/webpack.config.prod')
   ],
 })
 
-webConfig.plugins = webConfig.plugins.filter(
-  p => !p.constructor || (p.constructor && p.constructor.name !== 'UglifyJsPlugin')
-)
-
-nodeConfig.plugins = nodeConfig.plugins.filter(
-  p => !p.constructor || (p.constructor && p.constructor.name !== 'UglifyJsPlugin')
-)
+const nodeConfig = merge.strategy({ plugins: 'replace' })(baseProdConfig, {
+  target: 'node',
+  name: 'node',
+  externals: [
+    nodeExternals({
+      modulesFromFile: true,
+    }),
+  ],
+  plugins: baseProdConfig.plugins
+    .filter(p => !p.constructor || (p.constructor && p.constructor.name !== 'UglifyJsPlugin'))
+    .concat([
+      new DefinePlugin({
+        __PACKAGE__: JSON.stringify({ name, version }),
+      }),
+    ]),
+})
 
 module.exports = process.env.ANALYZE ? nodeConfig : [webConfig, nodeConfig, minifiedWebConfig]
