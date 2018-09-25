@@ -59,8 +59,8 @@ jobs:
       - run:
           name: Commit new versions to git
           command: >-
-            git diff --quiet && git diff --staged --quiet || git commit -am
-            '[skip ci] update package version(s)'
+            git diff --quiet && git diff --staged --quiet || git commit -a
+            --amend --no-edit 
       - run:
           name: Push changes to Github
           command: git push origin $CIRCLE_BRANCH
