@@ -1,16 +1,16 @@
 {
   "name": "skypager",
-  "version": "40.0.2",
+  "version": "40.0.4",
   "main": "universal.js",
   "browser": "dist/skypager-runtimes-web.min.js",
   "react-native": "native.js",
   "license": "MIT",
   "author": "Jon Soeder <jon@chicago.com>",
   "dependencies": {
-    "@skypager/web": "^0.0.17",
-    "@skypager/node": "^0.0.20",
-    "@skypager/cli": "^0.0.20",
-    "@skypager/runtime": "^0.0.17"
+    "@skypager/web": "^0.0.21",
+    "@skypager/node": "^0.0.21",
+    "@skypager/cli": "^0.0.21",
+    "@skypager/runtime": "^0.0.21"
   },
   "keywords": [
     "skypager"
@@ -21,5 +21,8 @@
     "url": "https://github.com/skypager/skypager"
   },
   "contributors": [],
-  "scripts": {}
+  "scripts": {
+    "prepare": "skypager build",
+    "build": "skypager build"
+  }
 }

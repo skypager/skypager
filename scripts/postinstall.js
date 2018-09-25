@@ -13,9 +13,6 @@ require('@babel/register')({
   plugins: ['@babel/plugin-proposal-object-rest-spread', '@babel/plugin-transform-runtime'],
 })
 
-require('child_process').spawnSync('node', ['scripts/update-main-package.js'], {
-  stdio: 'inherit',
-})
 require('child_process').spawnSync('yarn', ['build'], {
   cwd: require('path').resolve(__dirname, '..', 'src', 'runtime'),
   stdio: 'inherit',
@@ -26,7 +23,7 @@ require('child_process').spawnSync('yarn', ['build'], {
   stdio: 'inherit',
 })
 
-// process.env.DISABLE_SKYPAGER_FILE_MANAGER = true
+process.env.DISABLE_SKYPAGER_FILE_MANAGER = true
 
 const MultiSpinner = require('multispinner')
 const { resolve } = require('path')
@@ -72,6 +69,7 @@ async function main() {
 
   const { spawn } = skypager.proc.async
   const { print } = skypager.cli
+  const { red, green } = skypager.cli.colors
 
   const spinner = process.env.JOB_NAME
     ? new CISpinner(first.concat(rest).map(i => i[0]))
@@ -97,6 +95,8 @@ async function main() {
         })
     )
   ).catch(error => {
+    print(red(error.message))
+    print(error.stack)
     process.exit(1)
   })
 
@@ -118,6 +118,8 @@ async function main() {
         })
     )
   ).catch(error => {
+    print(red(error.message))
+    print(error.stack)
     process.exit(1)
   })
 
@@ -128,6 +130,7 @@ async function main() {
 
 main()
   .then(() => {
+    delete process.env.DISABLE_SKYPAGER_FILE_MANAGER
     skypager.cli.print('Creating dev dependency symlinks in each of our local projects.')
     return skypager.proc.async.spawn('node', ['scripts/link-dev-dependencies.js'], {
       stdio: 'inherit',

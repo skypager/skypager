@@ -16,8 +16,8 @@
     "link:devDependencies": "node scripts/link-dev-dependencies.js",
     "console": "node scripts/console.js",
     "release": "lerna publish patch --yes",
+    "postrelease": "node scripts/postrelease.js",
     "prerelease": "yarn test",
-    "postrelease": "skypager update-main-package && cd src/main && npm version patch --skip-git && npm publish",
     "test": "lerna run test --stream",
     "postinstall": "node scripts/postinstall.js"
   },
@@ -44,6 +44,6 @@
     "@babel/preset-env": "^7.1.0",
     "@babel/register": "^7.0.0",
     "@babel/runtime": "^7.0.0",
-    "lerna": "^2.1.4"
+    "lerna": "^3.4.0"
   }
 }
