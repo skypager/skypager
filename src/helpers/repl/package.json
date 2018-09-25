@@ -1,6 +1,6 @@
 {
   "name": "@skypager/helpers-repl",
-  "version": "0.0.12",
+  "version": "0.0.22",
   "description": "an awesome repl",
   "main": "lib/index.js",
   "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
