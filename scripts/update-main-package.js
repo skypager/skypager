@@ -1,3 +1,9 @@
+if (process.env.CI || process.env.JOB_NAME) {
+  // we only need to do this on the developer machines right now
+  // until we're publishing from CI
+  process.exit(0)
+}
+
 const fs = require('fs')
 const path = require('path')
 
