@@ -56,6 +56,14 @@ jobs:
       - run:
           name: Publish Package
           command: yarn release
+      - run:
+          name: Commit new versions to git
+          command: >-
+            git diff --quiet && git diff --staged --quiet || git commit -am
+            '[skip ci] update package version(s)'
+      - run:
+          name: Push changes to Github
+          command: git push origin $CIRCLE_BRANCH
 workflows:
   version: 2
   test-deploy:
