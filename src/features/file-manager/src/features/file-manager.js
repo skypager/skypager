@@ -603,7 +603,9 @@ function startPackageManager() {
 }
 
 export async function startAsync(options = {}) {
-  const { packages = this.settings.startPackageManager || this.settings.packages } = options
+  const {
+    packages = this.get('settings.startPackageManager') || this.get('settings.packages'),
+  } = options
 
   if (!this.has('git') || !this.get('git.files')) {
     const error = new Error(`FileManager depends on git`)
@@ -623,7 +625,7 @@ export async function startAsync(options = {}) {
       throw error
     })
 
-    if (packages || options.startPackageManager) {
+    if (packages || (options && options.startPackageManager)) {
       await startPackageManager.call(this)
     }
 

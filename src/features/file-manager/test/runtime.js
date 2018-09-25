@@ -1,7 +1,8 @@
 import runtime from '@skypager/node'
 import * as FileManagerFeature from '../src'
+import * as ServerHelper from '@skypager/helpers-server'
 
-runtime.use(FileManagerFeature)
+runtime.use(ServerHelper).use(FileManagerFeature)
 runtime.feature('file-manager').enable()
 runtime.feature('package-manager').enable()
 

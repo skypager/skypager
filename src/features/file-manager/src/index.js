@@ -60,7 +60,6 @@ export function attach(runtime, options = {}) {
 
   function onRegister(runtime, helperClass, options = {}) {
     const { registry = {} } = options
-
     if (registry.name === 'servers' && !registry.checkKey('file-manager')) {
       registry.register('file-manager', () => require('./servers/file-manager'))
       registry.register('package-manager', () => require('./servers/package-manager'))
@@ -68,7 +67,7 @@ export function attach(runtime, options = {}) {
   }
 
   if (fileManager.runtime.has('servers')) {
-    onRegister({ registry: runtime.servers })
+    onRegister(runtime, runtime.helpers.lookup('server'), { registry: runtime.servers })
   } else {
     fileManager.runtime.Helper.events.on('attached', onRegister)
   }
