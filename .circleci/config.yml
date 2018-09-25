@@ -53,17 +53,6 @@ jobs:
           command: >-
             git config user.email "jon@dais.com" && git config user.name
             "CircleCI"
-      - run:
-          name: Publish Package
-          command: yarn release
-      - run:
-          name: Commit new versions to git
-          command: >-
-            git diff --quiet && git diff --staged --quiet || git commit -a
-            --amend --no-edit 
-      - run:
-          name: Push changes to Github
-          command: git push origin $CIRCLE_BRANCH
 workflows:
   version: 2
   test-deploy:
