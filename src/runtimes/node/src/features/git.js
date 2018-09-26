@@ -189,6 +189,7 @@ export async function walk(options = {}) {
 
   const { files, directories } = this
 
+  const normalize = path => path.replace(/\\\\?/g, '/')
   const statFile = async path => {
     const exists = await runtime.fsx.existsAsync(path)
 
@@ -199,8 +200,8 @@ export async function walk(options = {}) {
     const stats = await runtime.fsx.statAsync(path)
 
     const dir = dirname(path)
-    const relativeDirname = runtime.relative(dir)
-    const relativeFile = runtime.relative(path)
+    const relativeDirname = normalize(runtime.relative(dir))
+    const relativeFile = normalize(runtime.relative(path))
     const isDirectory = stats.isDirectory()
     const parsed = parse(path)
 
