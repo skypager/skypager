@@ -1,6 +1,5 @@
 # Skypager
 [![CircleCI](https://circleci.com/gh/skypager/skypager/tree/master.svg?style=svg)](https://circleci.com/gh/soederpop/skypager-next/tree/master)
-[![NPM](https://nodei.co/npm/skypager.png?compact=true)](https://npmjs.org/package/skypager>)
 
 Skypager is a universal JavaScript runtime that makes it easy to write applications which run on node, the browser, in react native, or electron.
 
