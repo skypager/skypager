@@ -6,7 +6,6 @@ environment:
 init:
   - git config --global core.autocrlf input
 install:
-  - choco install -y googlechrome --ignore-checksums
   - ps: 'Install-Product node $env:nodejs_version'
   - set PATH=%APPDATA%\yarn;%PATH%
   - yarn
@@ -17,7 +16,9 @@ test_script:
   - >-
     IF NOT EXIST %APPVEYOR_BUILD_FOLDER%\src\helpers\sheet\secrets MKDIR
     %APPVEYOR_BUILD_FOLDER%\src\hepers\sheet\secrests
-  - echo %SERVICE_ACCOUNT_DATA% > src/helpers/sheet/secrets/serviceAccount.json
+  - >-
+    echo %SERVICE_ACCOUNT_DATA% >
+    %APPVEYOR_BUILD_FOLDER%\src\helpers\sheet\secrets\serviceAccount.json
   - yarn test
 cache:
   - '%LOCALAPPDATA%\Yarn'
