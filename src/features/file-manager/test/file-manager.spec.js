@@ -18,4 +18,9 @@ describe('The File Manager', function() {
   it('tells us about the packages inside the project', function() {
     runtime.fileManager.packages.should.not.be.empty
   })
+
+  it('matches file ids using a route pattern', function() {
+    const matches = runtime.fileManager.matchRoute('src/:name*.js')
+    matches.should.not.be.empty
+  })
 })

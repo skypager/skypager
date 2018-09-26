@@ -13,22 +13,27 @@ require('@babel/register')({
   plugins: ['@babel/plugin-proposal-object-rest-spread', '@babel/plugin-transform-runtime'],
 })
 
-require('child_process').spawnSync('yarn', ['build'], {
-  cwd: require('path').resolve(__dirname, '..', 'src', 'runtime'),
-  stdio: 'inherit',
-})
+const { resolve } = require('path')
+const MultiSpinner = require('multispinner')
+const { spawn } = require('child-process-promise')
+const { red, green } = require('chalk')
+const { spawnSync } = require('child_process')
+const ARGV = require('minimist')(process.argv.slice(0, 2))
+const currentPackage = require('../package.json')
 
-require('child_process').spawnSync('yarn', ['build'], {
-  cwd: require('path').resolve(__dirname, '..', 'src', 'runtimes', 'node'),
-  stdio: 'inherit',
-})
+const cwd = resolve(__dirname, '..')
 
 process.env.DISABLE_SKYPAGER_FILE_MANAGER = true
 
-const MultiSpinner = require('multispinner')
-const { resolve } = require('path')
+spawnSync('yarn', ['build'], {
+  cwd: resolve(cwd, 'src', 'runtime'),
+  stdio: ARGV.debug ? 'inherit' : 'ignore',
+})
 
-const stageOne = [['@skypager/features-file-manager', 'src/features/file-manager', 'lib']]
+const stageOne = [
+  ['@skypager/features-file-manager', 'src/features/file-manager', 'lib'],
+  ['@skypager/node', 'src/runtimes/node', 'lib'],
+]
 
 const stageTwo = [
   ['@skypager/helpers-client', 'src/helpers/client', 'lib'],
@@ -45,31 +50,27 @@ class CISpinner {
   }
 
   start() {
-    console.log('Starting Build Scripts')
-    this.projectNames.forEach(name => console.log(`  ${name}`))
+    print('Starting Build Scripts')
+    this.projectNames.forEach(name => print(`  ${name}`))
   }
   success(name) {
-    console.log(`${skypager.cli.colors.green('Success')}: ${name}`)
+    print(`${green('Success')}: ${name}`)
   }
   error(name) {
-    console.log(`${skypager.cli.colors.red('ERROR')}: ${name}`)
+    print(`${red('ERROR')}: ${name}`)
   }
 }
 
+const print = message => console.log(message)
+
 async function main() {
-  console.log('Building Local Projects')
+  print('Building Local Projects')
 
   if (!first.length && !rest.length) {
     return
   }
 
-  const skypager = require('@skypager/node')
-
   // skypager.cli.clear()
-
-  const { spawn } = skypager.proc.async
-  const { print } = skypager.cli
-  const { red, green } = skypager.cli.colors
 
   const spinner = process.env.JOB_NAME
     ? new CISpinner(first.concat(rest).map(i => i[0]))
@@ -82,14 +83,13 @@ async function main() {
 
   await Promise.all(
     first.map(([project, subfolder]) =>
-      spawn('yarn', ['build'], { cwd: skypager.resolve(subfolder) })
+      spawn('yarn', ['build'], { cwd: resolve(cwd, subfolder) })
         .then(() => {
           spinner.success(project)
         })
         .catch(error => {
           print(red(`Error in ${project}`))
           print(red(error.message), 2, 2, 2)
-          print(red(error.stack), 2, 2, 2)
           spinner.error(project)
           throw error
         })
@@ -102,9 +102,9 @@ async function main() {
 
   await Promise.all(
     rest.map(([project, subfolder]) =>
-      spawn('yarn', ['build', skypager.argv.force && '--force'].filter(Boolean), {
-        cwd: skypager.resolve(subfolder),
-        stdio: skypager.argv.debug ? 'inherit' : 'ignore',
+      spawn('yarn', ['build', ARGV.force && '--force'].filter(Boolean), {
+        cwd: resolve(cwd, subfolder),
+        stdio: ARGV.debug ? 'inherit' : 'ignore',
       })
         .then(() => {
           spinner.success(project)
@@ -112,7 +112,6 @@ async function main() {
         .catch(error => {
           print(red(`Error in ${project}`))
           print(red(error.message), 2, 2, 2)
-          print(red(error.stack), 2, 2, 2)
           spinner.error(project)
           throw error
         })
@@ -131,8 +130,8 @@ async function main() {
 main()
   .then(() => {
     delete process.env.DISABLE_SKYPAGER_FILE_MANAGER
-    skypager.cli.print('Creating dev dependency symlinks in each of our local projects.')
-    return skypager.proc.async.spawn('node', ['scripts/link-dev-dependencies.js'], {
+    print('Creating dev dependency symlinks in each of our local projects.')
+    return spawn('node', ['scripts/link-dev-dependencies.js'], {
       stdio: 'inherit',
     })
   })
@@ -141,27 +140,20 @@ main()
     process.exit(0)
   })
   .catch(error => {
-    console.error(error)
+    print(error)
     process.exit(1)
   })
 
 function printUsageInstructions() {
-  skypager.cli.clear()
-  skypager.cli.randomBanner('Skypager')
+  print(`The Skypager Frontend Portfolio`, `Version: ${currentPackage.version}`)
 
-  skypager.cli.print(
-    [`The Skypager Frontend Portfolio`, `Version: ${skypager.currentPackage.version}`],
-    0,
-    2,
-    2
-  )
-
-  require('child_process').spawnSync('lerna', ['ls'], {
-    cwd: resolve(__dirname, '..'),
+  spawnSync('lerna', ['ls'], {
+    cwd,
     stdio: 'inherit',
   })
+
   const USAGE = `
-${skypager.cli.colors.green.bold('Good luck!')}
+${green.bold('Good luck!')}
 `.trim()
-  console.log(`\n\n${USAGE}\n\n`)
+  print(`\n\n${USAGE}\n\n`)
 }

@@ -108,14 +108,13 @@ export const featureMethods = [
 
   'walkUpSync',
 
-  'loadDocument',
-
   'updateFileContent',
 
   'updateFileHash',
 ]
 
 export const hostMethods = ['requireContext']
+
 export const hostMixinOptions = {
   partial: [],
   injectOptions: false,
@@ -155,23 +154,6 @@ export function requireContext(rule, options = {}) {
       })
     })
     .value()
-}
-
-export async function loadDocument(options = {}) {
-  const { runtime } = this
-
-  if (typeof options === 'string') {
-    options = { id: options }
-  }
-
-  const file = this.file(options)
-
-  if (!file.content) {
-    const content = await runtime.fsx.readFileAsync(file.path)
-    this.updateFileContent(file.relative, content.toString())
-  }
-
-  return runtime.document(file.relative, { provider: file, ...options })
 }
 
 export function file(options = {}) {
@@ -384,11 +366,14 @@ export function selectMatches(options = {}) {
   return paths.map(key => convertToJS(this.files.get(key)))
 }
 
+/**
+ * Calculate the md5 hash of the file by its id
+ */
 export function hashFile(key) {
   const fileManager = this
 
   return new Promise((resolve, reject) => {
-    const { path } = fileManager.files.get(key)
+    const { path } = fileManager.file(key)
     md5File(path, (err, hash) => (err ? reject(err) : resolve({ id: key, hash })))
   }).then(({ id, hash } = {}) => {
     fileManager.updateFileHash(id, hash)
@@ -396,6 +381,14 @@ export function hashFile(key) {
   })
 }
 
+/**
+ * Calculate the md5 of all files matching a set of include and/or exclude rules.
+ *
+ * @param {Object} options
+ * @param {Array|Function|String|Regexp} options.include - a rule, or array of rules that the path must match
+ * @param {Array|Function|String|Regexp} options.exclude - a rule, or array of rules that the path must not match
+ *
+ */
 export async function hashFiles(options = {}) {
   const { include = [], exclude = [] } = options
 
@@ -411,14 +404,28 @@ export async function hashFiles(options = {}) {
   return results
 }
 
+/**
+ * Returns the package manager manifests map, which is a map of parsed package.json
+ * files found in the project
+ */
 export function getPackages() {
   return this.get('packageManager.manifests')
 }
 
+/**
+ * Returns a reference to the runtime's package manager
+ */
 export function getPackageManager() {
   return this.runtime.feature('package-manager')
 }
 
+/**
+ * Updates the md5 hash record for a particular file.
+ *
+ * @param {String} fileId - the id of the file
+ * @param {String} hash - the hash of the file
+ * @private
+ */
 export function updateFileHash(fileId, hash) {
   if (fileId && hash) {
     const file = this.file(fileId)
