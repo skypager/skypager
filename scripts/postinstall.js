@@ -27,7 +27,7 @@ process.env.DISABLE_SKYPAGER_FILE_MANAGER = true
 
 spawnSync('yarn', ['build'], {
   cwd: resolve(cwd, 'src', 'runtime'),
-  stdio: ARGV.debug ? 'inherit' : 'ignore',
+  stdio: 'inherit',
 })
 
 const stageOne = [
@@ -83,7 +83,7 @@ async function main() {
 
   await Promise.all(
     first.map(([project, subfolder]) =>
-      spawn('yarn', ['build'], { cwd: resolve(cwd, subfolder) })
+      spawn('yarn', ['build'], { cwd: resolve(cwd, subfolder), stdio: 'inherit' })
         .then(() => {
           spinner.success(project)
         })
@@ -104,7 +104,7 @@ async function main() {
     rest.map(([project, subfolder]) =>
       spawn('yarn', ['build', ARGV.force && '--force'].filter(Boolean), {
         cwd: resolve(cwd, subfolder),
-        stdio: ARGV.debug ? 'inherit' : 'ignore',
+        stdio: 'inherit',
       })
         .then(() => {
           spinner.success(project)
