@@ -19,7 +19,6 @@ test_script:
   - >-
     echo %SERVICE_ACCOUNT_DATA% >
     %APPVEYOR_BUILD_FOLDER%\src\helpers\sheet\secrets\serviceAccount.json
-  - node scripts/inspect-file-manager.js
   - yarn test
 cache:
   - '%LOCALAPPDATA%\Yarn'
