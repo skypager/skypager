@@ -43,6 +43,37 @@ runtime.server('app').start().then(() => {
 })
 ```
 
+### Helper Options
+
+Each instance of a helper class will have an `options` property that will be composed of several elements.  
+
+The motivation behind this is to support being able to supply configuration / options via package.json config, 
+runtime ARGV --command-line-flags as well as javascript runtime objects in the code.
+
+```javascript
+const customOptions = { myOption: 'nice' }
+// the skypager property in the package.json
+const { skypager: packageConfig } = runtime.currentPackage
+const { argv } = runtime
+const pageModel = runtime.feature('pageModel', customOptions)
+
+pageModel.options === Object.assign(
+ // package.json config by default
+ packageConfig,
+ // the package.json config property that matches the helper instance name next
+ packageConfig.pageModel,
+ // the command line flags e.g. --my-option=nice override json config
+ runtime.argv
+ // the custom options passed by the code override anything else
+ customOptions
+}
+```
+
+So in the above example, a script executed with `--my-option=whatever` in a project that has `skypager: { myOption: 'yes' }` would use the value passed to it.
+
+If that was left out, it would use `whatever` from `--my-option=whatever`, and if that was left out,
+it would use `skypager.myOption` from the package.json.  If that was left out, then it would be up to the helper class to determine.
+
 ## Example Projects
 
 Skypager is a powerful framework which can be used to build any kind of app, here are some examples of things we've built:
