@@ -156,6 +156,8 @@ export function requireContext(rule, options = {}) {
     .value()
 }
 
+const normalize = path => path.replace(/\\\\?/g, '/')
+
 export function file(options = {}) {
   const { runtime } = this
 
@@ -164,13 +166,13 @@ export function file(options = {}) {
   }
 
   const { id } = options
-  const foundById = this.files.get(id)
+  const foundById = this.files.get(normalize(id))
 
   if (foundById) {
     return foundById
   }
 
-  const foundByPath = this.files.get(runtime.relative(id))
+  const foundByPath = this.files.get(normalize(runtime.relative(id)))
 
   if (foundByPath) {
     return foundByPath
@@ -282,10 +284,10 @@ export function applyRouteMetadata(route, options = {}) {
 
   return mapValues(results, (metadata, fileId) => {
     if (options.directories) {
-      const directory = this.directories.get(fileId)
+      const directory = this.directories.get(normalize(fileId))
       const { meta = {} } = directory
 
-      this.directories.set(fileId, {
+      this.directories.set(normalize(fileId), {
         ...directory,
         meta: {
           ...meta,
@@ -294,12 +296,12 @@ export function applyRouteMetadata(route, options = {}) {
         },
       })
 
-      return this.directories.get(fileId)
+      return this.directories.get(normalize(fileId))
     } else {
-      const file = this.files.get(fileId)
+      const file = this.files.get(normalize(fileId))
       const { meta = {} } = file
 
-      this.files.set(fileId, {
+      this.files.set(normalize(fileId), {
         ...file,
         meta: {
           ...meta,
@@ -308,13 +310,13 @@ export function applyRouteMetadata(route, options = {}) {
         },
       })
 
-      return this.files.get(fileId)
+      return this.files.get(normalize(fileId))
     }
   })
 }
 
 export function matchRoute(route, options = {}) {
-  const subjects = options.directories ? this.directoryIds : this.fileIds
+  const subjects = (options.directories ? this.directoryIds : this.fileIds).map(normalize)
 
   return applyRoute(route, subjects, {
     discard: true,
@@ -355,15 +357,15 @@ export function matchPaths(options = {}) {
         .map(result => result.relative)
     : this.fileIds.filter(
         fileId =>
-          (!rules.length || pathMatcher(rules, fileId)) &&
-          (!exclude.length || !pathMatcher(exclude, fileId))
+          (!rules.length || pathMatcher(rules, normalize(fileId))) &&
+          (!exclude.length || !pathMatcher(exclude, normalize(fileId)))
       )
 }
 
 export function selectMatches(options = {}) {
   const { convertToJS } = this.runtime
   const paths = this.matchPaths(options)
-  return paths.map(key => convertToJS(this.files.get(key)))
+  return paths.map(key => convertToJS(this.files.get(normalize(key))))
 }
 
 /**
@@ -373,7 +375,8 @@ export function hashFile(key) {
   const fileManager = this
 
   return new Promise((resolve, reject) => {
-    const { path } = fileManager.file(key)
+    const file = fileManager.file(key)
+    const path = file.path
     md5File(path, (err, hash) => (err ? reject(err) : resolve({ id: key, hash })))
   }).then(({ id, hash } = {}) => {
     fileManager.updateFileHash(id, hash)
@@ -395,10 +398,11 @@ export async function hashFiles(options = {}) {
   const results = await Promise.all(
     this.files
       .values()
+      .filter(Boolean)
       .map(p => p.path)
       .filter(path => pathMatcher(include, path))
       .filter(path => exclude.length === 0 || !pathMatcher(exclude, path))
-      .map(path => this.hashFile(this.runtime.relative(path)))
+      .map(path => this.hashFile(normalize(this.runtime.relative(path))))
   )
 
   return results
@@ -431,7 +435,7 @@ export function updateFileHash(fileId, hash) {
     const file = this.file(fileId)
 
     if (file) {
-      this.files.set(fileId, {
+      this.files.set(normalize(fileId), {
         ...file,
         hash,
       })
@@ -446,7 +450,7 @@ export function updateFileContent(fileId, content) {
     const file = this.file(fileId)
 
     if (file) {
-      this.files.set(fileId, {
+      this.files.set(normalize(fileId), {
         ...file,
         content,
       })
@@ -459,7 +463,7 @@ export function updateFileContent(fileId, content) {
 export async function readAllContent(options = {}) {
   const { include = [], exclude = [/secret/, /\.env/, /build\//] } = options
 
-  const toFileId = path => this.runtime.relative(path)
+  const toFileId = path => normalize(this.runtime.relative(path))
 
   const results = await Promise.all(
     this.chain
