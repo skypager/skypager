@@ -17,11 +17,7 @@ module.exports = merge.strategy({ entry: 'replace', node: 'replace', externals: 
   {
     name: 'node',
     target: 'node',
-    node: {
-      __dirname: false,
-      __filename: false,
-      process: false,
-    },
+    node: false,
     resolve: {
       alias: {
         runtime: path.resolve(__dirname, '..', '..', 'runtime', 'src'),
