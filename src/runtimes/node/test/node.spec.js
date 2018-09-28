@@ -5,6 +5,15 @@ describe('@skypager/node', function() {
     await runtime.start()
   })
 
+  it('should detect that it is node', function() {
+    console.log(typeof process)
+    console.log(process.title)
+    runtime.should.have.property('isNode', true)
+    runtime.should.have.property('isBrowser', false)
+    runtime.should.have.property('isReactNative', false)
+    runtime.should.have.property('isElectron', false)
+  })
+
   it('knows the command line arguments', function() {
     runtime.argv.should.be
       .an('object')

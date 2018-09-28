@@ -55,9 +55,10 @@ const webConfig = merge.strategy({ node: 'replace', entry: 'replace', plugins: '
   }
 )
 
-const nodeConfig = merge.strategy({ plugins: 'replace' })(baseCommonConfig, {
+const nodeConfig = merge.strategy({ node: 'replace', plugins: 'replace' })(baseCommonConfig, {
   target: 'node',
   name: 'node',
+  node: false,
   devtool: 'source-map',
   entry: {
     index: path.resolve(cwd, 'src', 'index.js'),
