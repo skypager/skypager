@@ -593,7 +593,9 @@ export class Runtime {
   }
 
   get isNode() {
-    return !!(typeof process !== 'undefined' && !this.isElectron && process.title === 'node')
+    try {
+      return Object.prototype.toString.call(global.process) === '[object process]'
+    } catch (e) { }
   }
 
   get isElectron() {
