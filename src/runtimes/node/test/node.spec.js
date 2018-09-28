@@ -6,12 +6,6 @@ describe('@skypager/node', function() {
   })
 
   it('should detect that it is node', function() {
-    console.log(typeof process)
-    console.log(process.title)
-    console.log()
-
-    const isNode = Object.prototype.toString.call(global.process) === '[object process]'
-    console.log({ isNode, val: Object.prototype.toString.call(global.process) })
     runtime.should.have.property('isNode', true)
     runtime.should.have.property('isBrowser', false)
     runtime.should.have.property('isReactNative', false)

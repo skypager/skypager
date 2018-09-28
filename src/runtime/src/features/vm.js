@@ -8,9 +8,16 @@ export const hostMethods = [
 
 export function getVm() {
   try {
-    return __non_webpack_require__('vm')
+    if (this.isNode) {
+      const vm = __non_webpack_require__('vm')
+      return vm.default ? vm.default : vm
+    } else {
+      const vm = require('vm-browserify')
+      return vm.default ? vm.default : vm
+    }
   } catch (error) {
-    return require('vm-browserify')
+    const vm = require('vm-browserify')
+    return vm.default ? vm.default : vm
   }
 }
 
