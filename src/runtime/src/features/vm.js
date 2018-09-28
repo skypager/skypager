@@ -8,9 +8,7 @@ export const hostMethods = [
 
 export function getVm() {
   try {
-    if (typeof __non_webpack_require__ === 'function') {
-      return __non_webpack_require__('vm')
-    }
+    return __non_webpack_require__('vm')
   } catch (error) {
     return require('vm-browserify')
   }
