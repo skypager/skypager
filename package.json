@@ -17,7 +17,7 @@
     "console": "node scripts/console.js",
     "release": "lerna publish patch --yes",
     "postrelease": "node scripts/postrelease.js",
-    "test": "lerna run test --stream",
+    "test": "node scripts/sanity.js && lerna run test --stream",
     "postinstall": "node scripts/postinstall.js"
   },
   "keywords": [

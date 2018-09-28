@@ -1,23 +1,14 @@
-export const hostMethods = [
-  'createCodeRunner',
-  'createModule',
-  'createScript',
-  'createContext',
-  'getVm',
-]
+export const hostMethods = ['createCodeRunner', 'createModule', 'createScript', 'createContext']
 
-export function getVm() {
-  try {
-    if (this.isNode) {
-      const vm = __non_webpack_require__('vm')
-      return vm.default ? vm.default : vm
-    } else {
-      const vm = require('vm-browserify')
-      return vm.default ? vm.default : vm
-    }
-  } catch (error) {
-    const vm = require('vm-browserify')
-    return vm.default ? vm.default : vm
+export function featureWasEnabled() {
+  if (this.runtime.isNode || typeof __non_webpack_require__ === 'function') {
+    this.runtime.hide('vm', __non_webpack_require__('vm'))
+  } else {
+    const vmBrowserify = require('vm-browserify')
+    this.runtime.hide(
+      'vm',
+      vmBrowserify.createContext ? vmBrowserify : vmBrowserify.default || vmBrowserify
+    )
   }
 }
 
