@@ -7,9 +7,13 @@ export const hostMethods = [
 ]
 
 export function getVm() {
-  return this.isNode && typeof __non_webpack_require__ !== 'undefined'
-    ? __non_webpack_require__('vm')
-    : require('../isomorphic-vm')
+  try {
+    if (typeof __non_webpack_require__ === 'function') {
+      return __non_webpack_require__('vm')
+    }
+  } catch (error) {
+    return require('vm-browserify')
+  }
 }
 
 export function createModule(code, options = {}, sandbox) {
@@ -62,7 +66,9 @@ export function createCodeRunner(code, options = {}, sandbox) {
 
   sandbox = sandbox || this.sandbox
 
-  const vmContext = (vm.isContext ? vm.isContext(sandbox) : false)
+  const vmContext = (vm.isContext
+  ? vm.isContext(sandbox)
+  : false)
     ? sandbox
     : !thisContext && vm.createContext(sandbox)
 
@@ -80,7 +86,9 @@ export function createCodeRunner(code, options = {}, sandbox) {
     try {
       const result = vmContext
         ? script.runInContext(vmContext)
-        : thisContext ? script.runInThisContext() : script.runInNewContext(sandbox)
+        : thisContext
+          ? script.runInThisContext()
+          : script.runInNewContext(sandbox)
 
       return {
         result,
