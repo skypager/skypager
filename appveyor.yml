@@ -12,12 +12,6 @@ install:
 build: off
 test_script:
   - node --version
-  - >-
-    node -e 'console.log(\"@skypager/runtime:\" + " " +
-    require(\"@skypager/runtime/package.json\").version)'
-  - >-
-    node -e 'console.log(\"@skypager/node:\" + " " +
-    require(\"@skypager/node/package.json\").version)'
   - 'echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > .npmrc'
   - >-
     IF NOT EXIST %APPVEYOR_BUILD_FOLDER%\src\helpers\sheet\secrets MKDIR
