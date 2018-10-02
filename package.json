@@ -31,7 +31,6 @@
     "src/runtimes/*",
     "src/features/*",
     "src/helpers/*",
-    "src/servers/*",
     "src/examples/*",
     "src/main"
   ],
