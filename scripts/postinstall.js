@@ -23,12 +23,13 @@ const currentPackage = require('../package.json')
 
 const cwd = resolve(__dirname, '..')
 
-process.env.DISABLE_SKYPAGER_FILE_MANAGER = true
+try {
+  console.log('@skypager/runtime versions:')
+  console.log('Local Version: ' + require('../src/runtime/package.json').version)
+  console.log('Node Modules Version: ' + require('@skypager/runtime/package.json').version)
+} catch (error) {}
 
-spawnSync('yarn', ['build'], {
-  cwd: resolve(cwd, 'src', 'runtime'),
-  stdio: 'inherit',
-})
+process.env.DISABLE_SKYPAGER_FILE_MANAGER = true
 
 const stageOne = [
   ['@skypager/features-file-manager', 'src/features/file-manager', 'lib'],
@@ -64,12 +65,17 @@ class CISpinner {
 const print = message => console.log(message)
 
 async function main() {
-  print('Building Local Projects')
+  print(`Building @skypager/runtime ${require('../src/runtime/package.json').version}`)
+
+  await spawn('yarn', ['build'], {
+    cwd: resolve(__dirname, '..', 'src', 'runtime'),
+  })
 
   if (!first.length && !rest.length) {
     return
   }
 
+  print('Building rest of the projects in stages')
   // skypager.cli.clear()
 
   const spinner = process.env.JOB_NAME
@@ -83,7 +89,7 @@ async function main() {
 
   await Promise.all(
     first.map(([project, subfolder]) =>
-      spawn('yarn', ['build'], { cwd: resolve(cwd, subfolder), stdio: 'inherit' })
+      spawn('yarn', ['build'], { cwd: resolve(cwd, subfolder), stdio: 'ignore' })
         .then(() => {
           spinner.success(project)
         })
@@ -104,7 +110,7 @@ async function main() {
     rest.map(([project, subfolder]) =>
       spawn('yarn', ['build', ARGV.force && '--force'].filter(Boolean), {
         cwd: resolve(cwd, subfolder),
-        stdio: 'inherit',
+        stdio: 'ignore',
       })
         .then(() => {
           spinner.success(project)
