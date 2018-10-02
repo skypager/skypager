@@ -1,4 +1,4 @@
-import Server, { attach, registerHelper } from './helper'
+import Server, { attach, registerHelper } from './Server'
 
 export { Server, attach }
 

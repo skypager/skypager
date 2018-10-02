@@ -6,10 +6,22 @@ if (runtime.isBrowser) {
 }
 
 export function attach(runtime, options = {}) {
-  runtime.use(require('./helper'))
-
   if (!runtime.features.checkKey('google')) {
     runtime.features.register('google', () => GoogleFeature)
-    runtime.feature('google').enable(options)
+    runtime.feature('google').enable(options.google || options)
   }
+
+  runtime.use(require('./Sheet'))
+
+  if (options.autoDiscover) {
+    runtime.sheets.discover(options.discover || options).catch(error => error)
+  }
+
+  runtime.onRegistration('clients', () =>
+    runtime.clients.register('sheets', () => require('./client'))
+  )
+
+  runtime.onRegistration('servers', () =>
+    runtime.servers.register('sheets', () => require('./server'))
+  )
 }

@@ -5,5 +5,5 @@ if (runtime.isBrowser) {
 }
 
 export function attach(runtime) {
-  runtime.use(require('./helper'))
+  runtime.use(require('./Client'))
 }

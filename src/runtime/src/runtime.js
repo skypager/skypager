@@ -223,7 +223,42 @@ export class Runtime {
     return this.constructor.registerRuntime(...args)
   }
 
+  /** 
+   * If you have code that depends on a particular helper registry being available
+   * on the runtime, you can pass a callback which will run when ever it exists and
+   * is ready.  This is useful for example, when developing a feature which includes a
+   * client and a server helper to go along with it.  If the runtime is web, you wouldn't
+   * have a server helper so you wouldn't want to load that code.  If the same runtime is
+   * used on a server, then you would run that code. 
+  */
+  onRegistration(registryPropName, callback) {
+    if (typeof callback !== 'function') {
+      throw new Error('Must pass a callback')
+    }
+
+    const alreadyRegistered = this.has(registryPropName)
+
+    if (!alreadyRegistered) {
+      Helper.events.on('attached', (runtime, helperClass, options = {}) => {
+        const { registry = {} } = options || {}
+        if (registry && registry.name === registryPropName) {
+          callback(runtime, helperClass, options)
+        }  
+      })
+      return
+    }
+
+    const isValidHelper = this.helpers.checkKey(registryPropName) || this.helpers.checkKey(stringUtils.singularize(registryPropName))
+
+    if (!isValidHelper) {
+      callback(new Error(`${registryPropName} does not appear to be a valid helper`))
+    } else {
+      callback(this, this.helpers.lookup(isValidHelper), { registry: this.get(registryPropName)})
+    }
+  }
+
   static registerRuntime(name, runtimeClass) {
+    
     Runtime.runtimes.register(name, () => runtimeClass)
     return runtimeClass
   }
