@@ -12,13 +12,11 @@ import Helper from './helpers/index'
 import Feature from './helpers/feature'
 import Cache from './cache'
 import WeakCache from './weak-cache'
-import configBuilder from './config-builder'
 import * as stringUtils from './utils/string'
 
 export {
   propUtils,
   stringUtils,
-  configBuilder,
   Helper 
 }
 
@@ -358,14 +356,6 @@ export class Runtime {
       this.use(middlewareFn.bind(this), INITIALIZING)
     }
 
-    // autoConfigs are functions that can be passed in before our runtime gets created
-    // their execution is deferred until all of the helper initialization is finished and
-    // right before the features get enabled
-    this.autoConfigs.forEach(fn => this.configure(fn))
-    this.constructor.autoConfigs = this.constructor.autoConfigs.filter(
-      fn => typeof fn === 'function' && !fn.temp
-    )
-
     this.enableFeatures(this.autoEnabledFeatures)
 
     if (this.autoInitialize) this.initialize()
@@ -426,18 +416,10 @@ export class Runtime {
 
   static autoEnable = {
     vm: {},
-    //'observable': {},
-    //'configurable': {},
   }
 
   static get features() {
     return Feature.registry
-  }
-
-  get autoConfigs() {
-    return this.get('constructor.autoConfigs', [])
-      .filter(f => typeof f === 'function')
-      .map(fn => fn.bind(this))
   }
 
   get runtimeInitializers() {
@@ -451,13 +433,6 @@ export class Runtime {
   applyRuntimeInitializers() {
     const { mapValues } = this.lodash
     const matches = this.runtimeInitializers
-
-    /*
-    this.debug(`Applying runtime initializers`, {
-      tags: this.helperTags,
-      initializers: Object.keys(matches),
-    })
-    */
 
     Helper.attachAll(this, this.helperOptions)
 
@@ -519,38 +494,6 @@ export class Runtime {
   set argv(val = {}) {
     this.set('rawOptions', { ...this.rawOptions, ...val })
   }
-
-  /*
-  static contextTypes = {}
-
-  get contextTypes() {
-    return this.constructor.contextTypes
-  }
-
-  static defaultContext = {}
-
-  get defaultContext() {
-    return { ...global, ...result(this.constructor, 'defaultContext', {}) }
-  }
-
-  static optionTypes = typeof global.SkypagerOptionTypes === 'object'
-
-  get optionTypes() {
-    return this.constructor.optionTypes
-  }
-
-  static defaultOptions = {}
-
-  get defaultOptions() {
-    return defaults(
-      this.get('packageOptions'),
-      result(this.constructor, 'defaultOptions', {}),
-      // Find some way to be able to inject ARGV in projects which consume skypager via webpack
-      global.SKYPAGER_ARGV,
-      global.ARGV
-    )
-  }
-  */
 
   get env() {
     if (this.isTest) return 'test'
@@ -683,27 +626,6 @@ export class Runtime {
         err ? reject(err) : resolve(err)
       })
     })
-  }
-
-  configure(...args) {
-    if (args.length === 0) return this.configurator()
-
-    let [fn] = args
-
-    if (typeof fn === 'function') {
-      const builder = fn(this.configurator())
-      this.hide('builder', builder, true)
-      this.configHistory.push(this.builder.history)
-      return this
-    } else if (typeof fn === 'object') {
-      this.set('argv.baseConfig', defaultsDeep({}, fn, this.argv.baseConfig))
-    }
-
-    return this
-  }
-
-  get config() {
-    return this.configurator().getConfig()
   }
 
   static initialState = {}
@@ -1115,10 +1037,6 @@ export class Runtime {
     return this
   }
 
-  get configBuilder() {
-    return configBuilder
-  }
-
   get Helper() {
     return this.get('options.helperClass', this.get('context.helperClass', Helper))
   }
@@ -1136,37 +1054,11 @@ export class Runtime {
   }
 
   get namespace() {
-    return this.get('options.namespace', 'skypager-runtime')
+    return this.get('options.namespace', '')
   }
-
-  /*
-  get use() {
-    const runtime = this
-    const fn = this.useMiddleware.bind(this)
-    const configPresets = Object.keys(this.getConfigPresets())
-    const configurator = this.configurator()
-
-    const shortcuts = configPresets
-      .filter(id => !lodash.has(fn, id))
-      .reduce((memo, name) => ({
-        ...memo,
-        finish() {
-
-        },
-        [name]: (...args) => {
-          runtime.configure(c => c[name](...args))
-          return runtime.configurator()
-        },
-      }), {})
-
-    return Object.assign(fn, shortcuts)
-  }
-  */
 
   use(fn, stage) {
     const runtime = this
-
-    //this.debug('using ', { fnType: (typeof fn), keys: Object.keys(fn), stage })
 
     if (typeof fn === 'object' && typeof fn.initializer === 'function') {
       return this.use(fn.initializer.bind(this), INITIALIZING)
@@ -1357,176 +1249,6 @@ export class Runtime {
   async selectChain(selectorId, ...args) {
     const results = await this.select(selectorId, ...args)
     return lodash.chain(results)
-  }
-
-  get configPresets() {
-    return this.availableFeatures.map(featureId => camelCase(snakeCase(featureId))).reduce(
-      (memo, featureId) => ({
-        ...memo,
-        [featureId]: function(builder, ...args) {
-          return builder.feature(featureId, ...args)
-        },
-      }),
-      {}
-    )
-  }
-
-  static configFeatures() {
-    return {
-      helper(existing, helperId, opts) {
-        if (!existing && !helperId) return
-        if (!helperId) return existing
-        if (!existing && helperId) existing = {}
-        opts = opts || {}
-
-        return {
-          ...existing,
-          [helperId]: {
-            ...(existing[helperId] || {}),
-            ...opts,
-          },
-        }
-      },
-      feature(existing, featureId, opts) {
-        if (!existing && !featureId) return
-        if (!featureId) return existing
-        if (!existing && featureId) existing = {}
-        opts = opts || {}
-
-        featureId = camelCase(snakeCase(featureId))
-
-        return {
-          ...existing,
-          [featureId]: {
-            ...(existing[featureId] || {}),
-            ...opts,
-          },
-        }
-      },
-    }
-  }
-
-  static configReducers() {
-    return {
-      feature(state = {}) {
-        return state.feature || {}
-      },
-      helper(state = {}) {
-        return state.helper || {}
-      },
-    }
-  }
-
-  static configPresets() {
-    return {}
-  }
-
-  get baseConfig() {
-    return this.mergeResult('baseConfig', ['argv', 'constructor']) || {}
-  }
-
-  configurator(options = {}) {
-    if (this.builder) {
-      return this.builder
-    }
-
-    const { scope = this, tap = this.tryGet('tapConfig') } = options
-
-    const features = this.getConfigFeaturesObject(options.features)
-    const reducers = this.getConfigReducersObject(options.reducers)
-    const presets = this.getConfigPresetsObject(options.presets)
-
-    return configBuilder.call(this, {
-      features,
-      reducers,
-      presets,
-      baseConfig: {
-        ...this.baseConfig,
-        ...(options.baseConfig || {}),
-      },
-      history: this.configHistory,
-      scope,
-      tap,
-      onStash: (...a) => this.emit('config:stashed', ...a),
-      onReset: (...a) => this.emit('config:reset', ...a),
-      ...this.configuratorOptions,
-      ...options,
-    })
-  }
-
-  get configuratorOptions() {
-    return this.mergeResult('configuratorOptions', ['argv', 'constructor']) || {}
-  }
-
-  get configKeysFn() {
-    return (v, k) => stringUtils.pluralize(k)
-  }
-
-  stringifyConfig() {
-    return this.config.toString()
-  }
-
-  getConfigFeaturesObject(passed = {}) {
-    let options = this.options.configFeatures || (c => ({}))
-    let mine = this.configFeatures || (c => ({}))
-    let constructors = this.constructor.configFeatures || (c => ({}))
-
-    options = isFunction(options) ? options.call(this, this.options, this.context) : options || {}
-
-    constructors = isFunction(constructors)
-      ? constructors.call(this, this.options, this.context)
-      : constructors || {}
-
-    mine = isFunction(mine) ? mine.call(this, this.options, this.context) : mine || {}
-
-    return Object.assign({}, constructors, mine, options, passed)
-  }
-
-  getConfigFeatures(passed = {}) {
-    const base = omitBy(this.getConfigFeaturesObject(passed), v => !isFunction(v))
-    return mapValues(base, fn => fn.bind(this))
-  }
-
-  getConfigPresetsObject(passed = {}) {
-    let options = this.options.configPresets || (c => ({}))
-    let mine = this.configPresets || (c => ({}))
-    let constructors = this.constructor.configPresets || (c => ({}))
-
-    options = isFunction(options) ? options.call(this, this.options, this.context) : options || {}
-
-    constructors = isFunction(constructors)
-      ? constructors.call(this, this.options, this.context)
-      : constructors || {}
-
-    mine = isFunction(mine) ? mine.call(this, this.options, this.context) : mine || {}
-
-    return Object.assign({}, constructors, mine, options, passed)
-  }
-
-  getConfigPresets(passed = {}) {
-    const base = omitBy(this.getConfigPresetsObject(passed), v => !isFunction(v))
-    return mapValues(base, fn => fn.bind(this))
-  }
-
-  getConfigReducersObject(passed = {}) {
-    let options = this.options.configReducers || (c => ({}))
-    let mine = this.configReducers || (c => ({}))
-    let constructors = this.constructor.configReducers || (c => ({}))
-
-    options = isFunction(options) ? options.call(this, this.options, this.context) : options || {}
-
-    constructors = isFunction(constructors)
-      ? constructors.call(this, this.options, this.context)
-      : constructors || {}
-
-    mine = isFunction(mine) ? mine.call(this, this.options, this.context) : mine || {}
-
-    return Object.assign({}, constructors, mine, options, passed)
-  }
-
-  getConfigReducers(passed = {}) {
-    const base = omitBy(this.getConfigReducersObject(passed), v => !isFunction(v))
-    return mapValues(base, fn => fn.bind(this))
   }
 
   static get framework() {

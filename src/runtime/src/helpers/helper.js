@@ -12,7 +12,6 @@ import lodash from 'lodash'
 import { hashObject, hideProperty, lazy, enhanceObject } from '../utils/properties'
 import { camelCase, snakeCase, camelize, underscore, singularize, pluralize } from '../utils/string'
 import ContextRegistry from '../registries/context'
-import configBuilder from '../config-builder'
 import { attach as attachEmitter } from '../utils/emitter'
 
 const utils = require('./util')
@@ -390,147 +389,8 @@ export class Helper {
     return defaults({}, ...namespaces.map(n => this.get([n, ...key])).map(ifFunc))
   }
 
-  static configFeatures() {
-    return {}
-  }
-
-  static configReducers() {
-    return {}
-  }
-
-  static configPresets() {
-    return {}
-  }
-
   slice(...properties) {
     return lodash.zipObjectDeep(properties, this.at(properties))
-  }
-
-  getConfigPresetsObject(passed = {}) {
-    let providers = this.get('provider.configPresets', function() {})
-    let options = this.get('options.configPresets', function() {})
-    let constructors = this.get('constructor.configPresets', function() {})
-
-    providers = isFunction(providers)
-      ? providers.call(this, this.options, this.context)
-      : providers || {}
-
-    options = isFunction(options) ? options.call(this, this.options, this.context) : options || {}
-
-    constructors = isFunction(constructors)
-      ? constructors.call(this, this.options, this.context)
-      : constructors || {}
-
-    return defaults({}, passed, options, providers, constructors)
-  }
-
-  getConfigPresets() {
-    const base = omitBy(this.getConfigPresetsObject(), v => !isFunction(v))
-    return mapValues(base, fn => fn.bind(this))
-  }
-
-  getConfigFeaturesObject(passed = {}) {
-    let providers = this.get('provider.configFeatures', function() {})
-    let options = this.get('options.configFeatures', function() {})
-    let constructors = this.get('constructor.configFeatures', function() {})
-
-    providers = isFunction(providers)
-      ? providers.call(this, this.options, this.context)
-      : providers || {}
-
-    options = isFunction(options) ? options.call(this, this.options, this.context) : options || {}
-
-    constructors = isFunction(constructors)
-      ? constructors.call(this, this.options, this.context)
-      : constructors || {}
-
-    return defaults({}, passed, options, providers, constructors)
-  }
-
-  getConfigFeatures() {
-    const base = omitBy(this.getConfigFeaturesObject(), v => !isFunction(v))
-    return mapValues(base, fn => fn.bind(this))
-  }
-
-  getConfigReducersObject() {
-    let providers = this.get('provider.configReducers', function() {})
-    let options = this.get('options.configReducers', function() {})
-    let constructors = this.get('constructor.configReducers', function() {})
-
-    providers = isFunction(providers) ? providers.call(this, this.options, this.context) : providers
-    options = isFunction(options) ? options.call(this, this.options, this.context) : options
-    constructors = isFunction(constructors)
-      ? constructors.call(this, this.options, this.context)
-      : constructors
-
-    return mapValues(defaults({}, options, providers, constructors), fn => fn.bind(this))
-  }
-
-  getConfigReducers() {
-    const base = omitBy(this.getConfigReducersObject(), v => !isFunction(v))
-    return mapValues(base, fn => fn.bind(this))
-  }
-
-  configurator(options = {}) {
-    if (this.builder) {
-      return this.builder
-    }
-
-    const {
-      baseConfig = this.tryGet('baseConfig', {}),
-      scope = this,
-      tap = this.tryGet('tapConfig'),
-    } = options
-
-    const features = this.getConfigFeaturesObject(options.features)
-    const reducers = this.getConfigReducersObject(options.reducers)
-    const presets = this.getConfigPresetsObject(options.presets)
-
-    return configBuilder.call(this, {
-      features,
-      reducers,
-      presets,
-      history: this.configHistory,
-      scope,
-      tap,
-      baseConfig,
-      keyFn: this.configKeysFn,
-      onStash: (...a) => this.emit('config:stashed', ...a),
-      onReset: (...a) => this.emit('config:reset', ...a),
-    })
-  }
-
-  get configKeysFn() {
-    return (
-      this.at(
-        'options.mapConfigKeys',
-        'provider.mapConfigKeys',
-        'constructor.mapConfigKeys',
-        'options.transformConfigKeys',
-        'provider.transformConfigKeys',
-        'constructor.transformConfigKeys'
-      ).find(f => typeof f === 'function') || ((v, k) => pluralize(k))
-    )
-  }
-
-  configure(fn = c => c) {
-    this.lazy('builder', () => fn(this.configurator()), false)
-    this.configHistory.push(this.builder.history)
-    return this
-  }
-
-  get currentConfig() {
-    console.log('currentConfig is deprecated')
-    console.trace()
-    return this.config
-  }
-
-  get config() {
-    return this.configurator().getConfig()
-  }
-
-  stringifyConfig() {
-    return this.config.toString()
   }
 
   static registryName() {

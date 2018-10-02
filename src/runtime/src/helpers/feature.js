@@ -189,15 +189,12 @@ export class Feature extends Helper {
       `runtime.config.features.${this.name}`,
       `runtime.argv.features.${cased}`,
       `runtime.options.features.${cased}`,
-      `runtime.config.features.${cased}`,
       `runtime.argv.${this.name}`,
       `runtime.projectConfig.${this.name}`,
       `runtime.options.${this.name}`,
-      `runtime.config.${this.name}`,
       `runtime.argv.${cased}`,
       `runtime.projectConfig.${cased}`,
       `runtime.options.${cased}`,
-      `runtime.config.${cased}`,
     ])
   }
 }
