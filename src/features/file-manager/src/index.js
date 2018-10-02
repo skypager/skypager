@@ -37,6 +37,7 @@ export function attach(runtime, options = {}) {
 
   fileManager.enable(fileManagerOptions)
 
+  // is this necessary
   if (runtime.argv.moduleManager !== false) {
     runtime.feature('module-manager').enable()
   }
