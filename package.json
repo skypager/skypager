@@ -31,8 +31,7 @@
     "src/runtimes/*",
     "src/features/*",
     "src/helpers/*",
-    "src/examples/*",
-    "src/main"
+    "src/examples/*"
   ],
   "devDependencies": {
     "@babel/cli": "^7.1.0",
