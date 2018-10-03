@@ -318,47 +318,6 @@ function (_Component3) {
 }(Component);
 
 render(React.createElement(App, null), document.getElementById('root'));
-;
-
-var _temp = function () {
-  if (typeof __REACT_HOT_LOADER__ === 'undefined') {
-    return;
-  }
-
-  __REACT_HOT_LOADER__.register(React, "React", "/Users/jon/Projects/@skypager/src/examples/sheets-server/src/launch.js");
-
-  __REACT_HOT_LOADER__.register(skypager, "skypager", "/Users/jon/Projects/@skypager/src/examples/sheets-server/src/launch.js");
-
-  __REACT_HOT_LOADER__.register(semanticUIReact, "semanticUIReact", "/Users/jon/Projects/@skypager/src/examples/sheets-server/src/launch.js");
-
-  __REACT_HOT_LOADER__.register(ReactDOM, "ReactDOM", "/Users/jon/Projects/@skypager/src/examples/sheets-server/src/launch.js");
-
-  __REACT_HOT_LOADER__.register(ReactRouterDOM, "ReactRouterDOM", "/Users/jon/Projects/@skypager/src/examples/sheets-server/src/launch.js");
-
-  __REACT_HOT_LOADER__.register(Header, "Header", "/Users/jon/Projects/@skypager/src/examples/sheets-server/src/launch.js");
-
-  __REACT_HOT_LOADER__.register(Loader, "Loader", "/Users/jon/Projects/@skypager/src/examples/sheets-server/src/launch.js");
-
-  __REACT_HOT_LOADER__.register(Container, "Container", "/Users/jon/Projects/@skypager/src/examples/sheets-server/src/launch.js");
-
-  __REACT_HOT_LOADER__.register(Segment, "Segment", "/Users/jon/Projects/@skypager/src/examples/sheets-server/src/launch.js");
-
-  __REACT_HOT_LOADER__.register(Table, "Table", "/Users/jon/Projects/@skypager/src/examples/sheets-server/src/launch.js");
-
-  __REACT_HOT_LOADER__.register(render, "render", "/Users/jon/Projects/@skypager/src/examples/sheets-server/src/launch.js");
-
-  __REACT_HOT_LOADER__.register(Component, "Component", "/Users/jon/Projects/@skypager/src/examples/sheets-server/src/launch.js");
-
-  __REACT_HOT_LOADER__.register(client, "client", "/Users/jon/Projects/@skypager/src/examples/sheets-server/src/launch.js");
-
-  __REACT_HOT_LOADER__.register(ListSheets, "ListSheets", "/Users/jon/Projects/@skypager/src/examples/sheets-server/src/launch.js");
-
-  __REACT_HOT_LOADER__.register(ShowSheet, "ShowSheet", "/Users/jon/Projects/@skypager/src/examples/sheets-server/src/launch.js");
-
-  __REACT_HOT_LOADER__.register(App, "App", "/Users/jon/Projects/@skypager/src/examples/sheets-server/src/launch.js");
-}();
-
-;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(2)))
 
 /***/ }),
@@ -398,11 +357,9 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony export (immutable) */ __webpack_exports__["listSheets"] = listSheets;
 /* harmony export (immutable) */ __webpack_exports__["showFullSheet"] = showFullSheet;
 /* harmony export (immutable) */ __webpack_exports__["showWorksheet"] = showWorksheet;
-var interfaceMethods = ['listSheets', 'showFullSheet', 'showWorksheet', 'getBaseUrl'];
+var interfaceMethods = ['listSheets', 'showFullSheet', 'showWorksheet'];
 function listSheets() {
   var query = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
-  var baseURL = this.baseURL;
-  console.log(this, baseURL);
   return this.client.get("/sheets", {
     query: query
   }).then(function (r) {
@@ -411,7 +368,6 @@ function listSheets() {
 }
 function showFullSheet(sheetKey) {
   var query = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
-  var baseURL = this.baseURL;
   return this.client.get("/sheets/".concat(sheetKey), {
     query: query
   }).then(function (r) {
@@ -420,30 +376,12 @@ function showFullSheet(sheetKey) {
 }
 function showWorksheet(sheetKey, worksheetKey) {
   var query = arguments.length > 2 && arguments[2] !== undefined ? arguments[2] : {};
-  var baseURL = this.baseURL;
   return this.client.get("/sheets/".concat(sheetKey, "/worksheetKey"), {
     query: query
   }).then(function (r) {
     return r.data;
   });
 }
-;
-
-var _temp = function () {
-  if (typeof __REACT_HOT_LOADER__ === 'undefined') {
-    return;
-  }
-
-  __REACT_HOT_LOADER__.register(interfaceMethods, "interfaceMethods", "/Users/jon/Projects/@skypager/src/examples/sheets-server/src/client.js");
-
-  __REACT_HOT_LOADER__.register(listSheets, "listSheets", "/Users/jon/Projects/@skypager/src/examples/sheets-server/src/client.js");
-
-  __REACT_HOT_LOADER__.register(showFullSheet, "showFullSheet", "/Users/jon/Projects/@skypager/src/examples/sheets-server/src/client.js");
-
-  __REACT_HOT_LOADER__.register(showWorksheet, "showWorksheet", "/Users/jon/Projects/@skypager/src/examples/sheets-server/src/client.js");
-}();
-
-;
 
 /***/ })
 /******/ ]);

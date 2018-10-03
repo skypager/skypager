@@ -7,21 +7,33 @@ describe('The Sheets Server', function() {
   before(async function() {
     port = await runtime.networking.findOpenPort()
     const { childProcess } = runtime.proc.async.spawn(
-      'yarn',
-      ['start', '--port', port, '--host', 'localhost', '--hostname', 'localhost'],
+      'node',
+      [
+        '--require',
+        'esm',
+        'scripts/start.js',
+        '--port',
+        port,
+        '--host',
+        'localhost',
+        '--hostname',
+        'localhost',
+      ],
       {
         cwd: runtime.cwd,
-        stdio: 'ignore',
+        stdio: 'inherit',
       }
     )
 
     pid = childProcess.pid
 
-    await new Promise(resolve => setTimeout(resolve, 5000))
+    await untilServerIsListening(port)
   })
 
   after(function() {
-    process.kill(pid)
+    try {
+      process.kill(pid)
+    } catch (error) {}
   })
 
   it('returns a list of sheets via an API', async function() {
@@ -34,3 +46,20 @@ describe('The Sheets Server', function() {
     data.should.be.a('string').that.matches(/div id="root"/)
   })
 })
+
+let attempts = 0
+async function untilServerIsListening(onPort) {
+  const isPortOpen = await runtime.networking.isPortOpen(onPort)
+
+  if (attempts > 10) {
+    throw new Error('Server failed to start')
+  }
+
+  if (!isPortOpen) {
+    return true
+  } else {
+    attempts = attempts + 1
+    await new Promise((resolve, reject) => setTimeout(resolve, 1000))
+    return untilServerIsListening(onPort)
+  }
+}

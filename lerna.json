@@ -3,11 +3,11 @@
   "registry": "https://registry.npmjs.org/",
   "packages": [
     "src/devtools/*",
-    "src/examples/*",
     "src/features/*",
     "src/helpers/*",
     "src/runtime",
-    "src/runtimes/*"
+    "src/runtimes/*",
+    "src/examples/*"
   ],
   "command": {
     "publish": {

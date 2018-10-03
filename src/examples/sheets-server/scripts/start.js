@@ -24,13 +24,20 @@ async function main() {
 
   runtime.servers.register('app', () => require('../src/server'))
 
-  const server = runtime.server('app')
+  const server = runtime.server('app', {
+    port: runtime.argv.port,
+    hostname: runtime.argv.hostname,
+  })
 
   if (runtime.argv.open) {
     runtime.opener.openInBrowser(`http://${server.hostname}:${server.port}`)
   }
 
-  return server.start()
+  await server.start()
+
+  if (runtime.argv.interactive) {
+    await runtime.repl('interactive').launch({ server, runtime })
+  }
 }
 
 main()

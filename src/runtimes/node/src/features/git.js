@@ -29,6 +29,8 @@ export const featureMethods = [
   'getDirectoryIds',
   'getDirectoryObjects',
   'getFileObjects',
+  'clone',
+  'init',
 ]
 
 export const hostMethods = ['getGitInfo']
@@ -42,6 +44,32 @@ export function stopPolling() {
   }
 
   return this
+}
+
+export function clone(options = {}, dest) {
+  if (typeof options === 'string') {
+    options = { repo: options }
+  }
+
+  if (typeof dest === 'string') {
+    options.folder = dest
+  }
+
+  const { spawn } = this.runtime.proc.async
+  const { repo, folder } = options
+
+  return spawn('git', ['clone', repo, folder], {
+    stdio: 'ignore',
+  })
+}
+
+export function init(folder) {
+  const { spawn } = this.runtime.proc.async
+
+  return spawn('git', ['init', '.'], {
+    cwd: this.runtime.resolve(folder),
+    stdio: 'ignore',
+  })
 }
 
 export async function poll(options = {}) {

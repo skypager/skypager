@@ -13,12 +13,6 @@ build: off
 test_script:
   - node --version
   - 'echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > .npmrc'
-  - >-
-    IF NOT EXIST %APPVEYOR_BUILD_FOLDER%\src\helpers\sheet\secrets MKDIR
-    %APPVEYOR_BUILD_FOLDER%\src\hepers\sheet\secrets
-  - >-
-    echo %SERVICE_ACCOUNT_DATA% >
-    %APPVEYOR_BUILD_FOLDER%\src\helpers\sheet\secrets\serviceAccount.json
   - yarn test
 cache:
   - '%LOCALAPPDATA%\Yarn'

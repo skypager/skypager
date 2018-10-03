@@ -7,6 +7,8 @@ export function appWillMount(app, options = {}, context = {}) {
   const { isEmpty } = this.lodash
   const { colors } = runtime.cli
 
+  runtime.debug('Mounting sheets app')
+
   app.use((req, _, next) => {
     !isEmpty(req.params)
       ? runtime.info(`${colors.green(req.method)} ${req.url}`, req.params)
@@ -67,4 +69,6 @@ export function appWillMount(app, options = {}, context = {}) {
         })
     }
   })
+
+  return app
 }
