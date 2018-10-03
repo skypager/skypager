@@ -1,6 +1,6 @@
 {
   "name": "@skypager/sheets-server",
-  "version": "0.1.0",
+  "version": "0.1.4",
   "description": "a google sheets api server",
   "main": "lib/index.js",
   "scripts": {
@@ -18,7 +18,7 @@
   "dependencies": {
     "@skypager/helpers-server": "^0.1.0",
     "@skypager/helpers-sheet": "^0.1.3",
-    "@skypager/node": "^0.1.2"
+    "@skypager/node": "^0.1.4"
   },
   "skypager": {
     "webpack": {
