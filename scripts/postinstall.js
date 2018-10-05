@@ -41,6 +41,7 @@ const stageTwo = [
   ['@skypager/helpers-server', 'src/helpers/server', 'lib'],
   ['@skypager/helpers-repl', 'src/helpers/repl', 'lib'],
   ['@skypager/helpers-sheet', 'src/helpers/sheet', 'lib'],
+  ['@skypager/web', 'src/runtimes/web', 'lib'],
 ]
 
 const first = stageOne
