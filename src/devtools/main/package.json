@@ -2,12 +2,12 @@
   "name": "@skypager/devtools",
   "homepage": "https://devtools.skypager.io",
   "license": "SEE LICENSE IN LICENSE.md",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "skypager framework developer tools",
   "main": "index.js",
   "dependencies": {
-    "@skypager/node": "^0.1.4",
-    "@skypager/webpack": "^0.1.0",
+    "@skypager/node": "^0.1.5",
+    "@skypager/webpack": "^0.1.5",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",
     "chai-like": "^1.1.1",
@@ -16,5 +16,5 @@
     "sinon": "^6.2.0",
     "sinon-chai": "^3.2.0"
   },
-  "gitHead": "c79de1c2744801ee3fdfad03f8b9d1b2dccdfdad"
+  "gitHead": "e83538f51de792557fa139e4af368a20feb69899"
 }

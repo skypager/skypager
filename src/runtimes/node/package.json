@@ -1,6 +1,6 @@
 {
   "name": "@skypager/node",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "the skypager node runtime",
   "main": "lib/index.js",
   "scripts": {
@@ -44,5 +44,5 @@
       "scopeModules": false
     }
   },
-  "gitHead": "c79de1c2744801ee3fdfad03f8b9d1b2dccdfdad"
+  "gitHead": "e83538f51de792557fa139e4af368a20feb69899"
 }

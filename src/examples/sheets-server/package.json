@@ -1,8 +1,11 @@
 {
   "name": "@skypager/sheets-server",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "description": "a google sheets api server",
   "main": "lib/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "start": "cross-env NODE_ENV=development skypager start --esm",
     "prestart": "yarn build",
@@ -18,7 +21,7 @@
   "dependencies": {
     "@skypager/helpers-server": "^0.1.0",
     "@skypager/helpers-sheet": "^0.1.3",
-    "@skypager/node": "^0.1.4"
+    "@skypager/node": "^0.1.5"
   },
   "skypager": {
     "webpack": {
@@ -26,5 +29,5 @@
       "scopeModules": false
     }
   },
-  "gitHead": "c79de1c2744801ee3fdfad03f8b9d1b2dccdfdad"
+  "gitHead": "e83538f51de792557fa139e4af368a20feb69899"
 }

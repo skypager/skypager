@@ -2,7 +2,7 @@
   "name": "@skypager/webpack",
   "homepage": "https://webpack.skypager.io",
   "license": "SEE LICENSE IN LICENSE.md",
-  "version": "0.1.0",
+  "version": "0.1.5",
   "description": "provides common webpack dependencies, configs, and scripts",
   "scripts": {
     "build": "exit 0"
@@ -98,5 +98,6 @@
     "webpack-node-externals": "^1.7.2",
     "webpack-source-map-support": "^2.0.1",
     "yaml-loader": "^0.5.0"
-  }
+  },
+  "gitHead": "e83538f51de792557fa139e4af368a20feb69899"
 }
