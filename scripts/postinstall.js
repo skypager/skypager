@@ -40,12 +40,16 @@ const stageTwo = [
   ['@skypager/helpers-client', 'src/helpers/client', 'lib'],
   ['@skypager/helpers-server', 'src/helpers/server', 'lib'],
   ['@skypager/helpers-repl', 'src/helpers/repl', 'lib'],
-  ['@skypager/helpers-sheet', 'src/helpers/sheet', 'lib'],
+]
+
+const stageThree = [
   ['@skypager/web', 'src/runtimes/web', 'lib'],
+  ['@skypager/helpers-sheet', 'src/helpers/sheet', 'lib'],
 ]
 
 const first = stageOne
 const rest = stageTwo
+const last = stageThree
 
 class CISpinner {
   constructor(projectNames) {
@@ -81,11 +85,22 @@ async function main() {
   // skypager.cli.clear()
 
   const spinner = process.env.JOB_NAME
-    ? new CISpinner(first.concat(rest).map(i => i[0]))
-    : new MultiSpinner(first.concat(rest).map(i => i[0]), {
-        autoStart: false,
-        clear: false,
-      })
+    ? new CISpinner(
+        first
+          .concat(rest)
+          .concat(last)
+          .map(i => i[0])
+      )
+    : new MultiSpinner(
+        first
+          .concat(rest)
+          .concat(last)
+          .map(i => i[0]),
+        {
+          autoStart: false,
+          clear: false,
+        }
+      )
 
   spinner.start()
 
@@ -110,6 +125,27 @@ async function main() {
 
   await Promise.all(
     rest.map(([project, subfolder]) =>
+      spawn('yarn', ['build', ARGV.force && '--force'].filter(Boolean), {
+        cwd: resolve(cwd, subfolder),
+        stdio: 'ignore',
+      })
+        .then(() => {
+          spinner.success(project)
+        })
+        .catch(error => {
+          print(red(`Error in ${project}`))
+          print(red(error.message), 2, 2, 2)
+          spinner.error(project)
+          throw error
+        })
+    )
+  ).catch(error => {
+    print(red(error.message))
+    print(error.stack)
+    process.exit(1)
+  })
+  await Promise.all(
+    last.map(([project, subfolder]) =>
       spawn('yarn', ['build', ARGV.force && '--force'].filter(Boolean), {
         cwd: resolve(cwd, subfolder),
         stdio: 'ignore',
