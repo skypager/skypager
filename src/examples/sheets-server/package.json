@@ -23,7 +23,14 @@
     "@skypager/helpers-server": "^0.1.0",
     "@skypager/helpers-sheet": "^0.1.7",
     "@skypager/node": "^0.1.6",
-    "@skypager/webpack": "^0.1.8"
+    "@skypager/web": "^0.1.1",
+    "@skypager/webpack": "^0.1.8",
+    "prop-types": "^15.6.2",
+    "react": "^16.5.2",
+    "react-dom": "^16.5.2",
+    "react-hot-loader": "^4.3.11",
+    "react-router-dom": "^4.3.1",
+    "semantic-ui-react": "^0.82.5"
   },
   "skypager": {
     "webpack": {
