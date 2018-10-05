@@ -1,0 +1,8 @@
+*
+!lib/
+!src/
+!public/
+!scripts/
+!webpack.config.js
+!webpack.config.test.js
+!package.json

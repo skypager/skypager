@@ -1,0 +1,6 @@
+{
+  "name": "skypager-sheets-server-example",
+  "env": {
+      "SERVICE_ACCOUNT_DATA": "@skypager-sheets-server-sa"
+  }
+}

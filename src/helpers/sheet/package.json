@@ -6,6 +6,7 @@
   "browser": "lib/skypager-helpers-sheet.min.js",
   "react-native": "lib/index.js",
   "scripts": {
+    "prepare": "yarn build",
     "build": "cross-env NODE_ENV=production webpack --config webpack.config.js",
     "postbuild": "yarn smoke-test",
     "smoke-test": "skypager smoke-test",
