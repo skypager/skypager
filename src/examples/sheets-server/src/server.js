@@ -1,6 +1,81 @@
-export const history = true
-export const serveStatic = true
+export function history() {
+  return !this.runtime.isDevelopment
+}
+
+export function serveStatic() {
+  return !this.runtime.isDevelopment
+}
+
 export const cors = true
+
+export async function appDidMount(app) {
+  const { runtime } = this
+
+  if (runtime.isDevelopment) {
+    setupDevelopment.call(this, app)
+  }
+
+  return app
+}
+
+export function setupDevelopment(app) {
+  const { runtime } = this
+  const { hot } = this.options
+  const webpack = require('webpack')
+  const merge = require('webpack-merge')
+  const devMiddleware = require('webpack-dev-middleware')
+  const hotMiddleware = require('webpack-hot-middleware')
+  const config = merge(require('@skypager/webpack/config/webpack.config.dev'), {
+    node: {
+      process: 'mock',
+    },
+    externals: [
+      {
+        react: 'global React',
+        'react-dom': 'global ReactDOM',
+        'react-router-dom': 'global ReactRouterDOM',
+        'semantic-ui-react': 'global semanticUIReact',
+        'prop-types': 'global PropTypes',
+        '@skypager/web': 'global skypager',
+      },
+    ],
+  })
+
+  config.entry[1] = 'webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000'
+
+  const compiler = webpack(config)
+  const middleware = devMiddleware(compiler, {
+    noInfo: true,
+    publicPath: config.output.publicPath,
+  })
+
+  app.use(middleware)
+
+  if (hot !== false) {
+    app.use(
+      hotMiddleware(compiler, {
+        path: '/__webpack_hmr',
+      })
+    )
+  }
+
+  /*
+  app.get('*', (req, res) => {
+    middleware.fileSystem.readFile(
+      runtime.pathUtils.resolve(compiler.outputPath, 'index.html'),
+      (err, file) => {
+        if (err) {
+          res.sendStatus(404)
+        } else {
+          res.send(file.toString())
+        }
+      }
+    )
+  })
+  */
+
+  return app
+}
 
 export function appWillMount(app, options = {}, context = {}) {
   const { runtime } = this

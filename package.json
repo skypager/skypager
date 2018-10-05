@@ -16,7 +16,8 @@
     "link:devDependencies": "node scripts/link-dev-dependencies.js",
     "console": "node scripts/console.js",
     "release": "lerna publish patch --yes",
-    "postrelease": "node scripts/postrelease.js",
+    "postrelease": "node scripts/postrelease.js && yarn deploy",
+    "deploy": "lerna run deploy --stream",
     "test": "node scripts/sanity.js && lerna run test --stream",
     "postinstall": "node scripts/postinstall.js"
   },

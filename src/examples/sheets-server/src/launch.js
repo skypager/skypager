@@ -1,85 +1,22 @@
-const { React, skypager, semanticUIReact, ReactDOM, ReactRouterDOM } = global
-const { Header, Loader, Container, Segment, Table } = semanticUIReact
-const { render } = ReactDOM
-const { Component } = React
+import React from 'react'
+import runtime from './runtime'
+import App from './App'
+import { AppContainer } from 'react-hot-loader'
+import { render } from 'react-dom'
 
-skypager.clients.register('app', () => require('./client'))
-
-const client = (global.sheetsClient = skypager.client('app'))
-
-class ListSheets extends Component {
-  render() {
-    const { onClick, sheets = {} } = this.props
-    const records = Object.keys(sheets).map(id => Object.assign({}, sheets[id], { id }))
-
-    return (
-      <Container>
-        {records.map((record, idx) => (
-          <Segment key={record.id + idx} onClick={() => onClick(record.id, record)} raised>
-            <Header content={record.id} />
-          </Segment>
-        ))}
-      </Container>
-    )
-  }
+const renderer = Component => {
+  render(
+    <AppContainer>
+      <Component runtime={runtime} />
+    </AppContainer>,
+    document.getElementById('root')
+  )
 }
 
-class ShowSheet extends Component {
-  render() {
-    const { entries } = runtime.lodash
-    const { data = {}, sheetId } = this.props
+renderer(App)
 
-    return entries(data).map(([worksheetId, rows]) => (
-      <Table key={worksheetId}>
-        {rows[0] && (
-          <Table.Header>
-            {Object.keys(rows[0]).map((val, k) => (
-              <Table.HeaderCell key={`th-${k}`}>{val}</Table.HeaderCell>
-            ))}
-          </Table.Header>
-        )}
-        <Table.Body>
-          {rows.map((row, index) => (
-            <Table.Row key={`row-${index}`}>
-              {Object.values(row).map((val, k) => (
-                <Table.Cell key={`row-${k}`}>{val}</Table.Cell>
-              ))}
-            </Table.Row>
-          ))}
-        </Table.Body>
-      </Table>
-    ))
-  }
+if (process.env.NODE_ENV === 'development' && module.hot) {
+  module.hot.accept('./App', () => {
+    renderer(App)
+  })
 }
-
-class App extends Component {
-  state = {
-    loading: true,
-  }
-
-  async componentDidMount() {
-    const sheets = await client.listSheets()
-    this.setState({ sheets, loading: false })
-  }
-
-  selectSheet(sheetId) {
-    this.setState({ sheetId, loading: true })
-    return client.showFullSheet(sheetId).then(data => this.setState({ loading: false, data }))
-  }
-
-  render() {
-    const { loading, sheets, sheetId, data } = this.state
-
-    return (
-      <Container>
-        {loading && <Loader active />}
-        {!loading &&
-          !sheetId &&
-          sheets && <ListSheets onClick={this.selectSheet.bind(this)} sheets={sheets} />}
-        {!loading && sheetId && data && <ShowSheet data={data} sheetId={sheetId} />}
-      </Container>
-    )
-  }
-}
-
-render(<App />, document.getElementById('root'))

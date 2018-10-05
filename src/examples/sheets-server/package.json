@@ -7,9 +7,10 @@
     "access": "public"
   },
   "scripts": {
-    "start": "cross-env NODE_ENV=development skypager start --esm",
-    "prestart": "yarn build",
+    "start": "cross-env NODE_ENV=production skypager serve --esm",
+    "dev": "cross-env NODE_ENV=development skypager serve --esm --hot",
     "build": "cross-env NODE_ENV=production webpack --config webpack.config.js",
+    "deploy": "node scripts/deploy.js --verbose",
     "watch": "skypager watch",
     "console": "skypager console",
     "pretest": "yarn build",

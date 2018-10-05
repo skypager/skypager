@@ -7,6 +7,8 @@ if (!runtime.server) {
   runtime.use(serverHelper)
 }
 
+require('./install-secrets')
+
 if (!runtime.sheet) {
   const { serviceAccount = runtime.resolve('secrets', 'serviceAccount.json') } = runtime.argv
   runtime.use(sheetsHelper, {

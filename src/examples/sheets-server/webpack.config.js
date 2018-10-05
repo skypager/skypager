@@ -50,7 +50,7 @@ const nodeConfig = merge.strategy({ entry: 'replace', node: 'replace', externals
 
 const webConfig = merge.strategy({ entry: 'replace' })(production, {
   entry: {
-    app: [path.resolve(__dirname, 'src', 'launch.js')],
+    app: ['@babel/polyfill/noConflict', path.resolve(__dirname, 'src/launch.js')],
   },
   output: {
     path: path.resolve(__dirname, 'build'),
