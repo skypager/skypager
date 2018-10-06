@@ -19,7 +19,8 @@
     "postrelease": "node scripts/postrelease.js && yarn deploy",
     "deploy": "lerna run deploy --stream",
     "test": "node scripts/sanity.js && lerna run test --stream",
-    "postinstall": "node scripts/postinstall.js"
+    "postinstall": "node scripts/postinstall.js",
+    "clean": "lerna exec rimraf lib && lerna clean --yes && rimraf node_modules yarn.lock"
   },
   "keywords": [
     "Skypager"

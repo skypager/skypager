@@ -11,7 +11,7 @@ describe('The Sheets Server', function() {
       [
         '--require',
         'esm',
-        'scripts/start.js',
+        'scripts/serve.js',
         '--port',
         port,
         '--host',
