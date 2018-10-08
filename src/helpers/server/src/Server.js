@@ -60,6 +60,22 @@ export class Server extends Helper {
   async mount(options = this.options, context = this.context) {
     const { app } = this
     const { appDidMount = this.options.appDidMount || this.provider.appDidMount } = options
+    const { isString } = this.lodash
+
+    const endpoints = options.endpoints || this.tryResult('endpoints', [])
+
+    if (endpoints.length) {
+      endpoints.forEach(endpoint => {
+        if (isString(endpoint)) {
+          let handler = this.endpoints.lookup(endpoint)
+          handler = handler.default || handler
+          handler.call(this, app, options, context)
+        } else {
+          throw new Error(`Must pass an array of endpoint module registry ids`)
+        }
+      })
+    }
+
     let {
       history = this.tryResult('history', () => false),
       serveStatic = this.tryResult('serveStatic', () => false),
@@ -177,17 +193,31 @@ export class Server extends Helper {
     return this.constructor.express
   }
 
+  get endpoints() {
+    return this.runtime.endpoints
+  }
+
   static get express() {
     return express
   }
 
   static attach(host, options = {}) {
-    return Helper.attach(host, Server, {
+    const registration = Helper.attach(host, Server, {
       registry: Helper.createContextRegistry('servers', {
         context: Helper.createMockContext(),
       }),
       ...options,
     })
+
+    if (!host.has('endpoints')) {
+      host.lazy('endpoints', () =>
+        Helper.createContextRegistry('endpoints', {
+          context: Helper.createMockContext(),
+        })
+      )
+    }
+
+    return registration
   }
 }
 

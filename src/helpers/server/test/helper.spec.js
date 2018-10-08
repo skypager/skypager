@@ -15,7 +15,7 @@ describe('The Server Helper', function() {
       .property('servers')
       .that.is.an('object')
       .that.has.property('available')
-      .that.is.an('array').that.is.empty
+      .that.is.an('array')
   })
 
   it('attaches a factory function for creating server helper instances', function() {

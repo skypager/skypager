@@ -24,3 +24,26 @@ or do any sort of logic that relies on some asynchronous data
 services your server might need to connect to when handling requests
 - **serverDidFail** export a function which will be called when the server fails to start 
 - **displayBanner** export a function which will be used when the server stars to display console output
+- **endpoints** export an array or a function which returns an array of endpoint module ids to use.  endpoint modules can be registered with the runtime.endpoints registry
+
+## Registries
+
+With the server helper
+
+**Endpoints Registry**
+
+```javascript
+runtime.endpoints
+// register one at a time
+runtime.endpoints.register('my-endpoint', () => require('./my-endpoint'))
+// add a webpack require.context
+runtime.endpoints.add(require.context('./src/endpoints', true, /\.js$/))
+```
+
+**Servers Registry**
+
+```javascript
+runtime.servers
+// register a server module
+runtime.servers.register('app', () => require('./server/app.js'))
+```
