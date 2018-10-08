@@ -19,7 +19,13 @@
     "release": "lerna publish patch --yes",
     "postrelease": "node scripts/postrelease.js && yarn deploy",
     "deploy": "lerna run deploy --stream",
-    "test": "mocha && lerna run test --stream",
+    "test": "yarn test:unit && yarn test:portfolio && yarn test:web",
+    "test:unit": "mocha", 
+    "pretest:web": "node scripts/prepare-web-release.js",
+    "test:web": "skypager start-and-test --start start:test:webserver --test test:web:build",
+    "test:portfolio": "lerna run test --stream",
+    "test:web:build": "mocha --file test/test.js test/web/**/*.spec.js",
+    "start:test:webserver": "serve public",
     "postinstall": "node scripts/postinstall.js",
     "clean": "lerna exec rimraf lib && lerna clean --yes && rimraf node_modules yarn.lock"
   },
@@ -47,7 +53,8 @@
     "cross-env": "^5.2.0",
     "husky": "^1.1.1",
     "lerna": "^3.4.0",
-    "lint-staged": "^7.3.0"
+    "lint-staged": "^7.3.0",
+    "puppeteer": "^1.9.0"
   },
   "lint-staged": {
     "src/**/*.{js,json}": [

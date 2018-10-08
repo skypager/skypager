@@ -5,7 +5,7 @@ describe('The Skypager Packages', function() {
     await skypager.packageManager.startAsync()
   })
 
-  it('finds all of the packages', function() {
+  it('finds all of the packages', async function() {
     const { packageData = [] } = skypager.packageManager
     const packageNames = packageData.map(pkg => pkg.name)
 
@@ -21,14 +21,15 @@ describe('The Skypager Packages', function() {
     packageNames.should.include('@skypager/features-file-manager')
   })
 
-  it('enforces valid naming', function() {
+  it('enforces valid naming', async function() {
     const { packageData = [] } = skypager.packageManager
+    packageData.length.should.be.greaterThan(16)
     packageData.filter(pkg => !pkg.name.match(/test-package/)).forEach(pkg => {
       pkg.name.should.match(/^@?skypager/)
     })
   })
 
-  it('enforces valid package.json scripts config', function() {
+  it('enforces valid package.json scripts config', async function() {
     const { packageData = [] } = skypager.packageManager
 
     packageData.length.should.be.greaterThan(16)

@@ -25,3 +25,5 @@ coverage/
 /.npmrc
 stats.json
 .history
+public/skypager-runtime*.js
+public/skypager-runtime*.map
