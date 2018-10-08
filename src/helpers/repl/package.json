@@ -8,6 +8,13 @@
   "publishConfig": {
     "access": "public"
   },
+  "files": [
+    "src",
+    "lib",
+    "README.md",
+    "package.json",
+    "webpack.config.js"
+  ],
   "scripts": {
     "build": "skypager build"
   },

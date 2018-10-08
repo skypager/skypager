@@ -50,6 +50,16 @@ if (args.indexOf('--babel') !== -1) {
   args = args.filter(arg => arg !== '--babel')
 }
 
+// pass --debug to the underlying command too since our logger implementation uses it
+if (args.indexOf('--debug') !== -1) {
+  runtimeArgs.push('--inspect')
+}
+
+if (args.indexOf('--inspect') !== -1) {
+  runtimeArgs.push('--inspect')
+  args = args.filter(arg => arg !== '--inspect')
+}
+
 try {
   const result = spawnSync('node', [...runtimeArgs, scriptPath].concat(args), {
     cwd: process.cwd(),
