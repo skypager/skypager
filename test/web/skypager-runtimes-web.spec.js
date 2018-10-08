@@ -6,7 +6,10 @@ describe('The Skypager Web Runtime Build', function() {
   let browser, page
 
   before(async function() {
-    browser = await puppeteer.launch({ headless: !skypager.argv.showBrowser })
+    browser = await puppeteer.launch({
+      headless: !skypager.argv.showBrowser,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+    })
     page = await browser.newPage()
     const url = process.env.URL || process.env.TEST_URL
     await page.goto(`${url}/test.runtimes-web.html`)
