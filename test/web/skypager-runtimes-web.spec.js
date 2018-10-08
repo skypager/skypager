@@ -1,11 +1,12 @@
 require('chai').should()
 const puppeteer = require('puppeteer')
+const runtime = require('@skypager/node')
 
 describe('The Skypager Web Runtime Build', function() {
   let browser, page
 
   before(async function() {
-    browser = await puppeteer.launch()
+    browser = await puppeteer.launch({ headless: !skypager.argv.showBrowser })
     page = await browser.newPage()
     const url = process.env.URL || process.env.TEST_URL
     await page.goto(`${url}/test.runtimes-web.html`)
