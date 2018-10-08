@@ -3,14 +3,16 @@ module.exports = function(options = {}) {
     presets: [
       [
         require.resolve('@babel/preset-env'),
-        {
-          modules: false,
-          targets: options.targets || {
-            browsers: ['last 2 versions', 'ie >= 11', 'safari >= 10'],
-            node: '6.11.1',
+        Object.assign(
+          {
+            modules: false,
+            targets: options.targets || {
+              browsers: ['last 2 versions', 'ie >= 11', 'safari >= 10'],
+              node: '6.11.1',
+            },
           },
-          ...(options.presetEnv || {}),
-        },
+          options.presetEnv || {}
+        ),
       ],
       require.resolve('@babel/preset-react'),
     ],
@@ -25,7 +27,7 @@ module.exports = function(options = {}) {
         { id: ['lodash', 'semantic-ui-react'] },
       ],
     ].filter(Boolean),
-    ignore: ['**/lib/**', '**/dist/**'],
+    ignore: ['**/lib/**', '**/build/**', '**/public/**', '**/dist/**'],
     env: {
       development: {
         plugins: [require.resolve('react-hot-loader/babel')],

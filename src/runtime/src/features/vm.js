@@ -109,5 +109,5 @@ export function createCodeRunner(code, options = {}, sandbox) {
 }
 
 export function createScript(code = '', options = {}) {
-  return new vm.Script(code.toString(), options)
+  return new this.vm.Script(code.toString(), options)
 }
