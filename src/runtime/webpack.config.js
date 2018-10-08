@@ -15,7 +15,7 @@ const minifiedWebConfig = merge.strategy({ node: 'replace', entry: 'replace' })(
   {
     name: 'web',
     node: {
-      process: false,
+      process: 'mock',
       global: false,
     },
     resolve: {
@@ -36,7 +36,7 @@ const webConfig = merge.strategy({ node: 'replace', entry: 'replace', plugins: '
   {
     name: 'web',
     node: {
-      process: false,
+      process: 'mock',
       global: false,
     },
     resolve: {
