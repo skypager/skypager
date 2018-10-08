@@ -2,6 +2,15 @@
 
 ## Releases
 
+### 0.1.11
+
+- [@skypager/helpers-server](src/helpers/server)
+    - (enhancement) - Added endpoints registry in the server helper.  The endpoints registry allows us to register express route adding functions / middleware, and then load them by name when creating a server.
+- [@skypager/webpack](src/devtools/webpack) 
+    - (enhancement) - Extracted mdx parser function from the webpack loader, so that it can be used in a standalone way by other libraries
+- [@skypager/runtime] 
+    - (bugfix) - Fixed bug in vm feature's createScript method
+
 ### 0.1.10
 
 - Fixed a bug in the @skypager/runtime web build where it was not working because of webpack's global and process stubs.
