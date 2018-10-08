@@ -12,10 +12,34 @@
     "location": "/Users/jon/Projects/@skypager/src/devtools/main"
   },
   {
+    "name": "@skypager/webpack",
+    "version": "0.1.8",
+    "private": false,
+    "location": "/Users/jon/Projects/@skypager/src/devtools/webpack"
+  },
+  {
     "name": "@skypager/sheets-server",
     "version": "0.1.9",
     "private": false,
     "location": "/Users/jon/Projects/@skypager/src/examples/sheets-server"
+  },
+  {
+    "name": "@skypager/features-file-manager",
+    "version": "0.1.2",
+    "private": false,
+    "location": "/Users/jon/Projects/@skypager/src/features/file-manager"
+  },
+  {
+    "name": "@skypager/helpers-repl",
+    "version": "0.1.9",
+    "private": false,
+    "location": "/Users/jon/Projects/@skypager/src/helpers/repl"
+  },
+  {
+    "name": "@skypager/helpers-sheet",
+    "version": "0.1.7",
+    "private": false,
+    "location": "/Users/jon/Projects/@skypager/src/helpers/sheet"
   },
   {
     "name": "@skypager/runtime",
