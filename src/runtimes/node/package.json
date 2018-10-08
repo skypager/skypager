@@ -1,6 +1,6 @@
 {
   "name": "@skypager/node",
-  "version": "0.1.6",
+  "version": "0.1.9",
   "description": "the skypager node runtime",
   "main": "lib/index.js",
   "scripts": {
@@ -16,7 +16,7 @@
   "dependencies": {
     "@skypager/features-file-manager": "^0.1.2",
     "@skypager/helpers-client": "^0.1.0",
-    "@skypager/helpers-repl": "^0.1.0",
+    "@skypager/helpers-repl": "^0.1.9",
     "@skypager/helpers-server": "^0.1.0",
     "@skypager/runtime": "^0.1.1",
     "bluebird": "^3.5.0",
