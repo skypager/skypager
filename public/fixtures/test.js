@@ -1,0 +1,1 @@
+global.skypager.testScriptLoaded = true

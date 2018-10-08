@@ -20,10 +20,20 @@ export function getVm() {
 }
 
 export function whenReady(fn) {
+  if (typeof fn === 'undefined') {
+    return new Promise((resolve, reject) => {
+      whenReady.call(this, (err, Babel) => {
+        err ? reject(err) : resolve(Babel)
+      })
+    })
+  }
+
   if (this.ready) {
-    fn(global.Babel)
+    fn(null, global.Babel)
   } else {
-    this.once('ready', fn)
+    this.once('ready', Babel => {
+      fn(null, Babel)
+    })
   }
 }
 
@@ -55,6 +65,7 @@ export async function loadBabel(options = {}) {
 
 export function createCodeRunner(code, options = {}) {
   const { runtime } = this
+  const { vm } = runtime
   const { mapValues, pick } = this.lodash
   const compiled = this.compile(code)
   const script = vm.createScript(compiled)
