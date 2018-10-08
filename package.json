@@ -15,6 +15,7 @@
     "new": "skypager create",
     "link:devDependencies": "node scripts/link-dev-dependencies.js",
     "console": "node scripts/console.js",
+    "prerelease": "node scripts/prerelease.js",
     "release": "lerna publish patch --yes",
     "postrelease": "node scripts/postrelease.js && yarn deploy",
     "deploy": "lerna run deploy --stream",
@@ -44,6 +45,14 @@
     "@babel/register": "^7.0.0",
     "@babel/runtime": "^7.0.0",
     "cross-env": "^5.2.0",
-    "lerna": "^3.4.0"
+    "husky": "^1.1.1",
+    "lerna": "^3.4.0",
+    "lint-staged": "^7.3.0"
+  },
+  "lint-staged": {
+    "src/**/*": [
+      "node scripts/pre-commit.js",
+      "git add"
+    ]
   }
 }
