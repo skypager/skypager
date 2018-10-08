@@ -1,5 +1,7 @@
 # Skypager Node Runtime
 
+This provides a version of the skypager runtime specially tailored for use in a node.js server environment.
+
 ## Installation and Usage
 
 ```shell

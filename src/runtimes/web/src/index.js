@@ -20,6 +20,7 @@ skypager.hide('runtimeProvider', 'web', true)
 skypager.hide('runtimeModule', module.id, true)
 
 if (typeof __PACKAGE__ !== 'undefined') {
+  // eslint-disable-next-line
   skypager.hide('runtimePackageInfo', __PACKAGE__, true)
 }
 
