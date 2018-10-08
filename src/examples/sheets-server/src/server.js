@@ -20,6 +20,7 @@ export async function appDidMount(app) {
 
 export function setupDevelopment(app) {
   const { runtime } = this
+  const serviceAccount = runtime.fsx.readJsonSync(runtime.resolve('secrets', 'serviceAccount.json'))
   const { hot } = this.options
   const webpack = require('webpack')
   const merge = require('webpack-merge')
@@ -29,6 +30,12 @@ export function setupDevelopment(app) {
     node: {
       process: 'mock',
     },
+    plugins: [
+      new webpack.DefinePlugin({
+        SERVICE_ACCOUNT_EMAIL: JSON.stringify(serviceAccount.client_email),
+        SERVICE_ACCOUNT_PROJECT_ID: JSON.stringify(serviceAccount.project_id),
+      }),
+    ],
     externals: [
       {
         react: 'global React',
@@ -95,7 +102,22 @@ export function appWillMount(app, options = {}, context = {}) {
     const data = runtime.sheets.allMembers()
     res.json(data)
   })
+  app.get('/sheets-meta/:sheetName', (req, res) => {
+    const { sheetName } = req.params
 
+    if (!sheetName || !sheetName.length || !runtime.sheets.checkKey(req.params.sheetName)) {
+      res.status(404).json({ notFound: true, error: true, sheetName })
+    } else {
+      const sheet = runtime.sheet(sheetName)
+
+      sheet.whenReady().then(() => {
+        res.json({
+          info: sheet.info,
+          worksheets: sheet.worksheets,
+        })
+      })
+    }
+  })
   app.get('/sheets/:sheetName', (req, res) => {
     const { sheetName } = req.params
 

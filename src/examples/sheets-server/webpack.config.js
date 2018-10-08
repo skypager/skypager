@@ -1,3 +1,5 @@
+require('./scripts/install-secrets')
+
 const path = require('path')
 const merge = require('webpack-merge')
 const nodeExternals = require('webpack-node-externals')
@@ -48,6 +50,8 @@ const nodeConfig = merge.strategy({ entry: 'replace', node: 'replace', externals
   }
 )
 
+const serviceAccount = require('./secrets/serviceAccount')
+
 const webConfig = merge.strategy({ entry: 'replace' })(production, {
   entry: {
     app: ['@babel/polyfill/noConflict', path.resolve(__dirname, 'src/launch.js')],
@@ -55,6 +59,12 @@ const webConfig = merge.strategy({ entry: 'replace' })(production, {
   output: {
     path: path.resolve(__dirname, 'build'),
   },
+  plugins: [
+    new DefinePlugin({
+      SERVICE_ACCOUNT_EMAIL: JSON.stringify(serviceAccount.client_email),
+      SERVICE_ACCOUNT_PROJECT_ID: JSON.stringify(serviceAccount.project_id),
+    }),
+  ],
 })
 
 module.exports = [webConfig, nodeConfig]
