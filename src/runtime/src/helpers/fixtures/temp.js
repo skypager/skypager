@@ -1,8 +1,8 @@
-export const hostMethods = ["functionProvidedByFeature"]
+export const hostMethods = ['functionProvidedByFeature']
 
 export function functionProvidedByFeature(options = {}, context = {}) {}
 
-export const featureMethods = ["myFunction"]
+export const featureMethods = ['myFunction']
 
 export function myFunction(options = {}, context = {}) {}
 

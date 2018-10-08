@@ -1,11 +1,20 @@
-export const hostMethods = ["lazyConfigFeatures", "lazyConfigReducers", "lazyConfigPresets", "lazyConfigBuilder"]
+export const hostMethods = [
+  'lazyConfigFeatures',
+  'lazyConfigReducers',
+  'lazyConfigPresets',
+  'lazyConfigBuilder',
+]
 
 export function configurator(options = {}) {
   if (this.builder) {
     return this.builder
   }
 
-  const { baseConfig = this.tryGet("baseConfig", {}), scope = this, tap = this.tryGet("tapConfig") } = options
+  const {
+    baseConfig = this.tryGet('baseConfig', {}),
+    scope = this,
+    tap = this.tryGet('tapConfig'),
+  } = options
 
   const features = this.buildConfigFeatures(options.features)
   const reducers = this.getConfigReducersObject(options.reducers)
@@ -18,8 +27,8 @@ export function configurator(options = {}) {
     scope,
     tap,
     baseConfig,
-    onStash: (...a) => this.emit("config:stashed", ...a),
-    onReset: (...a) => this.emit("config:reset", ...a),
+    onStash: (...a) => this.emit('config:stashed', ...a),
+    onReset: (...a) => this.emit('config:reset', ...a),
     ...options,
   })
 }
@@ -39,7 +48,9 @@ export function buildConfigFeatures(passed = {}) {
 
   options = isFunction(options) ? options.call(this, this.options, this.context) : options || {}
 
-  constructors = isFunction(constructors) ? constructors.call(this, this.options, this.context) : constructors || {}
+  constructors = isFunction(constructors)
+    ? constructors.call(this, this.options, this.context)
+    : constructors || {}
 
   mine = isFunction(mine) ? mine.call(this, this.options, this.context) : mine || {}
 
@@ -58,7 +69,9 @@ export function getConfigReducersObject(passed = {}) {
 
   options = isFunction(options) ? options.call(this, this.options, this.context) : options || {}
 
-  constructors = isFunction(constructors) ? constructors.call(this, this.options, this.context) : constructors || {}
+  constructors = isFunction(constructors)
+    ? constructors.call(this, this.options, this.context)
+    : constructors || {}
 
   mine = isFunction(mine) ? mine.call(this, this.options, this.context) : mine || {}
 

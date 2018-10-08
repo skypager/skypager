@@ -115,8 +115,8 @@ function md5(string) {
     s = s.substring(i - 64)
     var tail = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       sl = s.length
-    for (i = 0; i < sl; i++) tail[i >> 2] |= s.charCodeAt(i) << ((i % 4) << 3)
-    tail[i >> 2] |= 0x80 << ((i % 4) << 3)
+    for (i = 0; i < sl; i++) tail[i >> 2] |= s.charCodeAt(i) << (i % 4 << 3)
+    tail[i >> 2] |= 0x80 << (i % 4 << 3)
     if (i > 55) {
       md5cycle(state, tail)
       i = 16
@@ -151,15 +151,18 @@ function md5(string) {
       i /* Andy King said do it this way. */
     for (i = 0; i < 64; i += 4) {
       md5blks[i >> 2] =
-        s.charCodeAt(i) + (s.charCodeAt(i + 1) << 8) + (s.charCodeAt(i + 2) << 16) + (s.charCodeAt(i + 3) << 24)
+        s.charCodeAt(i) +
+        (s.charCodeAt(i + 1) << 8) +
+        (s.charCodeAt(i + 2) << 16) +
+        (s.charCodeAt(i + 3) << 24)
     }
     return md5blks
   }
 
-  var hex_chr = "0123456789abcdef".split("")
+  var hex_chr = '0123456789abcdef'.split('')
 
   function rhex(n) {
-    var s = "",
+    var s = '',
       j = 0
     for (; j < 4; j++) s += hex_chr[(n >> (j * 8 + 4)) & 0x0f] + hex_chr[(n >> (j * 8)) & 0x0f]
     return s
@@ -168,7 +171,7 @@ function md5(string) {
   function hex(x) {
     var l = x.length
     for (var i = 0; i < l; i++) x[i] = rhex(x[i])
-    return x.join("")
+    return x.join('')
   }
 
   /* this function is much faster,
@@ -181,7 +184,7 @@ function md5(string) {
     return (a + b) & 0xffffffff
   }
 
-  if (hex(md51("hello")) != "5d41402abc4b2a76b9719d911017c592") {
+  if (hex(md51('hello')) != '5d41402abc4b2a76b9719d911017c592') {
     function add32(x, y) {
       var lsw = (x & 0xffff) + (y & 0xffff),
         msw = (x >> 16) + (y >> 16) + (lsw >> 16)

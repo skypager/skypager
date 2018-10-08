@@ -1,4 +1,4 @@
-export default async function packageLocations(chain, options = {}) {
+export default (async function packageLocations(chain, options = {}) {
   const { dirname } = this.pathUtils
   const { manifestFile = 'package.json', parse = false, filter, include = [] } = options
 
@@ -23,4 +23,4 @@ export default async function packageLocations(chain, options = {}) {
   }
 
   return response.map(file => (options.absolute ? file.dir : dirname(file.relative)))
-}
+})

@@ -140,7 +140,7 @@ function spinUpLocalhost(builtUrlObj) {
   }).catch(error => {
     console.log('Server shutting down')
     console.log('Error message', error.message)
-      /* eslint-enable */
+    /* eslint-enable */
   })
 }
 

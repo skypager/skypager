@@ -3,9 +3,9 @@ export function attach(options = {}) {
   const { runtime } = fileManager
   const { mapValues, omit } = runtime.lodash
 
-  const actions = mapValues(omit(module.exports, "default", "attach"), (fn, name) => [
-    "action",
-    fn.bind(fileManager)
+  const actions = mapValues(omit(module.exports, 'default', 'attach'), (fn, name) => [
+    'action',
+    fn.bind(fileManager),
   ])
 
   runtime.makeObservable(actions, fileManager)
@@ -26,7 +26,7 @@ export function updateFileAST({ file, hash, ast, type } = {}) {
 
   runtime.fileManager.asts.set(file, {
     ...existing,
-    [type]: { type, file, hash, ast }
+    [type]: { type, file, hash, ast },
   })
 }
 
@@ -36,7 +36,7 @@ export function updateFileCompilation({ file, hash, compilation, type } = {}) {
 
   runtime.fileManager.compiled.set(file, {
     ...existing,
-    [type]: { file, hash, compilation, type }
+    [type]: { file, hash, compilation, type },
   })
 }
 
@@ -44,11 +44,11 @@ export function updateFileHash(key, hash) {
   const { runtime } = this
   const file = runtime.fileManager.files.get(key)
   file.hash = hash
-  runtime.fileManager.emit("willUpdateFileHash", { key, file, hash })
+  runtime.fileManager.emit('willUpdateFileHash', { key, file, hash })
   runtime.fileManager.files.set(key, file)
 }
 
-export function updateFileContent(key, content = "") {
+export function updateFileContent(key, content = '') {
   const { runtime } = this
   const { dirname } = runtime.pathUtils
 

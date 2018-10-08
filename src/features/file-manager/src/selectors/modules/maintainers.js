@@ -1,7 +1,7 @@
-export default async function selectModuleMaintainers(chain, options = {}) {
+export default (async function selectModuleMaintainers(chain, options = {}) {
   const skypager = this
 
-  !skypager.moduleManager && skypager.feature("module-manager").enable()
+  !skypager.moduleManager && skypager.feature('module-manager').enable()
 
   await skypager.moduleManager.startAsync()
 
@@ -9,15 +9,15 @@ export default async function selectModuleMaintainers(chain, options = {}) {
 
   const { isString, castArray, isEmpty, fromPairs, mapValues } = skypager.lodash
 
-  const counts = () => mapValues(fromPairs(report.toJSON()), "size")
+  const counts = () => mapValues(fromPairs(report.toJSON()), 'size')
 
   return chain
-    .get("moduleManager.packageData", [])
+    .get('moduleManager.packageData', [])
     .reject(p => isEmpty(p.author))
-    .keyBy("name")
+    .keyBy('name')
     .mapValues(v => ({
       author: normalizeAuthorField(v.author),
-      contributors: normalizeContributorsField(v.contributors)
+      contributors: normalizeContributorsField(v.contributors),
     }))
     .mapValues((data, name) => {
       if (!report.has(data.author)) {
@@ -29,7 +29,7 @@ export default async function selectModuleMaintainers(chain, options = {}) {
     })
     .thru(byPackageName => ({
       byPackageName,
-      counts: counts()
+      counts: counts(),
     }))
 
   function normalizeContributorsField(contributors) {
@@ -39,8 +39,11 @@ export default async function selectModuleMaintainers(chain, options = {}) {
   function normalizeAuthorField(author) {
     let authorName = isString(author) ? author : author.name
 
-    authorName = authorName.split(" ").filter(f => !f.match(/^\W/)).join(" ")
+    authorName = authorName
+      .split(' ')
+      .filter(f => !f.match(/^\W/))
+      .join(' ')
 
-    return `${authorName || "Unknown"}`
+    return `${authorName || 'Unknown'}`
   }
-}
+})

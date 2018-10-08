@@ -1,1 +1,1 @@
-module.exports = global.lodash = require('lodash/lodash.min.js') 
+module.exports = global.lodash = require('lodash/lodash.min.js')

@@ -8,47 +8,47 @@ export default (repl, evalFn) => {
         return callback(err)
       }
 
-      if (res && typeof res.value === "function" && res.constructor.name === "LodashWrapper") {
+      if (res && typeof res.value === 'function' && res.constructor.name === 'LodashWrapper') {
         return callback(null, res.value())
       }
 
       if (
         !res ||
-        typeof res.then != "function" ||
-        (typeof res.then === "function" && typeof res.context === "object")
+        typeof res.then != 'function' ||
+        (typeof res.then === 'function' && typeof res.context === 'object')
       ) {
         return callback(null, res)
       }
 
       const cancel = (chunk, key) => {
-        repl.outputStream.write("break.\n")
-        if (key.name === "escape") {
-          process.stdin.removeListener("keypress", cancel)
+        repl.outputStream.write('break.\n')
+        if (key.name === 'escape') {
+          process.stdin.removeListener('keypress', cancel)
           callback(null, res)
           callback = function() {}
         }
       }
 
-      process.stdin.on("keypress", cancel)
+      process.stdin.on('keypress', cancel)
 
       // Start a timer indicating that escape can be used to quit
       const hangTimer = setTimeout(function() {
-        repl.outputStream.write("Hit escape to stop waiting on promise\n")
+        repl.outputStream.write('Hit escape to stop waiting on promise\n')
       }, 5000)
 
       res
         .then(
           function(val) {
-            process.stdin.removeListener("keypress", cancel)
+            process.stdin.removeListener('keypress', cancel)
             clearTimeout(hangTimer)
             callback(null, val)
           },
           function(err) {
-            process.stdin.removeListener("keypress", cancel)
+            process.stdin.removeListener('keypress', cancel)
             clearTimeout(hangTimer)
-            repl.outputStream.write("Promise rejected: ")
+            repl.outputStream.write('Promise rejected: ')
             callback(err)
-          },
+          }
         )
         .then(null, function(uncaught) {
           // Rethrow uncaught exceptions
@@ -61,14 +61,14 @@ export default (repl, evalFn) => {
 
   repl.eval = promiseEval
 
-  repl.commands["promise"] = {
-    help: "Toggle auto-promise unwrapping",
+  repl.commands['promise'] = {
+    help: 'Toggle auto-promise unwrapping',
     action() {
       if (repl.eval === promiseEval) {
-        this.outputStream.write("Promise auto-eval disabled\n")
+        this.outputStream.write('Promise auto-eval disabled\n')
         repl.eval = realEval
       } else {
-        this.outputStream.write("Promise auto-eval enabled\n")
+        this.outputStream.write('Promise auto-eval enabled\n')
         repl.eval = promiseEval
       }
       this.displayPrompt()

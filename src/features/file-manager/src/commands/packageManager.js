@@ -1,10 +1,10 @@
 export function program(p) {
   return p
-    .command("packageManager")
-    .description("launch the file manager")
-    .option("--base", "the base folder to start from")
-    .option("--ignore <pattern>", "ignore a file pattern")
-    .option("--doc-type <doctype>", "load the given docType handles")
+    .command('packageManager')
+    .description('launch the file manager')
+    .option('--base', 'the base folder to start from')
+    .option('--ignore <pattern>', 'ignore a file pattern')
+    .option('--doc-type <doctype>', 'load the given docType handles')
 }
 
 export async function validate() {

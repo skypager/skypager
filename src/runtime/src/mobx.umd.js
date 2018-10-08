@@ -1611,7 +1611,9 @@ and limitations under the License.
               var value
               var equals = opts.equals
                 ? opts.equals
-                : opts.compareStructural || opts.struct ? comparer.structural : comparer.default
+                : opts.compareStructural || opts.struct
+                  ? comparer.structural
+                  : comparer.default
               var r = new Reaction(opts.name, function() {
                 if (firstTime || opts.delay < 1) {
                   reactionRunner()
@@ -3694,7 +3696,11 @@ and limitations under the License.
                   "':\n * Status: [" +
                   (this.isDisposed
                     ? 'stopped'
-                    : this._isRunning ? 'running' : this.isScheduled() ? 'scheduled' : 'idle') +
+                    : this._isRunning
+                      ? 'running'
+                      : this.isScheduled()
+                        ? 'scheduled'
+                        : 'idle') +
                   ']\n * This reaction will re-run if any of the following observables changes:\n    ' +
                   joinStrings(observing) +
                   '\n    ' +
@@ -3838,7 +3844,9 @@ and limitations under the License.
               opts.setter = typeof arg2 === 'function' ? arg2 : opts.setter
               var equals = opts.equals
                 ? opts.equals
-                : opts.compareStructural || opts.struct ? comparer.structural : comparer.default
+                : opts.compareStructural || opts.struct
+                  ? comparer.structural
+                  : comparer.default
               return new ComputedValue(
                 arg1,
                 opts.context,
@@ -4189,7 +4197,11 @@ and limitations under the License.
             this,
             typeof global !== 'undefined'
               ? global
-              : typeof self !== 'undefined' ? self : typeof window !== 'undefined' ? window : {}
+              : typeof self !== 'undefined'
+                ? self
+                : typeof window !== 'undefined'
+                  ? window
+                  : {}
           ))
         },
         {},

@@ -7,7 +7,7 @@ import Helper, {
   attachAll,
   registry,
   createContextRegistry,
-} from "./helper"
+} from './helper'
 
 const createRegistry = createContextRegistry
 
@@ -25,4 +25,4 @@ export {
 
 export default Helper
 
-registerHelper("feature", () => require("./feature"))
+registerHelper('feature', () => require('./feature'))

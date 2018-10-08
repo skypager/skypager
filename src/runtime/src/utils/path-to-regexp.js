@@ -1,6 +1,6 @@
 /* eslint-disable */
 /* copyright github/pillarjs */
-const { isArray } = require("lodash")
+const { isArray } = require('lodash')
 
 /**
  * Expose `pathToRegexp`.
@@ -20,16 +20,16 @@ var PATH_REGEXP = new RegExp(
   [
     // Match escaped characters that would otherwise appear in future matches.
     // This allows the user to escape special characters that won't transform.
-    "(\\\\.)",
+    '(\\\\.)',
     // Match Express-style parameters and un-named parameters with a prefix
     // and optional suffixes. Matches appear as:
     //
     // "/:test(\\d+)?" => ["/", "test", "\d+", undefined, "?", undefined]
     // "/route(\\d+)"  => [undefined, undefined, undefined, "\d+", undefined, undefined]
     // "/*"            => ["/", undefined, undefined, undefined, undefined, "*"]
-    "([\\/.])?(?:(?:\\:(\\w+)(?:\\(((?:\\\\.|[^\\\\()])+)\\))?|\\(((?:\\\\.|[^\\\\()])+)\\))([+*?])?|(\\*))",
-  ].join("|"),
-  "g",
+    '([\\/.])?(?:(?:\\:(\\w+)(?:\\(((?:\\\\.|[^\\\\()])+)\\))?|\\(((?:\\\\.|[^\\\\()])+)\\))([+*?])?|(\\*))',
+  ].join('|'),
+  'g'
 )
 
 /**
@@ -43,8 +43,8 @@ function parse(str, options) {
   var tokens = []
   var key = 0
   var index = 0
-  var path = ""
-  var defaultDelimiter = (options && options.delimiter) || "/"
+  var path = ''
+  var defaultDelimiter = (options && options.delimiter) || '/'
   var res
 
   while ((res = PATH_REGEXP.exec(str)) != null) {
@@ -71,24 +71,28 @@ function parse(str, options) {
     // Push the current path onto the tokens.
     if (path) {
       tokens.push(path)
-      path = ""
+      path = ''
     }
 
     var partial = prefix != null && next != null && next !== prefix
-    var repeat = modifier === "+" || modifier === "*"
-    var optional = modifier === "?" || modifier === "*"
+    var repeat = modifier === '+' || modifier === '*'
+    var optional = modifier === '?' || modifier === '*'
     var delimiter = res[2] || defaultDelimiter
     var pattern = capture || group
 
     tokens.push({
       name: name || key++,
-      prefix: prefix || "",
+      prefix: prefix || '',
       delimiter: delimiter,
       optional: optional,
       repeat: repeat,
       partial: partial,
       asterisk: !!asterisk,
-      pattern: pattern ? escapeGroup(pattern) : asterisk ? ".*" : "[^" + escapeString(delimiter) + "]+?",
+      pattern: pattern
+        ? escapeGroup(pattern)
+        : asterisk
+          ? '.*'
+          : '[^' + escapeString(delimiter) + ']+?',
     })
   }
 
@@ -124,7 +128,13 @@ function compile(str, options) {
  */
 function encodeURIComponentPretty(str) {
   return encodeURI(str).replace(/[\/?#]/g, function(c) {
-    return "%" + c.charCodeAt(0).toString(16).toUpperCase()
+    return (
+      '%' +
+      c
+        .charCodeAt(0)
+        .toString(16)
+        .toUpperCase()
+    )
   })
 }
 
@@ -136,7 +146,13 @@ function encodeURIComponentPretty(str) {
  */
 function encodeAsterisk(str) {
   return encodeURI(str).replace(/[?#]/g, function(c) {
-    return "%" + c.charCodeAt(0).toString(16).toUpperCase()
+    return (
+      '%' +
+      c
+        .charCodeAt(0)
+        .toString(16)
+        .toUpperCase()
+    )
   })
 }
 
@@ -149,13 +165,13 @@ function tokensToFunction(tokens) {
 
   // Compile all the patterns before compilation.
   for (var i = 0; i < tokens.length; i++) {
-    if (typeof tokens[i] === "object") {
-      matches[i] = new RegExp("^(?:" + tokens[i].pattern + ")$")
+    if (typeof tokens[i] === 'object') {
+      matches[i] = new RegExp('^(?:' + tokens[i].pattern + ')$')
     }
   }
 
   return function(obj, opts) {
-    var path = ""
+    var path = ''
     var data = obj || {}
     var options = opts || {}
     var encode = options.pretty ? encodeURIComponentPretty : encodeURIComponent
@@ -163,7 +179,7 @@ function tokensToFunction(tokens) {
     for (var i = 0; i < tokens.length; i++) {
       var token = tokens[i]
 
-      if (typeof token === "string") {
+      if (typeof token === 'string') {
         path += token
 
         continue
@@ -188,7 +204,11 @@ function tokensToFunction(tokens) {
       if (isArray(value)) {
         if (!token.repeat) {
           throw new TypeError(
-            'Expected "' + token.name + '" to not repeat, but received `' + JSON.stringify(value) + "`",
+            'Expected "' +
+              token.name +
+              '" to not repeat, but received `' +
+              JSON.stringify(value) +
+              '`'
           )
         }
 
@@ -211,7 +231,7 @@ function tokensToFunction(tokens) {
                 token.pattern +
                 '", but received `' +
                 JSON.stringify(segment) +
-                "`",
+                '`'
             )
           }
 
@@ -225,7 +245,13 @@ function tokensToFunction(tokens) {
 
       if (!matches[i].test(segment)) {
         throw new TypeError(
-          'Expected "' + token.name + '" to match "' + token.pattern + '", but received "' + segment + '"',
+          'Expected "' +
+            token.name +
+            '" to match "' +
+            token.pattern +
+            '", but received "' +
+            segment +
+            '"'
         )
       }
 
@@ -243,7 +269,7 @@ function tokensToFunction(tokens) {
  * @return {string}
  */
 function escapeString(str) {
-  return str.replace(/([.+*?=^!:${}()[\]|\/\\])/g, "\\$1")
+  return str.replace(/([.+*?=^!:${}()[\]|\/\\])/g, '\\$1')
 }
 
 /**
@@ -253,7 +279,7 @@ function escapeString(str) {
  * @return {string}
  */
 function escapeGroup(group) {
-  return group.replace(/([=!:$\/()])/g, "\\$1")
+  return group.replace(/([=!:$\/()])/g, '\\$1')
 }
 
 /**
@@ -275,7 +301,7 @@ function attachKeys(re, keys) {
  * @return {string}
  */
 function flags(options) {
-  return options.sensitive ? "" : "i"
+  return options.sensitive ? '' : 'i'
 }
 
 /**
@@ -322,7 +348,7 @@ function arrayToRegexp(path, keys, options) {
     parts.push(pathToRegexp(path[i], keys, options).source)
   }
 
-  var regexp = new RegExp("(?:" + parts.join("|") + ")", flags(options))
+  var regexp = new RegExp('(?:' + parts.join('|') + ')', flags(options))
 
   return attachKeys(regexp, keys)
 }
@@ -357,39 +383,39 @@ function tokensToRegExp(tokens, keys, options) {
 
   var strict = options.strict
   var end = options.end !== false
-  var route = ""
+  var route = ''
 
   // Iterate over the tokens and create our regexp string.
   for (var i = 0; i < tokens.length; i++) {
     var token = tokens[i]
 
-    if (typeof token === "string") {
+    if (typeof token === 'string') {
       route += escapeString(token)
     } else {
       var prefix = escapeString(token.prefix)
-      var capture = "(?:" + token.pattern + ")"
+      var capture = '(?:' + token.pattern + ')'
 
       keys.push(token)
 
       if (token.repeat) {
-        capture += "(?:" + prefix + capture + ")*"
+        capture += '(?:' + prefix + capture + ')*'
       }
 
       if (token.optional) {
         if (!token.partial) {
-          capture = "(?:" + prefix + "(" + capture + "))?"
+          capture = '(?:' + prefix + '(' + capture + '))?'
         } else {
-          capture = prefix + "(" + capture + ")?"
+          capture = prefix + '(' + capture + ')?'
         }
       } else {
-        capture = prefix + "(" + capture + ")"
+        capture = prefix + '(' + capture + ')'
       }
 
       route += capture
     }
   }
 
-  var delimiter = escapeString(options.delimiter || "/")
+  var delimiter = escapeString(options.delimiter || '/')
   var endsWithDelimiter = route.slice(-delimiter.length) === delimiter
 
   // In non-strict mode we allow a slash at the end of match. If the path to
@@ -397,18 +423,22 @@ function tokensToRegExp(tokens, keys, options) {
   // is valid at the end of a path match, not in the middle. This is important
   // in non-ending mode, where "/test/" shouldn't match "/test//route".
   if (!strict) {
-    route = (endsWithDelimiter ? route.slice(0, -delimiter.length) : route) + "(?:" + delimiter + "(?=$))?"
+    route =
+      (endsWithDelimiter ? route.slice(0, -delimiter.length) : route) +
+      '(?:' +
+      delimiter +
+      '(?=$))?'
   }
 
   if (end) {
-    route += "$"
+    route += '$'
   } else {
     // In non-ending mode, we need the capturing groups to match as much as
     // possible by using a positive lookahead to the end or next path segment.
-    route += strict && endsWithDelimiter ? "" : "(?=" + delimiter + "|$)"
+    route += strict && endsWithDelimiter ? '' : '(?=' + delimiter + '|$)'
   }
 
-  return attachKeys(new RegExp("^" + route, flags(options)), keys)
+  return attachKeys(new RegExp('^' + route, flags(options)), keys)
 }
 
 /**
@@ -436,8 +466,8 @@ function pathToRegexp(path, keys, options) {
   }
 
   if (isArray(path)) {
-    return arrayToRegexp /** @type {!Array} */(path /** @type {!Array} */, keys, options)
+    return arrayToRegexp(/** @type {!Array} */ path /** @type {!Array} */, keys, options)
   }
 
-  return stringToRegexp /** @type {string} */(path /** @type {!Array} */, keys, options)
+  return stringToRegexp(/** @type {string} */ path /** @type {!Array} */, keys, options)
 }

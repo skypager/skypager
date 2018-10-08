@@ -1,5 +1,5 @@
-export default async function processOutput(chain, options = {}) {
-  if (typeof options === "string") {
+export default (async function processOutput(chain, options = {}) {
+  if (typeof options === 'string') {
     options = { command: options }
   }
 
@@ -12,10 +12,14 @@ export default async function processOutput(chain, options = {}) {
       : error => ({ stderr: `${error.message}\n\n\n${error.stack}`, stdout: `` })
   }
 
-  const { stdout, stderr, childProcess: { exitCode, spawnArgs, pid } } = await exec(command, {
+  const {
+    stdout,
+    stderr,
+    childProcess: { exitCode, spawnArgs, pid },
+  } = await exec(command, {
     cwd,
     env: environment,
-    ...options
+    ...options,
   }).catch(error => catchFailure(error))
 
   return chain.plant({
@@ -23,6 +27,6 @@ export default async function processOutput(chain, options = {}) {
     spawnArgs,
     pid,
     stdout: stdout.toString(),
-    stderr: stderr.toString()
+    stderr: stderr.toString(),
   })
-}
+})

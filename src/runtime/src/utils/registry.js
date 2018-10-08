@@ -8,9 +8,9 @@ const descriptors = getOwnPropertyDescriptors
  * lazy loading functions that can be called in the future.
  *
  */
-export function create(host = {}, propKey = "registry", members = {}) {
+export function create(host = {}, propKey = 'registry', members = {}) {
   if (!host) {
-    throw "You must pass a host object"
+    throw 'You must pass a host object'
   }
 
   const cacheKey = `_${propKey}`
@@ -25,7 +25,7 @@ export function create(host = {}, propKey = "registry", members = {}) {
     descriptors({
       ...host[cacheKey],
       ...members,
-    }),
+    })
   )
 
   available.forEach(key =>
@@ -33,7 +33,7 @@ export function create(host = {}, propKey = "registry", members = {}) {
       get [key]() {
         return host[cacheKey][key]
       },
-    }),
+    })
   )
 
   hideGetter(host, propKey, () => {
@@ -42,7 +42,7 @@ export function create(host = {}, propKey = "registry", members = {}) {
         get [key]() {
           return host[cacheKey][key]
         },
-      }),
+      })
     )
 
     return {
@@ -69,9 +69,9 @@ function lazy(target, attribute, fn, enumerable = false) {
       delete target[attribute]
 
       if (enumerable) {
-        return (target[attribute] = typeof fn === "function" ? fn.call(target) : fn)
+        return (target[attribute] = typeof fn === 'function' ? fn.call(target) : fn)
       } else {
-        let value = typeof fn === "function" ? fn.call(target) : fn
+        let value = typeof fn === 'function' ? fn.call(target) : fn
 
         defineProperty(target, attribute, {
           enumerable,

@@ -7,9 +7,9 @@ export function attach(options = {}) {
   const { runtime } = fileManager
   const { mapValues, omit } = runtime.lodash
 
-  const actions = mapValues(omit(module.exports, "default", "attach"), (fn, name) => [
-    "computed",
-    fn.bind(fileManager)
+  const actions = mapValues(omit(module.exports, 'default', 'attach'), (fn, name) => [
+    'computed',
+    fn.bind(fileManager),
   ])
 
   runtime.makeObservable(actions, fileManager)
@@ -19,13 +19,17 @@ export function attach(options = {}) {
 
 export function extensions() {
   const { runtime } = this
-  return runtime.fileManager.chain.result("files.values", []).map("extension").uniq().value()
+  return runtime.fileManager.chain
+    .result('files.values', [])
+    .map('extension')
+    .uniq()
+    .value()
 }
 
 export function mimeTypes() {
   const { runtime } = this
   return runtime.fileManager.chain
-    .result("files.values", [])
+    .result('files.values', [])
     .map(file => file.mime && file.mime.mimeType)
     .compact()
     .uniq()
@@ -35,7 +39,7 @@ export function mimeTypes() {
 export function mimeTypesByDirectory() {
   const { runtime } = this
   return runtime.fileManager.chain
-    .result("files.values", [])
+    .result('files.values', [])
     .groupBy(file => runtime.pathUtils.dirname(runtime.pathUtils.relative(runtime.cwd, file.path)))
     .mapValues(list => list.map(f => f.mime.mimeType))
     .value()
@@ -44,7 +48,7 @@ export function mimeTypesByDirectory() {
 export function extensionsByDirectory() {
   const { runtime } = this
   return runtime.fileManager.chain
-    .result("files.values", [])
+    .result('files.values', [])
     .groupBy(file => runtime.pathUtils.dirname(runtime.pathUtils.relative(runtime.cwd, file.path)))
     .mapValues(list => runtime.lodash.uniq(list.map(f => f.extension)))
     .value()
@@ -56,7 +60,7 @@ export function mimeTypesByPackage() {
   return directories.filter(dir => runtime.fileManager.files.has(`${dir}/package.json`))
 
   return runtime.fileManager.chain
-    .result("files.values", [])
+    .result('files.values', [])
     .groupBy(file => runtime.pathUtils.dirname(runtime.pathUtils.relative(runtime.cwd, file.path)))
     .mapValues(list => runtime.lodash.uniq(list.map(f => f.mime.mimeType)))
     .pickBy((list, dir) => directories.indexOf(dir) >= 0)
@@ -69,7 +73,7 @@ export function extensionsByPackage() {
   return directories.filter(dir => runtime.fileManager.files.has(`${dir}/package.json`))
 
   return runtime.fileManager.chain
-    .result("files.values", [])
+    .result('files.values', [])
     .groupBy(file => runtime.pathUtils.dirname(runtime.pathUtils.relative(runtime.cwd, file.path)))
     .mapValues(list => runtime.lodash.uniq(list.map(f => f.extension)))
     .pickBy((list, dir) => directories.indexOf(dir) >= 0)
@@ -92,9 +96,9 @@ export function packagesByName() {
 export function packageVersionMap() {
   const { runtime } = this
   return runtime.chain
-    .result("fileManager.packages.values", [])
-    .keyBy("name")
-    .mapValues("version")
+    .result('fileManager.packages.values', [])
+    .keyBy('name')
+    .mapValues('version')
     .value()
 }
 
@@ -107,7 +111,7 @@ export function cacheBase() {
 export function cacheBaseByPackage() {
   const { runtime } = this
   const times = runtime.chain
-    .invoke("fileManager.files.values")
+    .invoke('fileManager.files.values')
     .groupBy(file =>
       runtime.pathUtils.relative(
         runtime.fileManager.baseFolder,
@@ -130,9 +134,9 @@ export function cacheBaseByPackage() {
 export function packageLocations() {
   const { runtime } = this
   return runtime.chain
-    .invoke("fileManager.files.entries")
-    .filter(entry => entry[0].endsWith("package.json"))
-    .map(e => e[0].replace(/\/package.json$/, ""))
+    .invoke('fileManager.files.entries')
+    .filter(entry => entry[0].endsWith('package.json'))
+    .map(e => e[0].replace(/\/package.json$/, ''))
     .uniq()
     .value()
 }
@@ -140,7 +144,7 @@ export function packageLocations() {
 export function cacheBaseByDirectory() {
   const { runtime } = this
   const times = runtime.chain
-    .invoke("fileManager.files.values")
+    .invoke('fileManager.files.values')
     .groupBy(file =>
       runtime.pathUtils.relative(
         runtime.fileManager.baseFolder,

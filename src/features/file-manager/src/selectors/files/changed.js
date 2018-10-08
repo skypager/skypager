@@ -1,4 +1,4 @@
-export default async function(chain, directories = false) {
+export default (async function(chain, directories = false) {
   const skypager = this
 
   await skypager.fileManager.whenActivated()
@@ -6,4 +6,4 @@ export default async function(chain, directories = false) {
   const modified = skypager.git.modifiedFiles
 
   return chain.plant(modified).filter(path => skypager.fileManager.files.has(path))
-}
+})

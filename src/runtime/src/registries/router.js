@@ -77,15 +77,15 @@ export function applyRoute(pattern = '*', pathsToTest = [], options = {}) {
 
 export function pathMatcher(options = {}) {
   /**
-     * String decoder
-     * @param {String} str
-     * @returns {*}
-     */
+   * String decoder
+   * @param {String} str
+   * @returns {*}
+   */
   function decodeUri(str) {
     try {
       str = decodeURIComponent(str)
     } catch (e) {
-      throw new Error("Cannot decodeURIComponent: " + str)
+      throw new Error('Cannot decodeURIComponent: ' + str)
     }
     return str
   }

@@ -1,6 +1,6 @@
 export class Cache {
   constructor(init) {
-    hide(this, "hide", (...args) => hide(this, ...args))
+    hide(this, 'hide', (...args) => hide(this, ...args))
 
     this.clear(init)
     this.write = (k, v) => this.set(k, v).get(k)
@@ -10,7 +10,7 @@ export class Cache {
     if (this.has(k)) {
       return this.get(k)
     } else {
-      this.set(k, typeof defaultValue === "function" ? defaultValue(k) : defaultValue)
+      this.set(k, typeof defaultValue === 'function' ? defaultValue(k) : defaultValue)
       return this.get(k)
     }
   }
@@ -44,7 +44,7 @@ function hide(target, propName, value, configurable = false) {
   Object.defineProperty(target, propName, {
     enumerable: false,
     configurable,
-    value
+    value,
   })
 
   return target

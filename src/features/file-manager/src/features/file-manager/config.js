@@ -26,11 +26,11 @@ export function configFeatures() {
 
       existing = existing || {}
 
-      if (!typeof handler === "function" && !typeof extension === "string") {
+      if (!typeof handler === 'function' && !typeof extension === 'string') {
         return existing
       }
 
-      extension = extension.replace(/^\./, "")
+      extension = extension.replace(/^\./, '')
 
       return {
         ...existing,
@@ -76,7 +76,7 @@ export function configReducers() {
 
   return {
     baseFolder(state) {
-      return runtime.resolve(state.baseFolder || feature.get("options.cwd", runtime.cwd))
+      return runtime.resolve(state.baseFolder || feature.get('options.cwd', runtime.cwd))
     },
 
     ignore(state = {}) {

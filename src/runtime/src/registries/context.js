@@ -144,9 +144,7 @@ export class RequireContext {
     return this.req.keys()
   }
 
-  get resolved() {
-    
-  }
+  get resolved() {}
 
   get ids() {
     return Object.keys(this.idsMappedToKeys)

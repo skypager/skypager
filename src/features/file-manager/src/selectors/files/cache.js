@@ -1,4 +1,4 @@
-export default async function(chain, options = {}) {
+export default (async function(chain, options = {}) {
   const skypager = this
 
   //await skypager.fileManager.whenActivated()
@@ -6,7 +6,7 @@ export default async function(chain, options = {}) {
 
   return chain
     .plant(skypager.fileManager)
-    .result("files.values", [])
+    .result('files.values', [])
     .keyBy(value => skypager.fileManager.toFileId(value))
     .mapValues((v, fileId) => {
       return {
@@ -23,10 +23,14 @@ export default async function(chain, options = {}) {
         gitInfo: skypager.gitInfo,
         baseFolder: skypager.fileManager.baseFolder,
         files,
-        directories: skypager.fileManager.directories
-          .values()
-          .reduce((memo, d) => ({ ...memo, [d.key]: { directoryId: d.key, mtime: d.mtime, path: d.path } }), {}),
-        packages: skypager.fileManager.packageLocations.map(p => p.replace(/\/package.json/, "")),
+        directories: skypager.fileManager.directories.values().reduce(
+          (memo, d) => ({
+            ...memo,
+            [d.key]: { directoryId: d.key, mtime: d.mtime, path: d.path },
+          }),
+          {}
+        ),
+        packages: skypager.fileManager.packageLocations.map(p => p.replace(/\/package.json/, '')),
       }
     })
-}
+})

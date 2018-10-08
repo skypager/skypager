@@ -28,7 +28,7 @@ module.exports = async function(raw) {
   const compile = (src, o = {}) =>
     mdx(src, {
       mdPlugins: [replaceImages.bind(this)],
-      hastPlugins: [syncAstNodes(ast, this.resourcePath)]
+      hastPlugins: [syncAstNodes(ast, this.resourcePath)],
     })
 
   const toMdx = (a, o) => toMDXAST(o)(a)
@@ -36,34 +36,36 @@ module.exports = async function(raw) {
   const result = await compile(content, options)
 
   let headingsMap
-    
+
   try {
-  headingsMap = ast.children.reduce((memo, node) => {
-    if (node.type === 'heading') {
-      const string = toString(node) 
-      const pos = node.position.start.line
-      const slug = kebabCase(string.toLowerCase())
+    headingsMap = ast.children.reduce(
+      (memo, node) => {
+        if (node.type === 'heading') {
+          const string = toString(node)
+          const pos = node.position.start.line
+          const slug = kebabCase(string.toLowerCase())
 
-      memo.lines[pos] = string
-      memo.headings[string] = memo.lines[string] || []
-      memo.headings[slug] = memo.lines[slug] || []
+          memo.lines[pos] = string
+          memo.headings[string] = memo.lines[string] || []
+          memo.headings[slug] = memo.lines[slug] || []
 
-      memo.headings[string].push(pos)
-      memo.headings[slug].push(pos)
+          memo.headings[string].push(pos)
+          memo.headings[slug].push(pos)
 
-      return memo
-    } else {
-      return memo
-    }
-  }, {
-    lines: {},
-    headings: {}
-  })
-
-  } catch(error) {
+          return memo
+        } else {
+          return memo
+        }
+      },
+      {
+        lines: {},
+        headings: {},
+      }
+    )
+  } catch (error) {
     headingsMap = { message: error.message }
   }
-  
+
   let code = [
     `import React from 'react'`,
     `import { MDXTag } from '@mdx-js/tag'`,
@@ -143,45 +145,42 @@ function replaceImages(options = {}) {
 }
 
 function syncAstNodes(withAst, filePath) {
-
-  const findNode = (position) =>
+  const findNode = position =>
     withAst.children.find(node => node.position && node.position.start.line === position.start.line)
 
-  const tagWithLineNumber = (node) => {
+  const tagWithLineNumber = node => {
     if (!node.position || !node.position.start) {
       return node
     } else {
       const { properties = {} } = node
       return Object.assign({}, node, {
         properties: Object.assign({}, properties, {
-          ['data-line-number']: node.position.start.line
-        })
+          ['data-line-number']: node.position.start.line,
+        }),
       })
     }
-  } 
+  }
 
   return function(options) {
     return function(tree) {
       const ast = withAst
       const withLineNumbers = Object.assign({}, tree, {
-        children: tree.children
-          .map(tagWithLineNumber)
-          .map((node) => {
-            if (node.position) {
-              try {
-                const matchingNode = findNode(node.position)
-                const parentHeading = findBefore(ast, matchingNode, 'heading')
-  
-                if (parentHeading) {
-                  node.properties['data-parent-heading'] = parentHeading.position.start.line
-                }
-              } catch(error) {
-                console.error(`Error parsing headings map for markdown file: ${filePath}`)
+        children: tree.children.map(tagWithLineNumber).map(node => {
+          if (node.position) {
+            try {
+              const matchingNode = findNode(node.position)
+              const parentHeading = findBefore(ast, matchingNode, 'heading')
+
+              if (parentHeading) {
+                node.properties['data-parent-heading'] = parentHeading.position.start.line
               }
+            } catch (error) {
+              console.error(`Error parsing headings map for markdown file: ${filePath}`)
             }
-            
-            return node  
-          })
+          }
+
+          return node
+        }),
       })
 
       return withLineNumbers

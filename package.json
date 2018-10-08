@@ -21,7 +21,8 @@
     "deploy": "lerna run deploy --stream",
     "test": "mocha && lerna run test --stream",
     "postinstall": "node scripts/postinstall.js",
-    "clean": "lerna exec rimraf lib && lerna clean --yes && rimraf node_modules yarn.lock"
+    "clean": "lerna exec rimraf lib && lerna clean --yes && rimraf node_modules yarn.lock",
+    "precommit": "lint-staged"
   },
   "keywords": [
     "Skypager"
@@ -50,9 +51,9 @@
     "lint-staged": "^7.3.0"
   },
   "lint-staged": {
-    "src/**/*": [
+    "src/**/*.{js,json}": [
       "node scripts/pre-commit.js",
-      "git add"
+      "git add src"
     ]
   }
 }

@@ -12,77 +12,90 @@
 ;(function() {
   var Locales = {
     en_US: {
-      days: ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
-      shortDays: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+      days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+      shortDays: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
       months: [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
+        'January',
+        'February',
+        'March',
+        'April',
+        'May',
+        'June',
+        'July',
+        'August',
+        'September',
+        'October',
+        'November',
+        'December',
       ],
-      shortMonths: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
+      shortMonths: [
+        'Jan',
+        'Feb',
+        'Mar',
+        'Apr',
+        'May',
+        'Jun',
+        'Jul',
+        'Aug',
+        'Sep',
+        'Oct',
+        'Nov',
+        'Dec',
+      ],
       ordinalSuffixes: [
-        "st",
-        "nd",
-        "rd",
-        "th",
-        "th",
-        "th",
-        "th",
-        "th",
-        "th",
-        "th",
-        "th",
-        "th",
-        "th",
-        "th",
-        "th",
-        "th",
-        "th",
-        "th",
-        "th",
-        "th",
-        "st",
-        "nd",
-        "rd",
-        "th",
-        "th",
-        "th",
-        "th",
-        "th",
-        "th",
-        "th",
-        "st",
+        'st',
+        'nd',
+        'rd',
+        'th',
+        'th',
+        'th',
+        'th',
+        'th',
+        'th',
+        'th',
+        'th',
+        'th',
+        'th',
+        'th',
+        'th',
+        'th',
+        'th',
+        'th',
+        'th',
+        'th',
+        'st',
+        'nd',
+        'rd',
+        'th',
+        'th',
+        'th',
+        'th',
+        'th',
+        'th',
+        'th',
+        'st',
       ],
-      AM: "AM",
-      PM: "PM",
-      am: "am",
-      pm: "pm",
+      AM: 'AM',
+      PM: 'PM',
+      am: 'am',
+      pm: 'pm',
       formats: {
-        c: "%a %d %b %Y %X %Z",
-        D: "%m/%d/%y",
-        F: "%Y-%m-%d",
-        R: "%H:%M",
-        r: "%I:%M:%S %p",
-        T: "%H:%M:%S",
-        v: "%e-%b-%Y",
-        X: "%r",
-        x: "%D",
+        c: '%a %d %b %Y %X %Z',
+        D: '%m/%d/%y',
+        F: '%Y-%m-%d',
+        R: '%H:%M',
+        r: '%I:%M:%S %p',
+        T: '%H:%M:%S',
+        v: '%e-%b-%Y',
+        X: '%r',
+        x: '%D',
       },
     },
   }
 
-  var DefaultLocale = Locales["en_US"],
+  var DefaultLocale = Locales['en_US'],
     defaultStrftime = new Strftime(DefaultLocale, 0, false),
-    isCommonJS = typeof module !== "undefined",
+    isCommonJS = typeof module !== 'undefined',
     namespace
 
   // CommonJS / Node module
@@ -92,7 +105,7 @@
     // Browsers and other environments
     // Get the global object. Works in ES3, ES5, and ES5 strict mode.
     namespace = (function() {
-      return this || (1, eval)("this")
+      return this || (1, eval)('this')
     })()
     namespace.strftime = defaultStrftime
   }
@@ -123,7 +136,7 @@
             // how to avoid duplication of date instantiation for utc here?
             // we tied to getTimezoneOffset of the current date
             _cachedDate = new Date(
-              _cachedDateTimestamp + getTimestampToUtcOffsetFor(_cachedDate) + _customTimezoneOffset,
+              _cachedDateTimestamp + getTimestampToUtcOffsetFor(_cachedDate) + _customTimezoneOffset
             )
           }
         } else {
@@ -149,7 +162,7 @@
     }
 
     function _processFormat(format, date, locale, timestamp) {
-      var resultString = "",
+      var resultString = '',
         padding = null,
         isInScope = false,
         length = format.length,
@@ -161,20 +174,20 @@
         if (isInScope === true) {
           // '-'
           if (currentCharCode === 45) {
-            padding = ""
+            padding = ''
             continue
           } else if (currentCharCode === 95) {
             // '_'
-            padding = " "
+            padding = ' '
             continue
           } else if (currentCharCode === 48) {
             // '0'
-            padding = "0"
+            padding = '0'
             continue
           } else if (currentCharCode === 58) {
             // ':'
             if (extendedTZ) {
-              warn("[WARNING] detected use of unsupported %:: or %::: modifiers to strftime")
+              warn('[WARNING] detected use of unsupported %:: or %::: modifiers to strftime')
             }
             extendedTZ = true
             continue
@@ -186,7 +199,7 @@
             // '%'
             // case '%':
             case 37:
-              resultString += "%"
+              resultString += '%'
               break
 
             // 'Thursday'
@@ -270,13 +283,13 @@
             // '00'
             // case 'U':
             case 85:
-              resultString += padTill2(weekNumber(date, "sunday"), padding)
+              resultString += padTill2(weekNumber(date, 'sunday'), padding)
               break
 
             // '00'
             // case 'W':
             case 87:
-              resultString += padTill2(weekNumber(date, "monday"), padding)
+              resultString += padTill2(weekNumber(date, 'monday'), padding)
               break
 
             // '16:00:00'
@@ -295,11 +308,11 @@
             // case 'Z':
             case 90:
               if (_useUtcBasedDate && _customTimezoneOffset === 0) {
-                resultString += "GMT"
+                resultString += 'GMT'
               } else {
                 // fixme optimize
                 var tzString = date.toString().match(/\(([\w\s]+)\)/)
-                resultString += (tzString && tzString[1]) || ""
+                resultString += (tzString && tzString[1]) || ''
               }
               break
 
@@ -330,7 +343,7 @@
             // ' 1'
             // case 'e':
             case 101:
-              resultString += padTill2(date.getDate(), padding == null ? " " : padding)
+              resultString += padTill2(date.getDate(), padding == null ? ' ' : padding)
               break
 
             // 'Jan'
@@ -350,13 +363,13 @@
             // ' 0'
             // case 'k':
             case 107:
-              resultString += padTill2(date.getHours(), padding == null ? " " : padding)
+              resultString += padTill2(date.getHours(), padding == null ? ' ' : padding)
               break
 
             // '12'
             // case 'l':
             case 108:
-              resultString += padTill2(hours12(date.getHours()), padding == null ? " " : padding)
+              resultString += padTill2(hours12(date.getHours()), padding == null ? ' ' : padding)
               break
 
             // '01'
@@ -368,7 +381,7 @@
             // '\n'
             // case 'n':
             case 110:
-              resultString += "\n"
+              resultString += '\n'
               break
 
             // '1st'
@@ -405,7 +418,7 @@
             // '\t'
             // case 't':
             case 116:
-              resultString += "\t"
+              resultString += '\t'
               break
 
             // '4'
@@ -436,14 +449,14 @@
             // '70'
             // case 'y':
             case 121:
-              resultString += ("" + date.getFullYear()).slice(2)
+              resultString += ('' + date.getFullYear()).slice(2)
               break
 
             // '+0000'
             // case 'z':
             case 122:
               if (_useUtcBasedDate && _customTimezoneOffset === 0) {
-                resultString += extendedTZ ? "+00:00" : "+0000"
+                resultString += extendedTZ ? '+00:00' : '+0000'
               } else {
                 var off
                 if (_customTimezoneOffset !== 0) {
@@ -451,8 +464,8 @@
                 } else {
                   off = -date.getTimezoneOffset()
                 }
-                var sign = off < 0 ? "-" : "+"
-                var sep = extendedTZ ? ":" : ""
+                var sign = off < 0 ? '-' : '+'
+                var sep = extendedTZ ? ':' : ''
                 var hours = Math.floor(Math.abs(off / 60))
                 var mins = Math.abs(off % 60)
                 resultString += sign + padTill2(hours) + sep + padTill2(mins)
@@ -461,7 +474,7 @@
 
             default:
               if (isInScope) {
-                resultString += "%"
+                resultString += '%'
               }
               resultString += format[i]
               break
@@ -504,18 +517,18 @@
       var useUtcBasedDate = _useUtcBasedDate
 
       var timezoneType = typeof timezone
-      if (timezoneType === "number" || timezoneType === "string") {
+      if (timezoneType === 'number' || timezoneType === 'string') {
         useUtcBasedDate = true
 
         // ISO 8601 format timezone string, [-+]HHMM
-        if (timezoneType === "string") {
-          var sign = timezone[0] === "-" ? -1 : 1,
+        if (timezoneType === 'string') {
+          var sign = timezone[0] === '-' ? -1 : 1,
             hours = parseInt(timezone.slice(1, 3), 10),
             minutes = parseInt(timezone.slice(3, 5), 10)
 
           customTimezoneOffset = sign * (60 * hours + minutes) * 60 * 1000
           // in minutes: 420
-        } else if (timezoneType === "number") {
+        } else if (timezoneType === 'number') {
           customTimezoneOffset = timezone * 60 * 1000
         }
       }
@@ -531,11 +544,11 @@
   }
 
   function padTill2(numberToPad, paddingChar) {
-    if (paddingChar === "" || numberToPad > 9) {
+    if (paddingChar === '' || numberToPad > 9) {
       return numberToPad
     }
     if (paddingChar == null) {
-      paddingChar = "0"
+      paddingChar = '0'
     }
     return paddingChar + numberToPad
   }
@@ -545,9 +558,9 @@
       return numberToPad
     }
     if (numberToPad > 9) {
-      return "0" + numberToPad
+      return '0' + numberToPad
     }
-    return "00" + numberToPad
+    return '00' + numberToPad
   }
 
   function hours12(hour) {
@@ -563,12 +576,12 @@
   //
   // Pilfered & ported from Ruby's strftime implementation.
   function weekNumber(date, firstWeekday) {
-    firstWeekday = firstWeekday || "sunday"
+    firstWeekday = firstWeekday || 'sunday'
 
     // This works by shifting the weekday back by one day if we
     // are treating Monday as the first day of the week.
     var weekday = date.getDay()
-    if (firstWeekday === "monday") {
+    if (firstWeekday === 'monday') {
       if (
         weekday === 0 // Sunday
       )
@@ -590,15 +603,15 @@
     var ii = number % 100
 
     if ((ii >= 11 && ii <= 13) || i === 0 || i >= 4) {
-      return "th"
+      return 'th'
     }
     switch (i) {
       case 1:
-        return "st"
+        return 'st'
       case 2:
-        return "nd"
+        return 'nd'
       case 3:
-        return "rd"
+        return 'rd'
     }
   }
 
@@ -607,7 +620,7 @@
   }
 
   function warn(message) {
-    if (typeof console !== "undefined" && typeof console.warn == "function") {
+    if (typeof console !== 'undefined' && typeof console.warn == 'function') {
       console.warn(message)
     }
   }

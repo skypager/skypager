@@ -3,16 +3,19 @@ module.exports = function(args, opts) {
 
   var flags = { bools: {}, strings: {}, unknownFn: null }
 
-  if (typeof opts["unknown"] === "function") {
-    flags.unknownFn = opts["unknown"]
+  if (typeof opts['unknown'] === 'function') {
+    flags.unknownFn = opts['unknown']
   }
 
-  if (typeof opts["boolean"] === "boolean" && opts["boolean"]) {
+  if (typeof opts['boolean'] === 'boolean' && opts['boolean']) {
     flags.allBools = true
   } else {
-    ;[].concat(opts["boolean"]).filter(Boolean).forEach(function(key) {
-      flags.bools[key] = true
-    })
+    ;[]
+      .concat(opts['boolean'])
+      .filter(Boolean)
+      .forEach(function(key) {
+        flags.bools[key] = true
+      })
   }
 
   var aliases = {}
@@ -22,19 +25,21 @@ module.exports = function(args, opts) {
       aliases[x] = [key].concat(
         aliases[key].filter(function(y) {
           return x !== y
-        }),
+        })
       )
     })
   })
+  ;[]
+    .concat(opts.string)
+    .filter(Boolean)
+    .forEach(function(key) {
+      flags.strings[key] = true
+      if (aliases[key]) {
+        flags.strings[aliases[key]] = true
+      }
+    })
 
-  ;[].concat(opts.string).filter(Boolean).forEach(function(key) {
-    flags.strings[key] = true
-    if (aliases[key]) {
-      flags.strings[aliases[key]] = true
-    }
-  })
-
-  var defaults = opts["default"] || {}
+  var defaults = opts['default'] || {}
 
   var argv = { _: [] }
   Object.keys(flags.bools).forEach(function(key) {
@@ -43,13 +48,18 @@ module.exports = function(args, opts) {
 
   var notFlags = []
 
-  if (args.indexOf("--") !== -1) {
-    notFlags = args.slice(args.indexOf("--") + 1)
-    args = args.slice(0, args.indexOf("--"))
+  if (args.indexOf('--') !== -1) {
+    notFlags = args.slice(args.indexOf('--') + 1)
+    args = args.slice(0, args.indexOf('--'))
   }
 
   function argDefined(key, arg) {
-    return (flags.allBools && /^--[^=]+$/.test(arg)) || flags.strings[key] || flags.bools[key] || aliases[key]
+    return (
+      (flags.allBools && /^--[^=]+$/.test(arg)) ||
+      flags.strings[key] ||
+      flags.bools[key] ||
+      aliases[key]
+    )
   }
 
   function setArg(key, val, arg) {
@@ -58,10 +68,9 @@ module.exports = function(args, opts) {
     }
 
     var value = !flags.strings[key] && isNumber(val) ? Number(val) : val
-    setKey(argv, key.split("."), value)
-
+    setKey(argv, key.split('.'), value)
     ;(aliases[key] || []).forEach(function(x) {
-      setKey(argv, x.split("."), value)
+      setKey(argv, x.split('.'), value)
     })
   }
 
@@ -73,7 +82,7 @@ module.exports = function(args, opts) {
     })
 
     var key = keys[keys.length - 1]
-    if (o[key] === undefined || flags.bools[key] || typeof o[key] === "boolean") {
+    if (o[key] === undefined || flags.bools[key] || typeof o[key] === 'boolean') {
       o[key] = value
     } else if (Array.isArray(o[key])) {
       o[key].push(value)
@@ -99,7 +108,7 @@ module.exports = function(args, opts) {
       var key = m[1]
       var value = m[2]
       if (flags.bools[key]) {
-        value = value !== "false"
+        value = value !== 'false'
       }
       setArg(key, value, arg)
     } else if (/^--no-.+/.test(arg)) {
@@ -118,25 +127,25 @@ module.exports = function(args, opts) {
         setArg(key, next, arg)
         i++
       } else if (/^(true|false)$/.test(next)) {
-        setArg(key, next === "true", arg)
+        setArg(key, next === 'true', arg)
         i++
       } else {
-        setArg(key, flags.strings[key] ? "" : true, arg)
+        setArg(key, flags.strings[key] ? '' : true, arg)
       }
     } else if (/^-[^-]+/.test(arg)) {
-      var letters = arg.slice(1, -1).split("")
+      var letters = arg.slice(1, -1).split('')
 
       var broken = false
       for (var j = 0; j < letters.length; j++) {
         var next = arg.slice(j + 2)
 
-        if (next === "-") {
+        if (next === '-') {
           setArg(letters[j], next, arg)
           continue
         }
 
         if (/[A-Za-z]/.test(letters[j]) && /=/.test(next)) {
-          setArg(letters[j], next.split("=")[1], arg)
+          setArg(letters[j], next.split('=')[1], arg)
           broken = true
           break
         }
@@ -152,12 +161,12 @@ module.exports = function(args, opts) {
           broken = true
           break
         } else {
-          setArg(letters[j], flags.strings[letters[j]] ? "" : true, arg)
+          setArg(letters[j], flags.strings[letters[j]] ? '' : true, arg)
         }
       }
 
       var key = arg.slice(-1)[0]
-      if (!broken && key !== "-") {
+      if (!broken && key !== '-') {
         if (
           args[i + 1] &&
           !/^(-|--)[^-]/.test(args[i + 1]) &&
@@ -167,15 +176,15 @@ module.exports = function(args, opts) {
           setArg(key, args[i + 1], arg)
           i++
         } else if (args[i + 1] && /true|false/.test(args[i + 1])) {
-          setArg(key, args[i + 1] === "true", arg)
+          setArg(key, args[i + 1] === 'true', arg)
           i++
         } else {
-          setArg(key, flags.strings[key] ? "" : true, arg)
+          setArg(key, flags.strings[key] ? '' : true, arg)
         }
       }
     } else {
       if (!flags.unknownFn || flags.unknownFn(arg) !== false) {
-        argv._.push(flags.strings["_"] || !isNumber(arg) ? arg : Number(arg))
+        argv._.push(flags.strings['_'] || !isNumber(arg) ? arg : Number(arg))
       }
       if (opts.stopEarly) {
         argv._.push.apply(argv._, args.slice(i + 1))
@@ -185,19 +194,18 @@ module.exports = function(args, opts) {
   }
 
   Object.keys(defaults).forEach(function(key) {
-    if (!hasKey(argv, key.split("."))) {
-      setKey(argv, key.split("."), defaults[key])
-
+    if (!hasKey(argv, key.split('.'))) {
+      setKey(argv, key.split('.'), defaults[key])
       ;(aliases[key] || []).forEach(function(x) {
-        setKey(argv, x.split("."), defaults[key])
+        setKey(argv, x.split('.'), defaults[key])
       })
     }
   })
 
-  if (opts["--"]) {
-    argv["--"] = new Array()
+  if (opts['--']) {
+    argv['--'] = new Array()
     notFlags.forEach(function(key) {
-      argv["--"].push(key)
+      argv['--'].push(key)
     })
   } else {
     notFlags.forEach(function(key) {
@@ -219,7 +227,7 @@ function hasKey(obj, keys) {
 }
 
 function isNumber(x) {
-  if (typeof x === "number") return true
+  if (typeof x === 'number') return true
   if (/^0x[0-9a-f]+$/i.test(x)) return true
   return /^[-+]?(?:\d+(?:\.\d*)?|\.\d+)(e[-+]?\d+)?$/.test(x)
 }

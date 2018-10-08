@@ -1,5 +1,5 @@
-if (typeof window !== "undefined" && typeof global === "undefined") {
+if (typeof window !== 'undefined' && typeof global === 'undefined') {
   window.global = window
 }
 
-module.exports = require("./index")
+module.exports = require('./index')

@@ -2,7 +2,7 @@ let counter = 0
 
 export const configPresets = {
   auto(builder) {
-    return builder.service("autoService", { auto: true }).sheet("autoSheet", { auto: true })
+    return builder.service('autoService', { auto: true }).sheet('autoSheet', { auto: true })
   },
 }
 
@@ -49,11 +49,11 @@ export const configReducers = {
 }
 
 export function featureMethods() {
-  return ["lazyFeatureMethod", "getFeatureMethodGetter"]
+  return ['lazyFeatureMethod', 'getFeatureMethodGetter']
 }
 
 export function hostMethods() {
-  return ["lazyHostMethod", "getHostMethodGetter"]
+  return ['lazyHostMethod', 'getHostMethodGetter']
 }
 
 export function featureWasEnabled() {

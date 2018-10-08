@@ -4,7 +4,7 @@ export const featureMethods = ['listen', 'send']
 
 export const featureMixinOptions = {
   insertOptions: false,
-  partial: []
+  partial: [],
 }
 
 export function featureWasEnabled() {}

@@ -1,4 +1,4 @@
-export default async function selectFileTree(chain, options = {}) {
+export default (async function selectFileTree(chain, options = {}) {
   const skypager = this
   options = { ...this.options, ...options }
 
@@ -41,4 +41,4 @@ export default async function selectFileTree(chain, options = {}) {
     .keyBy(v => v)
     .mapValues(fileId => skypager.fileManager.file(fileId))
     .pickBy(v => v)
-}
+})

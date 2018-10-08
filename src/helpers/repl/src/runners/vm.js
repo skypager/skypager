@@ -17,7 +17,7 @@ export function run(command, context, filename, callback) {
 }
 
 function isRecoverable(error) {
-  if (error.name === "SyntaxError") {
+  if (error.name === 'SyntaxError') {
     return /(Unexpected end of input|Unexpected Token)/.test(error.message)
   }
 

@@ -1,17 +1,17 @@
-export default async function selectModuleKeywords(chain, options = {}) {
+export default (async function selectModuleKeywords(chain, options = {}) {
   const skypager = this
 
-  !skypager.moduleManager && skypager.feature("module-manager").enable()
+  !skypager.moduleManager && skypager.feature('module-manager').enable()
 
   await skypager.moduleManager.startAsync()
 
   const report = new Map()
 
   return chain
-    .get("moduleManager.packageData", [])
+    .get('moduleManager.packageData', [])
     .reject(p => skypager.lodash.isEmpty(p.keywords))
-    .keyBy("name")
-    .mapValues("keywords")
+    .keyBy('name')
+    .mapValues('keywords')
     .mapValues((words, name) => {
       const keywords = [...(words || [])].map(k => skypager.stringUtils.snakeCase(k.toLowerCase()))
 
@@ -25,7 +25,7 @@ export default async function selectModuleKeywords(chain, options = {}) {
     .thru(byPackageName => {
       return {
         byPackageName,
-        counts: skypager.lodash.mapValues(skypager.lodash.fromPairs(report.toJSON()), v => v.size)
+        counts: skypager.lodash.mapValues(skypager.lodash.fromPairs(report.toJSON()), v => v.size),
       }
     })
-}
+})

@@ -1,11 +1,11 @@
 let counter = 0
 
 export function featureMethods() {
-  return ["lazyFeatureMethod", "getFeatureMethodGetter"]
+  return ['lazyFeatureMethod', 'getFeatureMethodGetter']
 }
 
 export function hostMethods() {
-  return ["lazyHostMethod", "getHostMethodGetter"]
+  return ['lazyHostMethod', 'getHostMethodGetter']
 }
 
 export function featureWasEnabled() {
