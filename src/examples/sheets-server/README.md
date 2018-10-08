@@ -1,5 +1,7 @@
 # Skypager Example App: Sheets Server
 
+[View Demo](https://sheets-server-example.skypager.io)
+
 This example uses the `@skypager/helpers-server` and `@skypager/helpers-sheet` to create a REST API
 that lets you discover some available google sheets, and get the data from those sheets as JSON.  
 
