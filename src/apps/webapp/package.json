@@ -1,12 +1,12 @@
 {
   "name": "@skypager/apps-webapp",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "skypager.io webapp",
   "main": "lib/index.js",
   "publishConfig": {
     "access": "public"
   },
-  "homepage": "https://skypager.io", 
+  "homepage": "https://skypager.io",
   "scripts": {
     "start": "cross-env NODE_ENV=production skypager serve --esm",
     "dev": "cross-env NODE_ENV=development skypager serve --esm --hot",
@@ -20,7 +20,7 @@
   "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
   "license": "MIT",
   "dependencies": {
-    "@skypager/cli": "^0.1.12",
+    "@skypager/cli": "^0.1.13",
     "@skypager/helpers-server": "^0.1.11",
     "@skypager/helpers-sheet": "^0.1.12",
     "@skypager/node": "^0.1.11",
