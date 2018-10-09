@@ -36,6 +36,7 @@
   "author": "Jon Soeder <jon@chicago.com>",
   "license": "MIT",
   "workspaces": [
+    "src/apps/*",
     "src/devtools/*",
     "src/runtime",
     "src/runtimes/*",

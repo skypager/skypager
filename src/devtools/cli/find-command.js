@@ -6,6 +6,16 @@ const { spawn } = runtime.proc.async
 
 async function findCommand(scriptFilename, checkPaths, runtimeArgs = [], commandArgs = []) {
   const skypagerPackagePaths = await runtime.packageFinder.find(/@skypager\/.*/)
+  const portfolioName = runtime.currentPackage.name.split('/')[0]
+
+  if (portfolioName !== '@skypager') {
+    const portfolioPackagePaths = await runtime.packageFinder.find(name =>
+      name.startsWith(`${portfolioName}/`)
+    )
+
+    skypagerPackagePaths.push(...portfolioPackagePaths)
+  }
+
   const scriptPaths = await Promise.all(
     skypagerPackagePaths.map(folder => {
       const check = resolve(folder, 'scripts')

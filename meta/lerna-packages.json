@@ -1,5 +1,11 @@
 [
   {
+    "name": "@skypager/apps-webapp",
+    "version": "0.1.11",
+    "private": false,
+    "location": "/Users/jon/Projects/@skypager/src/apps/webapp"
+  },
+  {
     "name": "@skypager/cli",
     "version": "0.1.11",
     "private": false,

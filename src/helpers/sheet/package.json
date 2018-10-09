@@ -10,7 +10,7 @@
     "build": "cross-env NODE_ENV=production webpack --config webpack.config.js",
     "postbuild": "yarn smoke-test",
     "smoke-test": "skypager smoke-test",
-    "test": "skypager test"
+    "test": "skypager test --timeout 10000"
   },
   "publishConfig": {
     "access": "public"

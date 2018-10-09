@@ -2,6 +2,12 @@
 
 ## Releases
 
+### 0.1.12
+
+- [@skypager/cli]
+    - (enhancement) the `skypager` CLI will attempt to search all @skypager packages which have a scripts folder, as well as any other 
+    workspace paths (for @scoped projects) which have a scripts folder, when trying to run a command that isn't provided by @skypager/devtools, @skypager/cli, or @skypager/webpack
+
 ### 0.1.11
 
 - [@skypager/helpers-server](src/helpers/server)
