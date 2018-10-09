@@ -6,7 +6,7 @@
   "description": "provides common webpack dependencies, configs, and scripts",
   "scripts": {
     "build": "exit 0",
-    "test": "mocha"
+    "test": "mocha --timeout 10000"
   },
   "dependencies": {
     "@babel/cli": "^7.0.0",
