@@ -91,6 +91,13 @@ export function findParentPackage(options = {}) {
   })
 }
 
+const toSubject = fullPath => {
+  const { sep } = require('path')
+  const parts = fullPath.split(sep)
+  const subject = parts.slice(parts.length - 2).join(sep)
+  return subject
+}
+
 export async function find(options = {}, context = {}) {
   const { runtime } = this
   const { get, flatten, isArray, isFunction, isRegExp, isString } = runtime.lodash
@@ -125,9 +132,9 @@ export async function find(options = {}, context = {}) {
   ).then(flatten)
 
   if (parse === false) {
-    return packagePaths.filter(p => testPath(basename(p), rules))
+    return packagePaths.filter(p => testPath(toSubject(p), rules))
   } else if (parse === 'matches') {
-    packagePaths = flatten(packagePaths).filter(p => testPath(basename(p), rules))
+    packagePaths = flatten(packagePaths).filter(p => testPath(toSubject(p), rules))
   } else if (parse === true) {
     packagePaths = flatten(packagePaths)
   }
@@ -211,7 +218,20 @@ export async function findPackageLocations(options = {}) {
 }
 
 export async function findPackageFoldersIn(basePath) {
-  const folderNames = await readdir(basePath)
+  let folderNames = await readdir(basePath)
+
+  // support @scoped packages
+  folderNames = await Promise.all(
+    folderNames.map(
+      folderName =>
+        folderName.startsWith('@')
+          ? readdir(join(basePath, folderName)).map(base =>
+              [folderName, base].join(require('path').sep)
+            )
+          : folderName
+    )
+  ).then(this.lodash.flatten)
+
   const manifestPathLocations = folderNames.map(n => join(basePath, n, 'package.json'))
 
   const existing = await allExisting(manifestPathLocations)

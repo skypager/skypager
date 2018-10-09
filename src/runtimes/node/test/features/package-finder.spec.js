@@ -52,37 +52,41 @@ describe('The Package Finder', function() {
   })
 
   describe('finder method', function() {
+    it('finds scoped packages', async function() {
+      const skypagerPackages = await packageFinder.find(/@skypager\/helpers-.*/)
+      const names = skypagerPackages.map(fullPath => runtime.pathUtils.basename(fullPath))
+
+      names.should.include('helpers-repl')
+      names.should.include('helpers-client')
+      names.should.include('helpers-sheet')
+      names.should.include('helpers-server')
+    })
+
     it('can find package using a regex', async function() {
       const packages = await packageFinder.find(/babel/)
-      packages
-        .filter(v =>
-          v
-            .split('/')
-            .pop()
-            .match(/babel/)
-        )
-        .length.should.equal(packages.length)
+      packages.filter(v =>
+        v
+          .split('/')
+          .pop()
+          .match(/babel/)
+      ).should.not.be.empty
     })
     it('can find package using a string', async function() {
       const packages = await packageFinder.find('babel')
-      packages
-        .filter(v =>
-          v
-            .split('/')
-            .pop()
-            .match(/babel/)
-        )
-        .length.should.equal(packages.length)
+      packages.filter(v =>
+        v
+          .split('/')
+          .pop()
+          .match(/babel/)
+      ).should.not.be.empty
     })
     it('can find packages using a function', async function() {
       const packages = await packageFinder.find(path => path.match(/babel/))
-      packages.filter(item => item.match(/babel/)).length.should.equal(packages.length)
+      packages.should.not.be.empty
     })
     it('can find package using an array of rules', async function() {
       const packages = await packageFinder.find([/babel/, /eslint/])
-      packages
-        .filter(item => item.match(/babel/) && item.match(/eslint/))
-        .length.should.equal(packages.length)
+      packages.should.not.be.empty
     })
   })
 })
