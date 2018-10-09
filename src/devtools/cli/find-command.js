@@ -9,10 +9,7 @@ async function findCommand(scriptFilename, checkPaths, runtimeArgs = [], command
   const portfolioName = runtime.currentPackage.name.split('/')[0]
 
   if (portfolioName !== '@skypager') {
-    const portfolioPackagePaths = await runtime.packageFinder.find(name =>
-      name.startsWith(`${portfolioName}/`)
-    )
-
+    const portfolioPackagePaths = await runtime.packageFinder.find(new RegExp(`^${portfolioName}`))
     skypagerPackagePaths.push(...portfolioPackagePaths)
   }
 
