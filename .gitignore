@@ -26,3 +26,4 @@ coverage/
 stats.json
 .history
 public/latest/*
+*.tgz

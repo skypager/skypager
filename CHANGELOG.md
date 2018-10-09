@@ -2,6 +2,11 @@
 
 ## Releases
 
+### 0.1.15
+
+- [@skypager/runtime]
+    - (bugfix) the node version of @skypager/runtime did not use the babel polyfill
+
 ### 0.1.12
 
 - [@skypager/cli]
