@@ -5,7 +5,7 @@ const { existsSync } = require('fs')
 let args = process.argv.slice(2)
 const spawnSync = require('child_process').spawnSync
 const script = args.shift()
-const scriptFilename = `${script}.js`.replace(/\.js\.js/, '.js')
+const scriptFilename = `${script}.js`.replace(/\.js\.js/, '.js').replace(/:/g, '-')
 const localScriptPath = path.resolve(process.cwd(), 'scripts', scriptFilename)
 const ourScriptPath = path.resolve(__dirname, 'scripts/', scriptFilename)
 
@@ -30,11 +30,7 @@ const checkPaths = [
   `node_modules/@skypager/webpack/scripts/${scriptFilename}`,
 ]
 
-if (!existsSync(scriptPath)) {
-  console.error(`Could not find script: ${script}\n\nskypager searched in:`)
-  checkPaths.map(p => `  - ${p}`).forEach(line => console.log(line))
-  process.exit(1)
-}
+const scriptIsMissing = !existsSync(scriptPath)
 
 const runtimeArgs = []
 
@@ -60,13 +56,19 @@ if (args.indexOf('--inspect') !== -1) {
   args = args.filter(arg => arg !== '--inspect')
 }
 
-try {
-  const result = spawnSync('node', [...runtimeArgs, scriptPath].concat(args), {
-    cwd: process.cwd(),
-    stdio: 'inherit',
-  })
+if (scriptIsMissing) {
+  require('./find-command')(scriptFilename, checkPaths, runtimeArgs, args)
+    .then(result => process.exit(0))
+    .catch(error => process.exit(1)) // eslint-disable-line
+} else {
+  try {
+    const result = spawnSync('node', [...runtimeArgs, scriptPath].concat(args), {
+      cwd: process.cwd(),
+      stdio: 'inherit',
+    })
 
-  process.exit(result.status)
-} catch (error) {
-  process.exit(1)
+    process.exit(result.status)
+  } catch (error) {
+    process.exit(1)
+  }
 }
