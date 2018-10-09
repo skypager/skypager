@@ -94,7 +94,11 @@ export function findParentPackage(options = {}) {
 const toSubject = fullPath => {
   const { sep } = require('path')
   const parts = fullPath.split(sep)
-  const subject = parts.slice(parts.length - 2).join(sep)
+  const subject = parts
+    .slice(parts.length - 2)
+    .filter(item => !item.match(/node_modules/))
+    .join('/')
+
   return subject
 }
 
