@@ -2,7 +2,7 @@
   "name": "@skypager/cli",
   "homepage": "https://skypager-cli.skypager.io",
   "license": "SEE LICENSE IN LICENSE.md",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "description": "the skypager CLI",
   "scripts": {
     "build": "exit 0",
