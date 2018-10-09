@@ -28,16 +28,18 @@ spawnSync('yarn', ['build'], {
 const next = read()
 
 if (sig(next.dependencies) !== sig(current.dependencies)) {
-  spawnSync('npm', ['version', 'patch'], {
+  spawnSync('npm', ['version', 'patch', '--skip-git'], {
     cwd: mainRoot,
     stdio: 'inherit',
   })
 
   const published = read()
+  /*
   spawnSync('npm', ['publish'], {
     cwd: mainRoot,
     stdio: 'inherit',
   })
+  */
   spawnSync('git', ['add', 'src', 'main'], {
     cwd: resolve(__dirname, '..'),
   })
