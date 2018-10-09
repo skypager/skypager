@@ -1,7 +1,3 @@
 {
-    "name": "skypager-website",
-    "alias": [
-      "skypager.io",
-      "dev.skypager.io"
-    ]
+    "name": "skypager-website"
 }

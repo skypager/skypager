@@ -25,7 +25,9 @@ async function deployToNow() {
       '--token',
       nowToken,
       'alias',
-      runtime.gitInfo.branch === 'master' ? 'skypager.io' : 'dev.skypager.io',
+      runtime.gitInfo.branch === 'master'
+        ? 'latest.skypager.io'
+        : `latest-${String(runtime.gitInfo.branch).replace(/\//g, '-')}.skypager.io`,
     ],
     {
       stdio: 'inherit',
@@ -46,7 +48,7 @@ function readNowToken() {
     return require(resolve(process.env.HOME, '.now.json')).token
   } catch (error) {
     console.log(
-      'Could not retrive NOW_TOKEN.  Please set the environment variabe, pass --now-token as an argv, or make sure you have a now.json file in your home directory.'
+      'Could not retrive NOW_TOKEN.  Please set the environment variable, pass --now-token as an argv, or make sure you have a now.json file in your home directory.'
     )
     process.exit(1)
   }

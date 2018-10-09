@@ -1,7 +1,7 @@
 {
-  "name": "skypager-sheets-server-example",
+  "name": "skypager-webapp",
   "env": {
       "SERVICE_ACCOUNT_DATA": "@skypager-sheets-server-sa"
   },
-  "alias": "sheets-server-example.skypager.io"
+  "alias": "skypager.io"
 }
