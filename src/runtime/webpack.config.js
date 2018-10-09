@@ -61,7 +61,7 @@ const nodeConfig = merge.strategy({ node: 'replace', plugins: 'replace' })(baseC
   node: false,
   devtool: 'source-map',
   entry: {
-    index: path.resolve(cwd, 'src', 'index.js'),
+    index: ['@babel/polyfill/noConflict', path.resolve(cwd, 'src', 'index.js')],
     'utils/emitter': 'utils/emitter.js',
     'utils/entity': 'utils/entity.js',
     'utils/inflect': 'utils/inflect.js',
