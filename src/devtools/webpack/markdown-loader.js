@@ -1,5 +1,6 @@
 const { getOptions } = require('loader-utils')
 const mdx = require('./mdx-parser')
+const visit = require('unist-util-visit')
 
 module.exports = async function(raw) {
   const callback = this.async()

@@ -6,8 +6,8 @@ const { spawn, exec } = runtime.proc.async
 main()
 
 async function main() {
-  print('Refreshing Project Metadata')
-  await refreshProjectMetadata()
+  // print('Refreshing Project Metadata')
+  // await refreshProjectMetadata()
   print('Prettifying Code')
   await prettifyAll()
 }

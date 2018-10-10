@@ -27,3 +27,4 @@ stats.json
 .history
 public/latest/*
 *.tgz
+meta/

@@ -9,7 +9,7 @@ const toString = require('mdast-util-to-string')
 const kebabCase = require('lodash/kebabCase')
 const omit = require('lodash/omit')
 
-module.exports = async function(raw, options) {
+module.exports = async function(raw, options = {}) {
   const tree = unified()
     .use(parse)
     .use(stringify)
