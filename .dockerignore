@@ -1,0 +1,7 @@
+node_modules/
+secrets/
+build/
+**/node_modules/**
+**/lib/**
+**/build/**
+**/secrets/**
