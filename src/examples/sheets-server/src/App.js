@@ -10,7 +10,9 @@ import {
   Message,
   Segment,
   Table,
+  Grid,
 } from 'semantic-ui-react'
+import Readme from '../README.md'
 
 class ListSheets extends Component {
   render() {
@@ -18,39 +20,36 @@ class ListSheets extends Component {
     const records = Object.keys(sheets).map(id => Object.assign({}, sheets[id], { id }))
 
     return (
-      <Container>
-        <Message icon color="green">
-          <Icon name="google drive" />
-          <Message.Content>
-            Below you will find any available google sheet which is shared with the service account
-            email below. The Google Project listed below will need the google drive and google
-            sheets apis enabled.
-          </Message.Content>
-        </Message>
-        <Table>
-          <Table.Body>
-            <Table.Row>
-              <Table.Cell>Service Acccount Email</Table.Cell>
-              <Table.Cell>{SERVICE_ACCOUNT_EMAIL}</Table.Cell>
-            </Table.Row>
-            <Table.Row>
-              <Table.Cell>Google Project ID</Table.Cell>
-              <Table.Cell>{SERVICE_ACCOUNT_PROJECT_ID}</Table.Cell>
-            </Table.Row>
-          </Table.Body>
-        </Table>
-        <Header dividing as="h1" content="Available Sheets" />
-        <Segment secondary>
-          <Card.Group>
-            {records.map((record, idx) => (
-              <Card key={record.id + idx} onClick={() => onClick(record.id, record)}>
-                <Card.Content>
-                  <Header as="h4" content={record.id} />
-                </Card.Content>
-              </Card>
-            ))}
-          </Card.Group>
-        </Segment>
+      <Container fluid>
+        <Grid>
+          <Grid.Column width={6}>
+            <Message icon color="green">
+              <Icon name="google drive" />
+              <Message.Content>
+                Below you will find any available google sheet which is shared with the email found
+                in your google cloud service account credentials. (Make sure the google drive and
+                google sheets apis are enabled)
+              </Message.Content>
+            </Message>
+            <Header dividing as="h1" content="Available Sheets" />
+            <Segment secondary>
+              <Card.Group>
+                {records.map((record, idx) => (
+                  <Card key={record.id + idx} onClick={() => onClick(record.id, record)}>
+                    <Card.Content>
+                      <Header as="h4" content={record.id} />
+                    </Card.Content>
+                  </Card>
+                ))}
+              </Card.Group>
+            </Segment>
+          </Grid.Column>
+          <Grid.Column width={10}>
+            <Segment piled>
+              <Readme />
+            </Segment>
+          </Grid.Column>
+        </Grid>
       </Container>
     )
   }
@@ -144,7 +143,7 @@ export class App extends Component {
     const { loading, sheets, sheetId, data, info } = this.state
 
     return (
-      <Container style={{ marginTop: '40px' }}>
+      <Container fluid style={{ marginTop: '40px', padding: '48px' }}>
         {loading && <Loader active />}
         {!loading &&
           !sheetId &&
