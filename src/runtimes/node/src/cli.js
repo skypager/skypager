@@ -212,4 +212,6 @@ cli.addCustomMethod(
   (tableName, params = {}) => (tables[tableName] = new Table(params))
 )
 
-cli.addCustomMethod('clear', () => process.stdout.write('\x1bc'))
+cli.addCustomMethod('clear', () => {
+  !process.env.NO_CLEAR && !process.argv.indexOf('--no-clear') >= 0 && process.stdout.write('\x1bc')
+})
