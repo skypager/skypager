@@ -141,6 +141,12 @@ export class Runtime {
     return !!get(this, 'rawOptions.strictMode', this.constructor.strictMode)
   }
 
+  /**
+   * @readonly
+   * @memberof Runtime
+   * 
+   * The options are what the runtime was initialized with.  Runtimes can be strict about which options they accept.
+   */
   get options() {
     return this.strictMode
       ? pick(this.optionsWithDefaults, keys(this.optionTypes))
@@ -348,14 +354,14 @@ export class Runtime {
     this.hide(
       'registries',
       new ContextRegistry('registries', {
-        context: require.context('.', false, /mock/),
+        context: Helper.createMockContext('registries'),
       })
     )
 
     this.hide(
       'selectors',
       new ContextRegistry('selectors', {
-        context: require.context('.', false, /mock/),
+        context: Helper.createMockContext('selectors') 
       })
     )
 

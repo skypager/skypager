@@ -1,5 +1,10 @@
 import Helper from './helper.js'
 
+import * as ConfigurableFeature from '../features/configurable'
+import * as ObservableFeature from '../features/observable'
+import * as ProfilerFeature from '../features/profiler'
+import * as VmFeature from '../features/vm'
+
 const isFunction = o => typeof o === 'function'
 
 export class Feature extends Helper {
@@ -7,8 +12,13 @@ export class Feature extends Helper {
 
   static createRegistry(...args) {
     const reg = Helper.createContextRegistry('features', {
-      context: require.context('../features', false, /\.js$/),
+      context: Helper.createMockContext('features'),
     })
+
+    reg.register('configurable', () => ConfigurableFeature)
+    reg.register('observable', () => ObservableFeature)
+    reg.register('profiler', () => ProfilerFeature)
+    reg.register('vm', () => VmFeature)
 
     reg.enabled = {}
 

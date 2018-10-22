@@ -55,39 +55,4 @@ const webConfig = merge.strategy({ node: 'replace', entry: 'replace', plugins: '
   }
 )
 
-const nodeConfig = merge.strategy({ node: 'replace', plugins: 'replace' })(baseCommonConfig, {
-  target: 'node',
-  name: 'node',
-  node: false,
-  devtool: 'source-map',
-  entry: {
-    index: ['@babel/polyfill/noConflict', path.resolve(cwd, 'src', 'index.js')],
-    'utils/emitter': 'utils/emitter.js',
-    'utils/entity': 'utils/entity.js',
-    'utils/inflect': 'utils/inflect.js',
-    'utils/mware': 'utils/mware.js',
-    'utils/object-hash': 'utils/object-hash.js',
-    'utils/path-matcher': 'utils/path-matcher.js',
-    'utils/path-to-regexp': 'utils/path-to-regexp.js',
-    'utils/properties': 'utils/properties.js',
-    'utils/query': 'utils/query.js',
-    'utils/registry': 'utils/registry.js',
-    'utils/router': 'utils/router.js',
-    'utils/string': 'utils/string.js',
-  },
-  output: {
-    libraryTarget: 'umd',
-    filename: '[name].js',
-    path: path.resolve(cwd, 'lib'),
-  },
-  externals: [
-    nodeExternals({
-      modulesFromFile: true,
-    }),
-  ],
-  plugins: baseCommonConfig.plugins
-    .filter(p => !p.constructor || !p.constructor.name === 'UglifyJsPlugin')
-    .concat([new SourceMapSupport()]),
-})
-
-module.exports = process.env.ANALYZE ? nodeConfig : [webConfig, nodeConfig, minifiedWebConfig]
+module.exports = process.env.ANALYZE ? webConfig : [webConfig, minifiedWebConfig]

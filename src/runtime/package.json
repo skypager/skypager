@@ -8,7 +8,9 @@
   "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
   "license": "MIT",
   "scripts": {
-    "build": "cross-env NODE_ENV=production webpack --config webpack.config.js",
+    "build": "yarn build:lib && yarn build:web",
+    "build:lib": "cross-env NODE_ENV=production babel --comments --source-maps --config-file ./babelrc -d lib src",
+    "build:web": "cross-env NODE_ENV=production webpack --config webpack.config.js",
     "prepare": "yarn build",
     "test": "skypager test"
   },

@@ -33,7 +33,7 @@ const {
   zipObjectDeep,
 } = lodash
 
-const req = require.context('./helpers', false, /DISABLED\.js$/)
+const req = createMockContext('helpers')
 
 let REGISTRY
 
@@ -546,33 +546,33 @@ export class Helper {
     return host
   }
 
-  static createMockContext(object = {}) {
-    const fn = key =>
-      result(object, key, () => {
-        throw new Error(`Module ${key} not found in mock context`)
-      })
-
-    return Object.assign(fn, {
-      keys() {
-        return keys(object)
-      },
-      resolve(key) {
-        const resolved = has(object, key) && key
-
-        if (resolved) {
-          return resolved
-        } else {
-          throw new Error(`Module ${key} not found in mock context`)
-        }
-      },
-    })
-  }
+  static createMockContext = createMockContext
 }
 
 export default Helper
 
+export function createMockContext(object = {}) {
+  const fn = key =>
+    result(object, key, () => {
+      throw new Error(`Module ${key} not found in mock context`)
+    })
+
+  return Object.assign(fn, {
+    keys() {
+      return keys(object)
+    },
+    resolve(key) {
+      const resolved = has(object, key) && key
+
+      if (resolved) {
+        return resolved
+      } else {
+        throw new Error(`Module ${key} not found in mock context`)
+      }
+    },
+  })
+}
 export const createHost = Helper.createHost
-export const createMockContext = Helper.createMockContext
 export const registry = Helper.registry
 export const registerHelper = Helper.registerHelper
 export const createContextRegistry = (name, ...args) => new ContextRegistry(name, ...args)
