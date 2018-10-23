@@ -1,8 +1,8 @@
 export const hostMethods = ['createCodeRunner', 'createModule', 'createScript', 'createContext']
 
 export function featureWasEnabled() {
-  if (this.runtime.isNode || typeof __non_webpack_require__ === 'function') {
-    this.runtime.hide('vm', __non_webpack_require__('vm'))
+  if (this.runtime.isNode) {
+    this.runtime.hide('vm', require('vm'))
   } else {
     const vmBrowserify = require('vm-browserify')
     this.runtime.hide(

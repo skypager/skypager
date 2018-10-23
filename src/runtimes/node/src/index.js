@@ -18,4 +18,4 @@ module.exports = skypager
 
 skypager.hide('runtimeProvider', 'node', true)
 skypager.hide('runtimeModule', module.id, true)
-skypager.hide('runtimePackageInfo', __PACKAGE__, true) // eslint-disable-line
+skypager.hide('runtimePackageInfo', require('../package.json'), true) // eslint-disable-line

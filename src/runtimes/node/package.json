@@ -4,7 +4,7 @@
   "description": "the skypager node runtime",
   "main": "lib/index.js",
   "scripts": {
-    "build": "skypager build",
+    "build": "babel --comments --source-maps -d lib src",
     "watch": "webpack --config webpack.config.js --watch",
     "console": "skypager console",
     "prepare": "skypager build --force",

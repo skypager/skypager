@@ -581,7 +581,7 @@ export class Runtime {
       const isNode = Object.prototype.toString.call(global.process) === '[object process]'
       return isNode
     } catch (e) { 
-      return typeof global.process !== 'undefined' && typeof __non_webpack_require__ === 'function'
+      return typeof global.process !== 'undefined'
          && (process.title === 'node' || `${process.title}`.endsWith('.exe') )
     }
   }

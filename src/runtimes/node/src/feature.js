@@ -159,7 +159,9 @@ export function enabledHook(options = {}) {
     })
   }
 
-  runtime.selectors.add(require.context('./selectors', true, /.js$/))
+  runtime.selectors.register('helpers/discover', () => require('./selectors/helpers/discover'))
+  runtime.selectors.register('process/output', () => require('./selectors/process/output'))
+  runtime.selectors.register('process/result', () => require('./selectors/process/result'))
 
   runtime.feature('main-script').enable()
 
