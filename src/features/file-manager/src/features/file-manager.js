@@ -484,7 +484,12 @@ export async function readAllContent(options = {}) {
           .then(content => [toFileId(path), content])
           .then(entry => {
             const [fileId, content] = entry
-            fileManager.fireHook(RECEIVED_FILE_CONTENT, fileId, content, file.call(fileManager, fileId))
+            fileManager.fireHook(
+              RECEIVED_FILE_CONTENT,
+              fileId,
+              content,
+              file.call(fileManager, fileId)
+            )
             updateFileContent.call(fileManager, fileId, content)
             return options.hash ? hashFile.call(fileManager, fileId).then(() => entry) : entry
           })

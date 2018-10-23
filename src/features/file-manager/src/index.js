@@ -1,6 +1,6 @@
 export function attach(runtime, options = {}) {
   runtime = runtime || this
-  
+
   runtime.features.register('file-manager', () => require('./features/file-manager.js'))
   runtime.features.register('package-manager', () => require('./features/package-manager.js'))
   runtime.features.register('module-manager', () => require('./features/module-manager.js'))
@@ -25,7 +25,6 @@ export function attach(runtime, options = {}) {
     require('./selectors/package/repository-status')
   )
   runtime.selectors.register('package/snapshot', () => require('./selectors/package/snapshot'))
-
 
   options = runtime.lodash.defaults(
     {},
