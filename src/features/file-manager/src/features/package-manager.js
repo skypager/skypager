@@ -450,7 +450,7 @@ export async function loadManifests(options = {}) {
     this.manifests.set(this.runtime.relative(this.runtime.manifestPath), {
       ...this.runtime.currentPackage,
       _packageId: 'package.json',
-      _file: this.fileManager.file('package.json'),
+      _file: this.fileManager.files.get('package.json'),
     })
   } catch (error) {}
 
