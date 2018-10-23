@@ -1,6 +1,6 @@
 {
   "name": "@skypager/runtime",
-  "version": "0.1.17",
+  "version": "0.1.18",
   "description": "universal javascript application runtime",
   "main": "lib/index.js",
   "browser": "lib/skypager-runtime.min.js",
