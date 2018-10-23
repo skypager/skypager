@@ -45,11 +45,9 @@ describe('node runtime helpers', function() {
 
     await runtime.packageManager.startAsync()
 
-    debugger // eslint-disable-line
-
     runtime.packageManager.should.have.property('status', 'READY')
     runtime.packageManager.should.have.property('manifests')
-    runtime.packageManager.should.have.property('packageIds').that.is.an('array').that.is.not.empty
+    runtime.packageManager.should.have.property('packageIds').that.is.an('array')
     runtime.packageManager.byName.should.be.an('object').that.has.property('@skypager/node')
     runtime.packageManager.byName['@skypager/node'].should.have.property('_file').that.is.not.empty
   })

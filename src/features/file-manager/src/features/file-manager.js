@@ -375,11 +375,11 @@ export function hashFile(key) {
   const fileManager = this
 
   return new Promise((resolve, reject) => {
-    const file = fileManager.file(key)
-    const path = file.path
+    const result = file.call(fileManager, key)
+    const path = result.path
     md5File(path, (err, hash) => (err ? reject(err) : resolve({ id: key, hash })))
   }).then(({ id, hash } = {}) => {
-    fileManager.updateFileHash(id, hash)
+    updateFileHash.call(fileManager, id, hash)
     return hash
   })
 }
@@ -432,11 +432,11 @@ export function getPackageManager() {
  */
 export function updateFileHash(fileId, hash) {
   if (fileId && hash) {
-    const file = this.file(fileId)
+    const result = file.call(this, fileId)
 
-    if (file) {
+    if (result) {
       this.files.set(normalize(fileId), {
-        ...file,
+        ...result,
         hash,
       })
     }
@@ -447,11 +447,11 @@ export function updateFileHash(fileId, hash) {
 
 export function updateFileContent(fileId, content) {
   if (fileId && content) {
-    const file = this.file(fileId)
+    const result = file.call(this, fileId)
 
-    if (file) {
+    if (result) {
       this.files.set(normalize(fileId), {
-        ...file,
+        ...result,
         content,
       })
     }
@@ -464,6 +464,8 @@ export async function readAllContent(options = {}) {
   const { include = [], exclude = [/secret/, /\.env/, /build\//] } = options
 
   const toFileId = path => normalize(this.runtime.relative(path))
+
+  const fileManager = this
 
   const results = await Promise.all(
     this.chain
@@ -482,9 +484,9 @@ export async function readAllContent(options = {}) {
           .then(content => [toFileId(path), content])
           .then(entry => {
             const [fileId, content] = entry
-            this.fireHook(RECEIVED_FILE_CONTENT, fileId, content, this.files.get(fileId))
-            this.updateFileContent(fileId, content)
-            return options.hash ? this.hashFile(fileId).then(() => entry) : entry
+            fileManager.fireHook(RECEIVED_FILE_CONTENT, fileId, content, file.call(fileManager, fileId))
+            updateFileContent.call(fileManager, fileId, content)
+            return options.hash ? hashFile.call(fileManager, fileId).then(() => entry) : entry
           })
       )
   )

@@ -1,5 +1,9 @@
 export function attach(runtime, options = {}) {
   runtime = runtime || this
+  
+  runtime.features.register('file-manager', () => require('./features/file-manager.js'))
+  runtime.features.register('package-manager', () => require('./features/package-manager.js'))
+  runtime.features.register('module-manager', () => require('./features/module-manager.js'))
 
   runtime.selectors.register('files/asts', () => require('./selectors/files/asts'))
   runtime.selectors.register('files/cache', () => require('./selectors/files/asts'))
@@ -22,9 +26,6 @@ export function attach(runtime, options = {}) {
   )
   runtime.selectors.register('package/snapshot', () => require('./selectors/package/snapshot'))
 
-  runtime.features.register('file-manager', () => require('./features/file-manager.js'))
-  runtime.features.register('package-manager', () => require('./features/package-manager.js'))
-  runtime.features.register('module-manager', () => require('./features/module-manager.js'))
 
   options = runtime.lodash.defaults(
     {},
