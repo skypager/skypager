@@ -42,7 +42,11 @@ describe('node runtime helpers', function() {
       .that.is.an('object')
       .that.has.property('startAsync')
       .that.is.a('function')
+
     await runtime.packageManager.startAsync()
+
+    debugger // eslint-disable-line
+
     runtime.packageManager.should.have.property('status', 'READY')
     runtime.packageManager.should.have.property('manifests')
     runtime.packageManager.should.have.property('packageIds').that.is.an('array').that.is.not.empty

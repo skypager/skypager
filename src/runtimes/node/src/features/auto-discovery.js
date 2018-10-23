@@ -89,7 +89,7 @@ export async function registerDocumentTypes(options = {}) {
 
   documentTypes.entries().forEach(([id, data]) => {
     if (runtime.documentTypes.available.indexOf(id) === -1) {
-      runtime.documentTypes.register(id, () => __non_webpack_require__(data.file.dirname))
+      runtime.documentTypes.register(id, () => require(data.file.dirname))
     }
   })
 
@@ -105,7 +105,7 @@ export async function registerProjectTypes(options = {}) {
 
   projectTypes.entries().forEach(([id, data]) => {
     if (runtime.projectTypes.available.indexOf(id) === -1) {
-      runtime.projectTypes.register(id, () => __non_webpack_require__(data.file.dirname))
+      runtime.projectTypes.register(id, () => require(data.file.dirname))
     }
   })
 

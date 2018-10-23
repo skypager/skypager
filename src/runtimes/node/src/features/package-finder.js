@@ -42,7 +42,7 @@ export function getCurrentModulePaths() {
 export const hostMethods = ['getPackageFinder', 'findPackages', 'findPackage']
 
 export function getCachedModuleIds() {
-  return Object.keys(__non_webpack_require__.cache || {})
+  return Object.keys(require.cache || {})
 }
 
 /**
@@ -59,7 +59,7 @@ export function attemptResolve(options = {}) {
   const { debug = false, name } = options
 
   try {
-    return __non_webpack_require__.resolve(name)
+    return require.resolve(name)
   } catch (error) {
     if (debug) {
       console.error(`Error while resolving: ${name}`)

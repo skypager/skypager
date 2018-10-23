@@ -82,7 +82,7 @@ export async function runMainScript(options = {}, context = {}) {
   if (!context.require) {
     if (process.mainModule && process.mainModule.require && process.mainModule.require) {
       context.require = context.require || process.mainModule.require
-      context.require.resolve = __non_webpack_require__.resolve
+      context.require.resolve = require.resolve
     }
   }
 

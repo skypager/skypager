@@ -160,12 +160,7 @@ export function requireDocumentContext(rule, options = {}) {
 }
 
 export function requireContext(rule, options = {}) {
-  const {
-    requireFn = __non_webpack_require__,
-    keyBy = 'name',
-    mapValues = 'path',
-    formatId,
-  } = options
+  const { requireFn = require, keyBy = 'name', mapValues = 'path', formatId } = options
 
   return this.chain
     .invoke('selectMatches', { ...options, rules: rule })
@@ -195,7 +190,7 @@ export async function walk(...args) {
 
 export function watcher(options = {}) {
   try {
-    __non_webpack_require__.resolve('gaze')
+    require.resolve('gaze')
   } catch (error) {
     throw new Error(`Missing the gaze module, so file watching is unavailable.`)
   }

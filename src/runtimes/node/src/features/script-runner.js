@@ -25,8 +25,8 @@ export function lazyCurrentModule() {
 
   if (exists(currentPackagePath)) {
     try {
-      __non_webpack_require__(currentPackagePath)
-      const cache = __non_webpack_require__.cache || {}
+      require(currentPackagePath)
+      const cache = require.cache || {}
       const currentModule = cache[currentPackagePath]
 
       return currentModule
@@ -198,7 +198,7 @@ function createRunner(options = {}) {
 
     require: this.get('currentModule.require', process.mainModule.require),
 
-    __non_webpack_require__: this.get('currentModule.require', process.mainModule.require),
+    require: this.get('currentModule.require', process.mainModule.require),
 
     process,
 

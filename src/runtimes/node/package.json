@@ -4,11 +4,11 @@
   "description": "the skypager node runtime",
   "main": "lib/index.js",
   "scripts": {
-    "build": "babel --comments --source-maps -d lib src",
+    "build": "rimraf lib && babel --comments --source-maps -d lib src",
     "watch": "webpack --config webpack.config.js --watch",
     "console": "skypager console",
-    "prepare": "skypager build --force",
-    "test": "skypager test --webpack-config webpack.config.test.js --timeout 10000",
+    "prepare": "yarn build",
+    "test": "mocha --require @babel/register --file test/test.js --timeout 10000 test/**/*.spec.js",
     "test:watch": "skypager test --webpack-config webpack.config.test.js --watch"
   },
   "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",

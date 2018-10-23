@@ -45,7 +45,7 @@ export function enabledHook(options = {}) {
   /*
   if (disableHelpers.match(/command/i)) {
     runtime.invoke('profiler.profileStart', 'helperCommandEnabled')
-    runtime.use(__non_webpack_require__('skypager-helpers-command'), 'INITIALIZING')
+    runtime.use(require('skypager-helpers-command'), 'INITIALIZING')
     runtime.invoke('profiler.profileEnd', 'helperCommandEnabled')
   }
   */
@@ -149,7 +149,7 @@ export function enabledHook(options = {}) {
     runtime.lazy('fileManager', () => {
       try {
         runtime.invoke('profiler.profileStart', 'fileManagerEnabled')
-        __non_webpack_require__('@skypager/features-file-manager').attach(runtime)
+        require('@skypager/features-file-manager').attach(runtime)
         runtime.invoke('profiler.profileEnd', 'fileManagerEnabled')
         return runtime.feature('file-manager')
       } catch (e) {
@@ -198,7 +198,7 @@ export function enabledHook(options = {}) {
   if (!disableHelpers.match(/client/)) {
     lazyAttach('client', () => {
       runtime.invoke('profiler.profileStart', 'clientHelperEnabled')
-      runtime.use(__non_webpack_require__('@skypager/helpers-client'), 'INITIALIZING')
+      runtime.use(require('@skypager/helpers-client'), 'INITIALIZING')
       runtime.invoke('profiler.profileEnd', 'clientHelperEnabled')
     })
   }
@@ -206,7 +206,7 @@ export function enabledHook(options = {}) {
   if (!disableHelpers.match(/repl/)) {
     lazyAttach('repl', () => {
       runtime.invoke('profiler.profileStart', 'replHelperEnabled')
-      runtime.use(__non_webpack_require__('@skypager/helpers-repl'), 'INITIALIZING')
+      runtime.use(require('@skypager/helpers-repl'), 'INITIALIZING')
       runtime.invoke('profiler.profileEnd', 'replHelperEnabled')
     })
   }
@@ -214,7 +214,7 @@ export function enabledHook(options = {}) {
   if (!disableHelpers.match(/server/)) {
     lazyAttach('server', () => {
       runtime.invoke('profiler.profileStart', 'serverHelperEnabled')
-      runtime.use(__non_webpack_require__('@skypager/helpers-server'))
+      runtime.use(require('@skypager/helpers-server'))
       runtime.invoke('profiler.profileEnd', 'serverHelperEnabled')
     })
   }
