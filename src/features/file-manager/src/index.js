@@ -1,8 +1,30 @@
 export function attach(runtime, options = {}) {
   runtime = runtime || this
 
-  runtime.selectors.add(require.context('./selectors', true, /\.js$/))
-  runtime.features.add(require.context('./features', false, /\.js$/))
+  runtime.selectors.register('files/asts', () => require('./selectors/files/asts'))
+  runtime.selectors.register('files/cache', () => require('./selectors/files/asts'))
+  runtime.selectors.register('files/changed', () => require('./selectors/files/asts'))
+  runtime.selectors.register('files/documents', () => require('./selectors/files/asts'))
+  runtime.selectors.register('files/extensions', () => require('./selectors/files/asts'))
+  runtime.selectors.register('files/mimeTypes', () => require('./selectors/files/asts'))
+  runtime.selectors.register('files/tree', () => require('./selectors/files/asts'))
+  runtime.selectors.register('modules/keywords', () => require('./selectors/modules/keywords'))
+  runtime.selectors.register('modules/maintainers', () =>
+    require('./selectors/modules/maintainers')
+  )
+  runtime.selectors.register('package/changed', () => require('./selectors/package/changed'))
+  runtime.selectors.register('package/locations', () => require('./selectors/package/locations'))
+  runtime.selectors.register('package/outdated-remotes', () =>
+    require('./selectors/package/outdated-remotes')
+  )
+  runtime.selectors.register('package/repository-status', () =>
+    require('./selectors/package/repository-status')
+  )
+  runtime.selectors.register('package/snapshot', () => require('./selectors/package/snapshot'))
+
+  runtime.features.register('file-manager', () => require('./features/file-manager.js'))
+  runtime.features.register('package-manager', () => require('./features/package-manager.js'))
+  runtime.features.register('module-manager', () => require('./features/module-manager.js'))
 
   options = runtime.lodash.defaults(
     {},
