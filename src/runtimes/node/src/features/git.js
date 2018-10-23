@@ -375,13 +375,7 @@ export function getIsDirty() {
 }
 
 export function getModifiedFiles() {
-  const { execSync: exec } = this.runtime.proc
-
-  return exec('git status')
-    .toString()
-    .split('\n')
-    .filter(s => s.match(/modified/))
-    .map(t => t.replace(/modified\:\s+/, '').trim())
+  return this.statusMap.keys()
 }
 
 export function getMeta() {
