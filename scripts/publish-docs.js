@@ -2,7 +2,7 @@ const run = require('./shared/run')
 const { colors, showHeader, print } = require('./shared/cli')
 
 run(async runtime => {
-  // scripts/build internet-of-insurance
+  
   showHeader()
 
   const { spawn, exec } = runtime.proc.async

@@ -3,7 +3,7 @@ const { selectApplication, colors, showHeader, print } = require('./shared/cli')
 const { projectTask } = run
 
 run(async runtime => {
-  // scripts/build internet-of-insurance
+  
   let [app] = runtime.argv._
 
   showHeader()
