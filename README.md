@@ -117,3 +117,14 @@ runtime.start().then(() => {
   })
 </script>
 ```
+
+## Local Development
+
+In order to develop and test this project locally, you will need a service account json for a google cloud project.  It should have the google drive and sheets api's enabled.
+
+In order to run the tests, This file's content needs to either be stored in an environment variable `SERVICE_ACCOUNT_DATA` or you will need to copy this file to
+
+- src/helpers/sheet/secrets/serviceAccount.json
+- src/examples/sheets-server/secrets/serviceAccount.json
+
+See our [Circle CI Config](.circleci/config.yml) for an example of how I set up a project in CI to run tests.
