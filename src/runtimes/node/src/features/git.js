@@ -4,6 +4,10 @@ import createSkywalker from 'skywalker'
 
 export const createGetter = 'git'
 
+// For very large git repos, node's default max buffer for exec is too small
+// and i don't know how to use async spawn well enough to capture all the output and resolve etc
+const MAX_OUTPUT_BUFFER = process.env.SKYPAGER_GIT_MAX_OUTPUT_BUFFER || 1024 * 1024
+
 export const featureMethods = [
   'findRepo',
   'getMeta',
@@ -301,6 +305,7 @@ export async function filesStatus(options = {}) {
     .select('process/output', {
       cwd: this.runtime.cwd,
       env: this.runtime.environment,
+      maxBuffer: MAX_OUTPUT_BUFFER,
       command: 'git status --porcelain',
       format: 'lines',
       outputOnly: false,
@@ -334,6 +339,7 @@ export async function lsFiles(options = {}) {
     others = true,
     debug = false,
     cached = true,
+    maxBuffer = MAX_OUTPUT_BUFFER,
   } = options
 
   let pattern = options.pattern || null
@@ -357,8 +363,17 @@ export async function lsFiles(options = {}) {
     .join(' ')
 
   return this.runtime
-    .select('process/output', { command, cwd, env, format: 'lines', outputOnly: true })
-    .catch(error => '')
+    .select('process/output', {
+      maxBuffer,
+      command,
+      cwd,
+      env,
+      format: 'lines',
+      outputOnly: true,
+    })
+    .catch(e => {
+      return ''
+    })
 }
 
 export function getGitInfo() {
