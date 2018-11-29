@@ -1,6 +1,6 @@
 {
   "name": "skypager",
-  "version": "40.0.12",
+  "version": "40.0.13",
   "main": "universal.js",
   "publishConfig": {
     "access": "public"
@@ -11,8 +11,8 @@
   "author": "Jon Soeder <jon@chicago.com>",
   "dependencies": {
     "@skypager/web": "^0.1.18",
-    "@skypager/node": "^0.1.18",
-    "@skypager/cli": "^0.1.18",
+    "@skypager/node": "^0.1.19",
+    "@skypager/cli": "^0.1.19",
     "@skypager/runtime": "^0.1.18"
   },
   "keywords": [
