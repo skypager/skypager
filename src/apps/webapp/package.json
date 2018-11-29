@@ -1,6 +1,6 @@
 {
   "name": "@skypager/apps-webapp",
-  "version": "0.1.18",
+  "version": "0.1.19",
   "description": "skypager.io webapp",
   "main": "lib/index.js",
   "publishConfig": {
@@ -20,10 +20,10 @@
   "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
   "license": "MIT",
   "dependencies": {
-    "@skypager/cli": "^0.1.18",
+    "@skypager/cli": "^0.1.19",
     "@skypager/helpers-server": "^0.1.11",
-    "@skypager/helpers-sheet": "^0.1.12",
-    "@skypager/node": "^0.1.18",
+    "@skypager/helpers-sheet": "^0.1.19",
+    "@skypager/node": "^0.1.19",
     "@skypager/web": "^0.1.18",
     "@skypager/webpack": "^0.1.18",
     "prop-types": "^15.6.2",
