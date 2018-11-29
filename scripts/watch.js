@@ -3,7 +3,6 @@ const { selectApplication, colors, showHeader, print } = require('./shared/cli')
 const { projectTask } = run
 
 run(async runtime => {
-  
   let [app] = runtime.argv._
 
   showHeader()

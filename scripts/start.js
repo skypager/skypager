@@ -9,7 +9,6 @@ const { projectTask } = run
  * --port : which port to listen on
  */
 run(async runtime => {
-  
   let [app] = runtime.argv._
 
   showHeader()

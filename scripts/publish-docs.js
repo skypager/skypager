@@ -2,7 +2,6 @@ const run = require('./shared/run')
 const { colors, showHeader, print } = require('./shared/cli')
 
 run(async runtime => {
-  
   showHeader()
 
   const { spawn, exec } = runtime.proc.async
