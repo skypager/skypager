@@ -1,4 +1,4 @@
-const runtime = require('@skypager/node')
+Gkkconst runtime = require('@skypager/node')
 const serverHelper = require('@skypager/helpers-server')
 const sheetsHelper = require('@skypager/helpers-sheet')
 const { clear, randomBanner, print, colors } = runtime.cli
@@ -43,9 +43,6 @@ async function main() {
 }
 
 main()
-  .then(() => {
-    process.exit(0)
-  })
   .catch(error => {
     console.error(error)
     process.exit(1)
