@@ -119,11 +119,10 @@ export async function find(options = {}, context = {}) {
     rules.push(rule)
   }
 
-  rules = rules.map(
-    rule =>
-      isString(rule) && rule.match(/\*|\:|\+/)
-        ? val => require('path-to-regexp')(rule).test(val)
-        : rule
+  rules = rules.map(rule =>
+    isString(rule) && rule.match(/\*|\:|\+/)
+      ? val => require('path-to-regexp')(rule).test(val)
+      : rule
   )
 
   const packageStores = await this.findPackageLocations({
@@ -226,13 +225,12 @@ export async function findPackageFoldersIn(basePath) {
 
   // support @scoped packages
   folderNames = await Promise.all(
-    folderNames.map(
-      folderName =>
-        folderName.startsWith('@')
-          ? readdir(join(basePath, folderName)).map(base =>
-              [folderName, base].join(require('path').sep)
-            )
-          : folderName
+    folderNames.map(folderName =>
+      folderName.startsWith('@')
+        ? readdir(join(basePath, folderName)).map(base =>
+            [folderName, base].join(require('path').sep)
+          )
+        : folderName
     )
   ).then(this.lodash.flatten)
 

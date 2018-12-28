@@ -18,6 +18,7 @@ export const featureMethods = [
   'find',
   'findBy',
   'findByName',
+  'findLatestByName',
   'findDependentsOf',
   'getPackageNames',
   'getPackageIds',
@@ -35,6 +36,12 @@ export const featureMethods = [
   'activationEventWasFired',
   'start',
   'startAsync',
+  'getLatestPackages',
+  'getDependenciesMap',
+  'getExtendedDependenciesMap',
+  'exportGraph',
+  'downloadTarball',
+  'findInYarnCache',
 ]
 
 export const createGetter = 'moduleManager'
@@ -66,6 +73,25 @@ export const getLifeCycleHooks = () => LIFECYCLE_HOOKS
 
 export function getFinder() {
   return this.runtime.packageFinder
+}
+
+export const featureMixinOptions = {
+  partial: [],
+  insertOptions: false,
+}
+
+export async function downloadTarball(packageName, version, destination) {
+  const info = await checkRepo.call(this, packageName, version)
+
+  if (info && info.dist && info.dist.tarball) {
+    const filename = destination
+      ? this.runtime.resolve(destination)
+      : this.runtime.resolve(info.dist.tarball.split('/').pop())
+
+    await this.runtime.fileDownloader.downloadAsync(info.dist.tarball, filename)
+
+    return filename
+  }
 }
 
 export function activationEventWasFired(options = {}) {
@@ -130,7 +156,7 @@ export async function startAsync(options = {}) {
     this.status = STARTING
 
     try {
-      await this.findNodeModules()
+      await this.findNodeModules(options)
       this.status = READY
       return this
     } catch (error) {
@@ -146,7 +172,26 @@ export async function startAsync(options = {}) {
 }
 
 export async function findNodeModules(options = {}) {
+  const { join } = this.runtime.pathUtils
+  const { maxDepth, stopAt } = options
+
   let testPaths = await this.walkUp({ filename: 'node_modules' })
+
+  if (maxDepth) {
+    testPaths = testPaths.slice(0, maxDepth)
+  }
+
+  if (stopAt) {
+    testPaths.filter(
+      path =>
+        !(
+          path === stopAt ||
+          path === join(path, 'node_modules') ||
+          path.length < stopAt ||
+          path.length < join(path, 'node_modules').length
+        )
+    )
+  }
 
   testPaths = testPaths.concat(testPaths.map(p => p.replace('node_modules', '')))
 
@@ -177,6 +222,10 @@ export async function findNodeModules(options = {}) {
 
 export function getPackageIds() {
   return this.manifests.keys()
+}
+
+export function getLatestPackages() {
+  return this.packageIds.map(id => this.findLatestByName(id))
 }
 
 export function getPackageData() {
@@ -246,24 +295,33 @@ export function observables() {
     checkRemoteStatus: [
       'action',
       function(name) {
+        if (p.remotes.has(name)) {
+          return p.remotes.get(name)
+        }
         return checkRepo.call(p, name).then(result => {
           if (result && typeof result === 'object' && result.name && result.version) {
             p.updateRemote(name, result)
           }
+
+          return result
         })
       },
     ],
   }
 }
 
-export function checkRepo(name) {
+export function checkRepo(name, version) {
+  let request = name
+
+  if (typeof version === 'string') {
+    request = [name, version].join('@')
+  }
+
   return this.runtime.proc.async
-    .exec(`npm info ${packageName} --json`)
+    .exec(`npm info ${request} --json`)
     .then(c => c && c.stdout && c.stdout.toString())
-    .then(json => JSON.parse(json))
-    .catch(error => {
-      return false
-    })
+    .then(json => json && json.length && JSON.parse(json))
+    .catch(e => undefined)
 }
 
 export function find(name, version) {
@@ -281,37 +339,79 @@ export function findBy(fn) {
   return this.packageData.filter(fn || this.lodash.identity)
 }
 
-export function findByName(name) {
-  return this.manifests.get(name)
+export function findLatestByName(name) {
+  return this.findByName(name, { latest: true })
 }
 
-export function pickAllBy(fn) {
+export function findByName(name, options = {}) {
+  const { isEmpty } = this.lodash
+  const allVersions = this.manifests.get(name)
+  const { latest = false } = options
+
+  if (isEmpty(allVersions)) {
+    return
+  }
+
+  if (latest) {
+    const latest = this.runtime.packageFinder.semver.sort(Object.keys(allVersions)).pop()
+    return allVersions[latest]
+  } else {
+    return allVersions
+  }
+}
+
+export function pickAllBy(fn, options = {}) {
   fn = typeof fn === 'function' ? fn : v => v
 
   return this.chain
-    .get('packageData', [])
+    .get(options.latest ? 'latestPackages' : 'packageData', [])
     .map(pkg => this.lodash.pickBy(pkg, fn))
     .reject(v => this.lodash.isEmpty(v))
     .value()
 }
 
-export function pickAll(attributes, options = {}) {
-  return this.chain
-    .get('packageData', [])
-    .map(pkg => this.lodash.pick(pkg, this.lodash.castArray(attributes)))
-    .reject(v => this.lodash.isEmpty(v))
-    .value()
+export function pickAll(...attributes) {
+  const { isEmpty, pick } = this.lodash
+  const { packageData } = this
+
+  return packageData
+    .map(pkg => pick(pkg, attributes.filter(v => typeof v === 'string')))
+    .filter(v => !isEmpty(v))
 }
 
 export function findDependentsOf(packageName) {
   return this.lodash.pickBy(this.dependenciesMap, v => v[packageName])
 }
 
+export function getExtendedDependenciesMap() {
+  const { flatten, pick, entries, keys } = this.lodash
+
+  return this.chain
+    .get('latestPackages')
+    .keyBy('name')
+    .mapValues((pkg, source) => {
+      const deps = pick(
+        pkg,
+        'dependencies',
+        'devDependencies',
+        'optionalDependencies',
+        'peerDependencies'
+      )
+
+      return flatten(
+        entries(deps).map(([type, value]) =>
+          keys(value).map(name => ({ source, target: name, type }))
+        )
+      )
+    })
+    .value()
+}
+
 export function getDependenciesMap() {
   const { at, defaults } = this.lodash
 
   return this.chain
-    .invoke('manifests.values')
+    .get('latestPackages')
     .keyBy('name')
     .mapValues(v =>
       defaults(
@@ -364,4 +464,63 @@ export function findModulePaths(options = {}) {
   }
 
   return testPaths
+}
+
+export async function exportGraph(options = {}) {
+  const { flatten, values, pick } = this.lodash
+  const { latestPackages, extendedDependenciesMap } = this
+  const {
+    fields = ['name', 'version', 'keywords', 'license', 'description', 'homepage', 'repository'],
+  } = options
+
+  const edges = flatten(values(extendedDependenciesMap))
+  const nodes = latestPackages.map(p => pick(p, fields))
+
+  return {
+    nodes,
+    edges,
+  }
+}
+
+export async function findInYarnCache(name, version, cacheDir) {
+  cacheDir =
+    cacheDir ||
+    this.runtime.proc
+      .execSync(`yarn cache dir`)
+      .toString()
+      .trim()
+
+  const { fsx } = this.runtime
+
+  let packageName = name
+  const isScoped = name.startsWith('@')
+
+  if (isScoped) {
+    const parts = name.split('/')
+    const scope = parts[0]
+    packageName = parts[1]
+    cacheDir = this.runtime.resolve(cacheDir, `npm-${scope}`)
+  }
+
+  const folders = await fsx.readdirAsync(cacheDir)
+
+  const found = folders.find(folderName => {
+    // eslint-disable-line
+    const [hash, pkgVersion, ...rest] = folderName.split('-').reverse()
+
+    if (version && pkgVersion !== version) {
+      return false
+    }
+
+    const realName = isScoped
+      ? rest.reverse().join('-')
+      : rest
+          .reverse()
+          .slice(1)
+          .join('-')
+
+    return realName === packageName
+  })
+
+  return found && this.runtime.resolve(cacheDir, found)
 }

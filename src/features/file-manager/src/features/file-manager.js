@@ -57,6 +57,9 @@ export const featureMethods = [
   // Read the md5 hash of all files within a given tree
   'hashFiles',
 
+  // compute a hash of the selected files
+  'computeHash',
+
   // Read the content of all files within a given subtree
   'readAllContent',
 
@@ -398,16 +401,19 @@ export async function hashFiles(options = {}) {
   const results = await Promise.all(
     this.files
       .values()
-      .filter(Boolean)
       .map(p => p.path)
-      .filter(path => pathMatcher(include, path))
-      .filter(path => exclude.length === 0 || !pathMatcher(exclude, path))
+      .filter(path => path && pathMatcher(include, path))
+      .filter(path => path && (exclude.length === 0 || !pathMatcher(exclude, path)))
       .map(path => this.hashFile(normalize(this.runtime.relative(path))))
   )
 
   return results
 }
 
+export async function computeHash(options = {}) {
+  const results = await this.hashFiles(options)
+  return this.runtime.hashObject({ results })
+}
 /**
  * Returns the package manager manifests map, which is a map of parsed package.json
  * files found in the project

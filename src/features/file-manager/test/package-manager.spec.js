@@ -35,4 +35,12 @@ describe('The Package Manager', function() {
     packageManager.findBy(v => false).should.be.empty
     packageManager.findBy(v => true).should.not.be.empty
   })
+
+  describe('Package Graph', function() {
+    it('generates a graph of package dependencies', async function() {
+      const { graph } = await packageManager.exportGraph()
+      graph.should.be.an('object').that.has.property('nodes')
+      graph.should.be.an('object').that.has.property('edges')
+    })
+  })
 })

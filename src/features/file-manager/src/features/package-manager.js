@@ -32,6 +32,7 @@ export const featureMethods = [
   'findNodeModules',
   'walkUp',
   'walkUpSync',
+  'exportGraph',
 ]
 
 export const createGetter = 'packageManager'
@@ -199,6 +200,139 @@ export function start(options = {}, cb = function() {}) {
     })
 
   return this
+}
+
+export async function exportGraph(options = {}) {
+  const packageManager = this
+  const { currentPackage } = this.runtime
+  const { result, keys, pickBy, entries, flatten } = this.lodash
+  const { byName } = this
+
+  const { defaultProjectType = 'library', scope, exclude = [], direction = 'both' } = options
+
+  const packageScope =
+    scope || options.packageScope || currentPackage.name.startsWith('@')
+      ? currentPackage.name.split('/')[0]
+      : currentPackage.name.split('-')
+
+  function stripPackageScope(fromName) {
+    return fromName.replace(`${packageScope}/`, '')
+  }
+
+  function isDevDependency(sourceName, targetName) {
+    const pkg = byName[sourceName]
+    return pkg.devDependencies && pkg.devDependencies[targetName]
+  }
+
+  // a package can declare its projectType as a package.json property
+  // at the top level, or under the key whose name matches the package scope (e.g. @skypager looks in skypager)
+  const findProjectType =
+    typeof options.findProjectType === 'function'
+      ? options.findProjectType
+      : p =>
+          result(p, 'projectType', () =>
+            result(p, [packageScope.replace('@', ''), 'projectType'], defaultProjectType)
+          )
+
+  const packageDependents = this.chain
+    .get('dependenciesMap')
+    .mapValues(d =>
+      keys(pickBy(d, (v, k) => k.startsWith(packageScope) && exclude.indexOf(k) === -1))
+    )
+    .pickBy(v => v.length)
+    .value()
+
+  const packagesDependedOn = this.chain
+    .get('packageNames')
+    .filter(name => exclude.indexOf(name) === -1 && name.startsWith(packageScope))
+    .map(name => [name, keys(packageManager.findDependentsOf(name))])
+    .sortBy(v => v[1].length)
+    .reject(v => !v[1].length)
+    .fromPairs()
+    .value()
+
+  const nodes = this.packageData
+    .filter(
+      ({ name }) =>
+        exclude.indexOf(name) === -1 && (packagesDependedOn[name] || packageDependents[name])
+    )
+    .map((p, index) => {
+      const { name } = p
+      const projectType = findProjectType(p)
+
+      return {
+        data: { id: stripPackageScope(name), label: stripPackageScope(name) },
+        classes: [projectType],
+      }
+    })
+    .filter(Boolean)
+
+  const dependsLinks = flatten(
+    entries(packagesDependedOn)
+      .filter(([targetName]) => exclude.indexOf(targetName) === -1)
+      .map(([targetName, list]) =>
+        list
+          .filter(sourceName => exclude.indexOf(sourceName) === -1)
+          .map((sourceName, i) => ({
+            data: {
+              source: stripPackageScope(sourceName),
+              target: stripPackageScope(targetName),
+            },
+            classes: [
+              'depends',
+              isDevDependency(sourceName, targetName) ? 'devDependency' : 'prodDependency',
+            ],
+          }))
+      )
+  )
+
+  const needsLinks = flatten(
+    entries(packageDependents)
+      .filter(([sourceName]) => exclude.indexOf(sourceName) === -1)
+      .map(([sourceName, list]) =>
+        list
+          .filter(targetName => exclude.indexOf(targetName) === -1)
+          .map((targetName, i) => {
+            return {
+              data: {
+                source: stripPackageScope(sourceName),
+                target: stripPackageScope(targetName),
+              },
+              classes: [
+                'needs',
+                isDevDependency(sourceName, targetName) ? 'devDependency' : 'prodDependency',
+              ],
+            }
+          })
+      )
+  )
+
+  let edges
+
+  // graph the packages by what they depend on
+  if (direction === 'depends') {
+    edges = dependsLinks
+    // graph the packages by what is depended on
+  } else if (direction === 'needs') {
+    edges = needsLinks
+  } else if (direction === 'both') {
+    // show both types of relationships
+    edges = needsLinks.concat(dependsLinks)
+  }
+
+  // this is the shape required by the cytograph-dagre library
+  return {
+    graph: {
+      nodes,
+      edges,
+    },
+    packagesDependedOn,
+    packageDependents,
+    packages: this.packageData,
+    exclude,
+    packageScope,
+    direction,
+  }
 }
 
 export async function startAsync(options = {}) {

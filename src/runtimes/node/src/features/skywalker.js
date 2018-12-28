@@ -109,11 +109,13 @@ export function projectWalker(options = {}) {
   }
 
   options.ignorePatterns !== false &&
-    ignorePatterns.filter(v => typeof v === 'string' && v.length).forEach(pattern => {
-      skywalker = skywalker
-        .directoryFilter(pattern, (n, d) => d(null, false))
-        .fileFilter(pattern, (n, d) => d(null, false))
-    })
+    ignorePatterns
+      .filter(v => typeof v === 'string' && v.length)
+      .forEach(pattern => {
+        skywalker = skywalker
+          .directoryFilter(pattern, (n, d) => d(null, false))
+          .fileFilter(pattern, (n, d) => d(null, false))
+      })
 
   const defaultVisit = node => {
     const { _: info } = node
