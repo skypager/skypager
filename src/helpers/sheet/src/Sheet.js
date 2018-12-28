@@ -120,9 +120,8 @@ export class Sheet extends Helper {
 
     return new Promise((resolve, reject) => {
       if (hasRows) {
-        worksheet.getRows(
-          { offset: 1, ...options },
-          (err, rows) => (err ? reject(err) : resolve(rows))
+        worksheet.getRows({ offset: 1, ...options }, (err, rows) =>
+          err ? reject(err) : resolve(rows)
         )
       } else {
         this.spreadsheet.getRows(worksheet.id, (err, rows) => (err ? reject(err) : resolve(rows)))
@@ -182,9 +181,8 @@ export class Sheet extends Helper {
     )
 
     const authorized = await new Promise((resolve, reject) => {
-      this.spreadsheet.useServiceAccountAuth(
-        serviceAccount,
-        err => (err ? reject(err) : resolve(true))
+      this.spreadsheet.useServiceAccountAuth(serviceAccount, err =>
+        err ? reject(err) : resolve(true)
       )
     })
 

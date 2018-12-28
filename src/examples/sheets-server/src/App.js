@@ -145,20 +145,17 @@ export class App extends Component {
     return (
       <Container fluid style={{ marginTop: '40px', padding: '48px' }}>
         {loading && <Loader active />}
-        {!loading &&
-          !sheetId &&
-          sheets && <ListSheets onClick={this.selectSheet.bind(this)} sheets={sheets} />}
-        {!loading &&
-          sheetId &&
-          data &&
-          info && (
-            <ShowSheet
-              goBack={() => this.setState({ sheetId: undefined })}
-              data={data}
-              info={info}
-              sheetId={sheetId}
-            />
-          )}
+        {!loading && !sheetId && sheets && (
+          <ListSheets onClick={this.selectSheet.bind(this)} sheets={sheets} />
+        )}
+        {!loading && sheetId && data && info && (
+          <ShowSheet
+            goBack={() => this.setState({ sheetId: undefined })}
+            data={data}
+            info={info}
+            sheetId={sheetId}
+          />
+        )}
       </Container>
     )
   }

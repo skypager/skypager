@@ -89,6 +89,6 @@ export function lazyHostMethod(options = {}, context = {}) {
     options: Object.keys(options),
     context: Object.keys(context),
     id: this.id,
-    counter: (counter = counter + 1),
+    counter: counter = counter + 1,
   }
 }
