@@ -4,5 +4,6 @@ src/**/build/**
 src/**/lib/**
 src/**/dist/**
 src/runtime/src/runtime.js
+src/runtime/src/mobx.umd.js
 src/runtime/src/utils/index.js
 build/**
