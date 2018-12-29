@@ -6,26 +6,29 @@ describe('The Sheets Server', function() {
 
   before(async function() {
     port = await runtime.networking.findOpenPort()
-    const { childProcess } = runtime.proc.async.spawn(
-      'node',
-      [
-        '--require',
-        'esm',
-        'scripts/serve.js',
-        '--port',
-        port,
-        '--host',
-        'localhost',
-        '--hostname',
-        'localhost',
-      ],
-      {
-        cwd: runtime.cwd,
-        stdio: 'inherit',
-      }
-    )
 
-    pid = childProcess.pid
+    try {
+      const { childProcess } = runtime.proc.async.spawn(
+        'node',
+        [
+          '--require',
+          'esm',
+          'scripts/serve.js',
+          '--port',
+          port,
+          '--host',
+          'localhost',
+          '--hostname',
+          'localhost',
+        ],
+        {
+          cwd: runtime.cwd,
+          stdio: 'inherit',
+        }
+      )
+
+      pid = childProcess.pid
+    } catch (error) {}
 
     await untilServerIsListening(port)
   })
