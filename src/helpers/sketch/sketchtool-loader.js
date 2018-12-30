@@ -1,5 +1,4 @@
 const { stringifyRequest, getOptions } = require('loader-utils')
-const { exec, spawn } = require('child-process-promise')
 const cli = require('./cli')
 
 const { viewSketchMetadata } = cli
@@ -16,7 +15,7 @@ module.exports = async function(raw) {
     case 'meta':
     case 'metadata':
     default:
-      const metaJson = await viewSketchMetadata(this.resourcePath)
+      const metaJson = await viewSketchMetadata(this.resourcePath, { parse: false })
       output = `module.exports = ${metaJson}`
   }
 

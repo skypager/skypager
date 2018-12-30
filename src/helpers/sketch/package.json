@@ -15,7 +15,8 @@
   "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
   "license": "MIT",
   "dependencies": {
-    "cheerio": "^1.0.0-rc.2"
+    "cheerio": "^1.0.0-rc.2",
+    "sketchapp-json-flow-types": "^0.3.4"
   },
   "repository": {
     "type": "github",
