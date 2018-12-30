@@ -21,6 +21,8 @@ const nodeConfig = merge(require('@skypager/webpack/config/webpack.config.common
     { '@skypager/runtime': 'commonjs2 @skypager/runtime' },
     { '@skypager/features-file-manager': 'commonjs2 @skypager/features-file-manager' },
     { '@skypager/node': 'commonjs2 @skypager/node' },
+    { 'child-process-promise': 'commonjs2 child-process-promise' },
+    { 'fs-extra-promise': 'commonjs2 fs-extra-promise' },
     nodeExternals({
       modulesFromFile: true,
     }),

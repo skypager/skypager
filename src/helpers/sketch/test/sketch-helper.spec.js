@@ -1,13 +1,37 @@
 import runtime from '@skypager/node'
 import Sketch from '../src'
 
-describe('Companion Server / Client Helper', function() {
-  before(function() {
-    !runtime.has('sketches') && runtime.use(Sketch)
+describe('Sketch Helper', function() {
+  const fixturePath = runtime.resolve('test', 'fixtures', 'WebApplication.sketch')
+  let sketch
+
+  it('can be attached', function() {
+    Sketch.should.have.property('attach').that.is.a('function')
+    Sketch.attach(runtime)
+    runtime.helpers.available.should.include('sketch')
+    sketch = runtime.sketch('WebApplication', {
+      path: fixturePath,
+    })
   })
 
-  it('can find the sketch tool', async function() {
-    const bin = await Sketch.findSketchBin()
-    bin.should.be.a('string').that.matches(/sketchtool/)
+  it('creates a registry of sketch documents on the runtime', function() {
+    runtime.should.have
+      .property('sketches')
+      .that.has.property('register')
+      .that.is.a('function')
+    runtime.should.have
+      .property('sketches')
+      .that.has.property('lookup')
+      .that.is.a('function')
+  })
+
+  it('creates a sketch helper factory function on the runtime', function() {
+    runtime.should.have.property('sketch').that.is.a('function')
+  })
+
+  describe('Creating instances directly via the JavaScript API', function() {
+    it('needs a path', function() {
+      sketch.should.have.property('path', fixturePath)
+    })
   })
 })

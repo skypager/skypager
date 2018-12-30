@@ -1,5 +1,5 @@
 const { stringifyRequest, getOptions } = require('loader-utils')
-const cli = require('./cli')
+const cli = require('./src/cli')
 
 const { viewSketchMetadata } = cli
 

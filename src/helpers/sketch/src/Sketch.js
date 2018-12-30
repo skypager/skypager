@@ -1,4 +1,11 @@
 import { Helper } from '@skypager/node'
+import {
+  listSketchArtboards,
+  listSketchPages,
+  listSketchLayers,
+  viewSketchDump,
+  viewSketchMetadata,
+} from './cli'
 
 /**
  * The Sketch Helper is used to work with modules that are created from .sketch files using
@@ -26,11 +33,38 @@ export default class Sketch extends Helper {
   static allowAnonymousProviders = true
   static strictMode = false
 
-  initialState = {
-    metadata: {},
-  }
+  initialState = {}
 
   get pageNames() {}
+
+  get path() {
+    return this.tryGet('sketchFile') || this.tryGet('path')
+  }
+
+  async loadMetadata(pathToSketchFile = this.path, options = {}) {
+    const metadata = await viewSketchMetadata(pathToSketchFile, options)
+    return metadata
+  }
+
+  async loadArtboards(pathToSketchFile = this.path, options = {}) {
+    const layers = await listSketchArtboards(pathToSketchFile, options)
+    return layers
+  }
+
+  async loadLayers(pathToSketchFile = this.path, options = {}) {
+    const layers = await listSketchLayers(pathToSketchFile, options)
+    return layers
+  }
+
+  async loadPages(pathToSketchFile = this.path, options = {}) {
+    const layers = await listSketchPages(pathToSketchFile, options)
+    return layers
+  }
+
+  async loadDump(pathToSketchFile = this.path, options = {}) {
+    const layers = await viewSketchDump(pathToSketchFile, options)
+    return layers
+  }
 
   static attach(runtime, options = {}) {
     Helper.registerHelper('sketch', () => Sketch)
@@ -46,4 +80,8 @@ export default class Sketch extends Helper {
 
     return runtime
   }
+}
+
+export function attach(...args) {
+  return Sketch.attach(...args)
 }

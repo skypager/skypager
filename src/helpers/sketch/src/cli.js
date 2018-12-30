@@ -24,7 +24,7 @@ async function viewSketchMetadata(pathToSketchFile, options = {}) {
 }
 
 async function viewSketchDump(pathToSketchFile, options = {}) {
-  let output
+  let chunks = []
 
   try {
     const promise = spawn('sketchtool', ['dump', pathToSketchFile]).then(({ stdout }) =>
@@ -33,14 +33,16 @@ async function viewSketchDump(pathToSketchFile, options = {}) {
 
     const { childProcess } = promise
 
-    childProcess.stdout.on('data', (data) => {
-      output = output + String(data)
+    childProcess.stdout.on('data', data => {
+      const chunk = data.toString()
+      chunks.push(chunk)
     })
 
     await promise
 
-    return options.parse !== false ? JSON.parse(output) : output
+    const output = chunks.join('')
 
+    return options.parse !== false ? JSON.parse(output) : output
   } catch (error) {
     !options.silent && console.error(`Error running: sketchtool dump ${pathToSketchFile}`)
     throw error
@@ -62,6 +64,7 @@ async function listSketchArtboards(pathToSketchFile, options = {}) {
 async function listSketchLayers(pathToSketchFile, options = {}) {
   try {
     const output = await exec(`sketchtool list layers ${pathToSketchFile}`).then(({ stdout }) =>
+      String(stdout)
     )
     return options.parse !== false ? JSON.parse(output) : output
   } catch (error) {
