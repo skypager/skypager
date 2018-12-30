@@ -1,0 +1,119 @@
+{
+  "pages" : [
+    {
+      "id" : "2EC6B228-7BA7-4622-B964-BFA8F966C5C5",
+      "name" : "Home",
+      "bounds" : "237.000000,29.000000,1024.000000,1024.000000",
+      "artboards" : [
+        {
+          "id" : "6D046892-2083-4B74-9312-A6865D00A946",
+          "name" : "Desktop\/Home",
+          "rect" : {
+            "y" : 29,
+            "x" : 237,
+            "width" : 1024,
+            "height" : 1024
+          },
+          "trimmed" : {
+            "y" : 29,
+            "x" : 237,
+            "width" : 1024,
+            "height" : 1024
+          }
+        }
+      ]
+    },
+    {
+      "id" : "56020DA1-2705-4DA3-92D9-C102B93DC8B8",
+      "name" : "Products",
+      "bounds" : "237.000000,29.000000,1024.000000,1024.000000",
+      "artboards" : [
+        {
+          "id" : "D7412361-E8C6-4141-9CF1-4DAA760B6DA4",
+          "name" : "Desktop\/Products",
+          "rect" : {
+            "y" : 29,
+            "x" : 237,
+            "width" : 1024,
+            "height" : 1024
+          },
+          "trimmed" : {
+            "y" : 29,
+            "x" : 237,
+            "width" : 1024,
+            "height" : 1024
+          }
+        }
+      ]
+    },
+    {
+      "id" : "6B78F5F3-2470-41D0-9AFA-B25504259D5E",
+      "name" : "ProductDetails",
+      "bounds" : "237.000000,29.000000,1024.000000,1024.000000",
+      "artboards" : [
+        {
+          "id" : "4C306994-A0B0-4448-ADC6-950300F5A971",
+          "name" : "Desktop\/ProductDetails",
+          "rect" : {
+            "y" : 29,
+            "x" : 237,
+            "width" : 1024,
+            "height" : 1024
+          },
+          "trimmed" : {
+            "y" : 29,
+            "x" : 237,
+            "width" : 1024,
+            "height" : 1024
+          }
+        }
+      ]
+    },
+    {
+      "id" : "4F496AE5-A60D-4845-A839-76CFA647BBD8",
+      "name" : "PrivacyPolicy",
+      "bounds" : "237.000000,29.000000,1024.000000,1024.000000",
+      "artboards" : [
+        {
+          "id" : "CC19DEDB-93D5-43A8-B80D-56D4D21927D0",
+          "name" : "Desktop\/PrivacyPolicy",
+          "rect" : {
+            "y" : 29,
+            "x" : 237,
+            "width" : 1024,
+            "height" : 1024
+          },
+          "trimmed" : {
+            "y" : 29,
+            "x" : 237,
+            "width" : 1024,
+            "height" : 1024
+          }
+        }
+      ]
+    },
+    {
+      "id" : "DDFEFE47-61EE-4781-B30E-B39804C95267",
+      "name" : "TermsOfService",
+      "bounds" : "237.000000,29.000000,1024.000000,1024.000000",
+      "artboards" : [
+        {
+          "id" : "5B9A8E25-7C0A-4611-A5A5-95085617BF7C",
+          "name" : "Desktop\/TermsOfService",
+          "rect" : {
+            "y" : 29,
+            "x" : 237,
+            "width" : 1024,
+            "height" : 1024
+          },
+          "trimmed" : {
+            "y" : 29,
+            "x" : 237,
+            "width" : 1024,
+            "height" : 1024
+          }
+        }
+      ]
+    }
+  ]
+}
