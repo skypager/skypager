@@ -1,0 +1,25 @@
+{
+  "name": "@skypager/helpers-sketch",
+  "version": "0.1.19",
+  "description": "skypager sketch design document helper",
+  "main": "lib/index.js",
+  "scripts": {
+    "prepare": "yarn build",
+    "build": "cross-env NODE_ENV=production webpack --config webpack.config.js",
+    "smoke-test": "skypager smoke-test",
+    "test": "skypager test --timeout 10000"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
+  "license": "MIT",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.2"
+  },
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/skypager/skypager"
+  },
+  "homepage": "https://skypager.io"
+}
