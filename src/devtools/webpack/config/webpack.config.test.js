@@ -38,6 +38,8 @@ const webpackConfig = merge(config, {
       watch: 'commonjs2 watch',
       'aws-sdk': 'commonjs2 aws-sdk',
       fsevents: 'commonjs2 fsevents',
+      'child-process-promise': 'commonjs2 child-process-promise',
+      'fs-extra-promise': 'commonjs2 fs-extra-promise',
     },
     nodeExternals({ modulesFromFile: true }),
     nodeExternals({ modulesFromFile: false, modulesDir: paths.portfolioNodeModules }),
