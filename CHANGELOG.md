@@ -2,6 +2,13 @@
 
 ## Releases
 
+### 0.1.20
+
+- [@skypager/features-file-manager]
+    - (enhancement) added exportGraph() method to packageManager and moduleManager.  This represents the packges as nodes and edges,
+    where the edges represent the dependencies between packages (dev dependencies, optional, etc).  This is really useful for visualizing
+    the relationships between all of the packages.  Once I'm able to get the dependency between file modules mapped out, i'll do the same for those.
+
 ### 0.1.15
 
 - [@skypager/runtime]

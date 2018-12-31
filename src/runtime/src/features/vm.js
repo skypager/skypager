@@ -83,8 +83,8 @@ export function createCodeRunner(code, options = {}, sandbox) {
       const result = vmContext
         ? script.runInContext(vmContext)
         : thisContext
-          ? script.runInThisContext()
-          : script.runInNewContext(sandbox)
+        ? script.runInThisContext()
+        : script.runInNewContext(sandbox)
 
       return {
         result,

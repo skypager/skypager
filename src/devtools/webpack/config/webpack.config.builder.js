@@ -169,15 +169,15 @@ module.exports = function({ paths, ...options } = {}) {
     node: options.node
       ? options.node
       : target === 'web'
-        ? {
-            dgram: 'empty',
-            fs: 'empty',
-            net: 'empty',
-            tls: 'empty',
-            child_process: 'empty',
-            process: false,
-          }
-        : { __filename: false, __dirname: false, process: false },
+      ? {
+          dgram: 'empty',
+          fs: 'empty',
+          net: 'empty',
+          tls: 'empty',
+          child_process: 'empty',
+          process: false,
+        }
+      : { __filename: false, __dirname: false, process: false },
     plugins: plugins,
     resolve: {
       alias: options.alias || {},
