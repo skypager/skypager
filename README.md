@@ -1,226 +1,45 @@
 # Skypager
-[![CircleCI](https://circleci.com/gh/skypager/skypager/tree/master.svg?style=svg)](https://circleci.com/gh/skypager/skypager/master)
-[![Windows Build status](https://ci.appveyor.com/api/projects/status/j83kh674nbsl3us1/branch/master?svg=true)](https://ci.appveyor.com/project/soederpop/skypager/branch/master)
+> Universal, Fully Integrated, Cross Platform JavaScript Container 
 
-Skypager is a universal JavaScript runtime that makes it easy to write applications which run on node, the browser, in react native, or electron.
+I believe that as person or organization
 
-## Helpers 
+[![CircleCI](https://circleci.com/gh/skypager/skypager/tree/master.svg?style=svg)](https://circleci.com/gh/skypager/skypager/master) [![Windows Build status](https://ci.appveyor.com/api/projects/status/j83kh674nbsl3us1/branch/master?svg=true)](https://ci.appveyor.com/project/soederpop/skypager/branch/master)
 
-Skypager provides a class based abstraction called `Helper`, which let us define patterns for working with groups of similar modules.  
+Skypager is not like a traditional JavaScript framework, instead it gives JavaScript developers the pieces we need to build our own own frameworks on top of the "many different modules" we use (from repositories like NPM, and our own). 
 
-For example:
+It makes it easier to build applications by helping us think about them in distinct layers, composed from separate layers in your portfolio   
 
-- [The Feature Helper](src/runtime/helpers/feature.js) - a module that provides an interface to specific functionality on the running platform. Can be `enable()d` or `disable()d`
-- [The Google Sheets Helper](src/helpers/sheet) - a module that loads data as JSON from a google spreadsheet.  As a developer you can write an interface for reading, transforming, or updating this data.
-- [The Rest Client Helper](src/helpers/client) - a wrapper around the axios REST client.  As a developer you can write a friendly interface for making calls with axios
-- [The Server Helper](src/helpers/server) - a wrapper around any server that can be started and stopped.  By default provides an express server with history api fallback and static file serving enabled.
+In a typical Web Application your top layer is the one the users see and interact with: all of your URLs and the UI that gets rendered at each one.  Underneath that layer, are all of the layers that we work in as designers, developers, testers, and architects.  These layers happen to be the ones the user never sees, and generally won't care about in as much as there are no obvious performance, security, or usability issues to be experienced.  Thankfully, this means that it is possible to get these layers working how you want, built, tested, deployed, and cached until they change, freeing you up to focus on the top layer which matters most to the user.  However, it is unfair to just separate these layers into the ones the user sees, and everything else.  Even beneath the surface, there are many "natural" layers that correspond to the different skillsets and concerns required to deliver a consistent and pleasing user experience.
 
-The idea behind, for example, the Server Helper is that applications that work with servers generally want to do three things:
+This approach requires not only tools, but a different way of thinking about how we organize our JavaScript codebases.  Skypager attempts to provide us with both.
 
-- configure
-- start
-- stop
+With this layered approach, Skypager makes it easy to build cross platform JavaScript projects, which can run on the web, server, desktop, or react-native environment. By providing architectural patterns and tools that help us take advantage of the natural layers in our software projects, Skypager takes the write once, run everywhere style (a.k.a. universal or isomorphic javascript.) to the extreme.
 
-So the Server Helper provides these methods as an abstract interface.  You can register any type of module with the `runtime.servers` registry
-as long as it is capable of providing implementations for these things.  
+Skypager is designed for people who want to build their own portfolios, or monorepos, consisting of their own modules, while leveraging all of the problems that have already been solved by other people and published to NPM.  If you have a handful of apps, all which use the same "stack" of third party libraries, and you want the ability to standardize all of these apps and make it easier to share the progress you make on one app with all of the other apps, Skypager is for you.
 
-```javascript
-const runtime = require('@skypager/node')
-  .use(require('@skypager/helpers-server'))
+Skypager enables you to develop the different layers of your portfolio separately from one another, so that the components and modules which rarely change are built once, cached, and re-used until they change again.  The pieces of the app which change more often, are developed in a separate layer.  This is especially ideal for projects which multiple people or multiple teams contribute to, as the different layers that naturally emerge are very inline with the different teams and skillsets which contribute to a modern application.
 
-runtime.servers.register('app', () => ({
-  // enable cors
-  cors: true,
-  appWillMount(app) {
-    // app is express()
-    app.get('/api/*', (req, res) => res.json([{ data: 'data' }]))
-  }
-}))
+![Team Layers](docs/team-layers.png)
 
-// the barebones app server provider defined above uses the default implementation of start provided by express().listen()
-runtime.server('app').start().then(() => {
-  console.log(`Server Started`)
-})
-```
+In the graphic above, each box might represent a completely different department in a product organization.  
 
-### Inversion of Control framework
+If you're a solo full stack developer, each box represents a separate concern that you need to address using whichever hat you're wearing at the time.  You might be in charge of everything, but use off the shelf themes from bootstrap or semantic ui, or your client may be providing these visual elements for you.  You should be able to easily incorporate, or swap out any element, without causing too much stress on all of the other parts.
 
-The Skypager Helper system provides the runtime with a registry of similar modules, and a function for creating instances of the helpers which use these modules.
-
-This gives you the power to use the inversion of control technique with your modules, which is especially powerful when working with many modules,
-and especially with many different team members on the project.
-
-The [The Feature Helper](src/runtime/helpers/feature.js) is a great example of this.  
-
-Any application can be separated into entry points ( screens, pages, endpoints, commands ) 
-
-And once inside that entry point, we should be able to clearly identify the features that are available to be interacted with. 
-
-A `Feature` is any concept that can
-
-1) tell the program whether it is "supported" in the current context 
-2) be enabled with options, or configured dynamically
-3) provide a public API to the program
-
-And so the `Feature` class provides a registry of modules which meet these requirements.
-
-```javascript
-export const shortcut = 'myFeature'
-
-// only supported on  node in development or test environments
-export function isSupported() {
-  const { runtime } = this
-  return runtime.isNode && !runtime.isProduction
-} 
-
-/**
- * @param {Object} options
- * @param {String} options.type - the type to use
- */
-export function featureWasEnabled({ type }) {
-  switch(type) {
-    // do something 
-  }  
-}
-
-export function methodOne() {
-
-}
-
-export function methodTwo() {
-
-}
-
-export const featureMethods = ['methodOne', 'methodTwo']
-```
-
-So when you need to use `myFeature`
-
-```javascript
-runtime.features.register('my-feature', () => require('./my-feature'))
-const myFeature = runtime.feature('my-feature') 
-
-myFeature.enable()
-myFeature.methodOne()
-```
-
-What this allows you to do is standardize the way everyone who contributes to your project delivers a feature, so that anyone else who wants to
-use that feature can just enable it and use its public API.
-
-One thing I've developed a lot with this pattern is authentication.
-
-From the perspective of a UI, when I want to use authentication I either want to login, logout, or know who the current user is.
-
-There are dozens of different ways and apis with their own differing styles, but at the end of the day they can all be normalized to 
-provide this information in a consistent way.  
-
-In the example below, we see how a feature allows for this kind of dynamicism.  A generic authentication feature which lets you use firebase, aws, or anything else under the hood.
-
-```javascript
-export const shortcut = 'auth'
-
-export function login() {
-  return this.authProvider.login()
-}
-
-export function logout() {
-  return this.authProvider.logout()
-}
-
-export function getCurrentUser() {
-  return this.authProvider.getCurrentUser()
-}
-
-export function featureWasEnabled({ type = "firebase", config }) {
-  switch(type) {
-    case 'firebase':
-      this.authProvider = runtime.feature('auth/firebase') 
-      this.authProvider.enable(config)
-      break
-    default:
-      this.authProvider = runtime.feature('auth/aws') 
-      this.authProvider.enable(config)
-      break
-  }
-}
-```
-
-Now in your framework you can expose the runtime with these features
-
-```javascript
-import runtime from '@skypager/web'
-import * as AuthFeature from './src/features/auth'
-
-runtime.features.register('auth', () => AuthFeature)
-
-export default runtime
-```
-
-And in your application, they're available to be used
-
-```javascript
-import runtime from './runtime'
-
-runtime.feature('auth').enable({ type: 'firebase', config: {} })
-
-runtime.auth.login(username, password)
-```
-
-The `runtime.features` registry will tell you all of the features available
-
-```javascript
-runtime.features.available
-```
-
-### Helper Options
-
-Each instance of a helper class will have an `options` property that will be composed of several elements.  
-
-The motivation behind this is to support being able to supply configuration / options via package.json config, 
-runtime ARGV --command-line-flags as well as javascript runtime objects in the code.
-
-```javascript
-const customOptions = { myOption: 'nice' }
-// the skypager property in the package.json
-const { skypager: packageConfig } = runtime.currentPackage
-const { argv } = runtime
-const pageModel = runtime.feature('pageModel', customOptions)
-
-pageModel.options === Object.assign(
- // package.json config by default
- packageConfig,
- // the package.json config property that matches the helper instance name next
- packageConfig.pageModel,
- // the command line flags e.g. --my-option=nice override json config
- runtime.argv
- // the custom options passed by the code override anything else
- customOptions
-}
-```
-
-So in the above example, a script executed with `--my-option=whatever` in a project that has `skypager: { myOption: 'yes' }` would use the value passed to it.
-
-If that was left out, it would use `whatever` from `--my-option=whatever`, and if that was left out,
-it would use `skypager.myOption` from the package.json.  If that was left out, then it would be up to the helper class to determine.
-
-## Example Projects
-
-Skypager is a powerful framework which can be used to build any kind of app, here are some examples of things we've built:
-
-- [Sheets Server](src/examples/sheets-server) A REST API that lets you browse your google spreadsheets, and request them in JSON form
+In other words, if you don't already manage these aspects of an application as their own independent layer, you are probably having a much harder time than you need to be when changing things in the different layers.
 
 ## Installation
 
 You can install the single package `skypager` which provides the latest versions from the '@skypager/*' portfolio
 
 ```shell
-$ yarn add 
+$ yarn add skypager --save 
 ```
 
-Or you can install the main packages directly
+Or you can install the inividual packages directly:
 
 ```shell
-$ yarn add @skypager/cli @skypager/node @skypager/web
+$ yarn add @skypager/cli @skypager/node --dev # for single page apps and not servers, these can be devDependencies
+$ yarn add @skypager/web --save # for the browser builds, this is a runtime / production dependency
 ```
 
 ## Usage
@@ -246,6 +65,87 @@ runtime.start().then(() => {
   })
 </script>
 ```
+
+## Easily Extendable
+
+The `runtime`, while useful by itelf, is designed to be extended.  When you solve a problem that all of the applications in your portfolio can benefit from, you can solve it in a separate module and create a runtime which automatically has access to this module and can lazy load it when needed.
+
+```javascript
+import runtime from '@skypager/runtime'
+import MyNotificationsFeature from '@my/features-notifications'
+import MyLoggingFeature from '@my/features-logging'
+import MyAnalyticsFeature from '@my/features-analytics'
+import MyUserAuthenticationFeature from '@my/features-authentication'
+
+const myRuntime = runtime
+  .use(MyUserAuthenticationFeature)
+  .use(MyNotificationsFeature)
+  .use(MyLoggingFeature)
+  .use(MyAnalyticsFeature)
+
+export default myRuntime 
+```
+
+With this module, you have encoded a standard base layer that all of your apps can share.  These apps should never need to solve authentication, notifications, logging, or analytics on their own.  They get the benefit of these features just by using your runtime.
+
+## Motivation
+
+In 2019, JavaScript has become a universal language that empowers people to deploy applications on every platform, device, or form factor you can imagine.  There is an open source package for almost any thing you could need help building.  We can write code once in the most modern form of the language, and transpile code to support the oldest browsers out there.  This is a somewhat recent development in JavaScript, but it eliminates any tradeoffs we once had to make when choosing how we write JavaScript, given that it might be run on older browsers which don't support our features. 
+
+All of these capabilities come with a cost in complexity, and can become barriers that prevent people from being able to contribute to a project.  Many tools have emerged to address this problem in the time I have spent developing Skypager: tools which aim to provide developers with a single dependency solution offering zero config developer experiences.  Skypager also provides a similar tool, however I think that zero config single dependency tools address this problem from a very limited perspective since once build tooling is standardized, there is still an entire universe of other things which multiple projects have in common, and not only is it tedious to keep repeating them, it makes software development much more expensive than it needs to be, and forces us to spend more time on things which our users don't really care about. With JavaScript we have very little in the way of standardizing and re-using these patterns.  At best they live in a coding standards document and are taught to every developer who joins the project.
+
+Skypager is my attempt to codify and modularize all of the things I've seen my applications have in common in the 20 years I have been developing JavaScript applications.
+
+## Runtime Concept
+
+Regardless of which framework you are using, if you're using a single page app, or rendering pages on the server, you're probably using some routing DSL (like Express, Hapi, or React-Router, or many others) to declare which URLs map to which pages.  Even if you're building a completely static website, your folder organization is itself a routing DSL.
+
+If you have multiple apps which use the same libraries, chances are most of the project's source trees are very similar to each other.  The code which is different in each app, odds are, can be understood quickest by looking at the routes and seeing which modules are used to render them in response to a user's request.  (If you've used Webpack or any other module bundler, these are your "entry" points.)
+
+Each of the pages in your app, should generally not know or care about how they were rendered.  This is especially true when you want to render a page first on the server, and then let client side JS handle the rest, without changing the code.  
+
+The `runtime` idea exists to provide the code in this top level UX layer with a single object to talk to which behaves the same way regardless of which environment you're running.  It takes care of abstracting the many differences away, so your code can focus on what makes it unique for your user.
+
+Skypager provides a few base runtimes:
+
+- [@skypager/runtime](src/runtime) - universal platform agnostic base runtime, which provides observable state, and other utilities which are useful in any context
+- [@skypager/node](src/runtimes/node) - the universal runtime extended with node specific features and helpers, used in server side scripts / long running processes (e.g. web or api servers)
+- [@skypager/web](src/runtimes/web) - the browser runtime extended with browser specific features and helpers, used in your browser builds
+
+And the following runtimes are being ported over from older versions of skypager
+
+- [@skypager/electron](ROADMAP.md) - either the node or web runtime, extended with electron specific libraries and utilities depending if you're in the renderer or main electron process
+- [@skypager/native](ROADMAP.md) - the universal runtime extended with react-native specific features 
+
+The value of this approach means when you're developing React Components, you can have them talk to the runtime instead of the platform.  When you want to re-use this component in another platform or process, it should be no big deal to do so.
+
+Similarly, when you want to reuse these components across different apps which also use the `runtime`, you don't need to make so many changes as your apps will have a uniform pattern for how they get their state.
+
+## Docker for the Frontend
+
+I think of Skypager as being the equivalent of Docker for JavaScript applications running in the browser, on the server, on phones, desktops, in space.  It provides you with a system for working with JavaScript modules in cacheable layers, just like Docker.  This makes it possible to separate your work into layers, where the things which change the least, but are most foundational, are at the bottom.  The things which change the most, and are at the top.
+
+![Layers](docs/layers.png)
+
+Using this approach makes releasing cross platform JavaScript much easier, because your top level application layer is abstracted away from the underlying platform layer.  These underlying platform layers are aware of this, and perform dependency injection
+
+### Layers are just collections of modules 
+
+A Layer is just a group of dependencies that work together.  Skypager provides a [Helper Base Class](docs/about-helpers.md) for standardizing different types of modules based on when and where in the application process they are used:
+
+- [The Rest Client Helper](src/helpers/client) - a wrapper around the axios REST client.  As a developer you can write a friendly, cross-platform interface for making calls with axios.
+- [The Server Helper](src/helpers/server) - a wrapper around any server that can be started and stopped.  By default provides an express server with history api fallback and static file serving enabled.
+- [The Feature Helper](src/runtime/helpers/feature.js) - a module that provides an interface to specific functionality on the running platform. Can be `enable()d` or `disable()d`
+- [The Google Sheets Helper](src/helpers/sheet) - a module that loads data as JSON from a google spreadsheet.  As a developer you can write an interface for reading, transforming, or updating this data.
+- [The Sketch Document Helper](src/helpers/sketch) - a module that lets you load a designers sketch files as javascript modules.  This can be used to power various code generation apps, as well as anything else you can think of.
+
+The Runtime is responsible for activating each of these layers for you, relying on [The Inversion of Control Technique](docs/inversion-of-control-framework.md) for your modules.  (aka Don't call me, I'll call you.)
+
+## Example Projects
+
+Skypager is a powerful framework which can be used to build any kind of app, here are some examples.
+
+- [Sheets Server](src/examples/sheets-server) A REST API that lets you browse your google spreadsheets, and request them in JSON form
 
 ## Local Development
 
