@@ -3,6 +3,10 @@
 
 [![CircleCI](https://circleci.com/gh/skypager/skypager/tree/master.svg?style=svg)](https://circleci.com/gh/skypager/skypager/master) [![Windows Build status](https://ci.appveyor.com/api/projects/status/j83kh674nbsl3us1/branch/master?svg=true)](https://ci.appveyor.com/project/soederpop/skypager/branch/master)
 
+![Logo](docs/skypager-logo-nobg.svg)
+
+## What makes it different?
+
 Skypager is not like a traditional JavaScript framework, instead it gives JavaScript developers the pieces we need to build our own own frameworks on top of the "many different modules" we use (from repositories like NPM, and our own). 
 
 It makes it easier to build applications by helping us think about them in distinct layers, composed from separate layers in your portfolio   
@@ -66,7 +70,9 @@ runtime.start().then(() => {
 
 ## Easily Extendable
 
-The `runtime`, while useful by itelf, is designed to be extended.  When you solve a problem that all of the applications in your portfolio can benefit from, you can solve it in a separate module and create a runtime which automatically has access to this module and can lazy load it when needed.
+The `runtime`, while useful by itelf, is designed to be extended.  
+
+When you solve a problem that all of the applications in your portfolio can benefit from, you can solve it in a separate module and create a runtime which automatically has access to this module and can lazy load it when needed.
 
 ```javascript
 import runtime from '@skypager/runtime'
@@ -85,6 +91,51 @@ export default myRuntime
 ```
 
 With this module, you have encoded a standard base layer that all of your apps can share.  These apps should never need to solve authentication, notifications, logging, or analytics on their own.  They get the benefit of these features just by using your runtime.
+
+In any application
+
+```javascript
+import React from 'react'
+import { render } from 'react-dom'
+import runtime from 'skypager'
+
+const App = ({ runtime }) =>
+  <pre>{JSON.stringify(runtime.currentState, null, 2 ) }</pre>
+
+runtime.start()
+.then(() => render(<App runtime={runtime} />, document.getElementById('app')) )
+```
+
+## What does the runtime provide your application?
+
+- Asynchronous middlewares and lifecycle hooks (tap into any stage of the application boot and initialization logic)
+- Environment detection (isBrowser, isNode, isReactNative, isElectron, isElectronRenderer, isProduction, isDevelopment, isTest, isCI, etc)
+- Event emitters and global event bus patterns
+- [A 12 factor application architecture pattern](docs/12-factor-architecture.md) that makes it easy to containerize your frontend code and inject environment or deployment specific configuration in from the outside, so that your applications are portable and vendor agnostic.
+- A really good balance between composition and inheritance.  Inspired by React and Docker.
+- Out of the box integration between design / build / test / runtime contexts ( even in production! ) 
+- Utilities for working with strings, urls, routes
+- [A module registry system](docs/module-registries.md) that can load any kind of module in any environment (even dynamically at runtime in the browser from npm) 
+- [Utilities for dynamically building interfaces and mixins](docs/property-utils.md) (turn any simple JSON object you have access to into an [Entity](docs/entity-model.md) 
+- Dependency injection API
+
+### Familiar Component Module (State, Props, Context) 
+
+Componetize any Runtime, and Componetize any module in the Runtime with a `Helper` class that is very similar conceptually to a React Component.  Each Helper subclass can be used to `mount` any module and provide it with observable state and life-cycle hooks.
+
+- The `Helper` is a `React.Component`, the instances are the mounted elements.  
+- The module (a helper's `provider`) provides `defaultProps` 
+- The options you pass when you create a `Helper` instance are the actual props
+- The Rutime can pass context down to Helper instances which can pass their own context down to other Helpers they create. 
+- Each module instance has a observable `state`
+
+### Observable / State API
+
+The Runtime uses the Mobx library as its reactive state engine to provide applications with observable objects.  It uses it internally, and exposes it as a dependency that can be injected into your app if you don't want to bundle Mobx separately.
+
+The Runtime has a `state` observable, and a React like `setState` API
+
+Helper subclasses can provide their own observable state as well, and really any mobx primitive
 
 ## Motivation
 
@@ -144,6 +195,7 @@ The Runtime is responsible for activating each of these layers for you, relying 
 Skypager is a powerful framework which can be used to build any kind of app, here are some examples.
 
 - [Sheets Server](src/examples/sheets-server) A REST API that lets you browse your google spreadsheets, and request them in JSON form
+- [Conceptual Example](docs/conceptual-example.md)
 
 ## Local Development
 

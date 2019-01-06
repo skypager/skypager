@@ -259,7 +259,7 @@ export class Runtime {
     if (!isValidHelper) {
       callback(new Error(`${registryPropName} does not appear to be a valid helper`))
     } else {
-      callback(this, this.helpers.lookup(isValidHelper), { registry: this.get(registryPropName)})
+      callback(null, this, this.helpers.lookup(isValidHelper), { registry: this.get(registryPropName)})
     }
   }
 
@@ -1451,7 +1451,7 @@ export function makeStateful(obj = {}) {
     }
   })
 
-  //obj.getter('currentState', () => obj.state.toJSON())
+  // obj.getter('currentState', () => obj.state.toJSON())
 
   return obj
 }
