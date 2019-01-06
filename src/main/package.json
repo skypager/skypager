@@ -1,6 +1,6 @@
 {
   "name": "skypager",
-  "version": "40.0.14",
+  "version": "40.0.15",
   "main": "universal.js",
   "publishConfig": {
     "access": "public"
@@ -10,10 +10,10 @@
   "license": "MIT",
   "author": "Jon Soeder <jon@chicago.com>",
   "dependencies": {
-    "@skypager/web": "^0.1.20",
-    "@skypager/node": "^0.1.20",
-    "@skypager/cli": "^0.1.20",
-    "@skypager/runtime": "^0.1.20"
+    "@skypager/web": "^0.1.21",
+    "@skypager/node": "^0.1.21",
+    "@skypager/cli": "^0.1.21",
+    "@skypager/runtime": "^0.1.21"
   },
   "keywords": [
     "skypager"
