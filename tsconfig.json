@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
     "noEmit": true,
     "strict": true,
     "jsx": "preserve",
@@ -8,7 +9,13 @@
     "moduleResolution": "node",
     "esModuleInterop": true,
     "removeComments": true,
+    "resolveJsonModule": true,
     "isolatedModules": true,
+    "noImplicitAny": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
     "rootDir": "./",
     "baseUrl": "./",
     "paths": {

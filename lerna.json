@@ -11,14 +11,8 @@
   ],
   "command": {
     "publish": {
-      "allowBranch": [
-        "develop",
-        "master"
-      ],
-      "ignoreChanges": [
-        "**/*.md",
-        "**/*.spec.js"
-      ]
+      "allowBranch": ["develop", "master"],
+      "ignoreChanges": ["**/*.md", "**/*.spec.js"]
     },
     "run": {
       "npmClient": "yarn"

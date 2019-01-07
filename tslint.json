@@ -23,12 +23,7 @@
         "import-sources-order": "any"
       }
     ],
-    "variable-name": [
-      true,
-      "ban-keywords",
-      "check-format",
-      "allow-pascal-case"
-    ],
+    "variable-name": [true, "ban-keywords", "check-format", "allow-pascal-case"],
     "object-literal-sort-keys": [true, "ignore-case", "shorthand-first"],
     "import-name": [true, "ignore-modules"]
   },
@@ -38,6 +33,7 @@
     "exclude": [
       "config/**/*.js",
       "node_modules/**/*.ts",
+      "**/node_modules/**/",
       "coverage/lcov-report/*.js",
       "**/*/serviceWorker.ts"
     ]

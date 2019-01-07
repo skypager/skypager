@@ -27,9 +27,7 @@
     "prettier:json": "prettier --config .prettierrc  --write *.json",
     "prettier:md": "prettier --config .prettierrc --write **/*.{md, mdx}"
   },
-  "keywords": [
-    "Skypager"
-  ],
+  "keywords": ["Skypager"],
   "author": "Jon Soeder <jon@chicago.com>",
   "license": "MIT",
   "workspaces": [
