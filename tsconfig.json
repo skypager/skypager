@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "noEmit": true,
+    "strict": true,
+    "jsx": "preserve",
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "node",
+    "esModuleInterop": true,
+    "removeComments": true,
+    "isolatedModules": true,
+    "rootDir": "./",
+    "baseUrl": "./",
+    "paths": {
+      "@skypager/*": [
+        "src/devtools/*",
+        "src/runtime",
+        "src/runtimes/*",
+        "src/features/*",
+        "src/helpers/*",
+        "src/servers/*",
+        "src/examples/*",
+        "src/main"
+      ],
+      "*": ["node_modules", "src"]
+    }
+  },
+  "awesomeTypescriptLoaderOptions": {
+    "useBabel": true,
+    "babelCore": "@babel/core"
+  },
+  "include": ["src/packages"],
+  "exclude": ["node_modules", "packages/**/dist", "packages/**/build"]
+}
