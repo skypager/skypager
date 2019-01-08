@@ -18,5 +18,5 @@ export function showSheetMetadata(sheetKey, query = {}) {
 }
 
 export function showWorksheet(sheetKey, worksheetKey, query = {}) {
-  return this.client.get(`/sheets/${sheetKey}/worksheetKey`, { query }).then(r => r.data)
+  return this.client.get(`/sheets/${sheetKey}/${worksheetKey}`, { query }).then(r => r.data)
 }
