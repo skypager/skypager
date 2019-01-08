@@ -1,0 +1,427 @@
+{
+  "commit" : "a9a8e0cffcaebe58914746cb1ab8f707ba873565",
+  "pagesAndArtboards" : {
+    "DDC0E602-9883-4C4A-87DF-82359EFBB0DE" : {
+      "name" : "Preview",
+      "artboards" : {
+        "2164F08C-CD94-485F-9069-937333CCF51D" : {
+          "name" : "Icons"
+        },
+        "52E92BAF-6281-48D2-90E4-723564DA5072" : {
+          "name" : "Colors"
+        },
+        "585A9C5A-1F4B-4EE2-9455-CD3A59E717ED" : {
+          "name" : "Typography"
+        },
+        "A93B5341-1E86-42B6-8CA1-C4E5389E22B9" : {
+          "name" : "Style Guidelines"
+        }
+      }
+    },
+    "234C2167-FE06-4C2A-BF03-E4C51FD6FAC5" : {
+      "name" : "Editable",
+      "artboards" : {
+        "9A0619C1-7B60-4A58-AB28-67F754AAFAE6" : {
+          "name" : "Icons"
+        },
+        "F2B61043-D058-4917-94AC-80C1B799630E" : {
+          "name" : "Typography"
+        },
+        "62C76030-A5D6-4F03-82F3-0C759C86B43D" : {
+          "name" : "Start"
+        },
+        "2BD5CC38-4186-41D1-8DE7-4930059D5A30" : {
+          "name" : "Colors"
+        }
+      }
+    },
+    "7F124A64-F0BE-4607-B0BD-C93477C8C7B9" : {
+      "name" : "Symbols",
+      "artboards" : {
+        "08203912-079A-4812-AC8C-234E70BC5B88" : {
+          "name" : "Icons \/ 003-thunderbolt"
+        },
+        "96345711-8110-41CB-B4A6-08E5B0B64BE3" : {
+          "name" : "Icons \/ 008-watch"
+        },
+        "9BBE1F7F-B075-40E1-845B-88AF4C828510" : {
+          "name" : "Icons \/ 018-twitter"
+        },
+        "2A5DB98D-C5C9-48A8-9BDE-6649A73D9170" : {
+          "name" : "Icons \/ 128-bar-chart-1"
+        },
+        "3C17F947-5463-4E3C-A254-2A85D18270E3" : {
+          "name" : "Icons \/ 012-user-1"
+        },
+        "3328A3E6-8C64-4766-BA80-C717F92C41CC" : {
+          "name" : "Colors \/ Primary \/ 400"
+        },
+        "DF780DAA-C438-42F0-9576-3D367C9FEB98" : {
+          "name" : "Icons \/ 097-facebook"
+        },
+        "45FC5D1E-A8AE-432C-93D5-09545F49FB0C" : {
+          "name" : "Icons \/ 034-prohibition"
+        },
+        "40A1ABA8-3E05-478F-972C-B79922B7F369" : {
+          "name" : "Icons \/ 064-minus-2"
+        },
+        "1F1B7BC1-8B23-4F02-A984-7FE5103A20F7" : {
+          "name" : "Colors \/ Primary \/ 100"
+        },
+        "82C334A2-8DC3-47B6-83BF-92AF47DBC307" : {
+          "name" : "Icons \/ Arrow \/ arrow-right"
+        },
+        "78461F86-EFD4-4B67-88E3-D770C751F5EC" : {
+          "name" : "Icons \/ 085-image"
+        },
+        "13EA69FF-873A-481A-A602-DCF1AB8E6FBE" : {
+          "name" : "Colors \/ Accent \/ Warning"
+        },
+        "E60E0BA6-4DC4-42A1-8A9E-2F737CBD94FE" : {
+          "name" : "Icons \/ 136-shutter"
+        },
+        "191AFC61-E5F3-42E0-8F0D-516920DA13C8" : {
+          "name" : "Icons \/ 083-info"
+        },
+        "7564BFEC-3D0C-49DD-8F94-0D4E1F31C380" : {
+          "name" : "Icons \/ 050-pie-chart"
+        },
+        "DC902EB7-B309-4322-876B-8E93FF211429" : {
+          "name" : "Icons \/ 137-anchor"
+        },
+        "CBA14168-C442-43F7-90E1-290EA737DB38" : {
+          "name" : "Icons \/ 127-battery"
+        },
+        "007F2468-39C6-49CA-9C8C-77C72398CA4B" : {
+          "name" : "Icons \/ 069-voice-recording-1"
+        },
+        "BAC6A356-2FF5-49B8-A017-F5F66154566D" : {
+          "name" : "Icons \/ 021-trash"
+        },
+        "C50E64E7-A50A-4B85-9AE4-A1B97A219F6F" : {
+          "name" : "Icons \/ 106-delete"
+        },
+        "858836EF-0328-47F5-95B8-B4438FAA0C8B" : {
+          "name" : "Icons \/ 035-share"
+        },
+        "2E784465-CE10-430E-86FA-D0F02B5098A3" : {
+          "name" : "Colors \/ Text \/ 50"
+        },
+        "3D6E5478-A5F6-4F53-B62A-6225925ADCE1" : {
+          "name" : "Icons \/ 019-triangle"
+        },
+        "46A17BBE-2046-44D0-80BA-AAFA5C6DC804" : {
+          "name" : "Icons \/ 122-cube"
+        },
+        "A6D040BF-7075-4217-8E46-FDBCDF56279C" : {
+          "name" : "Icons \/ 119-photo-camera"
+        },
+        "51F4DF65-CE78-4084-BBAB-A9E3755C1ECA" : {
+          "name" : "Colors \/ Primary \/ 50"
+        },
+        "D7CD03F5-F823-4359-B55F-209A2A8FB7D3" : {
+          "name" : "Icons \/ 124-bluetooth"
+        },
+        "3AA783E7-A1C7-4821-B035-EEC86509F5A8" : {
+          "name" : "Icons \/ 103-download-1"
+        },
+        "90E31D5E-C4D2-4CDF-8141-5BDAFC884298" : {
+          "name" : "Icons \/ 117-check-1"
+        },
+        "E6588080-29ED-4D6E-B840-2E7A5F891CEA" : {
+          "name" : "Icons \/ 100-external"
+        },
+        "18883C45-FB12-4D7E-9EA5-798708A12026" : {
+          "name" : "Icons \/ 062-moon"
+        },
+        "3BF3FF82-5F6E-4D4C-BB2B-E4BBBA423B27" : {
+          "name" : "Icons \/ 060-musical-note"
+        },
+        "AEEADC3C-DD16-4155-A163-99BD14D5B429" : {
+          "name" : "Colors \/ Accent \/ Error"
+        },
+        "F77521FA-CEEC-4B83-BE4D-0CE526DF03E6" : {
+          "name" : "Icons \/ 071-menu"
+        },
+        "6CE7B4C0-B552-4BBE-9A45-95B99986DAC8" : {
+          "name" : "Icons \/ 092-folder"
+        },
+        "BA8C9984-4B72-49F3-AC92-BF8DCD7DA3BC" : {
+          "name" : "Icons \/ 033-square"
+        },
+        "4306EE37-6EF8-4AFF-A8D0-93CA687625F0" : {
+          "name" : "Icons \/ 118-check"
+        },
+        "A6671DAB-5FCD-4C26-9AAB-CDF83D8CAF20" : {
+          "name" : "Icons \/ 049-play"
+        },
+        "D373E973-20D0-4DE0-91D3-964B70DE834B" : {
+          "name" : "Icons \/ 088-headphones"
+        },
+        "46B635F3-D82B-44FF-A104-E621E7E7BBC8" : {
+          "name" : "Icons \/ 009-video-camera-1"
+        },
+        "E3106768-FF7A-4893-875B-A5AAE42A7DDB" : {
+          "name" : "Colors \/ White \/ Main"
+        },
+        "E78C75F5-E9EC-450C-A3CC-64D97DC2CAFC" : {
+          "name" : "Colors \/ Accent \/ Success"
+        },
+        "5099B84B-F4DC-4DC8-961B-890771270C4F" : {
+          "name" : "Icons \/ 073-maximize"
+        },
+        "6CE2ED50-C785-43CD-963F-148602F499DA" : {
+          "name" : "Icons \/ 037-scissors"
+        },
+        "875F63A6-63AA-46E7-901A-D7576604A639" : {
+          "name" : "Icons \/ 086-home"
+        },
+        "C61327E3-BB13-4154-91BF-ED31EAEDA59A" : {
+          "name" : "Icons \/ 072-maximize-1"
+        },
+        "0950834B-745D-43C3-9A61-4FA30641F540" : {
+          "name" : "Icons \/ 061-move"
+        },
+        "2766D63B-7422-4131-A73C-102E4E311DC7" : {
+          "name" : "Icons \/ 145-monitor"
+        },
+        "9C05C754-6BC1-4FD5-BC26-2BEDCCD33BCA" : {
+          "name" : "Colors \/ Gradients \/  1 Gradient"
+        },
+        "305EC7F0-4F29-495C-B492-49549284602D" : {
+          "name" : "Colors \/ Text \/ 400"
+        },
+        "35BC6EAB-CBD4-41F2-B91D-E64E88AE7DF5" : {
+          "name" : "Icons \/ 076-email"
+        },
+        "85C38F9B-F760-4E6B-BCAF-70DCB072C6CA" : {
+          "name" : "Icons \/ 014-upload-2"
+        },
+        "C2CD1049-0A86-4422-9087-E4996BD368DA" : {
+          "name" : "Icons \/ 017-umbrella"
+        },
+        "8B1FE7C7-8C1C-416B-BC73-A779313B827C" : {
+          "name" : "Colors \/ Secondary \/ 50"
+        },
+        "0AE7C56C-D7EC-4FEC-ABA3-BAC9124C6D06" : {
+          "name" : "Icons \/ 015-upload-1"
+        },
+        "B1A2B817-4083-4060-9650-D18D1320D599" : {
+          "name" : "Icons \/ 094-filter"
+        },
+        "85D12AF0-1D6F-4D82-B646-58B353B76B9F" : {
+          "name" : "Colors \/ Text \/ 300"
+        },
+        "81185A19-2ADF-4962-AE3A-8F19C8F5797E" : {
+          "name" : "Icons \/ 102-droplet"
+        },
+        "83876422-79FA-4299-B7BE-7E3FC414797E" : {
+          "name" : "Icons \/ 032-star"
+        },
+        "59439598-E490-4F5D-97CB-C31CB009D880" : {
+          "name" : "Icons \/ 121-briefcase"
+        },
+        "551CF061-787D-478A-A0B1-B65CDDAF9D65" : {
+          "name" : "Icons \/ 108-chat-1"
+        },
+        "42205A7F-A7DB-4F7B-AA4E-2AEAF1E6C261" : {
+          "name" : "Icons \/ 074-map"
+        },
+        "116C01A9-6C8F-4372-B0B6-F9DECB596586" : {
+          "name" : "Icons \/ 087-heart"
+        },
+        "54F53048-96BE-49D8-BDF3-6911EF4F0EC3" : {
+          "name" : "Icons \/ 007-wind"
+        },
+        "6FFF1E49-30D8-4785-BA7A-B5F57F9A0592" : {
+          "name" : "Icons \/ 101-edit"
+        },
+        "BD674640-DD80-4D68-85CB-C3E7AF9F891E" : {
+          "name" : "Icons \/ 066-minus"
+        },
+        "AC2CAE90-8205-49F6-87E5-E6CA840244A6" : {
+          "name" : "Icons \/ 063-monitor-1"
+        },
+        "21B86ACE-0733-4C2E-AC62-B096F5359D82" : {
+          "name" : "Icons \/ 123-bookmark"
+        },
+        "A73528CB-C4C3-4B02-9E89-840129C7CB12" : {
+          "name" : "Icons \/ Arrow \/ arrow-left"
+        },
+        "68159620-3EFE-400F-9BA9-EF8EEDAA3837" : {
+          "name" : "Colors \/ Secondary \/ Main"
+        },
+        "001BADF8-B673-4FDE-A57D-C7489E4C9315" : {
+          "name" : "Colors \/ Primary \/ 300"
+        },
+        "4A21F50D-18AB-4518-9703-6F2A04F6DAD6" : {
+          "name" : "Icons \/ 109-chat"
+        },
+        "A2797EA3-00EE-4907-91E3-92B885DE7BB5" : {
+          "name" : "Icons \/ 116-check-2"
+        },
+        "31F6CE66-9A39-4A6A-A11C-9B5E88634F0B" : {
+          "name" : "Icons \/ 065-minus-1"
+        },
+        "C3CC3BCD-B4E5-468E-A930-5D3463DB2B2F" : {
+          "name" : "Icons \/ 104-cloud-computing-1"
+        },
+        "7DBFE12F-501E-41D3-832D-9C727C75C9F6" : {
+          "name" : "Icons \/ 005-close-1"
+        },
+        "D3133B41-3F2A-4731-B763-CED988701C9A" : {
+          "name" : "Colors \/ Primary \/ Main"
+        },
+        "5170235E-B50D-42A9-9A46-C2326FC3F5AE" : {
+          "name" : "Colors \/ Secondary \/ 100"
+        },
+        "EBC67F0E-444E-4F63-B16F-4994FBDF8E41" : {
+          "name" : "Colors \/ Secondary \/ 300"
+        },
+        "D68B8A9A-E39E-44B3-B90F-8AC2A74CFF95" : {
+          "name" : "Icons \/ 125-bell-1"
+        },
+        "34564332-E50F-4EE8-8FEB-E53B5DE8E954" : {
+          "name" : "Icons \/ 051-phone-call-6"
+        },
+        "6CC3DD14-40C0-4F50-8CE3-E092EAA10CE3" : {
+          "name" : "Icons \/ 075-placeholder"
+        },
+        "2E796EBC-BC34-4E25-B496-71B75903B88D" : {
+          "name" : "Icons \/ 016-unlock"
+        },
+        "5CA2FB88-37D6-4507-BBCF-8A490F210F28" : {
+          "name" : "Icons \/ 112-cloud"
+        },
+        "A6B28110-629C-4F4E-B74F-2442353A822E" : {
+          "name" : "Icons \/ 011-user-2"
+        },
+        "C9B14957-5603-47BA-857C-E2F546274DBC" : {
+          "name" : "Colors \/ Text \/ 100"
+        },
+        "80BE4997-3C1C-47E7-AFA6-973471B86544" : {
+          "name" : "Icons \/ 082-instagram"
+        },
+        "A006EBF0-EF9D-4B97-BF88-7715037F73A7" : {
+          "name" : "Icons \/ 105-compact-disc"
+        },
+        "6007A51B-CB15-4D12-99CF-A40B5AAA5085" : {
+          "name" : "Icons \/ 096-feather"
+        },
+        "BEC54C7D-6404-4458-8024-61B91373789F" : {
+          "name" : "Icons \/ 004-close-2"
+        },
+        "2A94D388-4128-472F-820D-994C868490CA" : {
+          "name" : "Colors \/ Primary \/ 200"
+        },
+        "B6747018-CEC5-4039-809E-0D9769356D0B" : {
+          "name" : "Icons \/ 098-visualization"
+        },
+        "4624C839-3E54-4E22-8F06-DFB6D71F15E4" : {
+          "name" : "Colors \/ Text \/ 200"
+        },
+        "91EB0D49-6CA4-4176-A5F0-C61F2E1F5CBE" : {
+          "name" : "Colors \/ Text \/ Main"
+        },
+        "CE2AC299-B036-432A-90E6-23AFCE8808A4" : {
+          "name" : "Colors \/ Secondary \/ 400"
+        },
+        "25A3464F-EB6B-47E9-8BFE-527889E21B01" : {
+          "name" : "Icons \/ 113-cloud-computing"
+        },
+        "F3C7E6E1-5D45-4106-916D-AD96F997314D" : {
+          "name" : "Colors \/ Accent \/ Information"
+        },
+        "AF4854C2-A267-4D04-807C-7B9B4675EEA8" : {
+          "name" : "Icons \/ 002-zoom-in"
+        },
+        "676CAC07-0BCC-4A9C-AB4B-AA3F4BF63F4E" : {
+          "name" : "Icons \/ Arrow \/ arrow-up"
+        },
+        "541B9F98-16B2-4536-AD86-1AD3FC84790E" : {
+          "name" : "Icons \/ 129-bar-chart"
+        },
+        "80BB1BEE-A78F-4B42-987B-B1B6B768B721" : {
+          "name" : "Icons \/ 058-pause"
+        },
+        "F9CB32DC-D6CE-4BD1-A7BF-36384FC20420" : {
+          "name" : "Icons \/ 077-padlock"
+        },
+        "950270B7-9D67-4606-AFC7-D29ECC2FDB3D" : {
+          "name" : "Icons \/ 084-inbox"
+        },
+        "FC52FF4A-C9E1-4233-9916-25836A187B3D" : {
+          "name" : "Icons \/ 115-circle"
+        },
+        "A1D2C8C0-855D-494B-887B-420CEF7F62CF" : {
+          "name" : "Icons \/ 111-settings"
+        },
+        "3D005D04-4D56-4788-B52B-B19C18DDB7BE" : {
+          "name" : "Icons \/ 006-close"
+        },
+        "84F821AB-B725-411D-9FD6-FD243B3B8796" : {
+          "name" : "Icons \/ 036-search"
+        },
+        "D4E118A0-5D78-46F1-B30C-6B9567312713" : {
+          "name" : "Icons \/ 095-file"
+        },
+        "610DECA7-E6C8-446C-B7FF-74FD0FB3895C" : {
+          "name" : "Icons \/ Arrow \/ arrow-down"
+        },
+        "E3720436-DD2C-459E-913E-A0AED2115E37" : {
+          "name" : "Icons \/ 144-warning"
+        },
+        "BD65A6E5-7678-4DA3-84E6-4FD0007317ED" : {
+          "name" : "Icons \/ 114-clock"
+        },
+        "ADE0BDF3-F2E0-4265-B44F-35A50DA0CD20" : {
+          "name" : "Colors \/ Secondary \/ 200"
+        },
+        "AA73784D-A1D4-4897-B684-2F3245B0A723" : {
+          "name" : "Icons \/ 048-add"
+        },
+        "C13D002D-7D34-43C2-8706-A46C5D50F2E6" : {
+          "name" : "Icons \/ 093-flag"
+        },
+        "ADDFD04E-C628-4F11-9A6F-7462A65C2829" : {
+          "name" : "Colors \/ Gradients \/  2 Gradient"
+        },
+        "B162369A-C8C1-4C3B-BA84-A9B2EAA3CACF" : {
+          "name" : "Icons \/ 001-zoom-out"
+        },
+        "441C30F9-18DB-493D-9093-10B283B39641" : {
+          "name" : "Icons \/ 056-phone-call-1"
+        },
+        "F5C5782C-1831-4BC2-9DEC-9154C6DE0B20" : {
+          "name" : "Icons \/ 059-octagon"
+        }
+      }
+    }
+  },
+  "version" : 105,
+  "fonts" : [
+    "Roboto-Regular",
+    "SFProText-Bold",
+    "Roboto-Bold",
+    "Roboto-Light",
+    "Roboto-Black"
+  ],
+  "compatibilityVersion" : 99,
+  "app" : "com.bohemiancoding.sketch3",
+  "autosaved" : 0,
+  "variant" : "NONAPPSTORE",
+  "created" : {
+    "commit" : "a9a8e0cffcaebe58914746cb1ab8f707ba873565",
+    "appVersion" : "51.3",
+    "build" : 57544,
+    "app" : "com.bohemiancoding.sketch3",
+    "compatibilityVersion" : 99,
+    "version" : 105,
+    "variant" : "NONAPPSTORE"
+  },
+  "saveHistory" : [
+    "NONAPPSTORE.57544"
+  ],
+  "appVersion" : "51.3",
+  "build" : 57544
+}

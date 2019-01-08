@@ -1,0 +1,154 @@
+{
+  "pages" : [
+    {
+      "id" : "DDC0E602-9883-4C4A-87DF-82359EFBB0DE",
+      "name" : "Preview",
+      "bounds" : "-526.000000,-541.000000,8562.000000,3426.000000",
+      "artboards" : [
+        {
+          "id" : "2164F08C-CD94-485F-9069-937333CCF51D",
+          "name" : "Icons",
+          "rect" : {
+            "y" : -541,
+            "x" : 6444,
+            "width" : 1592,
+            "height" : 970
+          },
+          "trimmed" : {
+            "y" : -541,
+            "x" : 6444,
+            "width" : 1592,
+            "height" : 970
+          }
+        },
+        {
+          "id" : "585A9C5A-1F4B-4EE2-9455-CD3A59E717ED",
+          "name" : "Typography",
+          "rect" : {
+            "y" : -541,
+            "x" : 4058,
+            "width" : 2128,
+            "height" : 1844
+          },
+          "trimmed" : {
+            "y" : -541,
+            "x" : 4058,
+            "width" : 2128,
+            "height" : 1844
+          }
+        },
+        {
+          "id" : "52E92BAF-6281-48D2-90E4-723564DA5072",
+          "name" : "Colors",
+          "rect" : {
+            "y" : -541,
+            "x" : 1689,
+            "width" : 2128,
+            "height" : 3426
+          },
+          "trimmed" : {
+            "y" : -541,
+            "x" : 1689,
+            "width" : 2128,
+            "height" : 3426
+          }
+        },
+        {
+          "id" : "A93B5341-1E86-42B6-8CA1-C4E5389E22B9",
+          "name" : "Style Guidelines",
+          "rect" : {
+            "y" : -541,
+            "x" : -526,
+            "width" : 1872,
+            "height" : 1000
+          },
+          "trimmed" : {
+            "y" : -541,
+            "x" : -526,
+            "width" : 1872,
+            "height" : 1000
+          }
+        }
+      ]
+    },
+    {
+      "id" : "234C2167-FE06-4C2A-BF03-E4C51FD6FAC5",
+      "name" : "Editable",
+      "bounds" : "-210.000000,-541.000000,8246.000000,3426.000000",
+      "artboards" : [
+        {
+          "id" : "9A0619C1-7B60-4A58-AB28-67F754AAFAE6",
+          "name" : "Icons",
+          "rect" : {
+            "y" : -541,
+            "x" : 6444,
+            "width" : 1592,
+            "height" : 970
+          },
+          "trimmed" : {
+            "y" : -541,
+            "x" : 6444,
+            "width" : 1592,
+            "height" : 970
+          }
+        },
+        {
+          "id" : "F2B61043-D058-4917-94AC-80C1B799630E",
+          "name" : "Typography",
+          "rect" : {
+            "y" : -541,
+            "x" : 3997,
+            "width" : 2128,
+            "height" : 1844
+          },
+          "trimmed" : {
+            "y" : -541,
+            "x" : 3997,
+            "width" : 2128,
+            "height" : 1844
+          }
+        },
+        {
+          "id" : "2BD5CC38-4186-41D1-8DE7-4930059D5A30",
+          "name" : "Colors",
+          "rect" : {
+            "y" : -541,
+            "x" : 1549,
+            "width" : 2128,
+            "height" : 3426
+          },
+          "trimmed" : {
+            "y" : -541,
+            "x" : 1549,
+            "width" : 2128,
+            "height" : 3426
+          }
+        },
+        {
+          "id" : "62C76030-A5D6-4F03-82F3-0C759C86B43D",
+          "name" : "Start",
+          "rect" : {
+            "y" : -541,
+            "x" : -210,
+            "width" : 1440,
+            "height" : 1024
+          },
+          "trimmed" : {
+            "y" : -541,
+            "x" : -210,
+            "width" : 1440,
+            "height" : 1024
+          }
+        }
+      ]
+    },
+    {
+      "id" : "7F124A64-F0BE-4607-B0BD-C93477C8C7B9",
+      "name" : "Symbols",
+      "bounds" : "0.000000,-124.000000,1855.000000,11680.000000",
+      "artboards" : [
+
+      ]
+    }
+  ]
+}

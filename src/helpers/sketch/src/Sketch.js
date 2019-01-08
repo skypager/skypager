@@ -87,6 +87,17 @@ export default class Sketch extends Helper {
     return this.state.get('layers') || []
   }
 
+  get layerStyles() {
+    if (!this.isBuilt) {
+      throw new Error('Must call build() on this instance first')
+    }
+
+    const { get } = this.lodash
+    const dump = this.state.get('dump')
+
+    return get(dump, 'layerStyles.objects', [])
+  }
+
   get pageNames() {
     if (!this.isBuilt) {
       throw new Error('Must call build() on this instance first')
@@ -112,10 +123,15 @@ export default class Sketch extends Helper {
   async build(options = {}) {
     const { pages = [] } = await this.fetch('pages', () => this.loadPages(this.path, options))
 
-    const layers = await this.listAllLayers(options)
     const artboards = await this.listAllArtboards(options)
+    const dump = await this.loadDump()
 
-    this.state.merge({ built: true, layers, artboards, pages })
+    this.state.merge({ built: true, dump, artboards, pages })
+
+    if (options.includeLayers) {
+      const layers = await this.listAllLayers(options)
+      this.state.set('layers', layers)
+    }
 
     return this.state.toJSON()
   }

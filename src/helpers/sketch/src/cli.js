@@ -62,13 +62,27 @@ async function listSketchArtboards(pathToSketchFile, options = {}) {
 }
 
 async function listSketchLayers(pathToSketchFile, options = {}) {
+  let chunks = []
+
   try {
-    const output = await exec(`sketchtool list layers ${pathToSketchFile}`).then(({ stdout }) =>
-      String(stdout)
-    )
+    const promise = spawn('sketchtool', ['list', 'layers', pathToSketchFile], {
+      maxBuffer: 4 * 1024 * 1024,
+    }).then(({ stdout }) => String(stdout))
+
+    const { childProcess } = promise
+
+    childProcess.stdout.on('data', data => {
+      const chunk = data.toString()
+      chunks.push(chunk)
+    })
+
+    await promise
+
+    const output = chunks.join('')
+
     return options.parse !== false ? JSON.parse(output) : output
   } catch (error) {
-    !options.silent && console.error(`Error running: sketchtool list layers ${pathToSketchFile}`)
+    !options.silent && console.error(`Error running: sketchtool dump ${pathToSketchFile}`)
     throw error
   }
 }
