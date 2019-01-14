@@ -5,5 +5,35 @@
   "singleQuote": true,
   "tabWidth": 2,
   "trailingComma": "es5",
-  "bracketSpacing": true
+  "bracketSpacing": true,
+  "overrides": [
+    {
+      "files": "*.{ts, tsx}",
+      "options": {
+        "tabWidth": 2,
+        "printWidth": 100,
+        "parser": "typescript",
+        "semi": true,
+        "trailingComma": "es5",
+        "singleQuote": true,
+        "jsxBracketSameLine": false,
+        "bracketSpacing": true,
+        "arrowParens": "always",
+      }
+    },
+    {
+      "files": "*.md",
+      "options": {
+        "parser": "markdown",
+        "printWidth": 100,
+        "proseWrap": "always",
+      }
+    },
+    {
+      "files": "*.json",
+      "options": {
+        "parser": "json"
+      }
+    }
+  ]
 }

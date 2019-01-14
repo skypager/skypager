@@ -7,18 +7,13 @@
     "src/runtimes/*",
     "src/features/*",
     "src/helpers/*",
-    "src/servers/*"
+    "src/servers/*",
+    "src/examples/*"
   ],
   "command": {
     "publish": {
-      "allowBranch": [
-        "develop",
-        "master"
-      ],
-      "ignoreChanges": [
-        "**/*.md",
-        "**/*.spec.js"
-      ]
+      "allowBranch": ["develop", "master"],
+      "ignoreChanges": ["**/*.md", "**/*.spec.js"]
     },
     "run": {
       "npmClient": "yarn"
