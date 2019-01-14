@@ -1,3 +1,4 @@
+import { ILazyInjectInterface } from './types';
 export const shortcut: string = 'assetLoader';
 
 export const featureMethods: string[] = ['image', 'stylesheet', 'script', 'lazyInject'];
@@ -8,9 +9,9 @@ export const featureMethods: string[] = ['image', 'stylesheet', 'script', 'lazyI
  * @example
  * image('path/to/image.jpg || png || etc.')
  */
-export const image = (url: string) => {
-  return this.inject.img(url);
-};
+export const image = (url: string) =>
+  // @ts-ignore
+  this.inject.img(url);
 
 /**
  * Injects the css file into a project
@@ -18,22 +19,22 @@ export const image = (url: string) => {
  * @example
  * stylesheet('path/to/stylesheet.css')
  */
-export const stylesheet = (url: string): void => {
-  return this.inject.css(url);
-};
+export const stylesheet = (url: string) =>
+  // @ts-ignore
+  this.inject.css(url);
 
-export const script = (url) => {
-  return this.inject.js(url);
-};
+export const script = (url: string) =>
+  // @ts-ignore
+  this.inject.js(url);
 
 /**
  * @function
  */
-export const lazyInject = () => {
+export const lazyInject = (): ILazyInjectInterface => {
   /**
    * Function which returns a function:
    * @see
-   * https://davidwalsh.name/javascript-functions
+   * [this link for more information](https://davidwalsh.name/javascript-functions)
    * @param tag the html element
    */
   const load = (tag: string) => {
@@ -47,7 +48,7 @@ export const lazyInject = () => {
            * @todo
            * type better 'const element: any = document.createElement(tag)'
            */
-          const element: any = document.createElement(tag);
+          const element: any | Document = document.createElement(tag);
           let parent: string = 'body';
           let attr: string = 'src';
 
@@ -77,6 +78,7 @@ export const lazyInject = () => {
 
           // Inject into document to kick off loading
           element[attr] = url;
+          // @ts-ignore
           document[parent].appendChild(element);
         }
       );

@@ -10,7 +10,7 @@
     "esModuleInterop": true,
     "removeComments": true,
     "resolveJsonModule": true,
-    "isolatedModules": true,
+    "declaration": true,
     "noImplicitAny": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -36,6 +36,6 @@
     "useBabel": true,
     "babelCore": "@babel/core"
   },
-  "include": ["src/packages"],
-  "exclude": ["node_modules", "packages/**/dist", "packages/**/build"]
+  "include": ["src/examples/**"],
+  "exclude": ["node_modules", "**/node_modules/*"]
 }

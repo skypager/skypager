@@ -22,3 +22,9 @@ export interface IElement extends HTMLElement {
  * which is a standard convention
  */
 export type TElement = HTMLElement & IElement;
+
+export interface ILazyInjectInterface {
+  css: (arg: string) => Promise<{}>;
+  img: (arg: string) => Promise<{}>;
+  js: (arg: string) => Promise<{}>;
+}

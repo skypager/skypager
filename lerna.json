@@ -7,7 +7,8 @@
     "src/runtimes/*",
     "src/features/*",
     "src/helpers/*",
-    "src/servers/*"
+    "src/servers/*",
+    "src/examples/*"
   ],
   "command": {
     "publish": {

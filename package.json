@@ -25,7 +25,8 @@
     "prettier:js": "prettier --config .prettierrc --write *.{js, jsx}",
     "prettier:tsx": "prettier --config .prettierrc --write *.{tsx, ts}",
     "prettier:json": "prettier --config .prettierrc  --write *.json",
-    "prettier:md": "prettier --config .prettierrc --write **/*.{md, mdx}"
+    "prettier:md": "prettier --config .prettierrc --write **/*.{md, mdx}",
+    "tsc": "tsc --project src/examples/* ./tsconfig.json"
   },
   "keywords": ["Skypager"],
   "author": "Jon Soeder <jon@chicago.com>",
