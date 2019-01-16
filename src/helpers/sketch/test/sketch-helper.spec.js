@@ -49,7 +49,7 @@ describe('Sketch Helper', function() {
       sketch.artboards[0].should.have.property('category')
     })
 
-    it('builds a list of layers', function() {
+    xit('builds a list of layers', function() {
       sketch.should.have.property('layers').that.is.not.empty
       sketch.layers[0].should.have.property('category')
       sketch.layers[0].should.have.property('layers')
