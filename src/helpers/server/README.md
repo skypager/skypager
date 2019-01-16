@@ -28,7 +28,7 @@ services your server might need to connect to when handling requests
 
 ## Registries
 
-With the server helper
+With the server helper, you'll have a couple of module registries on your runtime
 
 **Endpoints Registry**
 
@@ -38,6 +38,10 @@ runtime.endpoints
 runtime.endpoints.register('my-endpoint', () => require('./my-endpoint'))
 // add a webpack require.context
 runtime.endpoints.add(require.context('./src/endpoints', true, /\.js$/))
+// or use the node runtime's requireContext to create a similar require context object 
+runtime.endpoints.add(runtime.requireContext('src/endpoints'))
+// see available endpoints
+runtime.endpoints.available
 ```
 
 **Servers Registry**
@@ -46,4 +50,8 @@ runtime.endpoints.add(require.context('./src/endpoints', true, /\.js$/))
 runtime.servers
 // register a server module
 runtime.servers.register('app', () => require('./server/app.js'))
+// retrieve a server module
+runtime.servers.lookup('app')
+// see all available servers
+runtime.servers.available
 ```
