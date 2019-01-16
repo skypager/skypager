@@ -59,11 +59,27 @@ class ShowSheet extends Component {
   render() {
     const createLink = id => `https://docs.google.com/spreadsheets/d/${id}`
     let { id } = this.props.info
+    const { sheetId } = this.props
 
     id = id.replace(/.*worksheets\//, '').replace(/\/private.*$/, '')
 
     return (
       <Container>
+        <Segment basic>
+          <Header as="h3" content="REST API" dividing />
+          View the entire sheet
+          <Segment secondary>
+            <pre>GET /sheets/{sheetId}</pre>
+          </Segment>
+          View an individual worksheet
+          <Segment secondary>
+            <pre>GET /sheets/{sheetId}/:workSheetId</pre>
+          </Segment>
+          View sheet metadata
+          <Segment secondary>
+            <pre>GET /sheets-meta/{sheetId}</pre>
+          </Segment>
+        </Segment>
         <Header as="h3" content="Table View" />
         <TableView {...this.props} />
         <Header as="h3" content="Data View" />
@@ -71,6 +87,7 @@ class ShowSheet extends Component {
           <pre>{JSON.stringify(this.props.data || {}, null, 2)}</pre>
         </Segment>
         <Button content="Go Back" onClick={this.props.goBack} />
+
         <Header as="h3" content="Sheet Info" />
         <a target="_blank" href={createLink(id)}>
           View On Web
