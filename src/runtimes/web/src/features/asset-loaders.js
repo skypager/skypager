@@ -1,6 +1,6 @@
 export const shortcut = 'assetLoader'
 
-export const featureMethods = ['image', 'stylesheet', 'script', 'css', 'lazyInject']
+export const featureMethods = ['image', 'stylesheet', 'script', 'css', 'unpkg', 'lazyInject']
 
 export function image(url, options = {}) {
   return this.inject.img(url, options)
@@ -16,6 +16,44 @@ export function stylesheet(url, options = {}) {
 
 export function script(url, options = {}) {
   return this.inject.js(url, options)
+}
+
+/**
+ * Load assets from unpkg.com by name, will asynchronously load them
+ * by injecting a script tag.  The Promise will resolve when the asset
+ * has been loaded.
+ *
+ * @param {object} dependencies - an object whose keys are the global variable name of the package,
+ *                                and the value is the path to the umd build on unpkg.com
+ * @param {object} options - an options hash
+ * @param {string} options.protocol - http or https
+ *
+ * @example
+ *
+ *  runtime.assetLoader.unpkg({
+ *    React: 'react@16.7.0/umd/react.production.min.js'
+ *  })
+ */
+export async function unpkg(dependencies = {}, { protocol = 'https' } = {}) {
+  const { entries, fromPairs } = this.lodash
+
+  const modules = await Promise.all(
+    entries(dependencies).map(([globalVariableName, packageName]) => {
+      const unpkgUrl = packageName.startsWith('http')
+        ? packageName
+        : `${protocol}://unpkg.com/${packageName}`
+
+      if (global[globalVariableName]) {
+        return [packageName, global[globalVariableName]]
+      }
+
+      return this.inject.js(unpkgUrl).then(() => {
+        return [packageName, global[globalVariableName]]
+      })
+    })
+  ).then(fromPairs)
+
+  return modules
 }
 
 export function lazyInject() {
