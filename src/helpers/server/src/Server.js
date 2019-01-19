@@ -299,6 +299,18 @@ export class Server extends Helper {
     return app
   }
 
+  setupHistoryFallback(options = {}) {
+    return setupHistoryFallback.call(this, this.app, options)
+  }
+
+  setupStaticServer(options = {}) {
+    return setupStaticServer.call(this, this.app, options)
+  }
+
+  setupDevelopmentMiddlewares(options = {}) {
+    return setupDevelopmentMiddlewares.call(this, this.app, options)
+  }
+
   startServer(...args) {
     return new Promise((resolve, reject) => {
       const handler = this.starter.bind(this, ...args)
@@ -374,6 +386,58 @@ export const registerHelper = () => Helper.registerHelper('server', () => Server
 
 export default Server
 export const attach = Server.attach
+
+// TODO you should be able to use @skypager/helpers-server without webpack
+function injectWebpackDependencies(base = {}) {
+  return base
+}
+
+function setupDevelopmentMiddlewares(app, options = {}) {
+  const { runtime } = this
+  const { hot } = options
+  const { config, webpack, devMiddleware, hotMiddleware } = injectWebpackDependencies.call(
+    this,
+    options
+  )
+
+  config.entry[1] = 'webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000'
+
+  const compiler = webpack(config)
+  const middleware = devMiddleware(compiler, {
+    noInfo: true,
+    publicPath: config.output.publicPath,
+  })
+
+  app.use(middleware)
+
+  if (hot) {
+    app.use(
+      hotMiddleware(compiler, {
+        path: '/__webpack_hmr',
+      })
+    )
+  }
+
+  app.use((req, res, next) => {
+    const { pathname } = runtime.urlUtils.parseUrl(req.url)
+    const { base, ext, dir } = runtime.pathUtils.parse(pathname)
+
+    // it must be index.html
+    if (ext === '') {
+      res.end(
+        middleware.fileSystem.readFileSync(runtime.pathUtils.join(config.output.path, 'index.html'))
+      )
+    } else {
+      res.end(
+        middleware.fileSystem.readFileSync(
+          runtime.pathUtils.join(config.output.path, pathname.replace(/^\//, ''))
+        )
+      )
+    }
+  })
+
+  return app
+}
 
 function setupHistoryFallback(app, historyOptions) {
   const { runtime } = this
