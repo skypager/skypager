@@ -31,6 +31,7 @@
     "gaze": "^1.1.2",
     "micromatch": "^3.1.4",
     "minimatch": "^3.0.3",
+    "mime": "^2.4.0",
     "node-emoji": "^1.8.1",
     "opn": "^5.1.0",
     "pretty-cli": "^0.0.14",
