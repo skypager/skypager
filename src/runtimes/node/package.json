@@ -1,6 +1,6 @@
 {
   "name": "@skypager/node",
-  "version": "0.1.21",
+  "version": "0.1.23",
   "description": "the skypager node runtime",
   "main": "lib/index.js",
   "scripts": {
@@ -14,10 +14,10 @@
   "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
   "license": "MIT",
   "dependencies": {
-    "@skypager/features-file-manager": "^0.1.21",
+    "@skypager/features-file-manager": "^0.1.23",
     "@skypager/helpers-client": "^0.1.0",
     "@skypager/helpers-repl": "^0.1.10",
-    "@skypager/helpers-server": "^0.1.11",
+    "@skypager/helpers-server": "^0.1.23",
     "@skypager/runtime": "^0.1.21",
     "bluebird": "^3.5.0",
     "child-process-promise": "^2.2.1",
