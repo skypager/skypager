@@ -1,6 +1,6 @@
 {
   "name": "@skypager/node",
-  "version": "0.1.23",
+  "version": "0.1.24",
   "description": "the skypager node runtime",
   "main": "lib/index.js",
   "scripts": {
@@ -30,8 +30,8 @@
     "fs-extra-promise": "^0.4.1",
     "gaze": "^1.1.2",
     "micromatch": "^3.1.4",
-    "minimatch": "^3.0.3",
     "mime": "^2.4.0",
+    "minimatch": "^3.0.3",
     "node-emoji": "^1.8.1",
     "opn": "^5.1.0",
     "pretty-cli": "^0.0.14",
