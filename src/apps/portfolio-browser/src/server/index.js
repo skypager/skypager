@@ -19,6 +19,7 @@ export async function appDidMount(app) {
 
   await portfolio.fileManager.startAsync({ startPackageManager: true })
   await portfolio.moduleManager.startAsync()
+  await runtime.fsx.mkdirpAsync(runtime.resolve('node_modules', '.cache'))
 
   app.use((req, res, next) => {
     const { pathname } = runtime.urlUtils.parseUrl(req.url)
@@ -76,7 +77,7 @@ export async function appDidMount(app) {
       graph,
       err => {
         if (err) {
-          console.error('CACHE WRITE FAILED', err.message0)
+          console.error('CACHE WRITE FAILED', err.message)
         }
       }
     )
@@ -90,6 +91,7 @@ export async function appDidMount(app) {
 }
 
 export function setupDevelopment(app) {
+  console.log('Setting up development middlewares')
   const webpack = require('webpack')
   const merge = require('webpack-merge')
   const devMiddleware = require('webpack-dev-middleware')
