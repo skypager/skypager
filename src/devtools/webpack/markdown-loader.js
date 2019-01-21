@@ -3,6 +3,7 @@ const mdx = require('./mdx-parser')
 const visit = require('unist-util-visit')
 
 module.exports = async function(raw) {
+  this.cacheable && this.cacheable()
   const callback = this.async()
   const options = getOptions(this)
 
