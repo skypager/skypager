@@ -255,7 +255,9 @@ export function lazyFsx() {
       results.filter(p => p)
     )
 
-  const mimeTypes = require('mime').types
+  const mime = require('mime')
+  const mimeTypes = mime.types || mime._types
+
   selected.mimeTypes = () => mimeTypes
   selected.mimeType = ext => mimeTypes[ext.replace('.', '')]
 
