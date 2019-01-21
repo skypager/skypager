@@ -1,0 +1,42 @@
+{
+  "name": "@skypager/apps-portfolio-browser",
+  "version": "0.1.21",
+  "description": "an api and application for browsing a portfolio",
+  "main": "lib/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "start": "cross-env NODE_ENV=production skypager serve --esm",
+    "dev": "cross-env NODE_ENV=development skypager serve --esm --hot",
+    "build": "cross-env NODE_ENV=production webpack --config webpack.config.js",
+    "deploy": "node scripts/deploy.js --verbose",
+    "watch": "skypager watch",
+    "console": "skypager console",
+    "pretest": "yarn build",
+    "test": "cross-env NODE_ENV=test skypager test --webpack-config webpack.config.test.js --timeout 30000"
+  },
+  "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
+  "license": "MIT",
+  "dependencies": {
+    "@skypager/node": "^0.1.21",
+    "@skypager/web": "^0.1.21",
+    "check-prop-types": "^1.1.2",
+    "prop-types": "^15.6.2",
+    "react": "^16.5.2",
+    "react-dom": "^16.5.2",
+    "react-hot-loader": "^4.3.11",
+    "react-loadable": "^5.5.0",
+    "react-router-dom": "^4.3.1",
+    "react-semantic-ui-range": "^0.6.2",
+    "react-treebeard": "^3.1.0",
+    "semantic-ui-react": "^0.82.5"
+  },
+  "skypager": {
+    "webpack": {
+      "build": "webpack.config.js",
+      "scopeModules": false
+    }
+  },
+  "gitHead": "e83538f51de792557fa139e4af368a20feb69899"
+}
