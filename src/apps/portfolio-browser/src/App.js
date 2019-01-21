@@ -4,7 +4,7 @@ import types from 'prop-types'
 import { Link, Switch, Route, BrowserRouter } from 'react-router-dom'
 import HomePage from './pages/HomePage'
 import DocPage from './pages/DocPage'
-import GraphExplorer from './pages/GraphExplorer'
+import GraphExplorer from './components/GraphExplorer'
 import MainLayout from './layouts/MainLayout'
 import SideMenu from '../docs/_sideMenu.md'
 
