@@ -1,25 +1,56 @@
 const runtime = require('@skypager/node')
 
 async function main() {
-  const { _ } = skypager.argv
+  const { _ } = runtime.argv
+  const request = _[0]
 
-  if (typeof _[0] === 'string' && runtime.fsx.existsSync(runtime.resolve(_[0]))) {
-    runtime.servers.register('static-server', () => ({
-      serveStatic: runtime.resolve(_[0]),
-      cors: true,
-      history: runtime.resolve(_[0], 'index.html'),
-    }))
-  } else {
-    runtime.servers.register('static-server', () => ({
-      serveStatic: true,
-      cors: true,
-      history: true,
-    }))
+  let server = runtime.argv.server
+  let serverInstance
+
+  if (request && request.length) {
+    const requestPath = runtime.resolve(request)
+    const fileExists = await runtime.fsx.existsAsync(requestPath)
+    const isDirectory = await (fileExists && runtime.fsx.isDirectoryAsync(requestPath))
+
+    if (isDirectory && !server) {
+      // we're going to setup a static file server using the provided directory
+      serverInstance = createStaticFileServer({ buildFolder: requestPath })
+    } else if (!isDirectory && !server && fileExists) {
+      // they must have passed a reference to a server file
+      serverInstance = createServer(requestPath)
+    }
+  } else if (!request && !server) {
+    // we're going to setup a static file server using the default build directory
+    serverInstance = createStaticFileServer({
+      buildFolder: runtime.argv.buildFolder || runtime.resolve('build'),
+    })
+  } else if (server) {
+    // they passed a reference to a file server
+    serverInstance = createServer(server)
   }
 
-  const server = runtime.server('static-server')
+  await serverInstance.start()
 
-  await server.start()
+  if (runtime.argv.open) {
+    Promise.resolve(
+      runtime.opener.openInBrowser(`http://${serverInstance.hostname}:${serverInstance.port}`)
+    ).catch(error => error)
+  }
+}
+
+function createServer(helperPath) {
+  runtime.servers.register('server', () => require(runtime.resolve(helperPath)))
+  return runtime.server('server')
+}
+
+function createStaticFileServer({ buildFolder = runtime.resolve('build') }) {
+  runtime.servers.register('static-server', () => ({
+    history: runtime.argv.history !== false && runtime.argv.single !== false,
+    serveStatic: buildFolder,
+    cors: runtime.argv.cors !== false,
+  }))
+
+  return runtime.server('static-server')
 }
 
 main()
