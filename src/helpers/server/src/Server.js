@@ -296,6 +296,7 @@ export class Server extends Helper {
       historySetupHook.call(this, app, history)
     }
 
+    console.log('hi')
     return app
   }
 
@@ -408,6 +409,7 @@ function setupDevelopmentMiddlewares(app, options = {}) {
     publicPath: config.output.publicPath,
   })
 
+  console.log('Setting up Dev Middleware')
   app.use(middleware)
 
   if (hot) {
@@ -424,6 +426,7 @@ function setupDevelopmentMiddlewares(app, options = {}) {
 
     // it must be index.html
     if (ext === '') {
+      console.log(`history ${base} ${dir}`)
       res.end(
         middleware.fileSystem.readFileSync(runtime.pathUtils.join(config.output.path, 'index.html'))
       )
@@ -444,25 +447,14 @@ function setupHistoryFallback(app, historyOptions) {
   const history = require('express-history-api-fallback')
 
   if (historyOptions === true) {
-    const htmlFile = runtime.resolve('build', 'index.html')
     app.use(
-      history(htmlFile, {
+      history('index.html', {
         root: runtime.resolve('build'),
       })
     )
-    this.runtime.debug(`Using history fallback`, this.runtime.relative(htmlFile))
   } else if (typeof historyOptions === 'object') {
-    let { htmlFile = runtime.resolve('build', 'index.html') } = historyOptions
-
-    htmlFile = runtime.resolve(htmlFile)
-
-    this.runtime.debug(`Using history fallback`, this.runtime.relative(htmlFile))
-
-    app.use(
-      history(htmlFile, {
-        root: runtime.resolve(historyOptions.root || runtime.pathUtils.dirname(htmlFile)),
-      })
-    )
+    let { htmlFile = 'index.html', root: historyRoot = runtime.resolve('build') } = historyOptions
+    app.use(history(runtime.pathUtils.basename(htmlFile), { root: runtime.resolve(historyRoot) }))
   }
 
   return app
