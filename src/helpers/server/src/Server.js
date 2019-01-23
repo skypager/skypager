@@ -163,7 +163,7 @@ export class Server extends Helper {
       throw err
     }
 
-    if (this.tryGet('showBanner') !== false) {
+    if (this.tryGet('showBanner') !== false && this.runtime.argv.banner !== false) {
       if (this.tryGet('displayBanner')) {
         this.tryResult('displayBanner')
       } else {
@@ -204,7 +204,10 @@ export class Server extends Helper {
       appWillMount = this.options.appWillMount || this.provider.appWillMount,
       createServer = this.options.createServer || this.provider.createServer,
       serverWasCreated = this.options.serverWasCreated || this.provider.serverWasCreated,
+      enableLogging = this.options.enableLogging || this.provider.enableLogging,
     } = options
+
+    let { loggerOptions = this.options.loggerOptions || this.provider.loggerOptions } = options
 
     let cors = this.tryResult('cors')
     let pretty = this.tryResult('pretty', () => process.env.NODE_ENV !== 'production')
@@ -228,6 +231,21 @@ export class Server extends Helper {
     if (pretty) {
       this.runtime.debug('Enabling pretty printing of JSON responses')
       app.use(require('express-prettify')({ query: 'pretty' }))
+    }
+
+    if (enableLogging) {
+      const winston = require('winston')
+      const expressWinston = require('express-winston')
+
+      if (!loggerOptions) {
+        loggerOptions = {
+          transports: [new winston.transports.Console()],
+          meta: false, // optional: control whether you want to log the meta data about the request (default to true)
+          colorize: false, // Color the text and status code, using the Express/morgan color palette (text: gray, status: default green, 3XX cyan, 4XX yellow, 5XX red).
+        }
+      }
+
+      app.use(expressWinston.logger(loggerOptions))
     }
 
     if (appWillMount) {

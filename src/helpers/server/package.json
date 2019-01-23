@@ -24,7 +24,9 @@
     "cors": "^2.8.4",
     "express": "^4.15.2",
     "express-history-api-fallback": "^2.2.1",
-    "express-prettify": "^0.1.0"
+    "express-prettify": "^0.1.0",
+    "express-winston": "^3.0.1",
+    "winston": "^3.1.0"
   },
   "repository": {
     "type": "github",
