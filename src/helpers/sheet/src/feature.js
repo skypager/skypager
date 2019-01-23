@@ -9,7 +9,26 @@ export const initialState = {
   googleError: false,
 }
 
-export const featureMethods = ['createAuthClient', 'listSpreadsheets', 'whenReady', 'getHasErrors']
+export const featureMethods = [
+  'createAuthClient',
+  'listSpreadsheets',
+  'whenReady',
+  'getHasErrors',
+  'getApis',
+  'service',
+]
+
+export function getApis() {
+  return g
+}
+
+export async function service(id, options = {}) {
+  const auth = await this.createAuthClient()
+  return g[id]({
+    auth,
+    ...options,
+  })
+}
 
 export function getHasErrors() {
   return !!this.state.get('googleErrors')
@@ -103,7 +122,13 @@ export async function listSpreadsheets(runtime, options = {}) {
     query = `and (${options.query})`
   }
 
-  const files = await drive.files.list({ maxResults, q: query }).then(r => r.data)
+  const teamDriveOptions =
+    options.teamDriveOptions ||
+    (options.teamDrives !== false ? { supportsTeamDrives: true, includeTeamDriveItems: true } : {})
+
+  const files = await drive.files
+    .list({ maxResults, q: query, ...teamDriveOptions })
+    .then(r => r.data)
 
   const { pick } = this.lodash
 
