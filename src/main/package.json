@@ -1,7 +1,7 @@
 {
   "name": "skypager",
-  "version": "40.0.18",
-  "main": "universal.js",
+  "version": "40.1.1",
+  "main": "node.js",
   "publishConfig": {
     "access": "public"
   },
@@ -10,6 +10,7 @@
   "license": "MIT",
   "author": "Jon Soeder <jon@chicago.com>",
   "dependencies": {
+    "@babel/runtime": "^7.3.1",
     "@skypager/web": "^0.1.23",
     "@skypager/node": "^0.1.25",
     "@skypager/cli": "^0.1.25",
