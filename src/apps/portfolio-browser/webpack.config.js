@@ -69,5 +69,4 @@ const webConfig = merge.strategy({ entry: 'replace' })(production, {
   ],
 })
 
-console.log(webConfig.plugins)
 module.exports = [webConfig, nodeConfig]

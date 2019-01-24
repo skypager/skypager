@@ -10,15 +10,9 @@ print(`Deploying Sheets Server Example`)
 
 async function main() {
   print(`Deploying to now.sh`)
-  await spawn(
-    'now',
-    `--token ${nowToken} -e SERVICE_ACCOUNT_DATA=@skypager-sheets-server-sa --npm ${
-      debug ? '--debug' : ''
-    }`.split(' '),
-    {
-      stdio: verbose ? 'inherit' : 'ignore',
-    }
-  )
+  await spawn('now', `--token ${nowToken} --npm ${debug ? '--debug' : ''}`.split(' '), {
+    stdio: verbose ? 'inherit' : 'ignore',
+  })
   print(`Aliasing deployment.`)
   await spawn('now', ['--token', nowToken, 'alias'])
 }

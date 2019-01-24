@@ -1,7 +1,4 @@
 {
-  "name": "skypager-sheets-server-example",
-  "env": {
-      "SERVICE_ACCOUNT_DATA": "@skypager-sheets-server-sa"
-  },
-  "alias": "sheets-server-example.skypager.io"
+  "name": "portfolio-browser",
+  "alias": "portfolio.skypager.io"
 }
