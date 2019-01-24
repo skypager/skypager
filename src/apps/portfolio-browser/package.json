@@ -20,6 +20,7 @@
   "license": "MIT",
   "dependencies": {
     "@skypager/node": "^0.1.27",
+    "@skypager/helpers-document": "^0.1.27",
     "@skypager/web": "^0.1.21",
     "check-prop-types": "^1.1.2",
     "prop-types": "^15.6.2",
@@ -31,6 +32,9 @@
     "react-semantic-ui-range": "^0.6.2",
     "react-treebeard": "^3.1.0",
     "semantic-ui-react": "^0.82.5"
+  },
+  "devDependencies": {
+    "@skypager/webpack": "^0.1.27"
   },
   "skypager": {
     "webpack": {
