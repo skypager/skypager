@@ -45,6 +45,7 @@ const stageTwo = [
 const stageThree = [
   ['@skypager/web', 'src/runtimes/web', 'lib'],
   ['@skypager/helpers-sheet', 'src/helpers/sheet', 'lib'],
+  ['@skypager/helpers-document', 'src/helpers/document', 'lib'],
 ]
 
 const first = stageOne
