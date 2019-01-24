@@ -63,7 +63,6 @@ module.exports = configMerge(commonConfig, {
     // In development, this will be an empty string.
     new InterpolateHtmlPlugin({
       ...env.raw,
-      HOLY_SHIT_WOW: 'WOW',
     }),
     // Generates an `index.html` file with the <script> injected.
     new HtmlWebpackPlugin({
@@ -74,7 +73,7 @@ module.exports = configMerge(commonConfig, {
     new webpack.NamedModulesPlugin(),
     // Makes some environment variables available to the JS code, for example:
     // if (process.env.NODE_ENV === 'development') { ... }. See `./env.js`.
-    new webpack.DefinePlugin(env.stringified),
+    // new webpack.DefinePlugin(env.stringified),
     // This is necessary to emit hot updates (currently CSS only):
     new webpack.HotModuleReplacementPlugin(),
     // Watcher doesn't work well if you mistype casing in a path so we use

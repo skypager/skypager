@@ -56,6 +56,17 @@ const webConfig = merge.strategy({ entry: 'replace' })(production, {
   output: {
     path: path.resolve(__dirname, 'build'),
   },
+  externals: [
+    {
+      'prop-types': 'global PropTypes',
+      react: 'global React',
+      '@skypager/runtime': 'global skypager',
+      '@skypager/web': 'global skypager',
+      'react-dom': 'global ReactDOM',
+      'react-router-dom': 'global ReactRouterDOM',
+      'semantic-ui-react': 'global semanticUIReact',
+    },
+  ],
 })
 
 console.log(webConfig.plugins)
