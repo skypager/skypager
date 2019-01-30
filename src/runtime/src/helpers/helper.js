@@ -54,6 +54,8 @@ export class ProviderError extends Error {}
 export class Helper {
   static isSkypagerHelper = true
 
+  static helperName = 'Helper'
+
   static registry = REGISTRY
 
   static ContextRegistry = ContextRegistry
@@ -263,25 +265,53 @@ export class Helper {
 
     options.provider = options.provider || {}
 
+    /**
+     * @property {string} name - the name for this helper
+     */
     !this.name && this.lazy('name', options.name)
 
+    /**
+     * @property {string} uuid - a unique id for this helper instance
+     */
     !this.uuid && this.hide('uuid', options.uuid || require('uuid')())
 
+    /**
+     * @property {object} context - the helper context
+     */
     this.hide('context', context)
 
     try {
-      this.hideGetter(`is${this.constructor.name}`, () => true)
+      this.hideGetter(`is${this.constructor.helperName || this.constructor.name}`, () => true)
     } catch (error) {}
 
-    this.hide('registryName', Helper.propNames(this.constructor.name).registryProp)
+    /**
+     * @property {string} registryName - the default name for the registry of helper modules
+     */
+    this.hide(
+      'registryName',
+      this.constructor.registryName ||
+        Helper.propNames(this.constructor.helperName || this.constructor.name).registryProp
+    )
 
-    // these are all aliases
+    /**
+     * @property {Runtime} project - a reference to the runtime that created this helper
+     */
+
     this.hideGetter('project', () => context.project || context.host || context.runtime)
+
+    /**
+     * @property {Runtime} host - a reference to the runtime that created this helper
+     */
+
     this.hideGetter('host', () => context.project || context.host || context.runtime)
+
+    /**
+     * @property {Runtime} runtime - a reference to the runtime that created this helper
+     */
     this.hideGetter('runtime', () => context.project || context.host || context.runtime)
 
     if (this.runtime.beforeHelperCreate) {
-      this.runtime.beforeHelperCreate.call(this.project, this, options, context, this.constructor)
+      this.runtime.beforeHelperCreate.call(this.runtime, this, options, context, this.constructor)
     }
 
     this.getter('options', () => omit({ ...this.defaultOptions, ...options }, 'provider'))

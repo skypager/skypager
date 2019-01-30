@@ -18,6 +18,10 @@ const minifiedWebConfig = merge.strategy({ node: 'replace', entry: 'replace' })(
       process: 'mock',
       global: false,
     },
+    output: {
+      library: 'skypager',
+      libraryTarget: 'umd',
+    },
     resolve: {
       alias: {
         lodash: require.resolve('lodash/lodash.min.js'),
@@ -26,7 +30,10 @@ const minifiedWebConfig = merge.strategy({ node: 'replace', entry: 'replace' })(
       },
     },
     entry: {
-      'skypager-runtime.min': ['@babel/polyfill/noConflict', path.resolve(cwd, 'src', 'index.js')],
+      'skypager-runtime.min': [
+        '@babel/polyfill/noConflict',
+        path.resolve(cwd, 'src', 'index.web.js'),
+      ],
     },
   }
 )
@@ -39,6 +46,10 @@ const webConfig = merge.strategy({ node: 'replace', entry: 'replace', plugins: '
       process: 'mock',
       global: false,
     },
+    output: {
+      library: 'skypager',
+      libraryTarget: 'umd',
+    },
     resolve: {
       alias: {
         lodash: require.resolve('lodash/lodash.min.js'),
@@ -47,7 +58,7 @@ const webConfig = merge.strategy({ node: 'replace', entry: 'replace', plugins: '
       },
     },
     entry: {
-      'skypager-runtime': ['@babel/polyfill/noConflict', path.resolve(cwd, 'src', 'index.js')],
+      'skypager-runtime': ['@babel/polyfill/noConflict', path.resolve(cwd, 'src', 'index.web.js')],
     },
     plugins: baseProductionConfig.plugins.filter(
       p => !p.constructor || !p.constructor.name === 'UglifyJsPlugin'
