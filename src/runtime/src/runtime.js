@@ -14,11 +14,7 @@ import Cache from './cache'
 import WeakCache from './weak-cache'
 import * as stringUtils from './utils/string'
 
-export {
-  propUtils,
-  stringUtils,
-  Helper 
-}
+export { propUtils, stringUtils, Helper }
 
 export const observableMap = mobx.observable.map
 export const urlUtils = { parseUrl, formatUrl, parseQueryString }
@@ -75,13 +71,13 @@ const enableStrictMode = get(
 )
 
 /**
- * Create a new instance of the skypager.Runtime 
- *  
+ * Create a new instance of the skypager.Runtime
+ *
  * @class
  * @classdesc The Runtime is similar to the window or document global in the browser, or the module / process globals in node.
  * You can extend Runtime and define your own process global singleton that acts as a state machine, event emitter,
- * module registry, dependency injector.  Typically you can just do this with features instead of subclassing.   
- * 
+ * module registry, dependency injector.  Typically you can just do this with features instead of subclassing.
+ *
  */
 export class Runtime {
   displayName = 'Skypager'
@@ -153,7 +149,7 @@ export class Runtime {
   /**
    * @readonly
    * @memberof Runtime
-   * 
+   *
    * The options are what the runtime was initialized with.  Runtimes can be strict about which options they accept.
    */
   get options() {
@@ -238,14 +234,14 @@ export class Runtime {
     return this.constructor.registerRuntime(...args)
   }
 
-  /** 
+  /**
    * If you have code that depends on a particular helper registry being available
    * on the runtime, you can pass a callback which will run when ever it exists and
    * is ready.  This is useful for example, when developing a feature which includes a
    * client and a server helper to go along with it.  If the runtime is web, you wouldn't
    * have a server helper so you wouldn't want to load that code.  If the same runtime is
-   * used on a server, then you would run that code. 
-  */
+   * used on a server, then you would run that code.
+   */
   onRegistration(registryPropName, callback) {
     if (typeof callback !== 'function') {
       throw new Error('Must pass a callback')
@@ -258,22 +254,25 @@ export class Runtime {
         const { registry = {} } = options || {}
         if (registry && registry.name === registryPropName) {
           callback(runtime, helperClass, options)
-        }  
+        }
       })
       return
     }
 
-    const isValidHelper = this.helpers.checkKey(registryPropName) || this.helpers.checkKey(stringUtils.singularize(registryPropName))
+    const isValidHelper =
+      this.helpers.checkKey(registryPropName) ||
+      this.helpers.checkKey(stringUtils.singularize(registryPropName))
 
     if (!isValidHelper) {
       callback(new Error(`${registryPropName} does not appear to be a valid helper`))
     } else {
-      callback(null, this, this.helpers.lookup(isValidHelper), { registry: this.get(registryPropName)})
+      callback(null, this, this.helpers.lookup(isValidHelper), {
+        registry: this.get(registryPropName),
+      })
     }
   }
 
   static registerRuntime(name, runtimeClass) {
-    
     Runtime.runtimes.register(name, () => runtimeClass)
     return runtimeClass
   }
@@ -309,9 +308,9 @@ export class Runtime {
 
   /**
    * @hideconstructor
-   * 
+   *
    * @param {object} options - the props, or argv, for the runtime instance at the time it is created
-   * @param {object} context - the context, environment, static config, or similar global values that may be relevant to some component in the runtime 
+   * @param {object} context - the context, environment, static config, or similar global values that may be relevant to some component in the runtime
    * @param {function} middlewareFn - this function will be called when the runtime is asynchronously loaded and the plugins have run
    */
   constructor(options = {}, context = {}, middlewareFn) {
@@ -340,7 +339,6 @@ export class Runtime {
       result(options, 'cwd', () => (!isUndefined(process) ? result(process, 'cwd', '/') : '/'))
     )
 
-    this.hide('configHistory', [], false)
     this.hide('uuid', require('uuid')())
 
     this.hideGetter('_name', () => options.name || camelCase(snakeCase(this.cwd.split('/').pop())))
@@ -355,9 +353,16 @@ export class Runtime {
     let { start, initialize, prepare } = this
 
     if (isFunction(options.initialize))
-      initialize = lodash.flow(this.initialize, options.initialize)
+      initialize = lodash.flow(
+        this.initialize,
+        options.initialize
+      )
 
-    if (isFunction(options.prepare)) prepare = lodash.flow(this.prepare, options.prepare)
+    if (isFunction(options.prepare))
+      prepare = lodash.flow(
+        this.prepare,
+        options.prepare
+      )
 
     this.hide('initialize', initializeSequence.bind(this, this, initialize), true)
     this.hide('prepare', prepareSequence.bind(this, this, prepare), true)
@@ -377,7 +382,7 @@ export class Runtime {
     this.hide(
       'selectors',
       new ContextRegistry('selectors', {
-        context: Helper.createMockContext('selectors') 
+        context: Helper.createMockContext('selectors'),
       })
     )
 
@@ -392,13 +397,14 @@ export class Runtime {
 
     extendObservable(this, {
       state: map(toPairs(this.initialState)),
+      currentState: computed(this.getCurrentState.bind(this)),
+      stateHash: computed(this.getStateHash.bind(this)),
+      cacheKey: computed(this.getCacheKey.bind(this)),
+      setState: action(this.setState.bind(this)),
+      replaceState: action(this.replaceState.bind(this)),
     })
 
     this.applyRuntimeInitializers()
-
-    if (typeof options.configure === 'function') {
-      this.configure(options.configure.bind(this))
-    }
 
     // autoAdd refers to require.contexts that should be added to our registries
     // this step is deferred until all helpers have been attached.
@@ -596,9 +602,11 @@ export class Runtime {
     try {
       const isNode = Object.prototype.toString.call(global.process) === '[object process]'
       return isNode
-    } catch (e) { 
-      return typeof global.process !== 'undefined'
-         && (process.title === 'node' || `${process.title}`.endsWith('.exe') )
+    } catch (e) {
+      return (
+        typeof global.process !== 'undefined' &&
+        (process.title === 'node' || `${process.title}`.endsWith('.exe'))
+      )
     }
   }
 
@@ -699,16 +707,18 @@ export class Runtime {
     )
   }
 
-  @computed
-  get currentState() {
+  getStateHash() {
+    return this.hashObject(this.currentState)
+  }
+
+  getCurrentState() {
     const { convertToJS } = this
     const { mapValues } = this.lodash
 
     return mapValues(this.state.toJSON(), v => convertToJS(v))
   }
 
-  @computed
-  get cacheKey() {
+  getCacheKey() {
     return `${this.namespace}:${this.stateVersion}`
   }
 
@@ -780,6 +790,10 @@ export class Runtime {
     return this.get('currentState.started', false)
   }
 
+  /**
+   * This will get called as part of the initialization sequence
+   * @private
+   */
   beginTrackingState() {
     if (this.mainDisposer) {
       return this
@@ -788,8 +802,9 @@ export class Runtime {
     const mainDisposer = autorun((...args) => {
       this.stateVersion = this.stateVersion + 1
       const { currentState, stateVersion } = this
-      this.emit('change', this, currentState, stateVersion, ...args)
+      this.emit('change', currentState, stateVersion, ...args)
       this.fireHook('stateDidChange', currentState, stateVersion, ...args)
+      // emit an event on the global event bus
       this.events.emit('runtimeDidChange', this, currentState, stateVersion, ...args)
     })
 
@@ -808,20 +823,46 @@ export class Runtime {
     return this
   }
 
-  @action
-  replaceState(newState = {}) {
-    return this.state.replace(toPairs(newState))
+  replaceState(newState = {}, cb) {
+    const { isFunction, toPairs } = this.lodash
+
+    this.emit('stateWillChange', this.currentState)
+    this.emit('stateWillReplace', this.currentState, newState)
+
+    if (isFunction(newState)) {
+      newState = newState(this.currentState, this)
+    }
+
+    const result = this.state.replace(toPairs(newState))
+
+    if (isFunction(cb)) {
+      cb(this.currentState)
+    }
+
+    return result
   }
 
-  @action
-  setState(newState = {}) {
-    const { toPairs } = this.lodash
-    return this.state.merge(toPairs(newState))
+  setState(newState = {}, cb) {
+    const { isFunction, toPairs } = this.lodash
+
+    this.emit('stateWillChange', this.currentState)
+
+    if (isFunction(newState)) {
+      newState = newState(this.currentState, this)
+    }
+
+    const result = this.state.merge(toPairs(newState))
+
+    if (isFunction(cb)) {
+      cb(this.currentState)
+    }
+
+    return result
   }
 
   stateDidChange() {}
 
-  observe(listener, prop) {
+  observe(listener, prop = 'state') {
     return observe(prop ? this.get(prop) : this, change => listener.call(this, change))
   }
 
@@ -1120,7 +1161,12 @@ export class Runtime {
     if (typeof fn === 'object' && typeof fn.initializer === 'function') {
       return this.use(fn.initializer.bind(this), INITIALIZING)
     } else if (typeof fn === 'object' && typeof fn.attach === 'function') {
-      fn.attach.call(this, this, typeof stage === 'object' ? { ...(this.options), ...stage } : this.options, this.context)
+      fn.attach.call(
+        this,
+        this,
+        typeof stage === 'object' ? { ...this.options, ...stage } : this.options,
+        this.context
+      )
     }
 
     if (typeof fn === 'object' && typeof (fn.middleware || fn.use) === 'function') {
@@ -1136,9 +1182,7 @@ export class Runtime {
       } else {
         try {
           console.error(`Can not do dynamic requires anymore: You tried: ${fn}`)
-        } catch (error) {
-
-        }
+        } catch (error) {}
       }
     }
 
@@ -1210,16 +1254,16 @@ export class Runtime {
     return hashObject(anyObject)
   }
 
-  /** 
-   * Creates an entity object from any slice of runtime properties / values 
-  */
+  /**
+   * Creates an entity object from any slice of runtime properties / values
+   */
   createEntityFrom(...properties) {
     const src = this.slice(...properties)
     return entity(toJS(src))
   }
 
   /**
-   * Select a slice of state using a list of object paths, can be multiple levels deep a.b.c 
+   * Select a slice of state using a list of object paths, can be multiple levels deep a.b.c
    *
    * @param {*} properties - an array of strings representing object paths
    * @returns
@@ -1317,9 +1361,9 @@ export class Runtime {
     return lodash.chain(results)
   }
 
-  /** 
+  /**
    * @returns {Runtime} the runtime singleton
-  */
+   */
   static get framework() {
     return (frameworkRuntime = frameworkRuntime || this.createSingleton())
   }
@@ -1328,7 +1372,7 @@ export class Runtime {
    * @returns {Runtime} the runtime singleton
    */
   static createSingleton(options, context, middlewareFn) {
-    return singleton = singleton || new this(options, context, middlewareFn)
+    return (singleton = singleton || new this(options, context, middlewareFn))
   }
 
   static autoConfigs = []
