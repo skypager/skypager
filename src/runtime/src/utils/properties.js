@@ -279,7 +279,15 @@ export function lazy(target, attribute, fn, enumerable = false) {
       delete target[attribute]
 
       if (enumerable) {
-        return (target[attribute] = typeof fn === 'function' ? fn.call(target) : fn)
+        let value = typeof fn === 'function' ? fn.call(target) : fn
+
+        defineProperty(target, attribute, {
+          enumerable: true,
+          configurable: true,
+          value,
+        })
+
+        return value
       } else {
         let value = typeof fn === 'function' ? fn.call(target) : fn
 

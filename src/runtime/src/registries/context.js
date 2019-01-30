@@ -94,7 +94,11 @@ export class RequireContext {
    * @param {String} options.prefix - a prefix that will be discarded when coming up with a humanized id for the module
    */
   constructor(webpackRequireContext, options = {}) {
-    if (typeof webpackRequireContext !== 'function' && webpackRequireContext.asRequireContext) {
+    if (
+      webpackRequireContext &&
+      typeof webpackRequireContext !== 'function' &&
+      webpackRequireContext.asRequireContext
+    ) {
       webpackRequireContext = webpackRequireContext.asRequireContext
     }
 

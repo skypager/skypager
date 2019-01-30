@@ -1,18 +1,14 @@
 import opn from 'opn'
+import { Feature } from '@skypager/runtime/lib/feature'
 
-export const featureMethods = ['open', 'openInBrowser']
+export default class OpenerFeature extends Feature {
+  shortcut = 'opener'
 
-export const createGetter = 'opener'
+  open(path, options = {}) {
+    return opn(path, options)
+  }
 
-export const featureMixinOptions = {
-  partial: [],
-  injectOptions: false,
-}
-
-export function open(path, options = {}) {
-  return opn(path, options)
-}
-
-export function openInBrowser(url, options = {}) {
-  return opn(url, options)
+  openInBrowser(url, options = {}) {
+    return opn(url, options)
+  }
 }

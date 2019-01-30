@@ -1,22 +1,25 @@
 import Helper from './helper.js'
 
-import * as ConfigurableFeature from '../features/configurable'
-import * as ObservableFeature from '../features/observable'
 import * as ProfilerFeature from '../features/profiler'
 import * as VmFeature from '../features/vm'
 
 const isFunction = o => typeof o === 'function'
 
+/**
+ * The Feature Class is used to provide an interface to something which can be
+ * enaabled() and optionally configured() and possibly even have persistent state
+ * throughout their object lifecyle.  Extended runtimes such as @skypager/node
+ * are just a normal runtime which packages certain node specific features
+ * and enable them automatically.
+ */
 export class Feature extends Helper {
   static isCacheable = true
 
   static createRegistry(...args) {
     const reg = Helper.createContextRegistry('features', {
-      context: Helper.createMockContext('features'),
+      context: Helper.createMockContext({}),
     })
 
-    reg.register('configurable', () => ConfigurableFeature)
-    reg.register('observable', () => ObservableFeature)
     reg.register('profiler', () => ProfilerFeature)
     reg.register('vm', () => VmFeature)
 
@@ -25,8 +28,10 @@ export class Feature extends Helper {
     return reg
   }
 
-  static attach(project, options = {}) {
-    const result = Helper.attach(project, Feature, {
+  static attach(runtime, options = {}) {
+    runtime.Feature = this
+
+    const result = Helper.attach(runtime, Feature, {
       registryProp: 'features',
       lookupProp: 'feature',
       cacheHelper: true,
@@ -35,8 +40,8 @@ export class Feature extends Helper {
       ...options,
     })
 
-    if (project.makeObservable && !project.has('featureStatus')) {
-      project.makeObservable({ featureStatus: ['shallowMap', {}] })
+    if (runtime.makeObservable && !runtime.has('featureStatus')) {
+      runtime.makeObservable({ featureStatus: ['shallowMap', {}] })
     }
 
     return result
@@ -46,6 +51,11 @@ export class Feature extends Helper {
     this.applyInterface(this.featureMixin, this.featureMixinOptions)
   }
 
+  /**
+   * Sets the initial state of the object.  This is called in the Helper constructor
+   *
+   * @private
+   */
   setInitialState(initialState = {}) {
     const { defaultsDeep } = this.lodash
 
@@ -86,6 +96,12 @@ export class Feature extends Helper {
     }
   }
 
+  /**
+   * Enable the feature.
+   *
+   * @param {object|function}
+   *
+   */
   enable(cfg) {
     const { runtime } = this
 
@@ -102,14 +118,25 @@ export class Feature extends Helper {
       const { defaultsDeep: defaults } = this.runtime.lodash
       this.set('options', defaults({}, cfg, options))
     } else if (isFunction(cfg)) {
-      this.configure(cfg.bind(this))
+      console.warn('function configuration is not supported anymore')
     }
 
     try {
       this.host.applyInterface(this.hostMixin, this.hostMixinOptions)
     } catch (error) {}
 
-    this.attemptMethodAsync('featureWasEnabled', cfg, this.options)
+    const hook = () =>
+      this.featureWasEnabled
+        ? this.featureWasEnabled(cfg, this.options)
+        : this.attemptMethodAsync('featureWasEnabled', cfg, this.options)
+
+    const shortcut = this.result('shortcut') || this.result('createGetter')
+
+    if (shortcut) {
+      this.runtime.lazy(shortcut, () => this, true)
+    }
+
+    hook()
       .then(result => {
         this.runtime.featureStatus.set(this.name, {
           cacheKey: this.cacheKey,

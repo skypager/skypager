@@ -1,10 +1,10 @@
 import micromatch from 'micromatch'
+import { Feature } from '@skypager/runtime/lib/feature'
 
-export const createGetter = 'matcher'
+export default class MatcherFeature extends Feature {
+  shortcut = 'matcher'
 
-// todo
-export const micro = micromatch
+  micro = micromatch
 
-export const makeRe = micromatch.makeRe
-
-export const featureMethods = ['micro', 'makeRe']
+  makeRe = micromatch.makeRe
+}

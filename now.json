@@ -1,0 +1,7 @@
+{
+  "name": "skypager-portfolio",
+  "env": {
+      "SERVICE_ACCOUNT_DATA": "@skypager-sheets-server-sa"
+  },
+  "alias": "portfolio.skypager.io"
+}

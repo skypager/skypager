@@ -1,62 +1,42 @@
-export const createGetter = 'os'
+import { Feature } from '@skypager/runtime/lib/helpers/feature'
+import * as os from 'os'
 
-export const featureMethods = [
-  'getArch',
-  'getPlatform',
-  'getNetworkInterfaces',
-  'getEnvironment',
-  'getOs',
-  'getCpuCount',
-  'getUptime',
-  'getMacAddresses',
-]
+export default class OsAdapterFeature extends Feature {
+  get os() {
+    return this.options.os || os
+  }
 
-export function getPlatform() {
-  return require('os').platform()
-}
+  get platform() {
+    return this.os.platform()
+  }
 
-export function getArch() {
-  return require('os').arch()
-}
+  get arch() {
+    return this.os.arch()
+  }
 
-export function getEnvironment() {
-  return process.env || {}
-}
+  get environment() {
+    return process.env || {}
+  }
 
-export function getUptime() {
-  return require('os').uptime()
-}
+  get uptime() {
+    return this.os.uptime()
+  }
 
-export function getCpuCount() {
-  return require('os').cpus().length
-}
+  get cpuCount() {
+    return this.os.cpus().length
+  }
 
-export function getMacAddresses() {
-  return this.chain
-    .get('networkInterfaces')
-    .values()
-    .flatten()
-    .map('mac')
-    .uniq()
-    .value()
-}
+  get macAddresses() {
+    const { values, flatten, uniq } = this.lodash
+    return uniq(flatten(values(this.networkInterfaces)).map(int => int.mac))
+  }
 
-export function getNetworkInterfaces() {
-  return this.runtime.lodash.omitBy(require('os').networkInterfaces(), v =>
-    v.find(a => a.address === '127.0.0.1')
-  )
-}
+  get networkInterfaces() {
+    const { omitBy } = this.lodash
+    return omitBy(this.os.networkInterfaces(), v => v.find(a => a.address === '127.0.0.1'))
+  }
 
-export function getHostname() {
-  return (
-    process.env.SKYPAGER_HOSTNAME ||
-    this.tryResult(
-      'hostname',
-      [this.runtime.get('currentPackage.name', 'skypager'), 'skypager', 'local'].join('.')
-    )
-  )
-}
-
-export function getOs() {
-  return require('os')
+  get hostname() {
+    return process.env.SKYPAGER_HOSTNAME || this.os.hostname()
+  }
 }

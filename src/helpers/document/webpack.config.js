@@ -72,18 +72,21 @@ const nodeConfig = merge(require('@skypager/webpack/config/webpack.config.common
     path: path.resolve(cwd, 'lib'),
   },
   externals: [
-    {
-      '@skypager/runtime': 'commonjs @skypager/runtime',
-      '@babel/preset-env': 'commonjs @babel/preset-env',
-      '@babel/plugin-proposal-decorators': '@babel/plugin-proposal-decorators',
-      '@babel/plugin-proposal-class-properties': '@babel/plugin-proposal-class-properties',
-      '@babel/plugin-proposal-export-default-from': '@babel/plugin-proposal-export-default-from',
-      '@babel/plugin-proposal-object-rest-spread': '@babel/plugin-proposal-object-rest-spread',
-      '@babel/plugin-syntax-dynamic-import': '@babel/plugin-syntax-dynamic-import',
-    },
     nodeExternals({
       modulesFromFile: true,
     }),
+    {
+      '@skypager/runtime': 'commonjs2 @skypager/runtime',
+      '@babel/preset-env': 'commonjs2 @babel/preset-env',
+      '@babel/plugin-proposal-decorators': 'commonjs2 @babel/plugin-proposal-decorators',
+      '@babel/plugin-proposal-class-properties':
+        'commonjs2 @babel/plugin-proposal-class-properties',
+      '@babel/plugin-proposal-export-default-from':
+        'commonjs2 @babel/plugin-proposal-export-default-from',
+      '@babel/plugin-proposal-object-rest-spread':
+        'commonjs2 @babel/plugin-proposal-object-rest-spread',
+      '@babel/plugin-syntax-dynamic-import': 'commonjs2 @babel/plugin-syntax-dynamic-import',
+    },
   ],
   plugins: [new SourceMapSupport()],
 })

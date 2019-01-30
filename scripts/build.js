@@ -24,7 +24,9 @@ run(async runtime => {
     .get('_file.dir')
     .value()
 
-  await projectTask(workingDir, 'build', process.argv.slice(3))
+  await projectTask(workingDir, 'build', process.argv.slice(3), {
+    stdio: process.env.CI ? 'inherit' : 'ignore',
+  })
 
   print(colors.green('SUCCESS'), 0, 2, 2)
 })

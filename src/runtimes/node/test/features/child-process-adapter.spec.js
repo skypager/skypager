@@ -3,6 +3,7 @@ describe('The Child Process Adapter', function() {
 
   it('provides the node child_process functions', function() {
     runtime.should.have.property('proc')
+
     runtime.proc.should.have.property('exec').that.is.a('function')
     runtime.proc.should.have.property('execSync').that.is.a('function')
     runtime.proc.should.have.property('spawn').that.is.a('function')

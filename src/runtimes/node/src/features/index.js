@@ -1,5 +1,5 @@
-import * as autoDiscovery from './auto-discovery.js'
-import * as childProcessAdapter from './child-process-adapter.js'
+// import * as autoDiscovery from './auto-discovery.js'
+import childProcessAdapter from './child-process-adapter.js'
 import * as featureFinder from './feature-finder.js'
 import * as fileDownloader from './file-downloader.js'
 import * as fsAdapter from './fs-adapter.js'
@@ -17,7 +17,7 @@ import * as scriptRunner from './script-runner.js'
 import * as skywalker from './skywalker.js'
 
 export function attach(runtime) {
-  runtime.features.register('auto-discovery', () => autoDiscovery)
+  // runtime.features.register('auto-discovery', () => autoDiscovery)
   runtime.features.register('child-process-adapter', () => childProcessAdapter)
   runtime.features.register('feature-finder', () => featureFinder)
   runtime.features.register('file-downloader', () => fileDownloader)

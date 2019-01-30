@@ -32,6 +32,12 @@ export class Babel extends Helper {
 
     const { content = this.content, cache = true } = options
 
+    options = {
+      ...this.provider,
+      ...this.options,
+      ...options,
+    }
+
     const { omit } = this.lodash
     const babelOptions =
       typeof options.babel === 'object' ? options.babel : { presetEnv: { modules: 'auto' } }
@@ -41,6 +47,10 @@ export class Babel extends Helper {
       core.parse(content, omit(babelConfig, 'ignore', 'env'), (err, result) => {
         err ? reject(err) : resolve(result)
       })
+    }).catch(error => {
+      error.babelConfig = babelConfig
+      error.content = content
+      throw error
     })
 
     if (cache !== false) {
