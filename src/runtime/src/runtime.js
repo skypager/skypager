@@ -74,6 +74,15 @@ const enableStrictMode = get(
   get(global, 'SkypagerStrictMode', false)
 )
 
+/**
+ * Create a new instance of the skypager.Runtime 
+ *  
+ * @class
+ * @classdesc The Runtime is similar to the window or document global in the browser, or the module / process globals in node.
+ * You can extend Runtime and define your own process global singleton that acts as a state machine, event emitter,
+ * module registry, dependency injector.  Typically you can just do this with features instead of subclassing.   
+ * 
+ */
 export class Runtime {
   displayName = 'Skypager'
 
@@ -298,6 +307,13 @@ export class Runtime {
     console.info ? console.info(...args) : console.log(...args)
   }
 
+  /**
+   * @hideconstructor
+   * 
+   * @param {object} options - the props, or argv, for the runtime instance at the time it is created
+   * @param {object} context - the context, environment, static config, or similar global values that may be relevant to some component in the runtime 
+   * @param {function} middlewareFn - this function will be called when the runtime is asynchronously loaded and the plugins have run
+   */
   constructor(options = {}, context = {}, middlewareFn) {
     if (isFunction(options)) {
       middlewareFn = options
@@ -1188,18 +1204,27 @@ export class Runtime {
   }
 
   /**
-   * Observable property system base on Mobx
+   * Returns an md5 hash for any JavaScript object
    */
-
-  hashObject(...args) {
-    return hashObject(...args)
+  hashObject(anyObject) {
+    return hashObject(anyObject)
   }
 
+  /** 
+   * Creates an entity object from any slice of runtime properties / values 
+  */
   createEntityFrom(...properties) {
     const src = this.slice(...properties)
     return entity(toJS(src))
   }
 
+  /**
+   * Select a slice of state using a list of object paths, can be multiple levels deep a.b.c 
+   *
+   * @param {*} properties - an array of strings representing object paths
+   * @returns
+   * @memberof Runtime
+   */
   slice(...properties) {
     return toJS(zipObjectDeep(properties, this.at(properties)))
   }
@@ -1292,12 +1317,18 @@ export class Runtime {
     return lodash.chain(results)
   }
 
+  /** 
+   * @returns {Runtime} the runtime singleton
+  */
   static get framework() {
-    return (frameworkRuntime = frameworkRuntime || Runtime.createSingleton())
+    return (frameworkRuntime = frameworkRuntime || this.createSingleton())
   }
 
-  static createSingleton(...args) {
-    return (global.skypager = global.skypager || (singleton = singleton || new this(...args)))
+  /**
+   * @returns {Runtime} the runtime singleton
+   */
+  static createSingleton(options, context, middlewareFn) {
+    return singleton = singleton || new this(options, context, middlewareFn)
   }
 
   static autoConfigs = []

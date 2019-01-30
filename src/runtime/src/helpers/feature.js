@@ -13,6 +13,10 @@ const isFunction = o => typeof o === 'function'
  * and enable them automatically.
  */
 export class Feature extends Helper {
+  static isSkypagerHelper = true
+
+  static allowAnonymousProviders = true
+
   static isCacheable = true
 
   static createRegistry(...args) {
@@ -122,28 +126,31 @@ export class Feature extends Helper {
     }
 
     try {
+      if (this.options.debugThisShit) {
+        console.log(typeof this.hostMixin.runtimeExtendedMethod)
+      }
+
       this.host.applyInterface(this.hostMixin, this.hostMixinOptions)
-    } catch (error) {}
-
-    const hook = () =>
-      this.featureWasEnabled
-        ? this.featureWasEnabled(cfg, this.options)
-        : this.attemptMethodAsync('featureWasEnabled', cfg, this.options)
-
-    const shortcut = this.result('shortcut') || this.result('createGetter')
-
-    if (shortcut) {
-      this.runtime.lazy(shortcut, () => this, true)
+    } catch (error) {
+      console.error('error applying hos tixin', error)
     }
 
-    hook()
-      .then(result => {
+    const hook = () =>
+      // this handles the class style
+      this.featureWasEnabled
+        ? this.featureWasEnabled(cfg, this.options)
+        : // this handles the module style
+          this.attemptMethodAsync('featureWasEnabled', cfg, this.options)
+
+    return hook()
+      .then(() => {
         this.runtime.featureStatus.set(this.name, {
           cacheKey: this.cacheKey,
           status: 'enabled',
           cfg,
           options: this.options,
         })
+
         return this
       })
       .catch(error => {

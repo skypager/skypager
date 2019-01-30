@@ -146,7 +146,10 @@ export function enabledHook(options = {}) {
       // swallow the erro
     })
 
-  runtime.feature('git').enable()
+  runtime.lazy('git', () => {
+    runtime.feature('git').enable()
+    return runtime.feature('git')
+  })
 
   /**
    * @instance
@@ -181,7 +184,11 @@ export function enabledHook(options = {}) {
   runtime.selectors.register('process/output', () => require('./selectors/process/output'))
   runtime.selectors.register('process/result', () => require('./selectors/process/result'))
 
-  runtime.feature('main-script').enable()
+  const mainScript = runtime.feature('main-script')
+
+  mainScript.enable()
+
+  runtime.getter('mainScript', () => mainScript)
 
   const attached = {}
 

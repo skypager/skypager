@@ -129,7 +129,7 @@ export default class SkywalkerFeature extends Feature {
     }
 
     // eslint-disable-next-line
-    skywalker.run = (err, tree) => 
+    skywalker.run = (err, tree) =>
       new Promise((resolve, reject) =>
         skywalker.start((err, tree) => {
           err ? reject(err) : resolve(tree)

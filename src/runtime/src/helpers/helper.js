@@ -346,7 +346,7 @@ export class Helper {
   /**
    * Access the first value we find in our options hash in our provider hash
    */
-  tryGet(property, defaultValue, sources = ['options', 'provider']) {
+  tryGet(property, defaultValue, sources = ['options', 'provider', 'provider.default']) {
     return (
       this.at(...sources.map(s => `${s}.${property}`)).find(v => !isUndefined(v)) || defaultValue
     )
