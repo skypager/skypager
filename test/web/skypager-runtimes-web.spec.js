@@ -7,7 +7,7 @@ describe('The Skypager Web Runtime Build', function() {
 
   before(async function() {
     browser = await puppeteer.launch({
-      headless: !skypager.argv.showBrowser,
+      headless: !runtime.argv.showBrowser,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     })
     page = await browser.newPage()
