@@ -3,9 +3,9 @@ require('@babel/register')({
     [
       '@babel/preset-env',
       {
-        modules: 'commonjs',
+        modules: 'auto',
         targets: {
-          node: '6.11.1',
+          node: 'current',
         },
       },
     ],

@@ -1,7 +1,7 @@
 const runtime = require('@skypager/node')
 const { existsAsync: exists } = runtime.fsx
 const { resolve } = runtime.pathUtils
-const { colors, print } = skypager.cli
+const { colors, print } = runtime.cli
 const { spawn } = runtime.proc.async
 
 async function findCommand(scriptFilename, checkPaths, runtimeArgs = [], commandArgs = []) {
