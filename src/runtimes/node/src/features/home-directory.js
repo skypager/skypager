@@ -2,6 +2,10 @@ import { relative, resolve, join } from 'path'
 
 export const hostMethods = ['getHomeFolder']
 
+export const hostMixinOptions = {
+  hidden: true,
+}
+
 export const featureMethods = [
   'initializeHomeFolder',
   'createHomePackageManifest',

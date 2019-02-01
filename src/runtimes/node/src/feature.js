@@ -110,6 +110,7 @@ export function enabledHook(options = {}) {
 
   defaultsDeep(runtime.argv, runtime.parseArgv(runtime.argv), runtime.projectConfig)
 
+  /*
   runtime.lazy(
     'homeFolder',
     () => {
@@ -119,6 +120,7 @@ export function enabledHook(options = {}) {
     },
     true
   )
+  */
 
   runtime.lazy(
     'skywalker',
