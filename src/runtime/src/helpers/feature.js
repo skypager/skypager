@@ -97,6 +97,7 @@ export class Feature extends Helper {
       insertOptions: true,
       right: true,
       hidden: false,
+      configurable: true,
     }
   }
 
@@ -132,7 +133,7 @@ export class Feature extends Helper {
 
       this.host.applyInterface(this.hostMixin, this.hostMixinOptions)
     } catch (error) {
-      console.error('error applying hos tixin', error)
+      console.error('error applying host mixin', error)
     }
 
     const hook = () =>

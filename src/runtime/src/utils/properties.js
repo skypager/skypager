@@ -14,6 +14,8 @@ import {
 
 const { defineProperty } = Object
 
+global.DEBUG_LODASH_USAGE = global.DEBUG_LODASH_USAGE || process.env.DEBUG_LODASH_USAGE
+
 /**
  * Creates some functions that are useful when trying to decorate objects with hidden properties or getters,
  * or lazy loading properties, etc.  I use this a lot inside of constructor functions for singleton type objects.
@@ -64,23 +66,69 @@ export function enhanceObject(target, options, lodash = global.lodash) {
     includeChain = isFunction(lodash) && isFunction(lodash.chain),
   } = options
 
+  if (global.DEBUG_LODASH_USAGE) {
+    console.log({
+      includeLodashMethods,
+      includeChain,
+      target: target.constructor && target.constructor.name,
+    })
+  }
+
   if (includeLodashMethods) {
     if (isObject(target) && !isArray(target)) {
       objectMethods
         .filter(name => lodash[name])
-        .forEach(name => hideProperty(target, name, partial(lodash[name], target)))
+        .forEach(name => {
+          const fn = partial(lodash[name], target)
+          hideProperty(target, name, (...args) => {
+            global.DEBUG_LODASH_USAGE &&
+              console.log(
+                `LODASH ACCESS: ${name}`,
+                target.constructor ? target.constructor.name : target.uuid || target
+              )
+            return fn(...args)
+          })
+        })
     } else if (isArray(target)) {
       collectionMethods
         .filter(name => lodash[name])
-        .forEach(name => hideProperty(target, name, partial(lodash[name], target)))
+        .forEach(name => {
+          const fn = partial(lodash[name], target)
+          hideProperty(target, name, (...args) => {
+            global.DEBUG_LODASH_USAGE &&
+              console.log(
+                `LODASH ACCESS: ${name}`,
+                target.constructor ? target.constructor.name : target.uuid || target
+              )
+            return fn(...args)
+          })
+        })
       arrayMethods
         .filter(name => lodash[name])
-        .forEach(name => hideProperty(target, name, partial(lodash[name], target)))
+        .forEach(name => {
+          const fn = partial(lodash[name], target)
+          hideProperty(target, name, (...args) => {
+            global.DEBUG_LODASH_USAGE &&
+              console.log(
+                `LODASH ACCESS: ${name}`,
+                target.constructor ? target.constructor.name : target.uuid || target
+              )
+            return fn(...args)
+          })
+        })
     }
   }
 
   if (includeChain && !has(target, 'chain') && isFunction(lodash.chain)) {
-    hideGetter(target, 'chain', partial(lodash.chain, target))
+    const fn = partial(lodash.chain, target)
+    hideGetter(target, 'chain', () => {
+      global.DEBUG_LODASH_USAGE &&
+        console.log(
+          `LODASH ACCESS CHAIN`,
+          target.constructor ? target.constructor.name : target.uuid || target
+        )
+      return fn()
+    })
   }
 
   return target

@@ -260,7 +260,15 @@ export class Helper {
   isConfigured = false
 
   constructor(options = {}, context = {}) {
-    enhanceObject(this, lodash)
+    enhanceObject(
+      this,
+      {
+        includeLodashMethods: false,
+        includeChain: true,
+      },
+      lodash
+    )
+
     attachEmitter(this)
 
     options.provider = options.provider || {}
@@ -334,6 +342,34 @@ export class Helper {
       console.trace()
       return this.conifgure(...a)
     })
+  }
+
+  at(...paths) {
+    return lodash.at(this, ...paths)
+  }
+
+  set(path, value) {
+    return lodash.set(this, path, value)
+  }
+
+  get(path, defaultValue) {
+    return lodash.get(this, path, defaultValue)
+  }
+
+  result(path, defaultValue, ...args) {
+    return lodash.result(this, path, defaultValue, ...args)
+  }
+
+  has(path) {
+    return lodash.has(this, path)
+  }
+
+  invoke(...args) {
+    return lodash.invoke(this, ...args)
+  }
+
+  pick(...args) {
+    return lodash.pick(this, ...args)
   }
 
   get lodash() {

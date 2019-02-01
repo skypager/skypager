@@ -71,6 +71,15 @@ const enableStrictMode = get(
 )
 
 /**
+ * @typedef {Object} Logger
+ * @prop {Function} log
+ * @prop {Function} info
+ * @prop {Function} debug
+ * @prop {Function} warn
+ * @prop {Function} error
+ */
+
+/**
  * Create a new instance of the skypager.Runtime
  *
  * @class
@@ -82,6 +91,155 @@ const enableStrictMode = get(
 export class Runtime {
   displayName = 'Skypager'
 
+  /**
+   * @constructor
+   * @param {object} options - the props, or argv, for the runtime instance at the time it is created
+   * @param {object} context - the context, environment, static config, or similar global values that may be relevant to some component in the runtime
+   * @param {function} middlewareFn - this function will be called when the runtime is asynchronously loaded and the plugins have run
+   */
+  constructor(options = {}, context = {}, middlewareFn) {
+    if (isFunction(options)) {
+      middlewareFn = options
+      options = {}
+      context = context || {}
+    }
+
+    if (isFunction(context)) {
+      middlewareFn = context
+      context = {}
+    }
+
+    enhanceObject(this, { includeLodashMethods: false, includeChain: true }, lodash)
+    attachEmitter(this)
+
+    this.events.emit('runtimeWasCreated', this, this.constructor)
+
+    /**
+     * @property {Logger}
+     */
+
+    this.lazy('logger', () => console, true)
+
+    this.hideGetter('parent', () => context.parent || singleton)
+
+    this.hide(
+      'cwd',
+      result(options, 'cwd', () => (!isUndefined(process) ? result(process, 'cwd', '/') : '/'))
+    )
+
+    this.hide('uuid', require('uuid')())
+
+    this.hideGetter('_name', () => options.name || camelCase(snakeCase(this.cwd.split('/').pop())))
+    this.hideGetter('name', () => this._name)
+
+    this.hide('cache', new Cache(options.cacheData || []))
+    this.hide('weakCache', new WeakCache(options.cacheData || [], this))
+
+    this.hide('rawOptions', options)
+    this.hide('rawContext', context)
+
+    let { start, initialize, prepare } = this
+
+    if (isFunction(options.initialize))
+      initialize = lodash.flow(
+        this.initialize,
+        options.initialize
+      )
+
+    if (isFunction(options.prepare))
+      prepare = lodash.flow(
+        this.prepare,
+        options.prepare
+      )
+
+    this.hide('initialize', initializeSequence.bind(this, this, initialize), true)
+    this.hide('prepare', prepareSequence.bind(this, this, prepare), true)
+    this.hide('start', startSequence.bind(this, this, start), true)
+
+    this.hide('middlewares', { [STARTING]: mware(this), [PREPARING]: mware(this) })
+
+    this.hide('_enabledFeatures', {})
+
+    this.hide(
+      'registries',
+      new ContextRegistry('registries', {
+        context: Helper.createMockContext('registries'),
+      })
+    )
+
+    this.hide(
+      'selectors',
+      new ContextRegistry('selectors', {
+        context: Helper.createMockContext('selectors'),
+      })
+    )
+
+    this.hideGetter('selectorCache', () => {
+      if (selectorCache.has(this)) {
+        return selectorCache.get(this)
+      }
+      selectorCache.set(this, new Map([]))
+
+      return selectorCache.get(this)
+    })
+
+    extendObservable(this, {
+      state: map(toPairs(this.initialState)),
+      currentState: computed(this.getCurrentState.bind(this)),
+      stateHash: computed(this.getStateHash.bind(this)),
+      cacheKey: computed(this.getCacheKey.bind(this)),
+      setState: action(this.setState.bind(this)),
+      replaceState: action(this.replaceState.bind(this)),
+    })
+
+    this.applyRuntimeInitializers()
+
+    // autoAdd refers to require.contexts that should be added to our registries
+    // this step is deferred until all helpers have been attached.
+    this.constructor.autoAdd.forEach(item => {
+      const { type, ctx } = item
+      this.invoke(`${type}.add`, ctx)
+    })
+
+    this.attachAllHelpers()
+
+    if (typeof middlewareFn === 'function') {
+      this.use(middlewareFn.bind(this), INITIALIZING)
+    }
+
+    this.enableFeatures(this.autoEnabledFeatures)
+
+    if (this.autoInitialize) this.initialize()
+  }
+
+  at(...paths) {
+    return lodash.at(this, ...paths)
+  }
+  
+  set(path, value) {
+    return lodash.set(this, path, value)
+  }
+
+  get(path, defaultValue) {
+    return get(this, path, defaultValue)
+  }
+
+  result(path, defaultValue, ...args) {
+    return result(this, path, defaultValue, ...args)
+  }
+
+  has(path) {
+    return lodash.has(this, path)
+  }
+
+  invoke(...args) {
+    return lodash.invoke(this, ...args)
+  }
+  
+  pick(...args) {
+    return lodash.pick(this, ...args)
+  }
+ 
   /**
     The Context Types API defines a schema for properties that will be made available via the runtime's context system.
 
@@ -109,6 +267,12 @@ export class Runtime {
 
   static strictMode = enableStrictMode.toString() !== 'false'
 
+  /**
+   * Returns the contextTypes declarations for our Runtime class.
+   *
+   * @readonly
+   * @memberof Runtime
+   */
   get contextTypes() {
     return defaults({}, result('constructor.contextTypes'), {
       lodash: 'func',
@@ -119,14 +283,33 @@ export class Runtime {
     })
   }
 
+  /**
+   * the optionTypes declarations for our Runtime class
+   *
+   * @readonly
+   * @memberof Runtime
+   */
+
   get optionTypes() {
     return result(this.constructor, 'optionTypes', {})
   }
 
+  /**
+   * Returns the default context value for this runtime
+   *
+   * @readonly
+   * @memberof Runtime
+   */
   get defaultContext() {
     return result(this.constructor, 'defaultContext', {})
   }
 
+  /**
+   * Returns the default options for this runtime
+   *
+   * @readonly
+   * @memberof Runtime
+   */
   get defaultOptions() {
     return defaults(
       {},
@@ -226,9 +409,8 @@ export class Runtime {
     return this.constructor.runtimes || Runtime.runtimes
   }
 
-  static get events() {
-    return events
-  }
+  /** */
+  static events = events
 
   registerRuntime(...args) {
     return this.constructor.registerRuntime(...args)
@@ -241,6 +423,9 @@ export class Runtime {
    * client and a server helper to go along with it.  If the runtime is web, you wouldn't
    * have a server helper so you wouldn't want to load that code.  If the same runtime is
    * used on a server, then you would run that code.
+   *
+   * @param {string} registryPropName - the name of the registry you want to wait for
+   * @param {Function} callback - a function that will be called with runtime, the helperClass, and the options passed when attaching that helper
    */
   onRegistration(registryPropName, callback) {
     if (typeof callback !== 'function') {
@@ -253,7 +438,7 @@ export class Runtime {
       Helper.events.on('attached', (runtime, helperClass, options = {}) => {
         const { registry = {} } = options || {}
         if (registry && registry.name === registryPropName) {
-          callback(runtime, helperClass, options)
+          callback(null, runtime, helperClass, options)
         }
       })
       return
@@ -304,124 +489,6 @@ export class Runtime {
 
   info(...args) {
     console.info ? console.info(...args) : console.log(...args)
-  }
-
-  /**
-   * @hideconstructor
-   *
-   * @param {object} options - the props, or argv, for the runtime instance at the time it is created
-   * @param {object} context - the context, environment, static config, or similar global values that may be relevant to some component in the runtime
-   * @param {function} middlewareFn - this function will be called when the runtime is asynchronously loaded and the plugins have run
-   */
-  constructor(options = {}, context = {}, middlewareFn) {
-    if (isFunction(options)) {
-      middlewareFn = options
-      options = {}
-      context = context || {}
-    }
-
-    if (isFunction(context)) {
-      middlewareFn = context
-      context = {}
-    }
-
-    enhanceObject(this, lodash)
-    attachEmitter(this)
-
-    this.events.emit('runtimeWasCreated', this, this.constructor)
-
-    this.lazy('logger', () => console, true)
-
-    this.hideGetter('parent', () => context.parent || singleton)
-
-    this.hide(
-      'cwd',
-      result(options, 'cwd', () => (!isUndefined(process) ? result(process, 'cwd', '/') : '/'))
-    )
-
-    this.hide('uuid', require('uuid')())
-
-    this.hideGetter('_name', () => options.name || camelCase(snakeCase(this.cwd.split('/').pop())))
-    this.hideGetter('name', () => this._name)
-
-    this.hide('cache', new Cache(options.cacheData || []))
-    this.hide('weakCache', new WeakCache(options.cacheData || [], this))
-
-    this.hide('rawOptions', options)
-    this.hide('rawContext', context)
-
-    let { start, initialize, prepare } = this
-
-    if (isFunction(options.initialize))
-      initialize = lodash.flow(
-        this.initialize,
-        options.initialize
-      )
-
-    if (isFunction(options.prepare))
-      prepare = lodash.flow(
-        this.prepare,
-        options.prepare
-      )
-
-    this.hide('initialize', initializeSequence.bind(this, this, initialize), true)
-    this.hide('prepare', prepareSequence.bind(this, this, prepare), true)
-    this.hide('start', startSequence.bind(this, this, start), true)
-
-    this.hide('middlewares', { [STARTING]: mware(this), [PREPARING]: mware(this) })
-
-    this.hide('_enabledFeatures', {})
-
-    this.hide(
-      'registries',
-      new ContextRegistry('registries', {
-        context: Helper.createMockContext('registries'),
-      })
-    )
-
-    this.hide(
-      'selectors',
-      new ContextRegistry('selectors', {
-        context: Helper.createMockContext('selectors'),
-      })
-    )
-
-    this.hideGetter('selectorCache', () => {
-      if (selectorCache.has(this)) {
-        return selectorCache.get(this)
-      }
-      selectorCache.set(this, new Map([]))
-
-      return selectorCache.get(this)
-    })
-
-    extendObservable(this, {
-      state: map(toPairs(this.initialState)),
-      currentState: computed(this.getCurrentState.bind(this)),
-      stateHash: computed(this.getStateHash.bind(this)),
-      cacheKey: computed(this.getCacheKey.bind(this)),
-      setState: action(this.setState.bind(this)),
-      replaceState: action(this.replaceState.bind(this)),
-    })
-
-    this.applyRuntimeInitializers()
-
-    // autoAdd refers to require.contexts that should be added to our registries
-    // this step is deferred until all helpers have been attached.
-    this.constructor.autoAdd.forEach(item => {
-      const { type, ctx } = item
-      this.invoke(`${type}.add`, ctx)
-    })
-
-    this.attachAllHelpers()
-
-    if (typeof middlewareFn === 'function') {
-      this.use(middlewareFn.bind(this), INITIALIZING)
-    }
-
-    this.enableFeatures(this.autoEnabledFeatures)
-
-    if (this.autoInitialize) this.initialize()
   }
 
   set name(val) {
@@ -1092,7 +1159,9 @@ export class Runtime {
         if (this.features.checkKey(id)) {
           feature = this.feature(id)
         } else if (this.constructor.features.available.indexOf(id) >= 0) {
-          feature = this.feature(id, { provider: this.constructor.features.lookup(id) })
+          feature = this.feature(id, {
+            provider: this.constructor.features.lookup(id),
+          })
         }
 
         feature.enable(cfg)
@@ -1189,7 +1258,9 @@ export class Runtime {
     if (fn && typeof fn.call === 'function' && stage === INITIALIZING) {
       fn.call(runtime, err => {
         if (err) {
-          runtime.error(err.message || `Error while using fn ${fn.name}`, { error: err })
+          runtime.error(err.message || `Error while using fn ${fn.name}`, {
+            error: err,
+          })
           throw err
         }
       })
@@ -1249,6 +1320,8 @@ export class Runtime {
 
   /**
    * Returns an md5 hash for any JavaScript object
+   *
+   * @param {Object} anyObject - any object you want to calculate a unique hash for
    */
   hashObject(anyObject) {
     return hashObject(anyObject)
@@ -1266,8 +1339,7 @@ export class Runtime {
    * Select a slice of state using a list of object paths, can be multiple levels deep a.b.c
    *
    * @param {*} properties - an array of strings representing object paths
-   * @returns
-   * @memberof Runtime
+   * @returns {*}
    */
   slice(...properties) {
     return toJS(zipObjectDeep(properties, this.at(properties)))
