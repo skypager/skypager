@@ -17,3 +17,7 @@ In addition to these base framework classes, it provides a number of utilities u
 - [Property Utils](src/utils/properties.js)
 - [Array Query](src/utils/query.js)
 - [String Utils](src/utils/string.js)
+
+## API Documentation
+
+[Read the API Documentation](docs/api)
