@@ -1,6 +1,6 @@
 {
   "name": "@skypager/apps-portfolio-browser",
-  "version": "0.1.27",
+  "version": "0.1.28",
   "description": "an api and application for browsing a portfolio",
   "main": "lib/index.js",
   "publishConfig": {
@@ -19,9 +19,9 @@
   "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
   "license": "MIT",
   "dependencies": {
-    "@skypager/node": "^0.1.27",
-    "@skypager/helpers-document": "^0.1.27",
-    "@skypager/web": "^0.1.21",
+    "@skypager/helpers-document": "^0.1.28",
+    "@skypager/node": "^0.1.28",
+    "@skypager/web": "^0.1.28",
     "check-prop-types": "^1.1.2",
     "prop-types": "^15.6.2",
     "react": "^16.5.2",
@@ -34,7 +34,7 @@
     "semantic-ui-react": "^0.82.5"
   },
   "devDependencies": {
-    "@skypager/webpack": "^0.1.27"
+    "@skypager/webpack": "^0.1.28"
   },
   "skypager": {
     "webpack": {
