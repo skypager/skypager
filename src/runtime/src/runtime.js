@@ -57,6 +57,11 @@ const {
 
 let runtimesRegistry
 let frameworkRuntime
+
+/** 
+ * @type {Runtime}
+ * @global
+*/
 let singleton
 
 const defaultOptions = result(global, 'SkypagerDefaultOptions', {})
@@ -71,6 +76,21 @@ const enableStrictMode = get(
 )
 
 /**
+ * @typedef {Object.<string, function>} Mixin
+ */
+
+/**
+ *
+ * @typedef {Object.<string>} MixinOptions
+ * @prop {Array} partial - an array of objects to be passed as arguments to the function
+ * @prop {Boolean} right - whether to append the arguments
+ * @prop {Boolean} insertOptions - whether to pass an empty object as the first arg automatically
+ * @prop {Boolean} hidden - make the property non-enumerable
+ * @prop {Boolean} configurable - make the property non-configurable
+ */
+
+/**
+ * 
  * @typedef {Object} Logger
  * @prop {Function} log
  * @prop {Function} info
@@ -82,7 +102,7 @@ const enableStrictMode = get(
 /**
  * Create a new instance of the skypager.Runtime
  *
- * @class
+ * @class Runtime
  * @classdesc The Runtime is similar to the window or document global in the browser, or the module / process globals in node.
  * You can extend Runtime and define your own process global singleton that acts as a state machine, event emitter,
  * module registry, dependency injector.  Typically you can just do this with features instead of subclassing.
@@ -92,7 +112,6 @@ export class Runtime {
   displayName = 'Skypager'
 
   /**
-   * @constructor
    * @param {object} options - the props, or argv, for the runtime instance at the time it is created
    * @param {object} context - the context, environment, static config, or similar global values that may be relevant to some component in the runtime
    * @param {function} middlewareFn - this function will be called when the runtime is asynchronously loaded and the plugins have run
@@ -115,13 +134,18 @@ export class Runtime {
     this.events.emit('runtimeWasCreated', this, this.constructor)
 
     /**
-     * @property {Logger}
+     * @property {Logger} logger
      */
-
     this.lazy('logger', () => console, true)
 
+    /** 
+     * @property {Runtime} parent
+    */
     this.hideGetter('parent', () => context.parent || singleton)
 
+    /** 
+     * @property {String} cwd
+    */
     this.hide(
       'cwd',
       result(options, 'cwd', () => (!isUndefined(process) ? result(process, 'cwd', '/') : '/'))
@@ -132,7 +156,16 @@ export class Runtime {
     this.hideGetter('_name', () => options.name || camelCase(snakeCase(this.cwd.split('/').pop())))
     this.hideGetter('name', () => this._name)
 
+    /** 
+     * @this Runtime
+     * @property {Cache} cache
+    */
     this.hide('cache', new Cache(options.cacheData || []))
+
+    /** 
+     * @this Runtime
+     * @property {WeakCache} weakCache
+    */
     this.hide('weakCache', new WeakCache(options.cacheData || [], this))
 
     this.hide('rawOptions', options)
@@ -183,6 +216,18 @@ export class Runtime {
       return selectorCache.get(this)
     })
 
+    /** 
+     * @mixin Stateful
+     * @property {Map} state
+     * @property {Object} currentState 
+     * @property {Function} setState
+     * @property {Function} replaceState
+     * @property {String} cacheKey
+     * @property {String} stateHash
+    */
+    /** 
+     * @mixes Stateful
+    */
     extendObservable(this, {
       state: map(toPairs(this.initialState)),
       currentState: computed(this.getCurrentState.bind(this)),
@@ -215,24 +260,64 @@ export class Runtime {
   at(...paths) {
     return lodash.at(this, ...paths)
   }
-  
+
+  /**
+   * Set the value at an object path. Uses lodash.set
+   *
+   * @param {*} path
+   * @param {*} value
+   * @returns {?}
+   * @memberof Runtime
+   */
   set(path, value) {
     return lodash.set(this, path, value)
   }
 
+  /**
+   * Get the value at an object path.  Uses lodash.get
+   * 
+   * @param {String} path
+   * @param {*} defaultValue
+   * @returns {?}
+   * @memberof Runtime
+   */
   get(path, defaultValue) {
     return get(this, path, defaultValue)
   }
-
+  
+  /**
+   * Get the value at an object path. If that path is a function, we'll call it.  
+   * Uses lodash.result
+   * 
+   * @param {*} path
+   * @param {*} defaultValue
+   * @returns {?}
+   * @memberof Runtime
+   */
   result(path, defaultValue, ...args) {
     return result(this, path, defaultValue, ...args)
   }
-
+  /**
+   * Check if runtime has a property 
+   * 
+   * @param {*} path
+   * @param {*} defaultValue
+   * @returns {Boolean}
+   * @memberof Runtime
+   */
   has(path) {
     return lodash.has(this, path)
   }
 
-  invoke(...args) {
+  /**
+   * Invoke a function at a nested path
+   * 
+   * @param {*} functionAtPath
+   * @param {...*} args
+   * @returns {?}
+   * @memberof Runtime
+   */
+  invoke(functionAtPath, ...args) {
     return lodash.invoke(this, ...args)
   }
   
@@ -426,6 +511,13 @@ export class Runtime {
    *
    * @param {string} registryPropName - the name of the registry you want to wait for
    * @param {Function} callback - a function that will be called with runtime, the helperClass, and the options passed when attaching that helper
+   * 
+   * @example @lang js <caption>Conditionally running code when the servers helper is attached</caption>
+   * 
+   * runtime.onRegistration("servers", () => {
+   *  runtime.servers.register('my-server', () => require('./my-server'))
+   * })
+   *  
    */
   onRegistration(registryPropName, callback) {
     if (typeof callback !== 'function') {
@@ -462,10 +554,26 @@ export class Runtime {
     return runtimeClass
   }
 
+   /** 
+   * Register a Helper class as being available to our Runtime class 
+   * 
+   * @param {String} helperName - the name of the helper class
+   * @param {Class} helperClass - a subclass of Helper 
+   * 
+   * @returns {Class} the helper class you registered
+  */ 
   registerHelper(...args) {
     return this.constructor.registerHelper(...args)
   }
 
+  /** 
+   * Register a Helper class as being available to this Runtime class 
+   * 
+   * @param {String} helperName - the name of the helper class
+   * @param {Class} helperClass - a subclass of Helper 
+   * 
+   * @returns {Class} the helper class you registered
+  */
   static registerHelper(name, helperClass) {
     registerHelper(name, () => helperClass)
     return helperClass
@@ -560,6 +668,13 @@ export class Runtime {
     return pickBy(initializers.allMembers(), (fn, id) => !!tags.find(tag => id.indexOf(tag) === 0))
   }
 
+  /** 
+   * A Runtime class will have certain initializer functions that it runs automatically
+   * as part of the startup lifecycle, which initializers will be dependent on the target (e.g. node, web) 
+   * as well as the NODE_ENV environment (production, development, test)
+   * 
+   * @private
+  */
   applyRuntimeInitializers() {
     const { mapValues } = this.lodash
     const matches = this.runtimeInitializers
@@ -579,13 +694,25 @@ export class Runtime {
     return this
   }
 
+  /** 
+   * Attach all registered helpers to the runtime
+   * 
+   * @private
+   * @returns {Runtime}
+  */
   attachAllHelpers() {
     Helper.attachAll(this, this.helperOptions)
     return this
   }
 
-  mixin(object = {}, options = {}) {
-    this.applyInterface(object, {
+  /** 
+   * A Mixin is an object of functions.  These functions will get created as properties on this instance.
+   * 
+   * @param {Mixin} mixin 
+   * @param {MixinOptions} options 
+  */
+  mixin(mixin = {}, options = {}) {
+    this.applyInterface(mixin, {
       transformKeys: true,
       scope: this,
       partial: [],
@@ -598,14 +725,35 @@ export class Runtime {
     return this
   }
 
+  /** 
+   * If you subclass Runtime, you can define your own initialize function which will be called during the constructor phase
+   * 
+   * @abstract
+   * @private
+   * @returns {Runtime}
+  */
   initialize() {
     return this
   }
 
+  /** 
+   * If you subclass Runtime, you can define your own prepare function which will be called after the constructor phase
+   * 
+   * @abstract
+   * @private
+   * @returns {PromiseLike<Runtime>}
+  */
   async prepare() {
     return this
   }
 
+  /** 
+   * If you subclass Runtime, you can define your own prepare function which will be called after the constructor phase
+   * 
+   * @abstract
+   * @private
+   * @returns {PromiseLike<Runtime>}
+  */
   async start() {
     return this
   }
@@ -1386,6 +1534,14 @@ export class Runtime {
     return defaults({}, ...namespaces.map(n => this.get([n, ...key])).map(ifFunc))
   }
 
+  /**
+   * Runs a selector function by first checking against the selectorCache 
+   *
+   * @param {*} selectorId
+   * @param {*} args
+   * @returns {PromiseLike<*>}
+   * @memberof Runtime
+   */
   async selectCached(selectorId, ...args) {
     if (this.selectorCache.get(selectorId)) {
       return this.selectorCache.get(selectorId)
@@ -1394,7 +1550,28 @@ export class Runtime {
     return this.select(selectorId, ...args)
   }
 
-  // run a selector from the selectors registry
+
+  /**
+   * Runs an async selector function from the registry.
+   * 
+   * A selector function will be passed an instance of `lodash.chain({Runtime})` and should return that chain.
+   *
+   * @param {String} selectorId a selector function that exists in the selectors registry 
+   * @param {*} args
+   * @returns {PromiseLike<*>}
+   * @memberof Runtime
+   * @example @lang js
+   * 
+   * runtime.selectors.register('something', () => async (chain, eachItem) => {
+   *  const results = await doStuff() 
+   *  return chain
+   *    .plant(results) 
+   *    .groupBy('column')
+   *    .mapValues((groupName, items) => items.map(eachItem))
+   * })
+   * 
+   * const value = await runtime.select('something', (item) => item + 1)
+   */
   async select(selectorId, ...args) {
     let selector = this.selectors.lookup(selectorId)
 
@@ -1405,6 +1582,15 @@ export class Runtime {
     return isFunction(result.value) ? result.value() : result
   }
 
+  /** 
+   * Same as `select` but accepts passing a function as the last argument.
+   * This function will be called with the result of the selector function
+   * 
+   * @param {String} selectorId a selector function that exists in the selectors registry 
+   * @param {*} args args to pass thru to the function. the last argument should be a function.
+   * @memberof Runtime
+   * @returns {PromiseLike<*>}
+  */
   async selectThru(selectorId, ...args) {
     const fn =
       args.length && typeof args[args.length - 1] === 'function'
@@ -1416,6 +1602,14 @@ export class Runtime {
     return response.thru(fn).value()
   }
 
+  /** 
+   * Same as `selectThru` but returns the resulting lodash chain still in chain mode
+   * 
+   * @param {string} selectorId the id of the registered selector function
+   * @param {...*} args args to pass thru to the selector.  if the last arg is a function
+   *                    it will receive the value as a lodash chain.thru()
+   * @returns {LodashChain}
+  */
   async selectChainThru(selectorId, ...args) {
     const fn =
       args.length && typeof args[args.length - 1] === 'function'
@@ -1427,7 +1621,13 @@ export class Runtime {
     return response.thru(fn)
   }
 
-  // run a selector, stay in lodash chain mode
+  /** 
+   * Same as `select` but returns the resulting lodash chain still in chain mode.
+   * 
+   * @param {String} selectorId a selector function that exists in the selectors registry 
+   * @param {*} args arguments to be passed thru to the selector function
+   * @returns {PromiseLike<*>}
+  */
   async selectChain(selectorId, ...args) {
     const results = await this.select(selectorId, ...args)
     return lodash.chain(results)
