@@ -27,6 +27,13 @@
     "url": "https://github.com/skypager/skypager"
   },
   "skypager": {
+    "apiDocs": [
+      "src/runtime",
+      "src/helpers/helper",
+      "src/helpers/feature",
+      "src/registries/*",
+      "src/utils/*"
+    ],
     "webpack": {
       "babel": {
         "lodash": false

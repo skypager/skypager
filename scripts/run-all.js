@@ -1,29 +1,75 @@
 const runtime = require('@skypager/node')
 const MultiSpinner = require('multispinner')
 
-const {
-  colors: { red, green },
-  print,
-} = runtime.cli
+const { colors, print } = runtime.cli
+
+const { red, green } = colors
 
 const { spawn } = runtime.proc.async
 const { fileManager, packageManager } = runtime
 
+/**
+ * @usage
+ *
+ * # build all of the themes and all of the apps
+ * $ dais-scripts run-all themes-light/build themes-zing/build apps-*
+ */
 const { _: commands = [] } = runtime.argv
 
 const {
+  /**
+   * --ci or auto-detects based on common environment variables
+   * @type {boolean}
+   */
   isCI = runtime.argv.ci || process.env.CI || (process.env.JOB_NAME && process.env.BRANCH_NAME),
-  sequential = runtime.argv.seq,
+  /**
+   * --seq or --sequential
+   * Whether you want to run the commands one at a time.  Default is to run them in parallel
+   *
+   * @type {boolean}
+   */
+  sequential = !!runtime.argv.seq,
+
+  /**
+   * --prefix
+   *
+   * Prefix the package name in the stdout.  Default is true
+   *
+   * @type {boolean}
+   */
   prefix = true,
-  progress = sequential,
+
+  /**
+   * --progress
+   *
+   * Instead of displaying output, just display the spinners
+   *
+   * @type {boolean}
+   */
+  progress = false,
+
+  /**
+   * --only-changed
+   *
+   * Only run the command if the package has changed since the last commit
+   *
+   * @type {boolean}
+   */
+  onlyChanged = false,
+
+  /**
+   * Which package scope? defaults to one found in the name of the current package
+   */
+  scope = runtime.currentPackage.name.split('/')[0],
 } = runtime.argv
 
 /**
  * @param {string} command -  the id of an npm package task in the mono repo that you want to run.
  *                            any of the following are valid
  *
- *                              - :projectName/:packageTask       this will run a task in a nested project, the package scope and initial slash can be omitted (e.g. @skypager/runtime/build or features-file-manager/build)
- *                              - :packageTask                    this will run a task in the top level project
+ *                              - @scope/:projectName/:packageTask        this will run a task in a nested project
+ *                              - :projectName/:packageTask               this will run a task in a nested project, the package scope and initial slash can be omitted (e.g. runtime/build or helpers-client/build)
+ *                              - :packageTask                            this will run a task in the top level project
  *
  *
  * @returns {{ projectName: string, task: string }}
@@ -59,7 +105,7 @@ const parseItem = command => {
   }
 
   return {
-    projectName: `@skypager/${parts[0]}`,
+    projectName: `${scope}/${parts[0]}`,
     task: parts[1],
   }
 }
@@ -104,13 +150,21 @@ function buildAssignments() {
       }
     })
     .filter(Boolean)
+    .filter(({ name, cwd }) => {
+      // if we only want to touch changed packages, and this package hasn't changed, we will just not run anything
+      if (onlyChanged) {
+        // TODO
+        return true
+      } else {
+        return true
+      }
+    })
 }
 async function handleAssignments(assignments) {
   if (sequential) {
     for (let assignment of assignments) {
       banner(assignment)
       await run(assignment)
-      await sleep(400)
     }
 
     return
@@ -128,7 +182,7 @@ async function handleAssignments(assignments) {
         .then(() => {
           progress && spinner.success(item.name)
         })
-        .catch(() => {
+        .catch(error => {
           progress && spinner.error(item.name)
         })
     })
@@ -151,23 +205,53 @@ async function run({ cwd, task, name, runner }, options = {}) {
 
   const { childProcess } = job
 
+  const errorOutput = []
+  const normalOutput = []
+
+  childProcess.stderr.on('data', buf => {
+    const content = buf.toString()
+
+    errorOutput.push(content)
+
+    if (!progress) {
+      if (prefix) {
+        print(content.split('\n').map(chunk => `[${name}]: ${chunk}`))
+      } else {
+        print(content)
+      }
+    }
+  })
+
   childProcess.stdout.on('data', buf => {
     const content = buf.toString()
 
-    if (progress) {
-      return
-    }
+    normalOutput.push(content)
 
-    if (prefix) {
-      print(content.split('\n').map(chunk => `[${name}]: ${chunk}`))
-    } else {
-      print(content)
+    if (!progress) {
+      if (prefix) {
+        print(content.split('\n').map(chunk => `[${name}]: ${chunk}`))
+      } else {
+        print(content)
+      }
     }
   })
 
   try {
     await job
-  } catch (error) {}
+
+    return { errorOutput, normalOutput, childProcess, options: { task, name, cwd, runner } }
+  } catch (error) {
+    const e = new Error(`${runner} ${task} failed in ${name}`)
+
+    e.cwd = cwd
+    e.childProcess = childProcess
+    e.errorOutput = errorOutput
+    e.normalOutput = normalOutput
+    e.original = error
+    e.options = { task, name, cwd, runner }
+
+    throw e
+  }
 }
 
 function banner({ runner, name, cwd, task }) {
