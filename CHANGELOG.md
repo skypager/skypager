@@ -2,6 +2,16 @@
 
 ## Releases
 
+### 0.2.0
+
+- [@skypager/runtime]
+    - (enhancement) you can now export a class from your helper provider modules, when the runtime creates your helper it will create an instance of this class 
+    - (breaking change) removed automatic lodash mixin application on instances of Runtime and Helper classes.
+- [@skypager/node]
+    - (enhancement) refactored the features to be class based
+- [@skypager/devtools]
+    - (enhancement) added a [run-all script](scripts/run-all.js) which can run package tasks in parallel
+
 ### 0.1.20
 
 - [@skypager/features-file-manager]
