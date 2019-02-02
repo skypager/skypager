@@ -24,15 +24,41 @@ global.DEBUG_LODASH_USAGE = global.DEBUG_LODASH_USAGE || process.env.DEBUG_LODAS
  * @return {Object}        Returns an object with some wrapper functions around Object.defineProperty
  */
 export function propertyUtils(target) {
-  return {
+  /**
+   * @mixin PropertyUtils
+   */
+  const propertyUtils = {
+    /**
+     * @link lazy
+     */
     lazy: partial(lazy, target),
+    /**
+     * @link hideProperty
+     */
     hide: partial(hideProperty, target),
+    /**
+     * @link hideProperty
+     */
     hideProperty: partial(hideProperty, target),
+    /**
+     * @link hideProperty
+     */
     hideGetter: partial(hideGetter, target),
+    /**
+     * @link hideProperty
+     */
     hideProperties: partial(hideProperties, target),
+    /**
+     * @link hideProperty
+     */
     getter: partial(getter, target),
+    /**
+     * @link hideProperty
+     */
     applyInterface: partial(applyInterface, target),
   }
+
+  return propertyUtils
 }
 
 export function createCollection(host = {}, items = []) {
@@ -179,13 +205,29 @@ export function createInterface(interfaceMethods = {}, options = {}) {
   return interFace
 }
 
+/**
+ * @typedef {Object.<string, function>} Mixin
+ *
+ * @typedef {Object.<string>} MixinOptions
+ * @prop {Array} partial - an array of objects to be passed as arguments to the function
+ * @prop {Boolean} right - whether to append the arguments
+ * @prop {Boolean} insertOptions - whether to pass an empty object as the first arg automatically
+ * @prop {Boolean} hidden - make the property non-enumerable
+ * @prop {Boolean} configurable - make the property non-configurable
+ */
+
+/**
+ * @param {Object} target - an object to extend
+ * @param {Mixin} methods - an object of functions that will be applied to the target
+ * @param {MixinOptions} options - options for the mixin attributes
+ */
 export function applyInterface(target, methods = {}, options = {}) {
   const {
     scope = target,
     transformKeys = true,
     safe = true,
     hidden = false,
-    configurable = false,
+    configurable = true,
   } = options
 
   const i = methods.isInterface
@@ -241,12 +283,12 @@ export function hideProperties(target, properties = {}) {
 /**
  * Create a hidden getter property on the object.
  *
- * @param  {Object}   target  The target object to define the hidden getter
- * @param  {String}   name    The name of the property
- * @param  {Function} fn      A function to call to return the desired value
- * @param  {Object}   options =             {} Additional options
- * @param  {Object}   options.scope The scope / binding for the function will be called in, defaults to target
- * @param  {Array}    options.args arguments that will be passed to the function
+ * @param {Object} target  The target object to define the hidden getter
+ * @param {String} name    The name of the property
+ * @param {Function} fn      A function to call to return the desired value
+ * @param {Object} options =             {} Additional options
+ * @param {Object} options.scope The scope / binding for the function will be called in, defaults to target
+ * @param {Array} options.args arguments that will be passed to the function
 
  * @return {Object}          Returns the target object
  */
@@ -279,7 +321,16 @@ export function hideGetter(target, name, fn, options = {}) {
   return target
 }
 
-// Creates a getter but makes it enumerable
+/**
+ * creates a non enumerable property on the target object
+ *
+ * @name hideProperty
+ * @param {Object} target the target object
+ * @param {String} attributeName
+ * @param {Function} function which returns a value
+ * @param {Object} definePropertyOptions
+ *
+ */
 export function getter(target, name, fn, options = {}) {
   return hideGetter(target, name, fn, {
     ...options,
@@ -287,6 +338,16 @@ export function getter(target, name, fn, options = {}) {
   })
 }
 
+/**
+ * creates a non enumerable property on the target object
+ *
+ * @name hideProperty
+ * @param {Object} target the target object
+ * @param {String} attributeName
+ * @param {*} value
+ * @param {Object} definePropertyOptions
+ *
+ */
 export function hideProperty(target, name, value, options = {}) {
   if (typeof options === 'boolean') {
     options = { configurable: options }
@@ -308,16 +369,20 @@ export function hideProperty(target, name, value, options = {}) {
   return target
 }
 
+/**
+ * @alias hideProperty
+ */
 export const hide = hideProperty
 
 /**
  * Creates a lazy loading property on an object.
-
- * @param  {Object}   target     The target object to receive the lazy loader
- * @param  {String}   attribute  The property name
- * @param  {Function} fn         The function that will be memoized
- * @param  {[type]}   enumerable =             false Whether to make the property enumerable when it is loaded
- * @return {Object}              Returns the target object
+ *
+ * @name lazy
+ * @param {Object} target The target object to receive the lazy loader
+ * @param {String} attribute The property name
+ * @param {Function} fn The function that will be memoized
+ * @param {[type]} enumerable Whether to make the property enumerable when it is loaded
+ * @return {Object} Returns the target object
  */
 export function lazy(target, attribute, fn, enumerable = false) {
   defineProperty(target, attribute, {
