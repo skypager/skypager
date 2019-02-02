@@ -1,6 +1,6 @@
 {
   "name": "skypager",
-  "version": "40.1.3",
+  "version": "40.1.4",
   "main": "node.js",
   "publishConfig": {
     "access": "public"
@@ -11,10 +11,10 @@
   "author": "Jon Soeder <jon@chicago.com>",
   "dependencies": {
     "@babel/runtime": "^7.3.1",
-    "@skypager/web": "^0.1.23",
-    "@skypager/node": "^0.1.27",
-    "@skypager/cli": "^0.1.27",
-    "@skypager/runtime": "^0.1.21"
+    "@skypager/web": "^0.1.28",
+    "@skypager/node": "^0.1.28",
+    "@skypager/cli": "^0.1.28",
+    "@skypager/runtime": "^0.1.28"
   },
   "keywords": [
     "skypager"
