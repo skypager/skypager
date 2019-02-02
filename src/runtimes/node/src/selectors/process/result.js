@@ -21,7 +21,8 @@ export default (async function processOutput(chain, options = {}) {
     maxBuffer: this.argv.maxProcBuffer || PROC_MAX_BUFFER,
     ...options,
   }).catch(error => {
-    console.error(`Error while running process/result`, { error: error.message, command, cwd })
+    options.logErrors &&
+      console.error(`Error while running process/result`, { error: error.message, command, cwd })
     return catchFailure(error)
   })
 

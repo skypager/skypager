@@ -3,9 +3,9 @@ require('@babel/register')({
     [
       '@babel/preset-env',
       {
-        modules: 'commonjs',
+        modules: 'auto',
         targets: {
-          node: '6.11.1',
+          node: 'current',
         },
       },
     ],
@@ -20,6 +20,7 @@ const { red, green } = require('chalk')
 const { spawnSync } = require('child_process')
 const ARGV = require('minimist')(process.argv.slice(0, 2))
 const currentPackage = require('../package.json')
+const { stdio = process.env.DEBUG_POSTINSTALL || process.env.CI ? 'inherit' : 'ignore' } = ARGV
 
 const cwd = resolve(__dirname, '..')
 
@@ -85,29 +86,30 @@ async function main() {
   print('Building rest of the projects in stages')
   // skypager.cli.clear()
 
-  const spinner = process.env.JOB_NAME
-    ? new CISpinner(
-        first
-          .concat(rest)
-          .concat(last)
-          .map(i => i[0])
-      )
-    : new MultiSpinner(
-        first
-          .concat(rest)
-          .concat(last)
-          .map(i => i[0]),
-        {
-          autoStart: false,
-          clear: false,
-        }
-      )
+  const spinner =
+    process.env.JOB_NAME || process.env.CI
+      ? new CISpinner(
+          first
+            .concat(rest)
+            .concat(last)
+            .map(i => i[0])
+        )
+      : new MultiSpinner(
+          first
+            .concat(rest)
+            .concat(last)
+            .map(i => i[0]),
+          {
+            autoStart: false,
+            clear: false,
+          }
+        )
 
   spinner.start()
 
   await Promise.all(
     first.map(([project, subfolder]) =>
-      spawn('yarn', ['build'], { cwd: resolve(cwd, subfolder), stdio: 'ignore' })
+      spawn('yarn', ['build'], { cwd: resolve(cwd, subfolder), stdio })
         .then(() => {
           spinner.success(project)
         })
@@ -128,7 +130,7 @@ async function main() {
     rest.map(([project, subfolder]) =>
       spawn('yarn', ['build', ARGV.force && '--force'].filter(Boolean), {
         cwd: resolve(cwd, subfolder),
-        stdio: 'ignore',
+        stdio,
       })
         .then(() => {
           spinner.success(project)
@@ -149,7 +151,7 @@ async function main() {
     last.map(([project, subfolder]) =>
       spawn('yarn', ['build', ARGV.force && '--force'].filter(Boolean), {
         cwd: resolve(cwd, subfolder),
-        stdio: 'ignore',
+        stdio,
       })
         .then(() => {
           spinner.success(project)

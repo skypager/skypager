@@ -14,7 +14,7 @@ async function main() {
   runtime.servers.register('app', () => require('../src/server'))
 
   const server = runtime.server('app', {
-    port: runtime.argv.port,
+    port: runtime.argv.port || process.env.PORT || 5000,
     hostname: runtime.argv.hostname,
   })
 

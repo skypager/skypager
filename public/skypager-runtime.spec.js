@@ -30,6 +30,29 @@ describe('Skypager Runtime', function() {
     skypager.cwd.should.equal('/')
   })
 
+  it('should provide mobx', function() {
+    skypager.should.have.property('mobx')
+  })
+
+  it('should provide lodash', function() {
+    skypager.should.have.property('lodash')
+    skypager.lodash.should.have.property('mapValues')
+  })
+
+  it('should path utils', function() {
+    skypager.pathUtils.should.be
+      .an('object')
+      .with.property('join')
+      .that.is.a('function')
+  })
+
+  it('should provide url utils', function() {
+    skypager.urlUtils.should.be
+      .an('object')
+      .with.property('parseUrl')
+      .that.is.a('function')
+  })
+
   it('should provide string utils', function() {
     skypager.stringUtils.should.be
       .an('object')

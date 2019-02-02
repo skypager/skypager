@@ -1,0 +1,9 @@
+{
+    "compilerOptions": {
+        "target": "es2015"
+    },
+    "include": [
+        "src/**/*",
+        "lib/**/*"
+    ]
+}

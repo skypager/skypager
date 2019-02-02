@@ -1,18 +1,10 @@
 import runtime from '@skypager/runtime'
 import * as features from './features'
 
+/** @namespace */
 runtime.use(features)
 
 export const hostMethods = ['parseArgv']
-
-/**
-
-TODO
-
-Node runtime initialization is out of control at the moment.  Every feature available
-is autoloaded no matter what command is being run. Move these to the command prepare step
-
-*/
 
 export function featureWasEnabled(...args) {
   try {
@@ -51,36 +43,57 @@ export function enabledHook(options = {}) {
   */
 
   runtime.invoke('profiler.profileStart', 'osAdaptersEnabled')
+  /**
+   * @instance
+   * @property fsx
+   * @type FsxInterface
+   */
   runtime.feature('fs-adapter').enable()
 
-  runtime.lazy('proc', () => {
-    const procFeature = runtime.feature('child-process-adapter')
-    procFeature.enable()
-    return procFeature
-  })
+  runtime.lazy(
+    'proc',
+    () => {
+      const procFeature = runtime.feature('child-process-adapter')
+      procFeature.enable()
+      return procFeature
+    },
+    true
+  )
 
-  runtime.lazy('os', () => {
-    const osFeature = runtime.feature('os-adapter')
-    osFeature.enable()
-    return osFeature
-  })
+  runtime.lazy(
+    'os',
+    () => {
+      const osFeature = runtime.feature('os-adapter')
+      osFeature.enable()
+      return osFeature
+    },
+    true
+  )
 
-  runtime.lazy('networking', () => {
-    const netFeature = runtime.feature('networking')
-    netFeature.enable()
-    return netFeature
-  })
+  runtime.lazy(
+    'networking',
+    () => {
+      const netFeature = runtime.feature('networking')
+      netFeature.enable()
+      return netFeature
+    },
+    true
+  )
 
   runtime.invoke('profiler.profileEnd', 'osAdaptersEnabled')
 
   runtime.feature('logging').enable()
-  runtime.lazy('logging', () => runtime.feature('logging'))
+  runtime.lazy('logging', () => runtime.feature('logging'), true)
 
-  runtime.lazy('opener', () => {
-    const opener = runtime.feature('opener')
-    opener.enable()
-    return opener
-  })
+  runtime.lazy(
+    'opener',
+    () => {
+      const opener = runtime.feature('opener')
+      opener.enable()
+      return opener
+    },
+    true
+  )
 
   runtime.hide(
     '_argv_paths',
@@ -97,27 +110,31 @@ export function enabledHook(options = {}) {
 
   defaultsDeep(runtime.argv, runtime.parseArgv(runtime.argv), runtime.projectConfig)
 
-  runtime.lazy('homeFolder', () => {
-    const homeDirectory = runtime.feature('home-directory')
-    homeDirectory.enable()
-    return runtime.homeFolder
-  })
+  /*
+  runtime.lazy(
+    'homeFolder',
+    () => {
+      const homeDirectory = runtime.feature('home-directory')
+      homeDirectory.enable()
+      return runtime.homeFolder
+    },
+    true
+  )
+  */
 
-  runtime.lazy('skywalker', () => {
-    const skywalker = runtime.feature('skywalker')
-    skywalker.enable()
-    return skywalker
-  })
+  runtime.lazy(
+    'skywalker',
+    () => {
+      const skywalker = runtime.feature('skywalker')
+      skywalker.enable()
+      return skywalker
+    },
+    true
+  )
 
   runtime.invoke('profiler.profileStart', 'packageFinderEnabled')
   runtime.feature('package-finder').enable()
   runtime.invoke('profiler.profileEnd', 'packageFinderEnabled')
-
-  runtime.lazy('autoDiscovery', () => {
-    const autoDiscovery = runtime.feature('auto-discovery')
-    autoDiscovery.enable()
-    return autoDiscovery
-  })
 
   runtime.invoke('profiler.profileStart', 'findCurrentPackage')
   runtime.packageFinder
@@ -131,9 +148,15 @@ export function enabledHook(options = {}) {
       // swallow the erro
     })
 
-  runtime.feature('git').enable()
+  runtime.lazy('git', () => {
+    runtime.feature('git').enable()
+    return runtime.feature('git')
+  })
 
-  // This seems to be an ok way of lazy loading a feature
+  /**
+   * @instance
+   * @name packageCache
+   */
   runtime.lazy('packageCache', () => {
     runtime.feature('package-cache').enable()
     return runtime.packageCache
@@ -163,7 +186,11 @@ export function enabledHook(options = {}) {
   runtime.selectors.register('process/output', () => require('./selectors/process/output'))
   runtime.selectors.register('process/result', () => require('./selectors/process/result'))
 
-  runtime.feature('main-script').enable()
+  const mainScript = runtime.feature('main-script')
+
+  mainScript.enable()
+
+  runtime.getter('mainScript', () => mainScript)
 
   const attached = {}
 

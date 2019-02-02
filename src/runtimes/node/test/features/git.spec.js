@@ -6,6 +6,11 @@ describe('The Git Adapter', function() {
     await git.walk()
   })
 
+  it('extends the runtime', function() {
+    git.hostMethods.should.include('getGitInfo')
+    git.hostMixin.should.not.be.empty
+  })
+
   it('provides generic info about the git status', function() {
     runtime.should.have
       .property('gitInfo')

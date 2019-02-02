@@ -1,56 +1,55 @@
-export const createGetter = 'fileDownloader'
+import { Feature } from '@skypager/runtime/lib/feature'
 
-export const featureMethods = ['download', 'downloadAsync']
+export default class FileDownloaderFeature extends Feature {
+  shortcut = 'fileDownloader'
 
-export const featureMixinOptions = {
-  partial: false,
-  insertOptions: false,
-}
+  async downloadAsync(sourceUrl, destinationPath) {
+    const { runtime: skypager } = this
 
-export async function downloadAsync(sourceUrl, destinationPath) {
-  const { runtime: skypager } = this
+    const dest = skypager.resolve(destinationPath)
+    await skypager.fsx.ensureDirAsync(skypager.pathUtils.dirname(dest))
 
-  const dest = skypager.resolve(destinationPath)
-  await skypager.fsx.ensureDirAsync(skypager.pathUtils.dirname(dest))
-
-  const req = new Promise((resolve, reject) => {
-    this.download(sourceUrl, dest, (err, loc) => {
-      err ? reject(err) : resolve(loc || dest)
-    })
-  })
-
-  return await req.catch(e => false).then(l => l || dest)
-}
-
-export function download(sourceUrl, dest, cb) {
-  const { runtime: skypager } = this
-  const file = require('fs').createWriteStream(dest)
-  const transport = sourceUrl.startsWith('https') ? require('https') : require('http')
-
-  try {
-    const request = transport.get(sourceUrl, response => {
-      response.pipe(file)
-
-      file.on('finish', () => {
-        console.log('file finished')
-        file.close(() => cb(null, dest))
+    const req = new Promise((resolve, reject) => {
+      this.download(sourceUrl, dest, (err, loc) => {
+        err ? reject(err) : resolve(loc || dest)
       })
     })
 
-    request.on('error', err => {
-      skypager.error('Received error while downloading', { message: err.message })
+    return Promise.resolve(req)
+      .catch(e => false)
+      .then(l => l || dest)
+  }
 
-      skypager.fsx
-        .unlinkAsync(dest)
-        .then(() => {
-          cb && typeof cb === 'function' && cb(err)
+  download(sourceUrl, dest, cb) {
+    const { runtime: skypager } = this
+    const file = require('fs').createWriteStream(dest)
+    const transport = sourceUrl.startsWith('https') ? require('https') : require('http')
+
+    try {
+      const request = transport.get(sourceUrl, response => {
+        response.pipe(file)
+
+        file.on('finish', () => {
+          console.log('file finished')
+          file.close(() => cb(null, dest))
         })
-        .catch(e => {
-          skypager.error(`Error while removing temp file`, { message: e.message })
-          cb && typeof cb === 'function' && cb(e)
-        })
-    })
-  } catch (e) {
-    cb && typeof cb === 'function' && cb(e)
+      })
+
+      request.on('error', err => {
+        skypager.error('Received error while downloading', { message: err.message })
+
+        skypager.fsx
+          .unlinkAsync(dest)
+          .then(() => {
+            cb && typeof cb === 'function' && cb(err)
+          })
+          .catch(e => {
+            skypager.error(`Error while removing temp file`, { message: e.message })
+            cb && typeof cb === 'function' && cb(e)
+          })
+      })
+    } catch (e) {
+      cb && typeof cb === 'function' && cb(e)
+    }
   }
 }

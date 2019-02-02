@@ -1,6 +1,7 @@
 describe('The Skypager Packages', function() {
+  const skypager = require('@skypager/node')
+
   before(async function() {
-    const skypager = require('@skypager/node')
     await skypager.fileManager.startAsync()
     await skypager.packageManager.startAsync()
   })
@@ -16,6 +17,8 @@ describe('The Skypager Packages', function() {
     packageNames.should.include('@skypager/devtools')
     packageNames.should.include('@skypager/webpack')
     packageNames.should.include('@skypager/helpers-server')
+    packageNames.should.include('@skypager/helpers-document')
+    packageNames.should.include('@skypager/helpers-sketch')
     packageNames.should.include('@skypager/helpers-repl')
     packageNames.should.include('@skypager/helpers-client')
     packageNames.should.include('@skypager/features-file-manager')
@@ -24,9 +27,11 @@ describe('The Skypager Packages', function() {
   it('enforces valid naming', async function() {
     const { packageData = [] } = skypager.packageManager
     packageData.length.should.be.greaterThan(16)
-    packageData.filter(pkg => !pkg.name.match(/test-package/)).forEach(pkg => {
-      pkg.name.should.match(/^@?skypager/)
-    })
+    packageData
+      .filter(pkg => !pkg.name.match(/test-package/))
+      .forEach(pkg => {
+        pkg.name.should.match(/^@?skypager/)
+      })
   })
 
   it('enforces valid package.json scripts config', async function() {

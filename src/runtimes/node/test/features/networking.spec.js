@@ -6,6 +6,10 @@ describe('The Networking Adapter', function() {
     runtime.should.have.property('networking')
   })
 
+  it('subclasses the Networking feature', function() {
+    runtime.networking.provider.default.name.should.equal('NetworkingFeature')
+  })
+
   it('has a method for finding an open port', async function() {
     const openPort = await networking.findOpenPort()
     openPort.should.be.a('number')

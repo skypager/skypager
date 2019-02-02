@@ -33,7 +33,7 @@ const {
   zipObjectDeep,
 } = lodash
 
-const req = createMockContext('helpers')
+const req = createMockContext({})
 
 let REGISTRY
 
@@ -52,6 +52,10 @@ export class OptionsError extends Error {}
 export class ProviderError extends Error {}
 
 export class Helper {
+  static isSkypagerHelper = true
+
+  static helperName = 'Helper'
+
   static registry = REGISTRY
 
   static ContextRegistry = ContextRegistry
@@ -93,7 +97,13 @@ export class Helper {
 
   static createInstance(options = {}, context = {}, runtime, helperClass) {
     helperClass = helperClass || this
-    const helperInstance = new helperClass(options, context)
+    const helperInstance = new helperClass(
+      {
+        shortcut: helperClass.shortcut || helperClass.prototype.shortcut,
+        ...options,
+      },
+      context
+    )
 
     /*
     runtime.debug("Helper Instance Created", {
@@ -250,34 +260,66 @@ export class Helper {
   isConfigured = false
 
   constructor(options = {}, context = {}) {
-    enhanceObject(this, lodash)
+    enhanceObject(
+      this,
+      {
+        includeLodashMethods: false,
+        includeChain: true,
+      },
+      lodash
+    )
+
     attachEmitter(this)
 
     options.provider = options.provider || {}
 
-    this.lazy(
-      'name',
-      () => this.get('options.name', this.result('provider.name', () => options.name)),
-      true
-    )
+    /**
+     * @property {string} name - the name for this helper
+     */
+    !this.name && this.lazy('name', options.name)
 
-    this.hide('uuid', require('uuid')())
+    /**
+     * @property {string} uuid - a unique id for this helper instance
+     */
+    !this.uuid && this.hide('uuid', options.uuid || require('uuid')())
 
+    /**
+     * @property {object} context - the helper context
+     */
     this.hide('context', context)
 
     try {
-      this.hideGetter(`is${this.constructor.name}`, () => true)
+      this.hideGetter(`is${this.constructor.helperName || this.constructor.name}`, () => true)
     } catch (error) {}
 
-    this.hide('registryName', Helper.propNames(this.constructor.name).registryProp)
+    /**
+     * @property {string} registryName - the default name for the registry of helper modules
+     */
+    this.hide(
+      'registryName',
+      this.constructor.registryName ||
+        Helper.propNames(this.constructor.helperName || this.constructor.name).registryProp
+    )
 
-    // these are all aliases
+    /**
+     * @property {Runtime} project - a reference to the runtime that created this helper
+     */
+
     this.hideGetter('project', () => context.project || context.host || context.runtime)
+
+    /**
+     * @property {Runtime} host - a reference to the runtime that created this helper
+     */
+
     this.hideGetter('host', () => context.project || context.host || context.runtime)
+
+    /**
+     * @property {Runtime} runtime - a reference to the runtime that created this helper
+     */
     this.hideGetter('runtime', () => context.project || context.host || context.runtime)
 
-    if (this.project.beforeHelperCreate) {
-      this.project.beforeHelperCreate.call(this.project, this, options, context, this.constructor)
+    if (this.runtime.beforeHelperCreate) {
+      this.runtime.beforeHelperCreate.call(this.runtime, this, options, context, this.constructor)
     }
 
     this.getter('options', () => omit({ ...this.defaultOptions, ...options }, 'provider'))
@@ -291,8 +333,6 @@ export class Helper {
       ].join(':')
     )
 
-    this.hide('configHistory', [], false)
-
     if (options.initialize !== false) {
       this.doInitialize()
     }
@@ -302,6 +342,34 @@ export class Helper {
       console.trace()
       return this.conifgure(...a)
     })
+  }
+
+  at(...paths) {
+    return lodash.at(this, ...paths)
+  }
+
+  set(path, value) {
+    return lodash.set(this, path, value)
+  }
+
+  get(path, defaultValue) {
+    return lodash.get(this, path, defaultValue)
+  }
+
+  result(path, defaultValue, ...args) {
+    return lodash.result(this, path, defaultValue, ...args)
+  }
+
+  has(path) {
+    return lodash.has(this, path)
+  }
+
+  invoke(...args) {
+    return lodash.invoke(this, ...args)
+  }
+
+  pick(...args) {
+    return lodash.pick(this, ...args)
   }
 
   get lodash() {
@@ -344,7 +412,7 @@ export class Helper {
   /**
    * Access the first value we find in our options hash in our provider hash
    */
-  tryGet(property, defaultValue, sources = ['options', 'provider']) {
+  tryGet(property, defaultValue, sources = ['options', 'provider', 'provider.default']) {
     return (
       this.at(...sources.map(s => `${s}.${property}`)).find(v => !isUndefined(v)) || defaultValue
     )
@@ -432,11 +500,11 @@ export class Helper {
   }
 
   attemptMethod(methodName, ...args) {
-    const handler = this.tryGet(methodName, this.get(methodName))
+    const handler = this.tryGet(methodName, this[methodName])
 
     if (typeof handler === 'undefined') {
-      if (this.project.isDevelopment && this.project.get('environment.DEBUG_HELPERS')) {
-        this.project.debug(`attemptMethod called on non-existent method: ${methodName} `, {
+      if (this.runtime.isDevelopment && this.runtime.get('environment.DEBUG_HELPERS')) {
+        this.runtime.debug(`attemptMethod called on non-existent method: ${methodName} `, {
           name: this.name,
           id: this.id,
         })
@@ -585,6 +653,8 @@ export function attach(host, helperClass, options = {}) {
     ...options,
   }
 
+  const originalHelperClass = helperClass
+
   if (host[registryProp]) {
     return host
   }
@@ -606,6 +676,7 @@ export function attach(host, helperClass, options = {}) {
     const { cacheHelper = !!(helperClass.isCacheable || opts.cacheHelper) } = opts
 
     opts = defaults(
+      {},
       opts,
       { name, id: name, cacheHelper: !!helperClass.isCacheable },
       omit(host.argv, '', '_'),
@@ -627,6 +698,21 @@ export function attach(host, helperClass, options = {}) {
       }
     }
 
+    if (
+      provider &&
+      provider.default &&
+      typeof provider.default === 'function' &&
+      provider.default.isSkypagerHelper
+    ) {
+      helperClass = provider.default
+      opts.shortcut = getShortcut(opts, helperClass)
+    } else if (provider && typeof provider === 'function' && provider.isSkypagerHelper) {
+      helperClass = provider
+      opts.shortcut = getShortcut(opts, helperClass)
+    } else {
+      helperClass = originalHelperClass
+    }
+
     const cacheable = !!(
       cacheHelper !== false &&
       provider.isCacheable !== false &&
@@ -639,8 +725,13 @@ export function attach(host, helperClass, options = {}) {
     opts.cacheable = cacheable
     opts.provider = provider
 
-    if (provider.shortcut) opts.shortcut = opts.shortcut || provider.shortcut
-    if (provider.createGetter) opts.createGetter = opts.createGetter || provider.createGetter
+    opts.shortcut =
+      opts.shortcut ||
+      provider.shortcut ||
+      (helperClass.prototype && helperClass.prototype.shortcut) ||
+      helperClass.shortcut
+    opts.createGetter =
+      opts.createGetter || provider.createGetter || opts.createGetter || opts.shortcut
 
     // type case the values true, false, TRUE, FALSE
     keys(opts).forEach(key => {
@@ -650,7 +741,7 @@ export function attach(host, helperClass, options = {}) {
     })
 
     if (host.willCreateHelper) {
-      const response = host.willCreateHelper.call(host, opts)
+      const response = host.willCreateHelper(opts, helperClass)
 
       if (response === false) {
         return false
@@ -682,7 +773,7 @@ export function attach(host, helperClass, options = {}) {
     })
 
     if (host.didCreateHelper) {
-      host.didCreateHelper.call(host, helperInstance, opts)
+      host.didCreateHelper(helperInstance, opts)
     }
 
     helperClass.didCreateHelper(host, helperInstance, opts)
@@ -738,3 +829,20 @@ const cacheableKeys = (value = {}, key) =>
   (value && value.then && isFunction(value.then)) ||
   key == 'provider' ||
   key === 'compiler'
+
+const getShortcut = (opts = {}, helperClass) => {
+  const shortcut =
+    lodash.result(opts, 'shortcut', () => lodash.result(opts, 'createGetter')) ||
+    lodash.result(helperClass, 'shortcut', () => lodash.result(helperClass, 'createGetter')) ||
+    lodash.result(helperClass.prototype, 'shortcut', () =>
+      lodash.result(helperClass.prototype, 'createGetter')
+    )
+
+  if (shortcut) {
+    return shortcut
+  }
+
+  const desc = Object.getOwnPropertyDescriptor(helperClass, 'shortcut') || {}
+
+  return lodash.result(desc, 'value')
+}

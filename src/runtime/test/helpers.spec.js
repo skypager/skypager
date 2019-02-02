@@ -4,6 +4,26 @@ describe('The Helpers System', function() {
   const runtime = new Runtime()
   const spy = require('sinon').spy()
 
+  describe('class based helpers', function() {
+    const { Feature } = runtime
+
+    class MyFeature extends Feature {}
+
+    MyFeature.isCacheable = true
+    MyFeature.prototype.shortcut = 'myFeature'
+
+    runtime.features.register('my-feature', () => MyFeature)
+
+    it('creates instances of helper subclasses if thats what the registered module provides', function() {
+      const myFeature = runtime.feature('my-feature')
+      myFeature.enable()
+
+      myFeature.should.be.an.instanceOf(MyFeature)
+      myFeature.shortcut.should.equal('myFeature')
+      myFeature.runtime.should.have.property('myFeature')
+    })
+  })
+
   it('lets you subscribe to registration events for specific helpers', function() {
     runtime.should.have.property('onRegistration').that.is.a('function')
     runtime.onRegistration('someRandomShit', spy)

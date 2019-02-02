@@ -1,21 +1,19 @@
-const skypager = require('@skypager/runtime')
-const initializer = require('./initializer')
+import runtime from '@skypager/runtime'
+import * as features from './features' // eslint-disable-line
+import * as NodeFeature from './feature'
 
-const { resolve } = skypager.pathUtils
-const { defaultsDeep } = skypager.lodash
+runtime.features.register('runtimes/node', () => NodeFeature)
 
-defaultsDeep(process, {
-  env: {
-    SKYPAGER_PACKAGE_CACHE_ROOT: resolve(__dirname, '..', '.cache', 'skypager'),
-  },
-})
+runtime.feature('runtimes/node').enable()
 
-skypager.features.register('runtimes/node', () => require('./feature'))
+/**
+ * @typedef NodeRuntime
+ * @property {GitFeature} git interact with git
+ * @property {FileSystemFeature} fsx interact with a file system
+ *
+ */
 
-skypager.use(initializer)
-
-module.exports = skypager
-
-skypager.hide('runtimeProvider', 'node', true)
-skypager.hide('runtimeModule', module.id, true)
-skypager.hide('runtimePackageInfo', require('../package.json'), true) // eslint-disable-line
+/**
+ * @type NodeRuntime - @skypager/runtime with the node feature set enabled
+ */
+module.exports = runtime

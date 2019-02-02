@@ -11,7 +11,7 @@ const nodeConfig = merge(
     context: cwd,
     target: 'node',
     name: 'node',
-    devtool: 'source-map',
+    devtool: '#cheap-module-eval-source-map',
     entry: {
       index: path.resolve(cwd, 'src', 'index.js'),
     },
@@ -19,6 +19,8 @@ const nodeConfig = merge(
       libraryTarget: 'commonjs2',
       filename: '[name].js',
       path: path.resolve(cwd, 'lib'),
+      devtoolModuleFilenameTemplate: '[absolute-resource-path]',
+      devtoolFallbackModuleFilenameTemplate: '[absolute-resource-path]?[hash]',
     },
     externals: [
       nodeExternals({
