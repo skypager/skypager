@@ -56,6 +56,16 @@ module registry, dependency injector.  Typically you can just do this with featu
         * [.defaultOptions](#Runtime+defaultOptions)
         * [.events](#Runtime+events)
         * [.argv](#Runtime+argv)
+        * [.isBrowser](#Runtime+isBrowser)
+        * [.isNode](#Runtime+isNode)
+        * [.isElectron](#Runtime+isElectron)
+        * [.isElectronRenderer](#Runtime+isElectronRenderer)
+        * [.isReactNative](#Runtime+isReactNative)
+        * [.isDebug](#Runtime+isDebug)
+        * [.isCI](#Runtime+isCI)
+        * [.isDevelopment](#Runtime+isDevelopment)
+        * [.isTest](#Runtime+isTest)
+        * [.isProduction](#Runtime+isProduction)
         * [.set(path, value)](#Runtime+set) ⇒ <code>?</code>
         * [.get(path, defaultValue)](#Runtime+get) ⇒ <code>?</code>
         * [.result(path, defaultValue)](#Runtime+result) ⇒ <code>?</code>
@@ -64,6 +74,9 @@ module registry, dependency injector.  Typically you can just do this with featu
         * [.onRegistration(registryPropName, callback)](#Runtime+onRegistration)
         * [.registerHelper(helperName, helperClass)](#Runtime+registerHelper) ⇒ <code>Class</code>
         * [.mixin(mixin, options)](#Runtime+mixin)
+        * [.replaceState([newState], [cb])](#Runtime+replaceState) ⇒ <code>Object</code>
+        * [.setState([newState], [cb])](#Runtime+setState) ⇒ <code>Object</code>
+        * *[.stateDidChange()](#Runtime+stateDidChange)*
         * [.hashObject(anyObject)](#Runtime+hashObject)
         * [.createEntityFrom()](#Runtime+createEntityFrom)
         * [.slice(...properties)](#Runtime+slice) ⇒ <code>\*</code>
@@ -72,6 +85,9 @@ module registry, dependency injector.  Typically you can just do this with featu
         * [.selectThru(selectorId, ...args)](#Runtime+selectThru) ⇒ <code>PromiseLike.&lt;\*&gt;</code>
         * [.selectChainThru(selectorId, ...args)](#Runtime+selectChainThru) ⇒ <code>LodashChain</code>
         * [.selectChain(selectorId, ...args)](#Runtime+selectChain) ⇒ <code>PromiseLike.&lt;\*&gt;</code>
+        * ["stateWillChange"](#Runtime+event_stateWillChange)
+        * ["stateWillReplace"](#Runtime+event_stateWillReplace)
+        * ["stateWillChange"](#Runtime+event_stateWillChange)
     * _static_
         * [.framework](#Runtime.framework) ⇒ [<code>Runtime</code>](#Runtime)
         * [.registerHelper(helperName, helperClass)](#Runtime.registerHelper) ⇒ <code>Class</code>
@@ -160,63 +176,25 @@ Returns the default options for this runtime
 argv will refer to the initial options passed to the runtime, along with any default values that have been set
 
 **Kind**: instance property of [<code>Runtime</code>](#Runtime)  
-<a name="Runtime+set"></a>
+<a name="Runtime+isBrowser"></a>
 
-### runtime.set(path, value) ⇒ <code>?</code>
-Set the value at an object path. Uses lodash.set
+### runtime.isBrowser
+Returns `true` if the runtime is running inside of a browser.
 
-**Kind**: instance method of [<code>Runtime</code>](#Runtime)  
+**Kind**: instance property of [<code>Runtime</code>](#Runtime)  
+**Read only**: true  
+<a name="Runtime+isNode"></a>
 
-| Param | Type |
-| --- | --- |
-| path | <code>\*</code> | 
-| value | <code>\*</code> | 
+### runtime.isNode
+Returns `true` if the runtime is running inside of node.
 
-<a name="Runtime+get"></a>
+**Kind**: instance property of [<code>Runtime</code>](#Runtime)  
+**Read only**: true  
+<a name="Runtime+isElectron"></a>
 
-### runtime.get(path, defaultValue) ⇒ <code>?</code>
-Get the value at an object path.  Uses lodash.get
+### runtime.isElectron
+Returns `true` if the runtime is running inside of electron
 
-**Kind**: instance method of [<code>Runtime</code>](#Runtime)  
-
-| Param | Type |
-| --- | --- |
-| path | <code>String</code> | 
-| defaultValue | <code>\*</code> | 
-
-<a name="Runtime+result"></a>
-
-### runtime.result(path, defaultValue) ⇒ <code>?</code>
-Get the value at an object path. If that path is a function, we'll call it.  
-Uses lodash.result
-
-**Kind**: instance method of [<code>Runtime</code>](#Runtime)  
-
-| Param | Type |
-| --- | --- |
-| path | <code>\*</code> | 
-| defaultValue | <code>\*</code> | 
-
-<a name="Runtime+has"></a>
-
-### runtime.has(path, defaultValue) ⇒ <code>Boolean</code>
-Check if runtime has a property
-
-**Kind**: instance method of [<code>Runtime</code>](#Runtime)  
-
-| Param | Type |
-| --- | --- |
-| path | <code>\*</code> | 
-| defaultValue | <code>\*</code> | 
-
-<a name="Runtime+invoke"></a>
-
-### runtime.invoke(functionAtPath, ...args) ⇒ <code>?</code>
-Invoke a function at a nested path
-
-**Kind**: instance method of [<code>Runtime</code>](#Runtime)  
-
-| Param | Type |
-| --- | --- |
-| functionAtPath | <code>\*</code> | 
-| ...args
+**Kind**: instance property of [<code>Runtime</code>](#Runtime)  
+**Read only**: true  
+<a name="

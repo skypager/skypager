@@ -802,6 +802,12 @@ export class Runtime {
     ])
   }
 
+  /**
+   * Returns `true` if the runtime is running inside of a browser.
+   *
+   * @readonly
+   * @memberof Runtime
+   */
   get isBrowser() {
     return !!(
       typeof window !== 'undefined' &&
@@ -813,6 +819,12 @@ export class Runtime {
     )
   }
 
+  /**
+   * Returns `true` if the runtime is running inside of node.
+   *
+   * @readonly
+   * @memberof Runtime
+   */
   get isNode() {
     try {
       const isNode = Object.prototype.toString.call(global.process) === '[object process]'
@@ -825,6 +837,12 @@ export class Runtime {
     }
   }
 
+  /**
+   * Returns `true` if the runtime is running inside of electron 
+   *
+   * @readonly
+   * @memberof Runtime
+   */
   get isElectron() {
     return !!(
       typeof process !== 'undefined' &&
@@ -834,6 +852,12 @@ export class Runtime {
     )
   }
 
+  /**
+   * Returns `true` if the runtime is running inside of electron's renderer process
+   *
+   * @readonly
+   * @memberof Runtime
+   */
   get isElectronRenderer() {
     return !!(
       typeof process !== 'undefined' &&
@@ -843,6 +867,12 @@ export class Runtime {
     )
   }
 
+  /**
+   * Returns `true` if the runtime is running inside of React-Native
+   *
+   * @readonly
+   * @memberof Runtime
+   */
   get isReactNative() {
     return !!(
       typeof global !== 'undefined' &&
@@ -851,10 +881,32 @@ export class Runtime {
     )
   }
 
+  /**
+   * Returns `true` if the process was started with a debug flag
+   *
+   * @readonly
+   * @memberof Runtime
+   */
   get isDebug() {
     return !!this.get('argv.debug')
   }
 
+  /**
+   * Returns `true` if the runtime is running in node process and common CI environment variables are detected
+   *
+   * @readonly
+   * @memberof Runtime
+   */
+  get isCI() {
+    return this.isNode && (process.env.CI || (process.env.JOB_NAME && process.env.BRANCH_NAME))
+  }
+
+  /**
+   * returns `true` when running in a process where NODE_ENV is set to development, or in a process started with the development flag
+   * 
+   * @readonly
+   * @memberof Runtime
+   */
   get isDevelopment() {
     return (
       !this.isProduction &&
@@ -867,6 +919,12 @@ export class Runtime {
     )
   }
 
+  /**
+   * returns `true` when running in a process where NODE_ENV is set to test, or in a process started with the test flag
+   * 
+   * @readonly
+   * @memberof Runtime
+   */
   get isTest() {
     return (
       !this.isProduction &&
@@ -876,6 +934,12 @@ export class Runtime {
     )
   }
 
+  /**
+   * returns `true` when running in a process where NODE_ENV is set to production, or in a process started with the test flag
+   * 
+   * @readonly
+   * @memberof Runtime
+   */
   get isProduction() {
     return (
       this.get('argv.env') === 'production' ||
@@ -964,7 +1028,11 @@ export class Runtime {
   }
 
   whenReady(fn) {
-    return this.whenPrepared(fn)
+   if (!isFunction(fn)) {
+     return this.whenReadyAsync()
+   }
+
+   return this.whenPrepared(fn)
   }
 
   whenReadyAsync() {
@@ -976,6 +1044,10 @@ export class Runtime {
   }
 
   whenPrepared(fn) {
+    if (!isFunction(fn)) {
+      return this.whenPreparedAsync()
+    }
+
     if (this.isPrepared) {
       fn.call(this, this, this.options, this.context)
     } else {
@@ -1038,10 +1110,31 @@ export class Runtime {
     return this
   }
 
+  /**
+   * Replace the current state with the new state.  `newState` can be an object or a function which returns the new state
+   * 
+   * @param {Object|Function} [newState={}] - a new object containing the state you wish the runtime to have
+   * @param {Function} [cb] - a function we'll call when the state is replaced 
+   * @returns {Object} the current state after being replaced
+   * @memberof Runtime
+   * @fires Runtime#stateWillChange
+   * @fires Runtime#stateWillReplace
+   */
   replaceState(newState = {}, cb) {
     const { isFunction, toPairs } = this.lodash
 
-    this.emit('stateWillChange', this.currentState)
+    /** 
+     * @event Runtime#stateWillChange
+     * @type {Object} currentState
+     * @type {Object} nextState
+    */
+    this.emit('stateWillChange', this.currentState, newState)
+
+    /** 
+     * @event Runtime#stateWillReplace
+     * @type {Object} currentState
+     * @type {Object} nextState
+    */   
     this.emit('stateWillReplace', this.currentState, newState)
 
     if (isFunction(newState)) {
@@ -1057,14 +1150,29 @@ export class Runtime {
     return result
   }
 
+  /**
+   * Replace the current state with the new state
+   * 
+   * @param {Object|Function} [newState={}] - a new object containing the state you wish the runtime to have
+   * @param {Function} [cb] - a function we'll call when the state is replaced 
+   * @returns {Object} the current state after being replaced
+   * @memberof Runtime
+   * @fires Runtime#stateWillChange
+   */
   setState(newState = {}, cb) {
     const { isFunction, toPairs } = this.lodash
-
-    this.emit('stateWillChange', this.currentState)
+    
 
     if (isFunction(newState)) {
       newState = newState(this.currentState, this)
     }
+
+    /** 
+     * @event Runtime#stateWillChange
+     * @type {Object} currentState
+     * @type {Object} stateUpdate 
+    */
+    this.emit('stateWillChange', this.currentState, newState)
 
     const result = this.state.merge(toPairs(newState))
 
@@ -1075,6 +1183,9 @@ export class Runtime {
     return result
   }
 
+  /** 
+   * @abstract
+  */
   stateDidChange() {}
 
   observe(listener, prop = 'state') {
