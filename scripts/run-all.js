@@ -11,8 +11,8 @@ const { fileManager, packageManager } = runtime
 /**
  * @usage
  *
- * # build all of the themes and all of the apps
- * $ dais-scripts run-all themes-light/build themes-zing/build apps-*
+ * # build all of the helpers and all of the apps
+ * $ skypager run-all 'helpers/*' 'apps/*'
  */
 const { _: commands = [] } = runtime.argv
 
