@@ -6,19 +6,48 @@ import * as VmFeature from '../features/vm'
 const isFunction = o => typeof o === 'function'
 
 /**
- * The Feature Class is used to provide an interface to something which can be
+ * @class Feature
+ * @extends Helper
+ * @classdesc The Feature Class is used to provide an interface to something which can be
  * enaabled() and optionally configured() and possibly even have persistent state
  * throughout their object lifecyle.  Extended runtimes such as @skypager/node
  * are just a normal runtime which packages certain node specific features
  * and enable them automatically.
  */
 export class Feature extends Helper {
+  /**
+   * @private
+   *
+   * This is used to detect if a provider in the registry should be treated as a class
+   * to be instantiated.
+   */
+
   static isSkypagerHelper = true
 
+  /**
+   * This lets you create feature instances using the `runtime.feature` factory method
+   * without first registering the module with the `runtime.features` registry.
+   */
   static allowAnonymousProviders = true
 
+  /**
+   * Since features are cacheable, you will get the same instance of the feature back
+   * every time you call the `runtime.feature` factory method with the same arguments
+   *
+   * @example @lang js
+   *
+   *  const one = runtime.feature('my-feature')
+   *  const two = runtime.feature('my-feature')
+   *  const three = runtime.feature('my-feature', { cacheHelper: false })
+   *
+   *  console.assert(one.uuid === two.uuid)
+   *  console.assert(three.uuid !== two.uuid)
+   */
   static isCacheable = true
 
+  /**
+   *
+   */
   static createRegistry(...args) {
     const reg = Helper.createContextRegistry('features', {
       context: Helper.createMockContext({}),
@@ -32,6 +61,15 @@ export class Feature extends Helper {
     return reg
   }
 
+  /**
+   * Attaches this helper class to a runtime.
+   *
+   * @param {Runtime} runtime the runtime to attach the Feature registry to
+   * @param {Object} options options to pass through to `Helper.attach`
+   * @param {String} [options.lookupProp='feature'] the name of the factory function to create on the runtime
+   * @param {String} [options.registryProp='features'] the name of the registry prop to create on the runtime
+   * @returns {Runtime}
+   */
   static attach(runtime, options = {}) {
     runtime.Feature = this
 
@@ -51,6 +89,9 @@ export class Feature extends Helper {
     return result
   }
 
+  /**
+   * @private
+   */
   initialize() {
     this.applyInterface(this.featureMixin, this.featureMixinOptions)
   }
