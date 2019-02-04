@@ -36,6 +36,10 @@ async function main() {
       runtime.opener.openInBrowser(`http://${serverInstance.hostname}:${serverInstance.port}`)
     ).catch(error => error)
   }
+
+  if (runtime.argv.interactive) {
+    runtime.repl('interactive').launch({ server: serverInstance })
+  }
 }
 
 function createServer(helperPath) {

@@ -51,6 +51,10 @@ if (ARGV.debug) {
   args.unshift('--inspect')
 }
 
+if (ARGV.debugBrk) {
+  args.unshift('--inspect-brk')
+}
+
 try {
   const result = spawnSync('node', args, {
     cwd: paths.appRoot,
