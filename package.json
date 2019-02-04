@@ -58,6 +58,7 @@
     "husky": "^1.1.1",
     "lerna": "^3.4.0",
     "lint-staged": "^7.3.0",
+    "patch-package": "^6.0.2",
     "puppeteer": "^1.9.0"
   },
   "lint-staged": {
