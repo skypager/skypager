@@ -9,14 +9,6 @@
 
 Skypager is not like a traditional JavaScript framework, instead it gives JavaScript developers the pieces we need to build our own own frameworks on top of the "many different modules" we use (from repositories like NPM, and our own). 
 
-It makes it easier to build applications by helping us think about them in distinct layers, composed from separate layers in your portfolio   
-
-In a typical Web Application your top layer is the one the users see and interact with: all of your URLs and the UI that gets rendered at each one.  Underneath that layer, are all of the layers that we work in as designers, developers, testers, and architects.  These layers happen to be the ones the user never sees, and generally won't care about in as much as there are no obvious performance, security, or usability issues to be experienced.  Thankfully, this means that it is possible to get these layers working how you want, built, tested, deployed, and cached until they change, freeing you up to focus on the top layer which matters most to the user.  However, it is unfair to just separate these layers into the ones the user sees, and everything else.  Even beneath the surface, there are many "natural" layers that correspond to the different skillsets and concerns required to deliver a consistent and pleasing user experience.
-
-This approach requires not only tools, but a different way of thinking about how we organize our JavaScript codebases.  Skypager attempts to provide us with both.
-
-With this layered approach, Skypager makes it easy to build cross platform JavaScript projects, which can run on the web, server, desktop, or react-native environment. By providing architectural patterns and tools that help us take advantage of the natural layers in our software projects, Skypager takes the write once, run everywhere style (a.k.a. universal or isomorphic javascript.) to the extreme.
-
 Skypager is designed for people who want to build their own portfolios, or monorepos, consisting of their own modules, while leveraging all of the problems that have already been solved by other people and published to NPM.  If you have a handful of apps, all which use the same "stack" of third party libraries, and you want the ability to standardize all of these apps and make it easier to share the progress you make on one app with all of the other apps, Skypager is for you.
 
 Skypager enables you to develop the different layers of your portfolio separately from one another, so that the components and modules which rarely change are built once, cached, and re-used until they change again.  The pieces of the app which change more often, are developed in a separate layer.  This is especially ideal for projects which multiple people or multiple teams contribute to, as the different layers that naturally emerge are very inline with the different teams and skillsets which contribute to a modern application.
@@ -68,7 +60,7 @@ runtime.start().then(() => {
 </script>
 ```
 
-## Easily Extendable
+## Designed to be Extendable
 
 The `runtime`, while useful by itelf, is designed to be extended.  
 
@@ -97,7 +89,7 @@ In any application
 ```javascript
 import React from 'react'
 import { render } from 'react-dom'
-import runtime from 'skypager'
+import runtime from 'myRuntime'
 
 const App = ({ runtime }) =>
   <pre>{JSON.stringify(runtime.currentState, null, 2 ) }</pre>
@@ -108,6 +100,7 @@ runtime.start()
 
 ## What does the runtime provide your application?
 
+- See the [API DOCS](src/runtime/docs/api)
 - Asynchronous middlewares and lifecycle hooks (tap into any stage of the application boot and initialization logic)
 - Environment detection (isBrowser, isNode, isReactNative, isElectron, isElectronRenderer, isProduction, isDevelopment, isTest, isCI, etc)
 - Event emitters and global event bus patterns
