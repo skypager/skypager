@@ -31,6 +31,8 @@
       "src/runtime",
       "src/helpers/helper",
       "src/helpers/feature",
+      "src/features/profiler",
+      "src/features/vm",
       "src/registries/*",
       "src/utils/*"
     ],

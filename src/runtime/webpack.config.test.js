@@ -19,8 +19,8 @@ const nodeConfig = merge(
       libraryTarget: 'commonjs2',
       filename: '[name].js',
       path: path.resolve(cwd, 'lib'),
-      devtoolModuleFilenameTemplate: '[absolute-resource-path]',
-      devtoolFallbackModuleFilenameTemplate: '[absolute-resource-path]?[hash]',
+      // devtoolModuleFilenameTemplate: '[absolute-resource-path]',
+      // devtoolFallbackModuleFilenameTemplate: '[absolute-resource-path]?[hash]',
     },
     externals: [
       nodeExternals({

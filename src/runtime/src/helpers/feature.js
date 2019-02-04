@@ -1,8 +1,5 @@
 import Helper from './helper.js'
 
-import * as ProfilerFeature from '../features/profiler'
-import * as VmFeature from '../features/vm'
-
 const isFunction = o => typeof o === 'function'
 
 /**
@@ -34,7 +31,7 @@ export class Feature extends Helper {
    * Since features are cacheable, you will get the same instance of the feature back
    * every time you call the `runtime.feature` factory method with the same arguments
    *
-   * @example @lang js
+   * @example
    *
    *  const one = runtime.feature('my-feature')
    *  const two = runtime.feature('my-feature')
@@ -52,9 +49,6 @@ export class Feature extends Helper {
     const reg = Helper.createContextRegistry('features', {
       context: Helper.createMockContext({}),
     })
-
-    reg.register('profiler', () => ProfilerFeature)
-    reg.register('vm', () => VmFeature)
 
     reg.enabled = {}
 
