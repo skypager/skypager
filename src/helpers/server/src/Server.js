@@ -9,6 +9,9 @@ import express from 'express'
  *
  */
 export class Server extends Helper {
+  static registryName() {
+    return 'servers'
+  }
   /**
    * By setting the Server class to be cacheable, we will always get the same instance of a server
    * when we ask for it by name with the same options we used when we requested it previously.
@@ -130,8 +133,10 @@ export class Server extends Helper {
    */
   async start(...args) {
     const {
-      serverDidFail = this.provider.serverDidFail,
-      serverWillStart = this.provider.serverWillStart,
+      serverDidFail = this.serverDidFail ||
+        this.options.serverDidFail ||
+        this.provider.serverDidFail,
+      serverWillStart = this.serverWillStart || this.provider.serverWillStart,
     } = this.options
 
     if (!this.stats.get('mounted')) {
@@ -201,16 +206,25 @@ export class Server extends Helper {
    */
   createServer(options = this.options, context = this.context) {
     const {
-      appWillMount = this.options.appWillMount || this.provider.appWillMount,
+      appWillMount = this.appWillMount || this.options.appWillMount || this.provider.appWillMount,
       createServer = this.options.createServer || this.provider.createServer,
-      serverWasCreated = this.options.serverWasCreated || this.provider.serverWasCreated,
+      serverWasCreated = this.serverWasCreated ||
+        this.options.serverWasCreated ||
+        this.provider.serverWasCreated,
       enableLogging = this.options.enableLogging || this.provider.enableLogging,
     } = options
 
-    let { loggerOptions = this.options.loggerOptions || this.provider.loggerOptions } = options
+    let {
+      loggerOptions = this.loggeOptions ||
+        this.options.loggerOptions ||
+        this.provider.loggerOptions,
+    } = options
 
-    let cors = this.tryResult('cors')
-    let pretty = this.tryResult('pretty', () => process.env.NODE_ENV !== 'production')
+    let {
+      cors = this.result('cors') || this.tryResult('cors'),
+      pretty = this.result('pretty') ||
+        this.tryResult('pretty', () => process.env.NODE_ENV !== 'production'),
+    } = options
 
     let app
 
@@ -268,7 +282,9 @@ export class Server extends Helper {
    */
   async mount(options = this.options, context = this.context) {
     const { app } = this
-    const { appDidMount = this.options.appDidMount || this.provider.appDidMount } = options
+    const {
+      appDidMount = this.appDidMount || this.options.appDidMount || this.provider.appDidMount,
+    } = options
     const { isString } = this.lodash
 
     let endpoints = options.endpoints || this.tryResult('endpoints', [])
@@ -292,9 +308,9 @@ export class Server extends Helper {
     }
 
     let {
-      history = this.tryResult('history', () => false),
-      serveStatic = this.tryResult('serveStatic', () => false),
-    } = options
+      history = options.history || this.tryResult('history', () => false),
+      serveStatic = options.serverStatic || this.tryResult('serveStatic', () => false),
+    } = this
 
     this.runtime.debug('App Did Mount')
 
@@ -314,7 +330,6 @@ export class Server extends Helper {
       historySetupHook.call(this, app, history)
     }
 
-    console.log('hi')
     return app
   }
 
