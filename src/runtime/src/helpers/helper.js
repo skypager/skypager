@@ -10,7 +10,7 @@
 
 import lodash from 'lodash'
 import { hashObject, hideProperty, lazy, enhanceObject } from '../utils/properties'
-import { camelCase, snakeCase, camelize, underscore, singularize, pluralize } from '../utils/string'
+import { camelCase, snakeCase, singularize, pluralize } from '../utils/string'
 import ContextRegistry from '../registries/context'
 import { attach as attachEmitter } from '../utils/emitter'
 
@@ -30,7 +30,6 @@ const {
   result,
   keys,
   has,
-  zipObjectDeep,
 } = lodash
 
 const req = createMockContext({})
@@ -412,7 +411,11 @@ export class Helper {
   /**
    * Access the first value we find in our options hash in our provider hash
    */
-  tryGet(property, defaultValue, sources = ['options', 'provider', 'provider.default']) {
+  tryGet(
+    property,
+    defaultValue,
+    sources = ['options', 'provider', 'provider.default', 'provider.protoype']
+  ) {
     return (
       this.at(...sources.map(s => `${s}.${property}`)).find(v => !isUndefined(v)) || defaultValue
     )
@@ -438,17 +441,17 @@ export class Helper {
     }
   }
 
-  // Merge the objects found at k starting with at options, provider, projectConfig
-  mergeGet(key, namespaces = ['options', 'provider', 'projectConfig']) {
+  // Merge the objects found at k starting with at options, provider, runtimeSettings
+  mergeGet(key, namespaces = ['options', 'provider', 'runtimeSettings']) {
     key = typeof key === 'string' ? key.split('.') : key
     key = flatten(castArray(key))
 
     return defaults({}, ...namespaces.map(n => this.get([n, ...key])))
   }
 
-  // Merge the objects found at k starting with at options, provider, projectConfig
+  // Merge the objects found at k starting with at options, provider, runtimeSettings
   // If the property is a function, it will be called in the scope of the helper, with the helpers options and context
-  mergeResult(key, namespaces = ['options', 'provider', 'projectConfig']) {
+  mergeResult(key, namespaces = ['options', 'provider', 'runtimeSettings']) {
     key = typeof key === 'string' ? key.split('.') : key
     key = flatten(castArray(key))
 
@@ -565,34 +568,36 @@ export class Helper {
   }
 
   get defaultOptions() {
-    return defaultsDeep({}, this.argv, this.projectConfig)
+    return defaultsDeep({}, this.argv, this.runtimeSettings)
   }
 
-  get projectOptions() {
-    return this.projectConfig
-  }
-
-  get projectConfig() {
+  get runtimeSettings() {
     const name = this.name || this.id
     const cased = camelCase(snakeCase(name))
     const { omit } = this.lodash
 
-    const { projectConfigKeys = [] } = this
-    return omit(defaultsDeep({}, ...this.at(projectConfigKeys)), name, cased)
+    const { projectSettingsPaths = [] } = this
+    return omit(defaultsDeep({}, ...this.at(projectSettingsPaths)), name, cased)
   }
 
-  get projectConfigKeys() {
+  /**
+   * The object search paths where we look for settings and configuration
+   *
+   * @readonly
+   * @memberof Helper
+   */
+  get projectSettingsPaths() {
     const groupName = this.constructor.registryName()
     const name = this.name || this.id
 
     return [
       `runtime.argv.${groupName}.${name}`,
       `runtime.options.${groupName}.${name}`,
-      `runtime.config.${groupName}.${name}`,
+      `runtime.settings.${groupName}.${name}`,
       `runtime.argv.${groupName}.${camelCase(snakeCase(name))}`,
       `runtime.options.${groupName}.${camelCase(snakeCase(name))}`,
-      `runtime.config.${groupName}.${camelCase(snakeCase(name))}`,
-    ]
+      `runtime.settings.${groupName}.${camelCase(snakeCase(name))}`,
+    ].map(str => str.replace(/(\\|\/)/g, '.'))
   }
 
   get argv() {
