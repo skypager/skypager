@@ -1,6 +1,8 @@
 import gql from 'graphql-tag'
 
 export const typeDefs = gql`
+  scalar JSON
+
   type Schema {
     query: Query
   }
@@ -9,6 +11,10 @@ export const typeDefs = gql`
     packages: [Package]
   }
 
+  # As far as i can tell, there is no key/value pair attribute type in GraphQL
+  # So I have to convert the dependencies hash in package.json to an array of
+  # objects.  This actually makes turning the package.jsons in our portfolio into
+  # a graph structure easier, so it makes sense.
   type Dependency {
     # the type of dependency relationship
     type: String
@@ -16,7 +22,7 @@ export const typeDefs = gql`
     source: Package
     # the package which is depended on
     target: Package
-
+    # the version requirement of the dependency
     version: String
   }
 
@@ -49,9 +55,10 @@ export const typeDefs = gql`
     dependencies: [Dependency]
     devDependencies: [Dependency]
     keywords: [String]
-    scripts: [Script]
+    scripts: JSON
     authors: [Author]
     repository: Repository
     releases: [Release]
+    skypager: JSON
   }
 `

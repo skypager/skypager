@@ -30,6 +30,7 @@
     "graphql": "^14.0.2",
     "graphql-schema-modules": "^0.0.3",
     "graphql-tools": "^4.0.3",
+    "graphql-type-json": "^0.2.1",
     "prop-types": "^15.6.2",
     "react": "^16.5.2",
     "react-apollo": "^2.3.3",

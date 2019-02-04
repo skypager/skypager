@@ -1,6 +1,9 @@
 import { set } from 'lodash'
+import JSON from 'graphql-type-json'
 
-const resolvers = {}
+const resolvers = {
+  JSON,
+}
 
 export function resolve(path, resolver) {
   set(resolvers, path, resolver)
