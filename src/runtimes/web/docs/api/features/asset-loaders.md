@@ -81,6 +81,7 @@ has been loaded.
 **Example**  
 ```js
 runtime.assetLoader.unpkg({
-   React: 'react@16.7.0/umd/react.production.min.js'
+   React: 'react@16.7.0/umd/react.production.min.js',
+   ReactDOM: 'react-dom@16.7.0/umd/react-dom.production.min.js'
  })
 ```
