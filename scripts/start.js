@@ -37,14 +37,10 @@ run(async runtime => {
       await projectTask(workingDir, 'build')
     }
 
-    await runtime.proc.async.spawn(
-      'serve',
-      ['-s', '--open', '--port', skypager.argv.port || 5001],
-      {
-        cwd: runtime.resolve(workingDir, 'build'),
-        stdio: 'inherit',
-      }
-    )
+    await runtime.proc.async.spawn('serve', ['-s', '--open', '--port', runtime.argv.port || 5001], {
+      cwd: runtime.resolve(workingDir, 'build'),
+      stdio: 'inherit',
+    })
   } else if (runtime.argv.docker) {
     const project = apps.get(app).value()
     await runtime.proc.async.spawn(

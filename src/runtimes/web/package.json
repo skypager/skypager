@@ -7,6 +7,7 @@
   "license": "MIT",
   "scripts": {
     "build": "yarn build:lib && yarn build:web",
+    "docs:api": "skypager generate-api-docs",
     "build:lib": "cross-env NODE_ENV=production babel --comments --source-maps --config-file ./babelrc -d lib src",
     "build:web": "cross-env NODE_ENV=production webpack --config webpack.config.js",
     "prepare": "yarn build"
