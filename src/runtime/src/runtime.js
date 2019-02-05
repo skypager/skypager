@@ -1266,10 +1266,22 @@ export class Runtime {
     return require('./strftime')(...args)
   }
 
+  /** 
+   * This function is a hook that gets called by the helper.createInstance lifecycle
+   * 
+   * I believe i originally had this setup as a hook on runtime so that, either:
+   * 
+   *  1) runtime could be in control of what observability means, and the helpers just expect an interface to it
+   *  2) as a form of code splitting? since runtime has the mobx dependency bundled with it, and we want to be able to export a small helper class? 
+   * 
+   * This hook decorates the instance of the helper with mobx observable properties, which includes
+   * observable objects, actions, and computed attribute getters
+  */
   didCreateObservableHelper(helperInstance, helperClass) {
     if (helperInstance.tryGet('observables')) {
+      const observables = helperInstance.tryResult('observables', {}) 
       this.makeObservable(
-        helperInstance.tryResult('observables', {}, helperInstance.options, helperInstance.context),
+        observables,
         helperInstance
       )
     }
@@ -1278,6 +1290,7 @@ export class Runtime {
       makeStateful(helperInstance)
     }
 
+    // can't think of any classes which define it as a static property
     if (helperClass.observables) {
       const observables = isFunction(helperClass.observables)
         ? helperClass.observables.call(
@@ -1291,8 +1304,7 @@ export class Runtime {
       this.makeObservable(observables, helperInstance)
     }
 
-    // helperInstance.setInitialState(helperClass.initialState || helperInstance.tryResult('initialState'))
-    helperInstance.setInitialState(helperClass.initialState || {})
+    Promise.resolve(helperInstance.setInitialState())
   }
 
   static ContextRegistry = ContextRegistry

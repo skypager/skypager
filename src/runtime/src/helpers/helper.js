@@ -401,6 +401,28 @@ export class Helper {
     return this
   }
 
+  /**
+   * Sets the initial state of the object.  This is called in the Helper constructor
+   *
+   * @private
+   */
+  setInitialState(initialState = this.initialState || {}) {
+    const { defaultsDeep } = this.lodash
+
+    if (this.state && this.tryGet('initialState')) {
+      return Promise.resolve(this.attemptMethodAsync('initialState'))
+        .then(i => {
+          if (typeof i === 'object') {
+            this.state.merge(defaultsDeep({}, i, initialState))
+          }
+        })
+        .catch(error => {
+          console.error('Error setting initial state', this, error)
+          this.initialStateError = error
+        })
+    }
+  }
+
   fireHook(hookName, ...args) {
     this.helperEvents.emit(`${this.registryName}:${hookName}`, this, ...args)
     this.emit(hookName, ...args)
@@ -414,7 +436,7 @@ export class Helper {
   tryGet(
     property,
     defaultValue,
-    sources = ['options', 'provider', 'provider.default', 'provider.protoype']
+    sources = ['options', 'provider', 'provider.default.prototype', 'provider.default']
   ) {
     return (
       this.at(...sources.map(s => `${s}.${property}`)).find(v => !isUndefined(v)) || defaultValue
@@ -533,12 +555,12 @@ export class Helper {
   }
 
   attemptMethodAsync(name, ...args) {
-    const result = this.attemptMethod.call(this, name, ...args)
+    const result = this.attemptMethod(name, ...args)
     return Promise.resolve(result || null)
   }
 
   callMethod(methodName, ...args) {
-    const handler = this.tryGet(methodName)
+    const handler = this.tryGet(methodName, this[methodName])
 
     if (typeof handler !== 'function') {
       throw new Error(`Could not find a property at ${methodName}`)
@@ -788,7 +810,8 @@ export function attach(host, helperClass, options = {}) {
       provider.isObservable ||
       provider.observables ||
       opts.observables ||
-      helperClass.observables
+      helperClass.observables ||
+      (helperClass.prototype && helperClass.prototype.observables)
     ) {
       host.fireHook('didCreateObservableHelper', helperInstance, helperClass)
     }

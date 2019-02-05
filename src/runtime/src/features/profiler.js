@@ -17,6 +17,8 @@ import { Feature } from '../helpers/feature'
  *  })
  */
 export default class ProfilerFeature extends Feature {
+  static shortcut = 'profiler'
+
   shortcut = 'profiler'
 
   /**
