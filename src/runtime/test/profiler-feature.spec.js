@@ -16,6 +16,6 @@ describe('The Profiling Feature', function() {
     profiler.start('startTest')
     await new Promise(resolve => setTimeout(resolve, 50))
     profiler.end('startTest')
-    profiler.report.startTest.duration.should.be.greaterThan(50)
+    profiler.report.startTest.duration.should.be.greaterThan(48)
   })
 })
