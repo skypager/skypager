@@ -1,8 +1,22 @@
 import { Feature } from '@skypager/runtime/lib/feature'
 
+/**
+ * @class FileDownloaderFeature
+ * @classdesc The File Downloader can download files from http(s) urls into the local path
+ */
 export default class FileDownloaderFeature extends Feature {
+  static shortcut = 'fileDownloader'
+
   shortcut = 'fileDownloader'
 
+  /**
+   * Download a URL to a destination path
+   *
+   * @param {String} sourceUrl
+   * @param {String} destinationPath
+   * @memberof FileDownloaderFeature
+   * @returns {PromiseLike<String>} absolute path to the saved file
+   */
   async downloadAsync(sourceUrl, destinationPath) {
     const { runtime: skypager } = this
 
@@ -20,7 +34,18 @@ export default class FileDownloaderFeature extends Feature {
       .then(l => l || dest)
   }
 
+  /**
+   * Download a URL to a a destination
+   * @param {String} sourceUrl
+   * @param {String} destinationPath
+   * @memberof FileDownloaderFeature
+   * @param {Function} [callback] if you leave off the function, we'll give you the promise api of downloadSync
+   */
   download(sourceUrl, dest, cb) {
+    if (typeof cb !== 'function') {
+      return this.downloadAsync(sourceUrl, dest)
+    }
+
     const { runtime: skypager } = this
     const file = require('fs').createWriteStream(dest)
     const transport = sourceUrl.startsWith('https') ? require('https') : require('http')

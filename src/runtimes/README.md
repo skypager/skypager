@@ -8,6 +8,8 @@ the runtime with those new capabilities.
 
 The [@skypager/node](node) package is the version of the runtime we get when we run packages with the [Skypager CLI](../devtools/cli) 
 
+[View the API Docs](node/docs/api)
+
 It comes with: 
 
 - the [File Manager Feature](../features/file-manager) 
@@ -19,6 +21,8 @@ And a bunch of other features for working inside the Node.js runtime. [See them 
 ## Web Runtime
 
 The [@skypager/web](web) package is the version of the runtime we get when running in the browser.
+
+[View the API Docs](web/docs/api)
 
 It comes with:
 
