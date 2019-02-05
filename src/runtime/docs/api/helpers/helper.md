@@ -8,7 +8,7 @@ Helpers act as a registry for specific types of Javascript modules
              Helpers are designed to be shared across multiple projects, and there are event Project Type helpers
              which exist to make specific types of helpers available to specific types of projects.
 
-**Kind**: global variable  
+**Kind**: global class  
 
 * [Helper](#Helper)
     * _instance_
@@ -18,6 +18,7 @@ Helpers act as a registry for specific types of Javascript modules
         * [.providerTypes](#Helper+providerTypes)
         * [.optionTypes](#Helper+optionTypes)
         * [.contextTypes](#Helper+contextTypes)
+        * [.projectSettingsPaths](#Helper+projectSettingsPaths)
         * [.doInitialize()](#Helper+doInitialize)
         * [.tryGet()](#Helper+tryGet)
         * [.tryResult()](#Helper+tryResult)
@@ -67,6 +68,13 @@ Individual helper modules can reference the context type configuration from thei
 them by passing in a contextTypes object in their options, by exporting a contextTypes object themselves.
 
 **Kind**: instance property of [<code>Helper</code>](#Helper)  
+<a name="Helper+projectSettingsPaths"></a>
+
+### helper.projectSettingsPaths
+The object search paths where we look for settings and configuration
+
+**Kind**: instance property of [<code>Helper</code>](#Helper)  
+**Read only**: true  
 <a name="Helper+doInitialize"></a>
 
 ### helper.doInitialize()

@@ -35,8 +35,7 @@ every time you call the `runtime.feature` factory method with the same arguments
 **Kind**: instance property of [<code>Feature</code>](#Feature)  
 **Example**  
 ```js
-
- const one = runtime.feature('my-feature')
+const one = runtime.feature('my-feature')
  const two = runtime.feature('my-feature')
  const three = runtime.feature('my-feature', { cacheHelper: false })
 

@@ -13,6 +13,8 @@ import Feature from './helpers/feature'
 import Cache from './cache'
 import WeakCache from './weak-cache'
 import * as stringUtils from './utils/string'
+import ProfilerFeature from './features/profiler'
+import VmFeature from './features/vm'
 
 export { propUtils, stringUtils, Helper }
 
@@ -59,7 +61,11 @@ let runtimesRegistry
 let frameworkRuntime
 
 /** 
+ * When you import or require @skypager/runtime the object you get back is a singleton,
+ * it is the global instance of Runtime. 
+ * 
  * @type {Runtime}
+ * @name skypager
  * @global
 */
 let singleton
@@ -106,16 +112,13 @@ const enableStrictMode = get(
  * @classdesc The Runtime is similar to the window or document global in the browser, or the module / process globals in node.
  * You can extend Runtime and define your own process global singleton that acts as a state machine, event emitter,
  * module registry, dependency injector.  Typically you can just do this with features instead of subclassing.
- *
+ * @param {object} options - the props, or argv, for the runtime instance at the time it is created
+ * @param {object} context - the context, environment, static config, or similar global values that may be relevant to some component in the runtime
+ * @param {function} middlewareFn - this function will be called when the runtime is asynchronously loaded and the plugins have run *
  */
 export class Runtime {
   displayName = 'Skypager'
 
-  /**
-   * @param {object} options - the props, or argv, for the runtime instance at the time it is created
-   * @param {object} context - the context, environment, static config, or similar global values that may be relevant to some component in the runtime
-   * @param {function} middlewareFn - this function will be called when the runtime is asynchronously loaded and the plugins have run
-   */
   constructor(options = {}, context = {}, middlewareFn) {
     if (isFunction(options)) {
       middlewareFn = options
@@ -252,6 +255,8 @@ export class Runtime {
       this.use(middlewareFn.bind(this), INITIALIZING)
     }
 
+    this.features.register('profiler', () => ({ default: ProfilerFeature }))
+    this.features.register('vm', () => VmFeature)
     this.enableFeatures(this.autoEnabledFeatures)
 
     if (this.autoInitialize) this.initialize()

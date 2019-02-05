@@ -3,13 +3,100 @@ import { Feature } from '@skypager/runtime/lib/helpers/feature'
 import * as cp from 'child_process'
 import * as cpAsync from 'child-process-promise'
 
+/**
+ * @class ChildProcessAdapter
+ * @classdesc provides some utility functions for spawning processes based on top of child_process and child-process-promise.
+ * The functions are always defaulting to use the cwd of the host runtime that is using them.
+ *
+ * @example
+ *
+ *  import runtime from '@skypager/node'
+ *  const { exec } = runtime.proc // node's child_process
+ *  const { spawn } = runtime.proc.async // child-process-promise
+ */
 export default class ChildProcessAdapter extends Feature {
   static isSkypagerHelper = true
 
   static shortcut = 'proc'
-
   shortcut = 'proc'
 
+  /**
+   * asynchronously Spawn a process and capture the output as it runs.
+   *
+   * @param {Object} spawnOptions options to pass to the spawn function
+   * @param {String} options.cmd the process to run
+   * @param {Array<String>} options.args an array of arguments to pass tot he process
+   * @param {Object<string, any>} options.options options to pass to spawn
+   * @param {Object} options options for the behavior of capture
+   * @param {Function} options.onErrorOutput a function which will be continulally passed error output as a string as it is received, and information about the process
+   * @param {Function} options.onOutput a function which will be continually passed normal output as a string as it is received, and information about the process
+   */
+  async spawnAndCapture({ cmd, args, options: opts }, options = {}) {
+    const { spawn } = this.async
+
+    const job = spawn(cmd, args, {
+      cwd: this.runtime.cwd,
+      ...opts,
+    })
+
+    const { childProcess } = job
+
+    const errorOutput = []
+    const normalOutput = []
+
+    const { onError, onErrorOutput, onOutput } = options
+
+    childProcess.stderr.on('data', buf => {
+      const content = buf.toString()
+      errorOutput.push(content)
+      if (typeof onErrorOutput === 'function') {
+        onErrorOutput(content, { cwd: this.runtime.cwd, args, options: opts, cmd, childProcess })
+      }
+    })
+
+    childProcess.stdout.on('data', buf => {
+      const content = buf.toString()
+      normalOutput.push(content)
+
+      if (typeof onOutput === 'function') {
+        onOutput(content, { cwd: this.runtime.cwd, args, options: opts, cmd, childProcess })
+      }
+    })
+
+    try {
+      await job
+
+      return {
+        errorOutput,
+        normalOutput,
+        childProcess,
+        options: { cwd: this.runtime.cwd, args, cmd, options: opts },
+      }
+    } catch (error) {
+      const e = new Error(`${cmd} ${args.join(' ')} failed in ${name}`)
+
+      e.cwd = this.runtime.cwd
+      e.childProcess = childProcess
+      e.errorOutput = errorOutput
+      e.normalOutput = normalOutput
+      e.original = error
+      e.options = { cmd, args, options: opts }
+
+      if (typeof onError === 'function') {
+        onError(e)
+      } else {
+        throw e
+      }
+    }
+  }
+
+  /**
+   * A wrapper around child_process.exec that sets the cwd to the same as the host runtime
+   *
+   * @param {String} cmd the command you wish to execute
+   * @param {Object} options options to pass to child_process.exec
+   * @param {*} args args that get passed through
+   */
   exec(cmd, options, ...args) {
     return cp.exec(cmd, { cwd: this.runtime.cwd, ...options }, ...args)
   }

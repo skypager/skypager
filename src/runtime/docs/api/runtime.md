@@ -18,8 +18,10 @@ module registry, dependency injector.  Typically you can just do this with featu
 ## Members
 
 <dl>
-<dt><a href="#singleton">singleton</a> : <code><a href="#Runtime">Runtime</a></code></dt>
-<dd></dd>
+<dt><a href="#skypager">skypager</a> : <code><a href="#Runtime">Runtime</a></code></dt>
+<dd><p>When you import or require @skypager/runtime the object you get back is a singleton,
+it is the global instance of Runtime.</p>
+</dd>
 </dl>
 
 ## Typedefs
@@ -43,10 +45,8 @@ module registry, dependency injector.  Typically you can just do this with featu
 **Kind**: global class  
 
 * [Runtime](#Runtime)
-    * [new Runtime()](#new_Runtime_new)
+    * [new Runtime(options, context, middlewareFn)](#new_Runtime_new)
     * _instance_
-        * [.Runtime](#Runtime+Runtime)
-            * [new exports.Runtime(options, context, middlewareFn)](#new_Runtime+Runtime_new)
         * [.contextTypes](#Runtime+contextTypes)
         * [.optionTypes](#Runtime+optionTypes)
         * [.defaultContext](#Runtime+defaultContext)
@@ -95,22 +95,15 @@ module registry, dependency injector.  Typically you can just do this with featu
 
 <a name="new_Runtime_new"></a>
 
-### new Runtime()
+### new Runtime(options, context, middlewareFn)
 Create a new instance of the skypager.Runtime
 
-<a name="Runtime+Runtime"></a>
-
-### runtime.Runtime
-**Kind**: instance class of [<code>Runtime</code>](#Runtime)  
-<a name="new_Runtime+Runtime_new"></a>
-
-#### new exports.Runtime(options, context, middlewareFn)
 
 | Param | Type | Description |
 | --- | --- | --- |
 | options | <code>object</code> | the props, or argv, for the runtime instance at the time it is created |
 | context | <code>object</code> | the context, environment, static config, or similar global values that may be relevant to some component in the runtime |
-| middlewareFn | <code>function</code> | this function will be called when the runtime is asynchronously loaded and the plugins have run |
+| middlewareFn | <code>function</code> | this function will be called when the runtime is asynchronously loaded and the plugins have run * |
 
 <a name="Runtime+contextTypes"></a>
 
@@ -197,4 +190,9 @@ Returns `true` if the runtime is running inside of electron
 
 **Kind**: instance property of [<code>Runtime</code>](#Runtime)  
 **Read only**: true  
-<a name="
+<a name="Runtime+isElectronRenderer"></a>
+
+### runtime.isElectronRenderer
+Returns `true` if the runtime is running inside of electron's renderer process
+
+**Kind**:

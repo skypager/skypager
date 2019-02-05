@@ -11,7 +11,8 @@
     "build": "yarn build:lib && yarn build:web",
     "build:lib": "cross-env NODE_ENV=production babel --comments --source-maps --config-file ./babelrc -d lib src",
     "build:web": "cross-env NODE_ENV=production webpack --config webpack.config.js",
-    "prepare": "yarn build",
+    "prepare": "yarn build && yarn docs:api",
+    "docs:api": "skypager generate-api-docs",
     "test": "skypager test"
   },
   "dependencies": {
@@ -31,6 +32,8 @@
       "src/runtime",
       "src/helpers/helper",
       "src/helpers/feature",
+      "src/features/profiler",
+      "src/features/vm",
       "src/registries/*",
       "src/utils/*"
     ],

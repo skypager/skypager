@@ -1,6 +1,6 @@
 /**
- * @name        Helper
- * @description Helpers act as a registry for specific types of Javascript modules
+ * @class       Helper
+ * @classdesc   Helpers act as a registry for specific types of Javascript modules
  *              that are to be made available to a project runtime.  Helpers exist to provide
  *              common behavior, interfaces, and life cycle events and hooks for all types of things
  *              such as servers, compilers, commands, or anything else that can be categorized and grouped.
