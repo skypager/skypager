@@ -70,4 +70,4 @@ const nodeConfig = merge.strategy({ plugins: 'replace' })(baseProdConfig, {
     ]),
 })
 
-module.exports = process.env.ANALYZE ? nodeConfig : [webConfig, nodeConfig, minifiedWebConfig]
+module.exports = process.env.ANALYZE ? webConfig : [webConfig, minifiedWebConfig]

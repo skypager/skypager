@@ -44,11 +44,11 @@ export async function unpkg(dependencies = {}, { protocol = 'https' } = {}) {
         : `${protocol}://unpkg.com/${packageName}`
 
       if (global[globalVariableName]) {
-        return [packageName, global[globalVariableName]]
+        return [globalVariableName, global[globalVariableName]]
       }
 
       return this.inject.js(unpkgUrl).then(() => {
-        return [packageName, global[globalVariableName]]
+        return [globalVariableName, global[globalVariableName]]
       })
     })
   ).then(fromPairs)
@@ -66,22 +66,30 @@ export function lazyInject() {
         var parent = 'body'
         var attr = 'src'
 
+        window.lastElement = element
+
         // Important success and error for the promise
         element.onload = function() {
+          console.log('loading', url)
           resolve(url)
         }
-        element.onerror = function() {
+        element.onerror = function(...args) {
+          console.log('error', url, ...args)
           reject(url)
         }
 
         // Need to set different attributes depending on tag type
         switch (tag) {
           case 'script':
-            element.async = true
             if (options.babel) {
               element.type = 'text/babel'
-              element['data-presets'] = 'es2015,stage-2,react'
+              // element['data-presets'] = 'es2015,stage-2,react'
             }
+
+            if (options.async !== false) {
+              element.async = true
+            }
+
             break
           case 'link':
             element.type = 'text/css'
