@@ -1,6 +1,6 @@
 {
   "name": "skypager",
-  "version": "40.1.6",
+  "version": "40.1.7",
   "main": "node.js",
   "publishConfig": {
     "access": "public"
@@ -12,8 +12,8 @@
   "dependencies": {
     "@babel/runtime": "^7.3.1",
     "@skypager/web": "^0.2.1",
-    "@skypager/node": "^0.2.1",
-    "@skypager/cli": "^0.2.1",
+    "@skypager/node": "^0.2.2",
+    "@skypager/cli": "^0.2.2",
     "@skypager/runtime": "^0.2.1"
   },
   "keywords": [
