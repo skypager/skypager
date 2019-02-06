@@ -15,15 +15,6 @@ module registry, dependency injector.  Typically you can just do this with featu
 <dd></dd>
 </dl>
 
-## Members
-
-<dl>
-<dt><a href="#skypager">skypager</a> : <code><a href="#Runtime">Runtime</a></code></dt>
-<dd><p>When you import or require @skypager/runtime the object you get back is a singleton,
-it is the global instance of Runtime.</p>
-</dd>
-</dl>
-
 ## Typedefs
 
 <dl>
@@ -77,9 +68,11 @@ module registry, dependency injector.  Typically you can just do this with featu
         * [.replaceState([newState], [cb])](#Runtime+replaceState) ⇒ <code>Object</code>
         * [.setState([newState], [cb])](#Runtime+setState) ⇒ <code>Object</code>
         * *[.stateDidChange()](#Runtime+stateDidChange)*
+        * [.didCreateObservableHelper()](#Runtime+didCreateObservableHelper)
         * [.hashObject(anyObject)](#Runtime+hashObject)
         * [.createEntityFrom()](#Runtime+createEntityFrom)
         * [.slice(...properties)](#Runtime+slice) ⇒ <code>\*</code>
+        * [.tryGet(objectPath, defaultValue)](#Runtime+tryGet)
         * [.selectCached(selectorId, ...args)](#Runtime+selectCached) ⇒ <code>PromiseLike.&lt;\*&gt;</code>
         * [.select(selectorId, ...args)](#Runtime+select) ⇒ <code>PromiseLike.&lt;\*&gt;</code>
         * [.selectThru(selectorId, ...args)](#Runtime+selectThru) ⇒ <code>PromiseLike.&lt;\*&gt;</code>
@@ -195,4 +188,6 @@ Returns `true` if the runtime is running inside of electron
 ### runtime.isElectronRenderer
 Returns `true` if the runtime is running inside of electron's renderer process
 
-**Kind**:
+**Kind**: instance property of [<code>Runtime</code>](#Runtime)  
+**Read only**: true  
+<a name="Runtime+isReactNative"></

@@ -1,21 +1,3 @@
-## Classes
-
-<dl>
-<dt><a href="#GitFeature">GitFeature</a></dt>
-<dd><p>The Git Feature provides an interface for real time status about the git tree,
-including all of the files and their current status, as well as information about the current branch,
-sha, tag, etc.</p>
-</dd>
-</dl>
-
-## Functions
-
-<dl>
-<dt><a href="#clone">clone(options, destination)</a></dt>
-<dd><p>Clone a repository.</p>
-</dd>
-</dl>
-
 <a name="GitFeature"></a>
 
 ## GitFeature
@@ -30,6 +12,10 @@ sha, tag, etc.
     * [.files](#GitFeature.files) : <code>Map</code>
     * [.directories](#GitFeature.directories) : <code>Map</code>
     * [.fileIds](#GitFeature.fileIds) : <code>Array.&lt;String&gt;</code>
+    * [.directoryIds](#GitFeature.directoryIds) : <code>Array.&lt;String&gt;</code>
+    * [.isDirty](#GitFeature.isDirty)
+    * [.modifiedFiles](#GitFeature.modifiedFiles) : <code>Array.&lt;String&gt;</code>
+    * [.clone(options, destination)](#GitFeature.clone)
     * [.run(options)](#GitFeature.run)
     * [.toJSON()](#GitFeature.toJSON) ⇒ <code>Object</code>
     * [.exists(path)](#GitFeature.exists) ⇒ <code>Boolean</code>
@@ -64,6 +50,38 @@ Returns a map of directories
 Returns an array of file ids from the files map
 
 **Kind**: static property of [<code>GitFeature</code>](#GitFeature)  
+<a name="GitFeature.directoryIds"></a>
+
+### GitFeature.directoryIds : <code>Array.&lt;String&gt;</code>
+Returns an array of directory ids from the directories map
+
+**Kind**: static property of [<code>GitFeature</code>](#GitFeature)  
+<a name="GitFeature.isDirty"></a>
+
+### GitFeature.isDirty
+Returns true if there are any dirty files
+
+**Kind**: static property of [<code>GitFeature</code>](#GitFeature)  
+<a name="GitFeature.modifiedFiles"></a>
+
+### GitFeature.modifiedFiles : <code>Array.&lt;String&gt;</code>
+Returns an array of files that have been modified
+
+**Kind**: static property of [<code>GitFeature</code>](#GitFeature)  
+<a name="GitFeature.clone"></a>
+
+### GitFeature.clone(options, destination)
+Clone a repository.
+
+**Kind**: static method of [<code>GitFeature</code>](#GitFeature)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| options | <code>Object</code> \| <code>String</code> | or repo path if a string |
+| options.repo | <code>String</code> | the url of the repo you want to clone |
+| options.folder | <code>String</code> | the folder you want to clone into |
+| destination | <code>Object</code> \| <code>string</code> | the destination path |
+
 <a name="GitFeature.run"></a>
 
 ### GitFeature.run(options)
@@ -149,17 +167,4 @@ Run git ls-files to get a list of files in the tree
 ### GitFeature.findRepo() ⇒ <code>String</code>
 Find the nearest git repo by walking up the tree from cwd
 
-**Kind**: static method of [<code>GitFeature</code>](#GitFeature)  
-<a name="clone"></a>
-
-## clone(options, destination)
-Clone a repository.
-
-**Kind**: global function  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| options | <code>Object</code> \| <code>String</code> | or repo path if a string |
-| options.repo | <code>String</code> | the url of the repo you want to clone |
-| options.folder | <code>String</code> | the folder you want to clone into |
-| destination | <code>Object</code> \| <code>string</code> | the destination path |
+**Kind**: static method of [<code>GitFeature</code>](#GitFeature)

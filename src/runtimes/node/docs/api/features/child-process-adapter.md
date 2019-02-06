@@ -7,15 +7,11 @@ The functions are always defaulting to use the cwd of the host runtime that is u
 </dd>
 </dl>
 
-## Functions
+## Typedefs
 
 <dl>
-<dt><a href="#spawnAndCapture">spawnAndCapture(spawnOptions, options)</a></dt>
-<dd><p>asynchronously Spawn a process and capture the output as it runs.</p>
-</dd>
-<dt><a href="#exec">exec(cmd, options, ...args)</a></dt>
-<dd><p>A wrapper around child_process.exec that sets the cwd to the same as the host runtime</p>
-</dd>
+<dt><a href="#AsyncProcInterface">AsyncProcInterface</a> : <code>Object</code></dt>
+<dd></dd>
 </dl>
 
 <a name="ChildProcessAdapter"></a>
@@ -25,12 +21,29 @@ provides some utility functions for spawning processes based on top of child_pro
 The functions are always defaulting to use the cwd of the host runtime that is using them.
 
 **Kind**: global class  
-<a name="spawnAndCapture"></a>
 
-## spawnAndCapture(spawnOptions, options)
+* [ChildProcessAdapter](#ChildProcessAdapter)
+    * [.async](#ChildProcessAdapter.async) : [<code>AsyncProcInterface</code>](#AsyncProcInterface)
+    * [.spawnAndCapture(spawnOptions, options)](#ChildProcessAdapter.spawnAndCapture)
+    * [.exec(cmd, options, ...args)](#ChildProcessAdapter.exec)
+    * [.execFile(cmd, argv, options)](#ChildProcessAdapter.execFile)
+    * [.spawn(cmd, argv, options)](#ChildProcessAdapter.spawn)
+    * [.fork(cmd, argv, options)](#ChildProcessAdapter.fork)
+    * [.execFileSync(cmd, argv, options)](#ChildProcessAdapter.execFileSync)
+    * [.execSync(cmd, options, ...args)](#ChildProcessAdapter.execSync)
+    * [.spawnSync(cmd, argv, options, ...args)](#ChildProcessAdapter.spawnSync)
+    * [.forkSync(cmd, argv, options, ...args)](#ChildProcessAdapter.forkSync)
+
+<a name="ChildProcessAdapter.async"></a>
+
+### ChildProcessAdapter.async : [<code>AsyncProcInterface</code>](#AsyncProcInterface)
+**Kind**: static property of [<code>ChildProcessAdapter</code>](#ChildProcessAdapter)  
+<a name="ChildProcessAdapter.spawnAndCapture"></a>
+
+### ChildProcessAdapter.spawnAndCapture(spawnOptions, options)
 asynchronously Spawn a process and capture the output as it runs.
 
-**Kind**: global function  
+**Kind**: static method of [<code>ChildProcessAdapter</code>](#ChildProcessAdapter)  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -42,15 +55,121 @@ asynchronously Spawn a process and capture the output as it runs.
 | options.onErrorOutput | <code>function</code> | a function which will be continulally passed error output as a string as it is received, and information about the process |
 | options.onOutput | <code>function</code> | a function which will be continually passed normal output as a string as it is received, and information about the process |
 
-<a name="exec"></a>
+<a name="ChildProcessAdapter.exec"></a>
 
-## exec(cmd, options, ...args)
+### ChildProcessAdapter.exec(cmd, options, ...args)
 A wrapper around child_process.exec that sets the cwd to the same as the host runtime
 
-**Kind**: global function  
+**Kind**: static method of [<code>ChildProcessAdapter</code>](#ChildProcessAdapter)  
 
 | Param | Type | Description |
 | --- | --- | --- |
 | cmd | <code>String</code> | the command you wish to execute |
 | options | <code>Object</code> | options to pass to child_process.exec |
 | ...args | <code>\*</code> | args that get passed through |
+
+<a name="ChildProcessAdapter.execFile"></a>
+
+### ChildProcessAdapter.execFile(cmd, argv, options)
+Perform a child_process execFile
+
+**Kind**: static method of [<code>ChildProcessAdapter</code>](#ChildProcessAdapter)  
+
+| Param | Type |
+| --- | --- |
+| cmd | <code>String</code> | 
+| argv | <code>Array</code> | 
+| options | <code>Object</code> | 
+
+<a name="ChildProcessAdapter.spawn"></a>
+
+### ChildProcessAdapter.spawn(cmd, argv, options)
+Perform a child_process spawn
+
+**Kind**: static method of [<code>ChildProcessAdapter</code>](#ChildProcessAdapter)  
+
+| Param | Type |
+| --- | --- |
+| cmd | <code>String</code> | 
+| argv | <code>Array</code> | 
+| options | <code>Object</code> | 
+
+<a name="ChildProcessAdapter.fork"></a>
+
+### ChildProcessAdapter.fork(cmd, argv, options)
+Perform a child_process fork
+
+**Kind**: static method of [<code>ChildProcessAdapter</code>](#ChildProcessAdapter)  
+
+| Param | Type |
+| --- | --- |
+| cmd | <code>String</code> | 
+| argv | <code>Array</code> | 
+| options | <code>Object</code> | 
+
+<a name="ChildProcessAdapter.execFileSync"></a>
+
+### ChildProcessAdapter.execFileSync(cmd, argv, options)
+Perform a child_process execFileSync
+
+**Kind**: static method of [<code>ChildProcessAdapter</code>](#ChildProcessAdapter)  
+
+| Param | Type |
+| --- | --- |
+| cmd | <code>String</code> | 
+| argv | <code>Array</code> | 
+| options | <code>Object</code> | 
+
+<a name="ChildProcessAdapter.execSync"></a>
+
+### ChildProcessAdapter.execSync(cmd, options, ...args)
+Perform a child_process.execSync
+
+**Kind**: static method of [<code>ChildProcessAdapter</code>](#ChildProcessAdapter)  
+
+| Param | Type |
+| --- | --- |
+| cmd | <code>String</code> | 
+| options | <code>Object</code> | 
+| ...args | <code>\*</code> | 
+
+<a name="ChildProcessAdapter.spawnSync"></a>
+
+### ChildProcessAdapter.spawnSync(cmd, argv, options, ...args)
+Perform a child_process.spawnSync
+
+**Kind**: static method of [<code>ChildProcessAdapter</code>](#ChildProcessAdapter)  
+
+| Param | Type |
+| --- | --- |
+| cmd | <code>String</code> | 
+| argv | <code>Array</code> | 
+| options | <code>Object</code> | 
+| ...args | <code>\*</code> | 
+
+<a name="ChildProcessAdapter.forkSync"></a>
+
+### ChildProcessAdapter.forkSync(cmd, argv, options, ...args)
+Perform a child_process.forkSync
+
+**Kind**: static method of [<code>ChildProcessAdapter</code>](#ChildProcessAdapter)  
+
+| Param | Type |
+| --- | --- |
+| cmd | <code>String</code> | 
+| argv | <code>Array</code> | 
+| options | <code>Object</code> | 
+| ...args | <code>\*</code> | 
+
+<a name="AsyncProcInterface"></a>
+
+## AsyncProcInterface : <code>Object</code>
+**Kind**: global typedef  
+**Properties**
+
+| Name | Type |
+| --- | --- |
+| spawn | <code>function</code> | 
+| execFile | <code>function</code> | 
+| fork | <code>function</code> | 
+| exec | <code>function</code> |

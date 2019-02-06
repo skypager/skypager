@@ -20,8 +20,8 @@ Helpers act as a registry for specific types of Javascript modules
         * [.contextTypes](#Helper+contextTypes)
         * [.projectSettingsPaths](#Helper+projectSettingsPaths)
         * [.doInitialize()](#Helper+doInitialize)
-        * [.tryGet()](#Helper+tryGet)
-        * [.tryResult()](#Helper+tryResult)
+        * [.tryGet(objectPath, defaultValue, sources)](#Helper+tryGet) ⇒ <code>\*</code>
+        * [.tryResult(objectPath, defaultValue, options, context)](#Helper+tryResult) ⇒ <code>\*</code>
     * _static_
         * [.attach()](#Helper.attach)
 
@@ -81,19 +81,34 @@ The object search paths where we look for settings and configuration
 **Kind**: instance method of [<code>Helper</code>](#Helper)  
 <a name="Helper+tryGet"></a>
 
-### helper.tryGet()
+### helper.tryGet(objectPath, defaultValue, sources) ⇒ <code>\*</code>
 Access the first value we find in our options hash in our provider hash
 
 **Kind**: instance method of [<code>Helper</code>](#Helper)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| objectPath | <code>String</code> | the dot.path to the property |
+| defaultValue | <code>\*</code> | the default value |
+| sources | <code>Array.&lt;String&gt;</code> | property paths to search |
+
 <a name="Helper+tryResult"></a>
 
-### helper.tryResult()
+### helper.tryResult(objectPath, defaultValue, options, context) ⇒ <code>\*</code>
 Access the first value we find in our options hash in our provider hash
 
 If the method is a function, it will be called in the scope of the helper,
 with the helpers options and context
 
 **Kind**: instance method of [<code>Helper</code>](#Helper)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| objectPath | <code>String</code> | the dot.path to the property |
+| defaultValue | <code>\*</code> | the default value |
+| options | <code>Object</code> | options object which will be passed to the property if it is a function |
+| context | <code>Object</code> | context object which will be passed to the property if it is a function |
+
 <a name="Helper.attach"></a>
 
 ### Helper.attach()

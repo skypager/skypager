@@ -14,7 +14,7 @@ and enable them automatically.
     * _instance_
         * [.allowAnonymousProviders](#Feature+allowAnonymousProviders)
         * [.isCacheable](#Feature+isCacheable)
-        * [.enable(cfg)](#Feature+enable)
+        * [.enable(options)](#Feature+enable)
     * _static_
         * [.createRegistry()](#Feature.createRegistry)
         * [.attach(runtime, options)](#Feature.attach) ⇒ <code>Runtime</code>
@@ -44,14 +44,14 @@ const one = runtime.feature('my-feature')
 ```
 <a name="Feature+enable"></a>
 
-### feature.enable(cfg)
+### feature.enable(options)
 Enable the feature.
 
 **Kind**: instance method of [<code>Feature</code>](#Feature)  
 
 | Param | Type |
 | --- | --- |
-| cfg | <code>object</code> \| <code>function</code> | 
+| options | <code>object</code> \| <code>function</code> | 
 
 <a name="Feature.createRegistry"></a>
 
