@@ -33,12 +33,12 @@ try {
 process.env.DISABLE_SKYPAGER_FILE_MANAGER = true
 
 const stageOne = [
+  ['@skypager/helpers-client', 'src/helpers/client', 'lib'],
   ['@skypager/features-file-manager', 'src/features/file-manager', 'lib'],
   ['@skypager/node', 'src/runtimes/node', 'lib'],
 ]
 
 const stageTwo = [
-  ['@skypager/helpers-client', 'src/helpers/client', 'lib'],
   ['@skypager/helpers-server', 'src/helpers/server', 'lib'],
   ['@skypager/helpers-repl', 'src/helpers/repl', 'lib'],
 ]
