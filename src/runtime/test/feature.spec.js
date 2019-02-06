@@ -14,6 +14,8 @@ describe('The Feature Helper', function() {
       featureMethods: ['a', 'b'],
     }))
 
+    runtime.features.available.should.include('some-feature')
+
     runtime.feature('some-feature').should.be.instanceOf(Feature)
     runtime.feature('some-feature').featureMethods.should.include('a', 'b')
   })

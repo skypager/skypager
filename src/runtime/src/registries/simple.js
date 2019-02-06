@@ -183,7 +183,7 @@ export class SimpleRegistry {
   }
 
   checkKey(componentId, registryName = 'registry') {
-    if (has(this[registryName], componentId)) {
+    if (this[registryName] && this[registryName].has(componentId)) {
       return componentId
     } else if (has(this.internalAliases, componentId)) {
       return get(this, ['internalAliases', componentId])
@@ -204,7 +204,8 @@ export class SimpleRegistry {
 
   lookup(componentId, registryName = 'registry') {
     const lookupId = this.willLookupById(componentId) || `${componentId}`
-    const result = get(this[registryName], this.checkKey(lookupId, registryName))
+    const realKey = this.checkKey(lookupId, registryName)
+    const result = this[registryName] && this[registryName].lookup(realKey)
 
     return result
       ? this.componentWasFound(result, lookupId, componentId)
@@ -213,7 +214,7 @@ export class SimpleRegistry {
 
   findRawMember(componentId, registryName = 'registry') {
     const lookupId = this.willLookupById(componentId) || `${componentId}`
-    const result = get(this[registryName], this.checkKey(lookupId, registryName))
+    const result = this[registryName].get(lookupId)
 
     return result
   }
