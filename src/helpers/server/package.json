@@ -3,13 +3,13 @@
   "publishConfig": {
     "access": "public"
   },
-  "version": "0.1.26",
+  "version": "0.1.29",
   "description": "skypager server helper",
   "main": "lib/index.js",
   "scripts": {
     "prepare": "yarn build && yarn docs:api",
     "build": "rimraf lib && babel --comments --source-maps -d lib src",
-    "watch": "babel --watch --comments --source-maps -d lib src",   
+    "watch": "babel --watch --comments --source-maps -d lib src",
     "test": "skypager test",
     "postbuild": "skypager smoke-test",
     "docs:api": "skypager generate-api-docs"
