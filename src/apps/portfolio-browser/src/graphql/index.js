@@ -11,17 +11,13 @@ export default async function attach(app, portfolio) {
 
   app.use(cookieParser())
 
-  const resolverModules = runtime.fsx.readdirSync(
-    runtime.resolve('src', 'server', 'graphql', 'resolvers')
-  )
+  const resolverModules = runtime.fsx.readdirSync(runtime.resolve('src', 'graphql', 'resolvers'))
 
   resolverModules.forEach(mod => {
-    require(runtime.resolve('src', 'server', 'graphql', 'resolvers', mod))(resolve, this)
+    require(runtime.resolve('src', 'graphql', 'resolvers', mod))(resolve, this)
   })
 
   const resolvers = resolve.value()
-
-  console.log(resolvers)
 
   const apollo = new ApolloServer({
     typeDefs,

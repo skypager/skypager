@@ -1,5 +1,5 @@
 import { Server } from '@skypager/helpers-server'
-import setupGraphQL from './graphql'
+import setupGraphQL from '../graphql'
 
 export default class PortfolioBrowserServer extends Server {
   get projectConfigKeys() {
@@ -38,7 +38,7 @@ export default class PortfolioBrowserServer extends Server {
       next()
     })
 
-    setupGraphQL.call(this, app, portfolio)
+    // setupGraphQL.call(this, app, portfolio)
 
     app.get('/package-graph', async (req, res) => {
       const cacheExists = await runtime.fsx.existsAsync(
