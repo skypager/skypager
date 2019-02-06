@@ -199,14 +199,14 @@ export class Runtime {
     this.hide(
       'registries',
       new ContextRegistry('registries', {
-        context: Helper.createMockContext('registries'),
+        context: Helper.createMockContext({}),
       })
     )
 
     this.hide(
       'selectors',
       new ContextRegistry('selectors', {
-        context: Helper.createMockContext('selectors'),
+        context: Helper.createMockContext({}),
       })
     )
 
@@ -1567,7 +1567,7 @@ export class Runtime {
 
   createRegistry(name, options = {}) {
     const registry = Helper.createRegistry(name, {
-      context: Helper.createMockContext(),
+      context: Helper.createMockContext({}),
       ...options,
     })
 

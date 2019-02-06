@@ -143,11 +143,10 @@ export class Feature extends Helper {
     }
 
     /**
-     * @property {Object} settings contains the settings or configuration for this feature based on how it was initialized and created
+     * @property {Object} featureSettings contains the settings or configuration for this feature based on how it was initialized and created
      */
     try {
-      // this.hide('settings', defaultsDeep({}, options, this.options), true)
-      this.hide('settings', defaultsDeep({}, options, this.options), {
+      this.hide('featureSettings', defaultsDeep({}, options, this.options), {
         configurable: true,
       })
     } catch (error) {}
