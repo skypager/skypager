@@ -1,6 +1,6 @@
 {
   "name": "@skypager/apps-portfolio-browser",
-  "version": "0.1.29",
+  "version": "0.1.30",
   "description": "an api and application for browsing a portfolio",
   "main": "lib/index.js",
   "publishConfig": {
@@ -20,7 +20,7 @@
   "license": "MIT",
   "dependencies": {
     "@skypager/helpers-document": "^0.1.28",
-    "@skypager/node": "^0.1.29",
+    "@skypager/node": "^0.1.30",
     "@skypager/web": "^0.1.29",
     "apollo-boost": "^0.1.23",
     "apollo-server": "^2.3.1",
