@@ -36,6 +36,13 @@ try {
  * @property {MainScriptFeature} mainScript interact with project specific main script for setup and customization
  */
 
+Object.assign(global, {
+  get skypager() {
+    console.warn('global.skypager is going to deprecated')
+    return runtime
+  },
+})
+
 /**
  * @type {NodeRuntime}
  * @extends Runtime
