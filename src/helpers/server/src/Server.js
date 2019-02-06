@@ -221,7 +221,7 @@ export class Server extends Helper {
     } = options
 
     let {
-      cors = this.result('cors') || this.tryResult('cors'),
+      cors = this.result('cors'),
       pretty = this.result('pretty') ||
         this.tryResult('pretty', () => process.env.NODE_ENV !== 'production'),
     } = options
@@ -282,9 +282,6 @@ export class Server extends Helper {
    */
   async mount(options = this.options, context = this.context) {
     const { app } = this
-    const {
-      appDidMount = this.appDidMount || this.options.appDidMount || this.provider.appDidMount,
-    } = options
     const { isString } = this.lodash
 
     let endpoints = options.endpoints || this.tryResult('endpoints', [])
@@ -312,21 +309,27 @@ export class Server extends Helper {
       serveStatic = options.serverStatic || this.tryResult('serveStatic', () => false),
     } = this
 
-    this.runtime.debug('App Did Mount')
+    this.runtime.debug('Running App Did Mount Hook')
 
-    if (appDidMount) {
-      await appDidMount.call(this, app, options, context)
-    }
+    await this.attemptMethodAsync('appDidMount', app)
+
+    this.runtime.debug('Ran App Did Mount Hook')
 
     if (serveStatic) {
       this.runtime.debug('Setting up static file hosting')
-      const staticSetupHook = this.tryGet('setupStaticServer', setupStaticServer)
+      const staticSetupHook = this.tryGet('setupStaticServer', setupStaticServer, [
+        'options',
+        'provider',
+      ])
       staticSetupHook.call(this, app, serveStatic)
     }
 
     if (history) {
       this.runtime.debug('Setting up history fallback for single page app hosting')
-      const historySetupHook = this.tryGet('setupHistoryFallback', setupHistoryFallback)
+      const historySetupHook = this.tryGet('setupHistoryFallback', setupHistoryFallback, [
+        'options',
+        'provider',
+      ])
       historySetupHook.call(this, app, history)
     }
 
@@ -366,7 +369,7 @@ export class Server extends Helper {
   }
 
   get starter() {
-    const fn = this.tryGet('start', function(cb) {
+    const fn = this.tryGet('createStarter', function(cb) {
       return this.app.listen(this.port, this.hostname, err => {
         if (err) {
           this.runtime.error(`Server failed to start: ${err.message}`)
