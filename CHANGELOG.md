@@ -2,6 +2,10 @@
 
 ## Releases
 
+### 0.2.2
+
+- [@skypager/features-file-manager] added hashTree function which gives a reliable checksum of the project file contents
+
 ### 0.2.0
 
 - [@skypager/runtime]

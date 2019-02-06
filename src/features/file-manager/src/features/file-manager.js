@@ -114,6 +114,8 @@ export const featureMethods = [
   'updateFileContent',
 
   'updateFileHash',
+
+  'hashTree',
 ]
 
 export const hostMethods = ['requireContext']
@@ -157,6 +159,16 @@ export function requireContext(rule, options = {}) {
       })
     })
     .value()
+}
+
+export async function hashTree() {
+  await this.hashFiles({ include: [/.*/] })
+  const sortedHashTable = this.chain
+    .get('fileObjects')
+    .sortBy('relative')
+    .map(file => ({ id: file.relative, hash: file.hash }))
+    .value()
+  return this.runtime.hashObject(sortedHashTable)
 }
 
 const normalize = path => path.replace(/\\\\?/g, '/')
