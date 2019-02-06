@@ -60,14 +60,14 @@ const {
 let runtimesRegistry
 let frameworkRuntime
 
-/** 
+/**
  * When you import or require @skypager/runtime the object you get back is a singleton,
- * it is the global instance of Runtime. 
- * 
+ * it is the global instance of Runtime.
+ *
  * @type {Runtime}
  * @name skypager
  * @global
-*/
+ */
 let singleton
 
 const defaultOptions = result(global, 'SkypagerDefaultOptions', {})
@@ -96,7 +96,7 @@ const enableStrictMode = get(
  */
 
 /**
- * 
+ *
  * @typedef {Object} Logger
  * @prop {Function} log
  * @prop {Function} info
@@ -141,14 +141,14 @@ export class Runtime {
      */
     this.lazy('logger', () => console, true)
 
-    /** 
+    /**
      * @property {Runtime} parent
-    */
+     */
     this.hideGetter('parent', () => context.parent || singleton)
 
-    /** 
+    /**
      * @property {String} cwd
-    */
+     */
     this.hide(
       'cwd',
       result(options, 'cwd', () => (!isUndefined(process) ? result(process, 'cwd', '/') : '/'))
@@ -159,16 +159,16 @@ export class Runtime {
     this.hideGetter('_name', () => options.name || camelCase(snakeCase(this.cwd.split('/').pop())))
     this.hideGetter('name', () => this._name)
 
-    /** 
+    /**
      * @this Runtime
      * @property {Cache} cache
-    */
+     */
     this.hide('cache', new Cache(options.cacheData || []))
 
-    /** 
+    /**
      * @this Runtime
      * @property {WeakCache} weakCache
-    */
+     */
     this.hide('weakCache', new WeakCache(options.cacheData || [], this))
 
     this.hide('rawOptions', options)
@@ -219,18 +219,18 @@ export class Runtime {
       return selectorCache.get(this)
     })
 
-    /** 
+    /**
      * @mixin Stateful
      * @property {Map} state
-     * @property {Object} currentState 
+     * @property {Object} currentState
      * @property {Function} setState
      * @property {Function} replaceState
      * @property {String} cacheKey
      * @property {String} stateHash
-    */
-    /** 
+     */
+    /**
      * @mixes Stateful
-    */
+     */
     extendObservable(this, {
       state: map(toPairs(this.initialState)),
       currentState: computed(this.getCurrentState.bind(this)),
@@ -280,7 +280,7 @@ export class Runtime {
 
   /**
    * Get the value at an object path.  Uses lodash.get
-   * 
+   *
    * @param {String} path
    * @param {*} defaultValue
    * @returns {?}
@@ -289,11 +289,11 @@ export class Runtime {
   get(path, defaultValue) {
     return get(this, path, defaultValue)
   }
-  
+
   /**
-   * Get the value at an object path. If that path is a function, we'll call it.  
+   * Get the value at an object path. If that path is a function, we'll call it.
    * Uses lodash.result
-   * 
+   *
    * @param {*} path
    * @param {*} defaultValue
    * @returns {?}
@@ -303,8 +303,8 @@ export class Runtime {
     return result(this, path, defaultValue, ...args)
   }
   /**
-   * Check if runtime has a property 
-   * 
+   * Check if runtime has a property
+   *
    * @param {*} path
    * @param {*} defaultValue
    * @returns {Boolean}
@@ -316,7 +316,7 @@ export class Runtime {
 
   /**
    * Invoke a function at a nested path
-   * 
+   *
    * @param {*} functionAtPath
    * @param {...*} args
    * @returns {?}
@@ -325,11 +325,11 @@ export class Runtime {
   invoke(functionAtPath, ...args) {
     return lodash.invoke(this, ...args)
   }
-  
+
   pick(...args) {
     return lodash.pick(this, ...args)
   }
- 
+
   /**
     The Context Types API defines a schema for properties that will be made available via the runtime's context system.
 
@@ -516,13 +516,13 @@ export class Runtime {
    *
    * @param {string} registryPropName - the name of the registry you want to wait for
    * @param {Function} callback - a function that will be called with runtime, the helperClass, and the options passed when attaching that helper
-   * 
+   *
    * @example @lang js <caption>Conditionally running code when the servers helper is attached</caption>
-   * 
+   *
    * runtime.onRegistration("servers", () => {
    *  runtime.servers.register('my-server', () => require('./my-server'))
    * })
-   *  
+   *
    */
   onRegistration(registryPropName, callback) {
     if (typeof callback !== 'function') {
@@ -559,26 +559,27 @@ export class Runtime {
     return runtimeClass
   }
 
-   /** 
-   * Register a Helper class as being available to our Runtime class 
-   * 
+  /**
+   * Register a Helper class as being available to our Runtime class
+   *
    * @param {String} helperName - the name of the helper class
-   * @param {Class} helperClass - a subclass of Helper 
-   * 
+   * @param {Class} helperClass - a subclass of Helper
+   *
    * @returns {Class} the helper class you registered
-  */ 
+   */
+
   registerHelper(...args) {
     return this.constructor.registerHelper(...args)
   }
 
-  /** 
-   * Register a Helper class as being available to this Runtime class 
-   * 
+  /**
+   * Register a Helper class as being available to this Runtime class
+   *
    * @param {String} helperName - the name of the helper class
-   * @param {Class} helperClass - a subclass of Helper 
-   * 
+   * @param {Class} helperClass - a subclass of Helper
+   *
    * @returns {Class} the helper class you registered
-  */
+   */
   static registerHelper(name, helperClass) {
     registerHelper(name, () => helperClass)
     return helperClass
@@ -673,13 +674,13 @@ export class Runtime {
     return pickBy(initializers.allMembers(), (fn, id) => !!tags.find(tag => id.indexOf(tag) === 0))
   }
 
-  /** 
+  /**
    * A Runtime class will have certain initializer functions that it runs automatically
-   * as part of the startup lifecycle, which initializers will be dependent on the target (e.g. node, web) 
+   * as part of the startup lifecycle, which initializers will be dependent on the target (e.g. node, web)
    * as well as the NODE_ENV environment (production, development, test)
-   * 
+   *
    * @private
-  */
+   */
   applyRuntimeInitializers() {
     const { mapValues } = this.lodash
     const matches = this.runtimeInitializers
@@ -699,23 +700,23 @@ export class Runtime {
     return this
   }
 
-  /** 
+  /**
    * Attach all registered helpers to the runtime
-   * 
+   *
    * @private
    * @returns {Runtime}
-  */
+   */
   attachAllHelpers() {
     Helper.attachAll(this, this.helperOptions)
     return this
   }
 
-  /** 
+  /**
    * A Mixin is an object of functions.  These functions will get created as properties on this instance.
-   * 
-   * @param {Mixin} mixin 
-   * @param {MixinOptions} options 
-  */
+   *
+   * @param {Mixin} mixin
+   * @param {MixinOptions} options
+   */
   mixin(mixin = {}, options = {}) {
     this.applyInterface(mixin, {
       transformKeys: true,
@@ -730,35 +731,35 @@ export class Runtime {
     return this
   }
 
-  /** 
+  /**
    * If you subclass Runtime, you can define your own initialize function which will be called during the constructor phase
-   * 
+   *
    * @abstract
    * @private
    * @returns {Runtime}
-  */
+   */
   initialize() {
     return this
   }
 
-  /** 
+  /**
    * If you subclass Runtime, you can define your own prepare function which will be called after the constructor phase
-   * 
+   *
    * @abstract
    * @private
    * @returns {PromiseLike<Runtime>}
-  */
+   */
   async prepare() {
     return this
   }
 
-  /** 
+  /**
    * If you subclass Runtime, you can define your own prepare function which will be called after the constructor phase
-   * 
+   *
    * @abstract
    * @private
    * @returns {PromiseLike<Runtime>}
-  */
+   */
   async start() {
     return this
   }
@@ -843,7 +844,7 @@ export class Runtime {
   }
 
   /**
-   * Returns `true` if the runtime is running inside of electron 
+   * Returns `true` if the runtime is running inside of electron
    *
    * @readonly
    * @memberof Runtime
@@ -908,7 +909,7 @@ export class Runtime {
 
   /**
    * returns `true` when running in a process where NODE_ENV is set to development, or in a process started with the development flag
-   * 
+   *
    * @readonly
    * @memberof Runtime
    */
@@ -926,7 +927,7 @@ export class Runtime {
 
   /**
    * returns `true` when running in a process where NODE_ENV is set to test, or in a process started with the test flag
-   * 
+   *
    * @readonly
    * @memberof Runtime
    */
@@ -941,7 +942,7 @@ export class Runtime {
 
   /**
    * returns `true` when running in a process where NODE_ENV is set to production, or in a process started with the test flag
-   * 
+   *
    * @readonly
    * @memberof Runtime
    */
@@ -1033,11 +1034,11 @@ export class Runtime {
   }
 
   whenReady(fn) {
-   if (!isFunction(fn)) {
-     return this.whenReadyAsync()
-   }
+    if (!isFunction(fn)) {
+      return this.whenReadyAsync()
+    }
 
-   return this.whenPrepared(fn)
+    return this.whenPrepared(fn)
   }
 
   whenReadyAsync() {
@@ -1117,9 +1118,9 @@ export class Runtime {
 
   /**
    * Replace the current state with the new state.  `newState` can be an object or a function which returns the new state
-   * 
+   *
    * @param {Object|Function} [newState={}] - a new object containing the state you wish the runtime to have
-   * @param {Function} [cb] - a function we'll call when the state is replaced 
+   * @param {Function} [cb] - a function we'll call when the state is replaced
    * @returns {Object} the current state after being replaced
    * @memberof Runtime
    * @fires Runtime#stateWillChange
@@ -1128,18 +1129,15 @@ export class Runtime {
   replaceState(newState = {}, cb) {
     const { isFunction, toPairs } = this.lodash
 
-    /** 
+    /**
      * @event Runtime#stateWillChange
-     * @type {Object} currentState
-     * @type {Object} nextState
-    */
+     */
     this.emit('stateWillChange', this.currentState, newState)
 
-    /** 
+    /**
      * @event Runtime#stateWillReplace
-     * @type {Object} currentState
-     * @type {Object} nextState
-    */   
+     */
+
     this.emit('stateWillReplace', this.currentState, newState)
 
     if (isFunction(newState)) {
@@ -1157,26 +1155,23 @@ export class Runtime {
 
   /**
    * Replace the current state with the new state
-   * 
+   *
    * @param {Object|Function} [newState={}] - a new object containing the state you wish the runtime to have
-   * @param {Function} [cb] - a function we'll call when the state is replaced 
+   * @param {Function} [cb] - a function we'll call when the state is replaced
    * @returns {Object} the current state after being replaced
    * @memberof Runtime
    * @fires Runtime#stateWillChange
    */
   setState(newState = {}, cb) {
     const { isFunction, toPairs } = this.lodash
-    
 
     if (isFunction(newState)) {
       newState = newState(this.currentState, this)
     }
 
-    /** 
+    /**
      * @event Runtime#stateWillChange
-     * @type {Object} currentState
-     * @type {Object} stateUpdate 
-    */
+     */
     this.emit('stateWillChange', this.currentState, newState)
 
     const result = this.state.merge(toPairs(newState))
@@ -1188,9 +1183,9 @@ export class Runtime {
     return result
   }
 
-  /** 
+  /**
    * @abstract
-  */
+   */
   stateDidChange() {}
 
   observe(listener, prop = 'state') {
@@ -1266,24 +1261,21 @@ export class Runtime {
     return require('./strftime')(...args)
   }
 
-  /** 
+  /**
    * This function is a hook that gets called by the helper.createInstance lifecycle
-   * 
+   *
    * I believe i originally had this setup as a hook on runtime so that, either:
-   * 
+   *
    *  1) runtime could be in control of what observability means, and the helpers just expect an interface to it
-   *  2) as a form of code splitting? since runtime has the mobx dependency bundled with it, and we want to be able to export a small helper class? 
-   * 
+   *  2) as a form of code splitting? since runtime has the mobx dependency bundled with it, and we want to be able to export a small helper class?
+   *
    * This hook decorates the instance of the helper with mobx observable properties, which includes
    * observable objects, actions, and computed attribute getters
-  */
+   */
   didCreateObservableHelper(helperInstance, helperClass) {
     if (helperInstance.tryGet('observables')) {
-      const observables = helperInstance.tryResult('observables', {}) 
-      this.makeObservable(
-        observables,
-        helperInstance
-      )
+      const observables = helperInstance.tryResult('observables', {})
+      this.makeObservable(observables, helperInstance)
     }
 
     if (!helperInstance.has('state')) {
@@ -1663,7 +1655,7 @@ export class Runtime {
   }
 
   /**
-   * Runs a selector function by first checking against the selectorCache 
+   * Runs a selector function by first checking against the selectorCache
    *
    * @param {*} selectorId
    * @param {*} args
@@ -1678,26 +1670,25 @@ export class Runtime {
     return this.select(selectorId, ...args)
   }
 
-
   /**
    * Runs an async selector function from the registry.
-   * 
+   *
    * A selector function will be passed an instance of `lodash.chain({Runtime})` and should return that chain.
    *
-   * @param {String} selectorId a selector function that exists in the selectors registry 
+   * @param {String} selectorId a selector function that exists in the selectors registry
    * @param {*} args
    * @returns {PromiseLike<*>}
    * @memberof Runtime
    * @example @lang js
-   * 
+   *
    * runtime.selectors.register('something', () => async (chain, eachItem) => {
-   *  const results = await doStuff() 
+   *  const results = await doStuff()
    *  return chain
-   *    .plant(results) 
+   *    .plant(results)
    *    .groupBy('column')
    *    .mapValues((groupName, items) => items.map(eachItem))
    * })
-   * 
+   *
    * const value = await runtime.select('something', (item) => item + 1)
    */
   async select(selectorId, ...args) {
@@ -1710,15 +1701,15 @@ export class Runtime {
     return isFunction(result.value) ? result.value() : result
   }
 
-  /** 
+  /**
    * Same as `select` but accepts passing a function as the last argument.
    * This function will be called with the result of the selector function
-   * 
-   * @param {String} selectorId a selector function that exists in the selectors registry 
+   *
+   * @param {String} selectorId a selector function that exists in the selectors registry
    * @param {*} args args to pass thru to the function. the last argument should be a function.
    * @memberof Runtime
    * @returns {PromiseLike<*>}
-  */
+   */
   async selectThru(selectorId, ...args) {
     const fn =
       args.length && typeof args[args.length - 1] === 'function'
@@ -1730,14 +1721,14 @@ export class Runtime {
     return response.thru(fn).value()
   }
 
-  /** 
+  /**
    * Same as `selectThru` but returns the resulting lodash chain still in chain mode
-   * 
+   *
    * @param {string} selectorId the id of the registered selector function
    * @param {...*} args args to pass thru to the selector.  if the last arg is a function
    *                    it will receive the value as a lodash chain.thru()
    * @returns {LodashChain}
-  */
+   */
   async selectChainThru(selectorId, ...args) {
     const fn =
       args.length && typeof args[args.length - 1] === 'function'
@@ -1749,13 +1740,13 @@ export class Runtime {
     return response.thru(fn)
   }
 
-  /** 
+  /**
    * Same as `select` but returns the resulting lodash chain still in chain mode.
-   * 
-   * @param {String} selectorId a selector function that exists in the selectors registry 
+   *
+   * @param {String} selectorId a selector function that exists in the selectors registry
    * @param {*} args arguments to be passed thru to the selector function
    * @returns {PromiseLike<*>}
-  */
+   */
   async selectChain(selectorId, ...args) {
     const results = await this.select(selectorId, ...args)
     return lodash.chain(results)

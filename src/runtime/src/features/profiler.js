@@ -22,7 +22,18 @@ export default class ProfilerFeature extends Feature {
   shortcut = 'profiler'
 
   /**
-   * @type {Object<string, { start: number, end: number, duration: number }> }
+   * @typedef {Object} TimingReport
+   * @property {Number} start
+   * @property {Number} stop
+   * @property {Number} duration
+   */
+
+  /**
+   * @typedef {Object<String, TimingReport>} TimingsReport
+   */
+
+  /**
+   * @type {TimingsReport}
    */
   get report() {
     const timings = this.runtime.convertToJS(this.timings.toJSON())
@@ -41,6 +52,7 @@ export default class ProfilerFeature extends Feature {
   observables() {
     /**
      * @property {Map} timings
+     * @memberof ProfilerFeature
      */
     return {
       timings: ['shallowMap', []],
@@ -49,6 +61,7 @@ export default class ProfilerFeature extends Feature {
 
   /**
    * @param {String} eventName the name of the event you're finished timing
+   * @memberof ProfilerFeature
    */
   end(eventName) {
     return this.profileEnd(eventName)
@@ -67,6 +80,7 @@ export default class ProfilerFeature extends Feature {
 
   /**
    * @param {String} eventName the name of the event you're starting to time
+   * @memberof ProfilerFeature
    */
   start(eventName) {
     this.profileStart(eventName)

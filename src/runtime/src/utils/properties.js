@@ -9,7 +9,6 @@ import {
   camelCase,
   cloneDeep,
   lowerFirst,
-  omit,
 } from 'lodash'
 
 const { defineProperty } = Object
@@ -206,9 +205,9 @@ export function createInterface(interfaceMethods = {}, options = {}) {
 }
 
 /**
- * @typedef {Object.<string, function>} Mixin
+ * @typedef {Object<String, Function>} Mixin
  *
- * @typedef {Object.<string>} MixinOptions
+ * @typedef {Object<String>} MixinOptions
  * @prop {Array} partial - an array of objects to be passed as arguments to the function
  * @prop {Boolean} right - whether to append the arguments
  * @prop {Boolean} insertOptions - whether to pass an empty object as the first arg automatically
@@ -381,7 +380,7 @@ export const hide = hideProperty
  * @param {Object} target The target object to receive the lazy loader
  * @param {String} attribute The property name
  * @param {Function} fn The function that will be memoized
- * @param {[type]} enumerable Whether to make the property enumerable when it is loaded
+ * @param {Boolean} enumerable Whether to make the property enumerable when it is loaded
  * @return {Object} Returns the target object
  */
 export function lazy(target, attribute, fn, enumerable = false) {

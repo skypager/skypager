@@ -12,13 +12,6 @@ const isFunction = o => typeof o === 'function'
  * and enable them automatically.
  */
 export class Feature extends Helper {
-  /**
-   * @private
-   *
-   * This is used to detect if a provider in the registry should be treated as a class
-   * to be instantiated.
-   */
-
   static isSkypagerHelper = true
 
   /**

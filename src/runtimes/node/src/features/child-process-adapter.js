@@ -4,10 +4,16 @@ import * as cp from 'child_process'
 import * as cpAsync from 'child-process-promise'
 
 /**
+ * @typedef {Object} AsyncProcInterface
+ * @prop {Function} spawn
+ * @prop {Function} execFile
+ * @prop {Function} fork
+ * @prop {Function} exec
+ */
+/**
  * @class ChildProcessAdapter
  * @classdesc provides some utility functions for spawning processes based on top of child_process and child-process-promise.
  * The functions are always defaulting to use the cwd of the host runtime that is using them.
- *
  * @example
  *
  *  import runtime from '@skypager/node'
@@ -23,6 +29,7 @@ export default class ChildProcessAdapter extends Feature {
   /**
    * asynchronously Spawn a process and capture the output as it runs.
    *
+   * @memberof ChildProcessAdapter
    * @param {Object} spawnOptions options to pass to the spawn function
    * @param {String} options.cmd the process to run
    * @param {Array<String>} options.args an array of arguments to pass tot he process
@@ -96,39 +103,101 @@ export default class ChildProcessAdapter extends Feature {
    * @param {String} cmd the command you wish to execute
    * @param {Object} options options to pass to child_process.exec
    * @param {*} args args that get passed through
+   * @memberof ChildProcessAdapter
    */
   exec(cmd, options, ...args) {
     return cp.exec(cmd, { cwd: this.runtime.cwd, ...options }, ...args)
   }
 
+  /**
+   * Perform a child_process execFile
+   *
+   * @param {String} cmd
+   * @param {Array} argv
+   * @param {Object} options
+   * @memberof ChildProcessAdapter
+   */
   execFile(cmd, argv, options, ...args) {
     return cp.execFile(cmd, argv, { cwd: this.runtime.cwd, ...options }, ...args)
   }
 
+  /**
+   * Perform a child_process spawn
+   *
+   * @param {String} cmd
+   * @param {Array} argv
+   * @param {Object} options
+   * @memberof ChildProcessAdapter
+   */
   spawn(cmd, argv, options, ...args) {
     return cp.spawn(cmd, argv, { cwd: this.runtime.cwd, ...options }, ...args)
   }
-
+  /**
+   * Perform a child_process fork
+   *
+   * @param {String} cmd
+   * @param {Array} argv
+   * @param {Object} options
+   * @memberof ChildProcessAdapter
+   */
   fork(cmd, argv, options, ...args) {
     return cp.fork(cmd, argv, { cwd: this.runtime.cwd, ...options }, ...args)
   }
 
+  /**
+   * Perform a child_process execFileSync
+   *
+   * @param {String} cmd
+   * @param {Array} argv
+   * @param {Object} options
+   * @memberof ChildProcessAdapter
+   */
   execFileSync(cmd, argv, options, ...args) {
     return cp.execFileSync(cmd, argv, { cwd: this.runtime.cwd, ...options }, ...args)
   }
 
+  /**
+   * Perform a child_process.execSync
+   *
+   * @param {String} cmd
+   * @param {Object} options
+   * @param {...*} args
+   * @memberof ChildProcessAdapter
+   */
   execSync(cmd, options, ...args) {
     return cp.execSync(cmd, { cwd: this.runtime.cwd, ...options }, ...args)
   }
 
+  /**
+   * Perform a child_process.spawnSync
+   *
+   * @param {String} cmd
+   * @param {Array} argv
+   * @param {Object} options
+   * @param {...*} args
+   * @memberof ChildProcessAdapter
+   */
   spawnSync(cmd, argv, options, ...args) {
     return cp.spawnSync(cmd, argv, { cwd: this.runtime.cwd, ...options }, ...args)
   }
 
+  /**
+   * Perform a child_process.forkSync
+   *
+   * @param {String} cmd
+   * @param {Array} argv
+   * @param {Object} options
+   * @param {...*} args
+   * @memberof ChildProcessAdapter
+   */
   forkSync(cmd, argv, options, ...args) {
     return cp.forkSync(cmd, argv, { cwd: this.runtime.cwd, ...options }, ...args)
   }
 
+  /**
+   * @memberof ChildProcessAdapter
+   * @type {AsyncProcInterface}
+   */
   get async() {
     const { runtime } = this
     const cwd = runtime.cwd

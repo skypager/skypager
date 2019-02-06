@@ -1,5 +1,9 @@
 import { Feature } from '@skypager/runtime/lib/feature'
 
+/**
+ * @class PackageCacheFeature
+ * @classdesc The Package Cache Feature provides a package specific JSON cache store for saving snapshots of selector functions
+ */
 export default class PackageCacheFeature extends Feature {
   static shortcut = 'packageCache'
 
@@ -24,6 +28,15 @@ export default class PackageCacheFeature extends Feature {
     }
   }
 
+  /**
+   * Build a snapshot from certain selector functions
+   *
+   * @param {Object} [options={}] options
+   * @param {Array<String>} options.selectors an array of selector functions to use to build the snapshot
+   * @param {...*} args
+   * @returns {Object}
+   * @memberof PackageCacheFeature
+   */
   async snapshot(options = {}, ...args) {
     const snapshot = await this.buildSnapshot(options)
     const { write = true, name = this.runtime.currentPackage.name } = {

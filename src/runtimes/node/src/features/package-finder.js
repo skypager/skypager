@@ -45,12 +45,6 @@ export function getCachedModuleIds() {
   return Object.keys(require.cache || {})
 }
 
-/**
-  Attempt to resolve a module to a requireable path. Returns false instead
-  of throwing an error when the resolution fails.
-
-  @param {String} name the name of the module to resolve to a location
-*/
 export function attemptResolve(options = {}) {
   if (typeof options === 'string') {
     options = { name: options }
@@ -207,11 +201,10 @@ export function getSemver() {
 
 export async function findPackageLocations(options = {}) {
   const { runtime } = this
-  const { flatten } = runtime.lodash
 
   let { testPaths = this.currentModulePaths || [] } = options
 
-  const { additionalPaths = [], moduleFolderName = 'node_modules' } = options
+  const { moduleFolderName = 'node_modules' } = options
 
   if (moduleFolderName !== 'node_modules') {
     testPaths = testPaths.map(v => v.replace(/node_modules/, moduleFolderName))
@@ -262,6 +255,4 @@ export async function allExisting(paths = []) {
   } catch (error) {
     return []
   }
-
-  return []
 }

@@ -69,13 +69,30 @@ export default class GitFeature extends Feature {
     return this.runtime.fileIds
   }
 
+  /**
+   * Returns an array of directory ids from the directories map
+   *
+   * @memberof GitFeature
+   * @type {Array<String>}
+   */
   get directoryIds() {
     return this.runtime.directoryIds
   }
+
+  /**
+   * Returns true if there are any dirty files
+   * @memberof GitFeature
+   */
   get isDirty() {
     return this.modifiedFiles.length > 0
   }
 
+  /**
+   * Returns an array of files that have been modified
+   *
+   * @type {Array<String>}
+   * @memberof GitFeature
+   */
   get modifiedFiles() {
     return this.statusMap.keys()
   }
@@ -227,6 +244,7 @@ export default class GitFeature extends Feature {
    * @param {String} options.repo the url of the repo you want to clone
    * @param {String} options.folder the folder you want to clone into
    * @param {Object|string} destination the destination path
+   * @memberof GitFeature
    */
   clone(options = {}, dest) {
     if (typeof options === 'string') {

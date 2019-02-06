@@ -1,8 +1,21 @@
 import { Feature } from '@skypager/runtime/lib/feature'
 
+/**
+ * @class MainScriptFeature
+ * @classdesc Loads a configured main script for the skypager project, configured in the package.json skypager.main property.
+ * This script will be run in the context of the runtime's sandbox, and can export a module with attach and start functions that
+ * will be called asycnhronously.
+ *
+ */
 export default class MainScriptFeature extends Feature {
   shortcut = 'mainScript'
 
+  /**
+   * Resolves when the main script has been loaded and applied
+   *
+   * @returns {PromiseLike}
+   * @memberof MainScriptFeature
+   */
   whenReady() {
     const { runtime } = this
 
@@ -29,6 +42,12 @@ export default class MainScriptFeature extends Feature {
     })
   }
 
+  /**
+   * Returns whatever the main script exports, if anything
+   *
+   * @readonly
+   * @memberof MainScriptFeature
+   */
   get mainExports() {
     try {
       return this.toModule().exports
@@ -41,12 +60,24 @@ export default class MainScriptFeature extends Feature {
     return 'script'
   }
 
+  /**
+   * Returns the path to the main script
+   *
+   * @readonly
+   * @memberof MainScriptFeature
+   */
   get skypagerMainPath() {
     const { runtime } = this
     const { main = `skypager.js` } = runtime.argv
     return runtime.resolve(main)
   }
 
+  /**
+   * Returns true if a file exists at the main script path
+   *
+   * @readonly
+   * @memberof MainScriptFeature
+   */
   get mainScriptExists() {
     return this.runtime.fsx.existsSync(this.skypagerMainPath)
   }
