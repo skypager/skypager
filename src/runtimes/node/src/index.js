@@ -19,6 +19,13 @@ runtime.features.register('runtimes/node', () => NodeFeature)
 
 runtime.feature('runtimes/node').enable()
 
+try {
+    const gitInfo = runtime.git.meta
+    runtime.setState({ gitInfo  })
+} catch(error) {
+
+}
+
 /**
  * @typedef NodeRuntime
  * @property {GitFeature} git interact with git
