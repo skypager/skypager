@@ -2,72 +2,42 @@ const merge = require('webpack-merge')
 const nodeExternals = require('webpack-node-externals')
 const cwd = __dirname
 const path = require('path')
-const { DefinePlugin } = require('webpack')
-const { name, version } = require('./package.json')
+const SourceMapSupport = require('webpack-source-map-support')
 
+const orig = process.env.MINIFY
 process.env.MINIFY = true
-const baseProdConfig = require('@skypager/webpack/config/webpack.config.prod')
+const baseProductionConfig = require('@skypager/webpack/config/webpack.config.prod')
+process.env.MINIFY = orig || false
 
-const webConfig = merge.strategy({ plugins: 'replace', entry: 'replace', node: 'replace' })(
-  baseProdConfig,
+const minifiedWebConfig = merge.strategy({ node: 'replace', entry: 'replace' })(
+  baseProductionConfig,
   {
     name: 'web',
-    node: {
-      process: false,
-      global: false,
-      vm: false,
+    output: {
+      library: 'skypager',
+      libraryTarget: 'umd',
     },
-    resolve: {
-      alias: {
-        vm: 'vm-browserify',
-      },
+    entry: {
+      'skypager-runtimes-web.min': path.resolve(cwd, 'src', 'index.js'),
+    },
+  }
+)
+
+const webConfig = merge.strategy({ node: 'replace', entry: 'replace', plugins: 'replace' })(
+  baseProductionConfig,
+  {
+    name: 'web',
+    output: {
+      library: 'skypager',
+      libraryTarget: 'umd',
     },
     entry: {
       'skypager-runtimes-web': path.resolve(cwd, 'src', 'index.js'),
     },
-    plugins: baseProdConfig.plugins
-      .filter(p => !p.constructor || !p.constructor.name === 'UglifyJsPlugin')
-      .concat([
-        new DefinePlugin({
-          __PACKAGE__: JSON.stringify({ name, version }),
-        }),
-      ]),
+    plugins: baseProductionConfig.plugins.filter(
+      p => !p.constructor || !p.constructor.name === 'UglifyJsPlugin'
+    ),
   }
 )
-
-const minifiedWebConfig = merge.strategy({ entry: 'replace', node: 'replace' })(baseProdConfig, {
-  name: 'web',
-  node: false,
-  resolve: {
-    alias: {
-      vm: 'vm-browserify',
-    },
-  },
-  entry: {
-    'skypager-runtimes-web.min': path.resolve(cwd, 'src', 'index.js'),
-  },
-  plugins: [
-    new DefinePlugin({
-      __PACKAGE__: JSON.stringify({ name, version }),
-    }),
-  ],
-})
-
-const nodeConfig = merge.strategy({ plugins: 'replace' })(baseProdConfig, {
-  target: 'node',
-  name: 'node',
-  externals: [
-    nodeExternals({
-      modulesFromFile: true,
-    }),
-  ],
-  plugins: baseProdConfig.plugins
-    .filter(p => !p.constructor || (p.constructor && p.constructor.name !== 'UglifyJsPlugin'))
-    .concat([
-      new DefinePlugin({
-        __PACKAGE__: JSON.stringify({ name, version }),
-      }),
-    ]),
-})
 
 module.exports = process.env.ANALYZE ? webConfig : [webConfig, minifiedWebConfig]

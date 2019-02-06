@@ -1,4 +1,4 @@
-import runtime from '@skypager/web'
+import runtime from '@skypager/runtime'
 
 const { Feature } = runtime
 

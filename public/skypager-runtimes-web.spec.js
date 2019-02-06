@@ -2,7 +2,7 @@ mocha.setup('bdd')
 mocha.setup({ timeout: 30000 })
 chai.should() // eslint-disable-line
 
-const { skypager } = global
+const { skypager } = window
 
 describe('Skypager Runtime', function() {
   it('is available on global', function() {

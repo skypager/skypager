@@ -2,15 +2,7 @@ if (typeof global === 'undefined' && typeof window !== 'undefined') {
   window.global = window
 }
 
-if (typeof process === 'undefined') {
-  global.process = { env: {} }
-} else {
-  // global.process = process
-}
-
-const skypager = (global.skypager = global.runtime = require('@skypager/runtime').use(
-  require('@skypager/helpers-client')
-))
+const skypager = require('@skypager/runtime').use(require('@skypager/helpers-client'))
 
 skypager.features.register('asset-loaders', () => require('./features/asset-loaders'))
 skypager.features.register('babel', () => require('./features/babel'))
@@ -24,8 +16,4 @@ skypager.hide('runtimeModule', module.id, true)
 if (typeof __PACKAGE__ !== 'undefined') {
   // eslint-disable-next-line
   skypager.hide('runtimePackageInfo', __PACKAGE__, true)
-}
-
-if (!global.skypager) {
-  global.skypager = skypager
 }

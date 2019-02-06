@@ -1,4 +1,4 @@
-import runtime from '@skypager/web'
+import runtime from '@skypager/runtime'
 
 const { Feature } = runtime
 
@@ -9,7 +9,7 @@ const { Feature } = runtime
  *
 
  */
-export class BabelCompiler extends Feature {
+export default class BabelCompiler extends Feature {
   static shortcut = 'babel'
   shortcut = 'babel'
 
