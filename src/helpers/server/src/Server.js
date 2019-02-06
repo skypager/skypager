@@ -389,7 +389,7 @@ export class Server extends Helper {
   }
 
   get endpoints() {
-    return this.runtime.endpoints
+    return this.runtime && this.runtime.endpoints
   }
 
   static get express() {
@@ -399,7 +399,7 @@ export class Server extends Helper {
   static attach(host, options = {}) {
     const registration = Helper.attach(host, Server, {
       registry: Helper.createContextRegistry('servers', {
-        context: Helper.createMockContext(),
+        context: Helper.createMockContext({}),
       }),
       ...options,
     })
@@ -407,7 +407,7 @@ export class Server extends Helper {
     if (!host.has('endpoints')) {
       host.lazy('endpoints', () =>
         Helper.createContextRegistry('endpoints', {
-          context: Helper.createMockContext(),
+          context: Helper.createMockContext({}),
         })
       )
     }
@@ -419,6 +419,7 @@ export class Server extends Helper {
 export const registerHelper = () => Helper.registerHelper('server', () => Server)
 
 export default Server
+
 export const attach = Server.attach
 
 // TODO you should be able to use @skypager/helpers-server without webpack
