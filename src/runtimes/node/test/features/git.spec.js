@@ -1,8 +1,11 @@
 describe('The Git Adapter', function() {
   const runtime = require('../../src/index.js')
-  const { git } = runtime
 
+  let git
   before(async function() {
+    runtime.should.have.property('gitInfo')
+
+    git = runtime.git
     await git.walk()
   })
 
