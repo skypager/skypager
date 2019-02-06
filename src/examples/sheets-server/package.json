@@ -1,6 +1,6 @@
 {
   "name": "@skypager/sheets-server",
-  "version": "0.1.30",
+  "version": "0.2.1",
   "description": "a google sheets api server",
   "main": "lib/index.js",
   "publishConfig": {
@@ -19,12 +19,12 @@
   "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
   "license": "MIT",
   "dependencies": {
-    "@skypager/cli": "^0.1.30",
-    "@skypager/helpers-server": "^0.1.29",
-    "@skypager/helpers-sheet": "^0.1.26",
-    "@skypager/node": "^0.1.30",
-    "@skypager/web": "^0.1.29",
-    "@skypager/webpack": "^0.1.28",
+    "@skypager/cli": "^0.2.1",
+    "@skypager/helpers-server": "^0.2.1",
+    "@skypager/helpers-sheet": "^0.2.1",
+    "@skypager/node": "^0.2.1",
+    "@skypager/web": "^0.2.1",
+    "@skypager/webpack": "^0.2.1",
     "prop-types": "^15.6.2",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
