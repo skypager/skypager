@@ -18,7 +18,9 @@ export const hostMethods = ['getGitInfo']
  * sha, tag, etc.
  */
 export default class GitFeature extends Feature {
-  shotcut = 'git'
+  static shortcut = 'git'
+
+  shortcut = 'git'
 
   hostMethods = hostMethods
 

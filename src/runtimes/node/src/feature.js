@@ -147,11 +147,6 @@ export function enabledHook(options = {}) {
       // swallow the erro
     })
 
-  runtime.lazy('git', () => {
-    runtime.feature('git').enable()
-    return runtime.feature('git')
-  })
-
   runtime.lazy('packageCache', () => {
     runtime.feature('package-cache').enable()
     return runtime.packageCache
