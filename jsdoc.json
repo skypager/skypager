@@ -1,0 +1,12 @@
+{
+    "tags": {
+        "allowUnknownTags": true
+    },
+    "opts": {
+        "template": "node_modules/better-docs",
+        "tutorials": "docs/tutorials"
+    },
+    "plugins": [
+        "node_modules/better-docs/category"
+    ]
+}

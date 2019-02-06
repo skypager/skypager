@@ -12,13 +12,6 @@ const isFunction = o => typeof o === 'function'
  * and enable them automatically.
  */
 export class Feature extends Helper {
-  /**
-   * @private
-   *
-   * This is used to detect if a provider in the registry should be treated as a class
-   * to be instantiated.
-   */
-
   static isSkypagerHelper = true
 
   /**
@@ -90,28 +83,6 @@ export class Feature extends Helper {
     this.applyInterface(this.featureMixin, this.featureMixinOptions)
   }
 
-  /**
-   * Sets the initial state of the object.  This is called in the Helper constructor
-   *
-   * @private
-   */
-  setInitialState(initialState = {}) {
-    const { defaultsDeep } = this.lodash
-
-    if (this.state && this.tryGet('initialState')) {
-      Promise.resolve(this.attemptMethodAsync('initialState'))
-        .then(i => {
-          if (typeof i === 'object') {
-            this.state.merge(defaultsDeep({}, i, initialState))
-          }
-        })
-        .catch(error => {
-          console.error('Error setting initial state', this, error)
-          this.initialStateError = error
-        })
-    }
-  }
-
   get featureMixinOptions() {
     const { defaults } = this.lodash
     const opts = this.tryResult('featureMixinOptions') || this.tryResult('mixinOptions') || {}
@@ -142,51 +113,61 @@ export class Feature extends Helper {
    * @param {object|function}
    *
    */
-  enable(cfg) {
+  enable(options = {}, callback) {
     const { runtime } = this
+    const { identity, isFunction, defaultsDeep } = this.lodash
+
+    if (isFunction(options)) {
+      callback = options
+      options = {}
+    }
+
+    if (!isFunction(callback)) {
+      callback = identity
+    }
 
     if (
       runtime.isFeatureEnabled(this.name) &&
       runtime.get(`enabledFeatures.${this.name}.cacheKey`) === this.cacheKey
     ) {
       // this.runtime.debug(`Attempting to enable ${this.name} after it has already been enabled.`)
+      callback(null, this)
       return this
     }
 
-    if (typeof cfg === 'object') {
-      const { options = {} } = this
-      const { defaultsDeep: defaults } = this.runtime.lodash
-      this.set('options', defaults({}, cfg, options))
-    } else if (isFunction(cfg)) {
-      console.warn('function configuration is not supported anymore')
-    }
+    /**
+     * @property {Object} featureSettings contains the settings or configuration for this feature based on how it was initialized and created
+     */
+    try {
+      this.hide('featureSettings', defaultsDeep({}, options, this.options), {
+        configurable: true,
+      })
+    } catch (error) {}
 
     try {
-      if (this.options.debugThisShit) {
-        console.log(typeof this.hostMixin.runtimeExtendedMethod)
-      }
-
       this.host.applyInterface(this.hostMixin, this.hostMixinOptions)
     } catch (error) {
       console.error('error applying host mixin', error)
+      this.hostMixinError = error
     }
 
     const hook = () =>
       // this handles the class style
       this.featureWasEnabled
-        ? this.featureWasEnabled(cfg, this.options)
+        ? Promise.resolve(this.featureWasEnabled(options))
         : // this handles the module style
-          this.attemptMethodAsync('featureWasEnabled', cfg, this.options)
+          this.attemptMethodAsync('featureWasEnabled', options)
 
     return hook()
       .then(() => {
         this.runtime.featureStatus.set(this.name, {
           cacheKey: this.cacheKey,
           status: 'enabled',
-          cfg,
+          cfg: options,
           options: this.options,
         })
 
+        callback(null, this)
         return this
       })
       .catch(error => {
@@ -194,10 +175,12 @@ export class Feature extends Helper {
           status: 'failed',
           error,
           cacheKey: this.cacheKey,
-          cfg,
+          cfg: options,
           options: this.options,
         })
         this.runtime.error(`Error while enabling feature`, this, error.message)
+
+        callback(error)
 
         throw error
       })

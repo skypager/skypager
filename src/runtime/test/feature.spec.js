@@ -45,7 +45,6 @@ describe('The Feature Helper', function() {
   it('can extend the runtime', async function() {
     const runtimeExtension = runtime.feature('runtime-extension', {
       hostMethods: ['runtimeExtendedMethod'],
-      debugThisShit: true,
       runtimeExtendedMethod() {
         return this.uuid
       },
@@ -53,5 +52,39 @@ describe('The Feature Helper', function() {
 
     runtimeExtension.hostMethods.should.include('runtimeExtendedMethod')
     runtimeExtension.hostMixin.should.have.property('runtimeExtendedMethod').that.is.a('function')
+  })
+
+  it('enables with a promise', async function() {
+    const asyncFeature = runtime.feature('async-feature', {
+      featureWasEnabled() {
+        return new Promise(resolve => setTimeout(resolve, 400)).then(
+          () => (asyncFeature.finally = true)
+        )
+      },
+    })
+
+    const p = runtime.feature('profiler')
+
+    p.enable()
+
+    p.start('enableAsync')
+    await asyncFeature.enable()
+    p.end('enableAsync')
+
+    asyncFeature.finally.should.equal(true)
+    p.report.enableAsync.duration.should.be.greaterThan(400)
+  })
+
+  it('enables with a callback', function(done) {
+    const cbStyle = runtime.feature('callback-feature', {
+      featureWasEnabled() {
+        this.done = true
+      },
+    })
+
+    cbStyle.enable(() => {
+      cbStyle.done.should.equal(true)
+      done()
+    })
   })
 })

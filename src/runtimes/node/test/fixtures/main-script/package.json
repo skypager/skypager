@@ -1,0 +1,10 @@
+{
+  "name": "skypager-test-fixture",
+  "version": "0.0.1",
+  "scripts": {
+    "console": "skypager console"
+  },
+  "skypager": {
+    "main": "skypager.js"
+  }
+}

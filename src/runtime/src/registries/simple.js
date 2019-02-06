@@ -128,9 +128,11 @@ export class SimpleRegistry {
 
   /**
    * Register a component with the registry
-   * @param  {[type]} componentId [description]
-   * @param  {[type]} component   [description]
-   * @return {[type]}             [description]
+   *
+   * @param {String} componentId
+   * @param {Function} componentFn
+   * @param {Object} options
+   * @memberof SimpleRegistry
    */
   register(...args) {
     return this._register(...args)
@@ -280,7 +282,7 @@ export class SimpleRegistry {
    *
    * @param  {String} componentId - the id of the component that was passed to register
    * @param  {Function} component - a function that will return the component that was registered
-   * @return {Array<String><Function>} - the componentId and function that will actually be registered.
+   * @return {Array} - the componentId and function that will actually be registered.
    */
   componentWillRegister(componentId, component) {
     return [componentId, component]

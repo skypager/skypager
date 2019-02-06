@@ -6,8 +6,11 @@
   "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
   "license": "MIT",
   "scripts": {
-    "build": "cross-env NODE_ENV=production webpack --config webpack.config.js",
-    "prepare": "yarn build"
+    "build": "yarn build:lib && yarn build:web",
+    "docs:api": "skypager generate-api-docs",
+    "build:lib": "cross-env NODE_ENV=production babel --comments --source-maps --config-file ./babelrc -d lib src",
+    "build:web": "cross-env NODE_ENV=production webpack --config webpack.config.js",
+    "prepare": "yarn build && yarn docs:api"
   },
   "dependencies": {
     "@skypager/runtime": "^0.1.28"

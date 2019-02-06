@@ -12,8 +12,10 @@ const pollers = new WeakMap()
 export const hostMethods = ['getGitInfo']
 
 /**
- * The Git Feature is an observable wrapper around the git repository
- * this project lives in.
+ * @class GitFeature
+ * @classdesc The Git Feature provides an interface for real time status about the git tree,
+ * including all of the files and their current status, as well as information about the current branch,
+ * sha, tag, etc.
  */
 export default class GitFeature extends Feature {
   shotcut = 'git'
@@ -22,36 +24,75 @@ export default class GitFeature extends Feature {
 
   static hostMethods = ['getGitInfo']
 
+  /**
+   * @memberof Runtime
+   * @property gitInfo
+   * @type {{ branch: string, sha: string, abbreviatedSha: string, tag: string, root: string }}
+   */
   static getGitInfo() {
     return this.feature('git').meta
   }
 
+  /**
+   * Returns a map of the files and their git status
+   * @memberof GitFeature
+   * @type {Map}
+   */
   get statusMap() {
     return this.runtime.fileStatusMap
   }
 
   /**
-   * @type {}
+   * Returns a map of files
+   * @memberof GitFeature
+   * @type {Map}
    */
   get files() {
     return this.runtime.files
   }
 
+  /**
+   * Returns a map of directories
+   * @memberof GitFeature
+   * @type {Map}
+   */
   get directories() {
     return this.runtime.directories
   }
 
+  /**
+   * Returns an array of file ids from the files map
+   * @memberof GitFeature
+   * @type {Array<String>}
+   */
   get fileIds() {
     return this.runtime.fileIds
   }
 
+  /**
+   * Returns an array of directory ids from the directories map
+   *
+   * @memberof GitFeature
+   * @type {Array<String>}
+   */
   get directoryIds() {
     return this.runtime.directoryIds
   }
+
+  /**
+   * Returns true if there are any dirty files
+   * @memberof GitFeature
+   */
   get isDirty() {
     return this.modifiedFiles.length > 0
   }
 
+  /**
+   * Returns an array of files that have been modified
+   *
+   * @type {Array<String>}
+   * @memberof GitFeature
+   */
   get modifiedFiles() {
     return this.statusMap.keys()
   }
@@ -196,6 +237,15 @@ export default class GitFeature extends Feature {
     return this
   }
 
+  /**
+   * Clone a repository.
+   *
+   * @param {Object|String} options or repo path if a string
+   * @param {String} options.repo the url of the repo you want to clone
+   * @param {String} options.folder the folder you want to clone into
+   * @param {Object|string} destination the destination path
+   * @memberof GitFeature
+   */
   clone(options = {}, dest) {
     if (typeof options === 'string') {
       options = { repo: options }
@@ -262,6 +312,13 @@ export default class GitFeature extends Feature {
     return this.runtime.relative(p.path ? p.path : p)
   }
 
+  /**
+   * Begin the stateful process of tracking the files with git
+   *
+   * @memberof GitFeature
+   * @param {Object} options options which will be passed on to walk, and update status
+   * @param {Boolean} [options.clear=false] clear the current state
+   */
   async run(options = {}) {
     if (options.clear) {
       this.clearState(options)
@@ -273,6 +330,12 @@ export default class GitFeature extends Feature {
     return this
   }
 
+  /**
+   * Dump the files directories and status objects to a JSON structure
+   *
+   * @return {{ files: object, directories: object, statusMap: objects, branch: string, tag: string, sha: string, root: string, abbreviatedSha: string }}
+   * @memberof GitFeature
+   */
   toJSON() {
     return this.runtime.convertToJS({
       files: this.files.toJS(),
@@ -282,11 +345,26 @@ export default class GitFeature extends Feature {
     })
   }
 
+  /**
+   * Returns true if a file exists in the tree
+   *
+   * @param {String} path
+   * @returns {Boolean}
+   * @memberof GitFeature
+   */
   exists(path) {
     const fileId = this.runtime.relative(path)
     return this.files.has(fileId) || this.directories.has(fileId)
   }
 
+  /**
+   * Creates a walker that will walk the files tree built by ls-files
+   * and receive file and directory objects it finds, populating these
+   * maps with information about the file stats, parsed path info, etc
+   *
+   * @returns {PromiseLike<Skywalker>}
+   * @memberof GitFeature
+   */
   async walker(options = {}) {
     const { exclude = [], include = [] } = options
 
@@ -328,7 +406,12 @@ export default class GitFeature extends Feature {
       })
   }
 
-  async updateStatus(options = {}) {
+  /**
+   * Updates the observable files map with status information from the git status map
+   *
+   * @memberof GitFeature
+   */
+  async updateStatus() {
     const fileStatus = await this.filesStatus({ object: true })
 
     this.runtime.lodash.mapValues(fileStatus, (status, fileId) => {
@@ -338,6 +421,13 @@ export default class GitFeature extends Feature {
     return this
   }
 
+  /**
+   * Uses git ls-files to learn about all of the files in the tree,
+   * populates the files and directories map with any information about the files it finds.
+   *
+   * @param {Object} options options for the walker behavior, same as lsFiles options
+   * @memberof GitFeature
+   */
   async walk(options = {}) {
     const { runtime } = this
     const { dirname, parse } = runtime.pathUtils
@@ -429,6 +519,12 @@ export default class GitFeature extends Feature {
     return this
   }
 
+  /**
+   * Returns the git status for any files that have been changed
+   *
+   * @returns {Object<string,Array<string>>}
+   * @memberof GitFeature
+   */
   async filesStatus(options = {}) {
     return this.runtime
       .select('process/output', {
@@ -451,6 +547,20 @@ export default class GitFeature extends Feature {
       .then(p => (options.object ? this.runtime.lodash.fromPairs(p) : p))
   }
 
+  /**
+   * Run git ls-files to get a list of files in the tree
+   *
+   * @param {Object} options options for the ls-files command
+   * @param {String} [options.cwd] the current working path to run the command in
+   * @param {Boolean} [options.fullName=false]
+   * @param {Boolean} [options.status=false] include the status in the output
+   * @param {Boolean} [options.others=true] include other files
+   * @param {Boolean} [options.cached=true] include cached files
+   * @param {Number} [options.maxBuffer=1024*1024] the maxBuffer, for large git repos this needs to be bigger.  this comes from process.env.SKYPAGER_GIT_MAX_OUTPUT_BUFFER
+   * @param {Boolean} [options.skypagerignore=false] include patterns found in the .skypagerignore file if it exists
+   * @param {Array<String>} [options.exclude=[]] patterns to exclude
+   * @memberof GitFeature
+   */
   async lsFiles(options = {}) {
     if (typeof options === 'string') {
       options = { pattern: options }
@@ -504,6 +614,11 @@ export default class GitFeature extends Feature {
       })
   }
 
+  /**
+   * Find the nearest git repo by walking up the tree from cwd
+   * @memberof GitFeature
+   * @returns {String}
+   */
   findRepo() {
     const { runtime } = this
     return runtime.fsx.findUpSync('.git')

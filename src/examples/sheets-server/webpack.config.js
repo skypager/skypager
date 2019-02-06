@@ -57,6 +57,14 @@ const webConfig = merge.strategy({ entry: 'replace' })(production, {
   output: {
     path: path.resolve(__dirname, 'build'),
   },
+  externals: [
+    {
+      '@skypager/web': 'global skypager',
+      '@skypager/runtime': 'global skypager',
+      lodash: 'global _',
+      'semantic-ui-react': 'global semanticUIReact',
+    },
+  ],
 })
 
 module.exports = [webConfig, nodeConfig]

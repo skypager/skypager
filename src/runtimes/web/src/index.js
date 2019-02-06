@@ -5,14 +5,16 @@ if (typeof global === 'undefined' && typeof window !== 'undefined') {
 if (typeof process === 'undefined') {
   global.process = { env: {} }
 } else {
-  global.process = process
+  // global.process = process
 }
 
 const skypager = (global.skypager = global.runtime = require('@skypager/runtime').use(
   require('@skypager/helpers-client')
 ))
 
-skypager.features.add(require.context('./features', true, /\.js$/))
+skypager.features.register('asset-loaders', () => require('./features/asset-loaders'))
+skypager.features.register('babel', () => require('./features/babel'))
+skypager.features.register('window-messaging', () => require('./features/window-messaging'))
 
 module.exports = skypager.use('asset-loaders')
 

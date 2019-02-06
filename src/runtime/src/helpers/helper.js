@@ -14,7 +14,6 @@ import { camelCase, snakeCase, singularize, pluralize } from '../utils/string'
 import ContextRegistry from '../registries/context'
 import { attach as attachEmitter } from '../utils/emitter'
 
-const utils = require('./util')
 const {
   flatten,
   castArray,
@@ -401,6 +400,28 @@ export class Helper {
     return this
   }
 
+  /**
+   * Sets the initial state of the object.  This is called in the Helper constructor
+   *
+   * @private
+   */
+  setInitialState(initialState = this.initialState || {}) {
+    const { defaultsDeep } = this.lodash
+
+    if (this.state && this.tryGet('initialState')) {
+      return Promise.resolve(this.attemptMethodAsync('initialState'))
+        .then(i => {
+          if (typeof i === 'object') {
+            this.state.merge(defaultsDeep({}, i, initialState))
+          }
+        })
+        .catch(error => {
+          console.error('Error setting initial state', this, error)
+          this.initialStateError = error
+        })
+    }
+  }
+
   fireHook(hookName, ...args) {
     this.helperEvents.emit(`${this.registryName}:${hookName}`, this, ...args)
     this.emit(hookName, ...args)
@@ -410,11 +431,17 @@ export class Helper {
 
   /**
    * Access the first value we find in our options hash in our provider hash
+   *
+   * @param {String} objectPath the dot.path to the property
+   * @param {*} defaultValue the default value
+   * @param {Array<String>} sources property paths to search
+   * @returns {*}
+   * @memberof Helper
    */
   tryGet(
     property,
     defaultValue,
-    sources = ['options', 'provider', 'provider.default', 'provider.protoype']
+    sources = ['options', 'provider', 'provider.default.prototype', 'provider.default']
   ) {
     return (
       this.at(...sources.map(s => `${s}.${property}`)).find(v => !isUndefined(v)) || defaultValue
@@ -426,6 +453,13 @@ export class Helper {
    *
    * If the method is a function, it will be called in the scope of the helper,
    * with the helpers options and context
+   *
+   * @param {String} objectPath the dot.path to the property
+   * @param {*} defaultValue the default value
+   * @param {Object} options options object which will be passed to the property if it is a function
+   * @param {Object} context context object which will be passed to the property if it is a function
+   * @returns {*}
+   * @memberof Helper
    */
   tryResult(property, defaultValue, options = {}, context = {}) {
     const val = this.tryGet(property)
@@ -533,12 +567,12 @@ export class Helper {
   }
 
   attemptMethodAsync(name, ...args) {
-    const result = this.attemptMethod.call(this, name, ...args)
+    const result = this.attemptMethod(name, ...args)
     return Promise.resolve(result || null)
   }
 
   callMethod(methodName, ...args) {
-    const handler = this.tryGet(methodName)
+    const handler = this.tryGet(methodName, this[methodName])
 
     if (typeof handler !== 'function') {
       throw new Error(`Could not find a property at ${methodName}`)
@@ -611,14 +645,6 @@ export class Helper {
     }
   }
 
-  static createHost(...args) {
-    const host = utils.createHost(...args)
-
-    Helper.attachAll(host)
-
-    return host
-  }
-
   static createMockContext = createMockContext
 }
 
@@ -645,7 +671,6 @@ export function createMockContext(object = {}) {
     },
   })
 }
-export const createHost = Helper.createHost
 export const registry = Helper.registry
 export const registerHelper = Helper.registerHelper
 export const createContextRegistry = (name, ...args) => new ContextRegistry(name, ...args)
@@ -788,7 +813,8 @@ export function attach(host, helperClass, options = {}) {
       provider.isObservable ||
       provider.observables ||
       opts.observables ||
-      helperClass.observables
+      helperClass.observables ||
+      (helperClass.prototype && helperClass.prototype.observables)
     ) {
       host.fireHook('didCreateObservableHelper', helperInstance, helperClass)
     }

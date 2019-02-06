@@ -130,8 +130,9 @@ export function createModule(code, options = {}, sandbox) {
   const wrapped = `(function (exports, require, module, __filename, __dirname) {\n\n${code}\n\n});`
   const script = this.createScript(wrapped)
   const context = this.createContext(sandbox)
+  const hash = this.hashObject({ code })
 
-  const filename = options.filename || this.resolve(this.hashObject({ code }) + '.js')
+  const filename = options.filename || (this.resolve ? this.resolve(`${hash}.js`) : `${hash}.js`)
   const id = options.id || filename
   const dirname = options.dirname || this.cwd || '/'
 

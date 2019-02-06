@@ -11,7 +11,7 @@ async function main() {
   randomBanner('Skypager')
   print(`Starting MDX Site`)
 
-  runtime.servers.register('app', () => require('../src/server'))
+  runtime.servers.register('app', () => require(runtime.resolve('src', 'servers', 'app.js')))
 
   const server = runtime.server('app', {
     port: runtime.argv.port || process.env.PORT || 5000,

@@ -55,5 +55,5 @@ module.exports = function(resolve, server) {
     }))
   })
 
-  console.log('hi')
+  return true
 }

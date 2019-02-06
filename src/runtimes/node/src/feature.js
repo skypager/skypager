@@ -1,7 +1,6 @@
 import runtime from '@skypager/runtime'
 import * as features from './features'
 
-/** @namespace */
 runtime.use(features)
 
 export const hostMethods = ['parseArgv']
@@ -153,10 +152,6 @@ export function enabledHook(options = {}) {
     return runtime.feature('git')
   })
 
-  /**
-   * @instance
-   * @name packageCache
-   */
   runtime.lazy('packageCache', () => {
     runtime.feature('package-cache').enable()
     return runtime.packageCache
@@ -197,6 +192,10 @@ export function enabledHook(options = {}) {
   runtime.hideGetter('attachedHelpers', () => attached)
 
   const lazyAttach = (baseName, fn) => {
+    runtime.setState(({ lazyAttached = [] }) => ({
+      lazyAttached: lazyAttached.concat([baseName]),
+    }))
+
     runtime.invoke('profiler.profileStart', `lazyAttached_${baseName}`)
     runtime.lazy(baseName, () => {
       if (attached[baseName]) {
