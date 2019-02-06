@@ -8,8 +8,8 @@ import lodash from 'lodash'
 import * as propUtils from './utils/properties'
 import { attachEmitter } from './utils/emitter'
 import mware from './utils/mware'
-import Helper from './helpers/index'
-import Feature from './helpers/feature'
+import { Helper } from './helpers/helper'
+import { Feature } from './helpers/feature'
 import Cache from './cache'
 import WeakCache from './weak-cache'
 import * as stringUtils from './utils/string'
@@ -82,12 +82,12 @@ const enableStrictMode = get(
 )
 
 /**
- * @typedef {Object.<string, function>} Mixin
+ * @typedef {Object<string, function>} Mixin
  */
 
 /**
  *
- * @typedef {Object.<string>} MixinOptions
+ * @typedef {Object<string>} MixinOptions
  * @prop {Array} partial - an array of objects to be passed as arguments to the function
  * @prop {Boolean} right - whether to append the arguments
  * @prop {Boolean} insertOptions - whether to pass an empty object as the first arg automatically
@@ -138,16 +138,19 @@ export class Runtime {
 
     /**
      * @property {Logger} logger
+     * @memberof Runtime
      */
     this.lazy('logger', () => console, true)
 
     /**
      * @property {Runtime} parent
+     * @memberof Runtime
      */
     this.hideGetter('parent', () => context.parent || singleton)
 
     /**
      * @property {String} cwd
+     * @memberof Runtime
      */
     this.hide(
       'cwd',
@@ -254,6 +257,8 @@ export class Runtime {
     if (typeof middlewareFn === 'function') {
       this.use(middlewareFn.bind(this), INITIALIZING)
     }
+
+    Feature.attach(this)
 
     this.features.register('profiler', () => ({ default: ProfilerFeature }))
     this.features.register('vm', () => VmFeature)
@@ -1608,11 +1613,22 @@ export class Runtime {
    *
    * @param {*} properties - an array of strings representing object paths
    * @returns {*}
+   * @memberof Runtime
    */
   slice(...properties) {
     return toJS(zipObjectDeep(properties, this.at(properties)))
   }
 
+  /**
+   * Fetch a object from runtime.options or runtime.context
+   *
+   * If the method is a function, it will be called in the scope of the helper,
+   * with the helpers options and context
+   *
+   * @param {String} objectPath the dot.path to the property
+   * @param {*} defaultValue the default value
+   * @memberof Runtime
+   */
   tryGet(property, defaultValue) {
     return (
       this.at(`options.${property}`, `context.${property}`).filter(
@@ -1620,7 +1636,19 @@ export class Runtime {
       )[0] || defaultValue
     )
   }
-
+  /**
+   * Fetch a object from runtime.options or runtime.context
+   *
+   * If the method is a function, it will be called in the scope of the helper,
+   * with the helpers options and context
+   *
+   * @param {String} objectPath the dot.path to the property
+   * @param {*} defaultValue the default value
+   * @param {Object} options options object which will be passed to the property if it is a function
+   * @param {Object} context context object which will be passed to the property if it is a function
+   * @returns {*}
+   * @memberof Helper
+   */
   tryResult(property, defaultValue, options = {}, context = {}) {
     const val = this.tryGet(property)
 

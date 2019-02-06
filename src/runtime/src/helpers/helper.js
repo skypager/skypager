@@ -14,7 +14,6 @@ import { camelCase, snakeCase, singularize, pluralize } from '../utils/string'
 import ContextRegistry from '../registries/context'
 import { attach as attachEmitter } from '../utils/emitter'
 
-const utils = require('./util')
 const {
   flatten,
   castArray,
@@ -432,6 +431,12 @@ export class Helper {
 
   /**
    * Access the first value we find in our options hash in our provider hash
+   *
+   * @param {String} objectPath the dot.path to the property
+   * @param {*} defaultValue the default value
+   * @param {Array<String>} sources property paths to search
+   * @returns {*}
+   * @memberof Helper
    */
   tryGet(
     property,
@@ -448,6 +453,13 @@ export class Helper {
    *
    * If the method is a function, it will be called in the scope of the helper,
    * with the helpers options and context
+   *
+   * @param {String} objectPath the dot.path to the property
+   * @param {*} defaultValue the default value
+   * @param {Object} options options object which will be passed to the property if it is a function
+   * @param {Object} context context object which will be passed to the property if it is a function
+   * @returns {*}
+   * @memberof Helper
    */
   tryResult(property, defaultValue, options = {}, context = {}) {
     const val = this.tryGet(property)
@@ -633,14 +645,6 @@ export class Helper {
     }
   }
 
-  static createHost(...args) {
-    const host = utils.createHost(...args)
-
-    Helper.attachAll(host)
-
-    return host
-  }
-
   static createMockContext = createMockContext
 }
 
@@ -667,7 +671,6 @@ export function createMockContext(object = {}) {
     },
   })
 }
-export const createHost = Helper.createHost
 export const registry = Helper.registry
 export const registerHelper = Helper.registerHelper
 export const createContextRegistry = (name, ...args) => new ContextRegistry(name, ...args)
