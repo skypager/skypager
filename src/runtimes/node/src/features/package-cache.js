@@ -1,10 +1,12 @@
 import { Feature } from '@skypager/runtime/lib/feature'
 
 export default class PackageCacheFeature extends Feature {
-  createGetter = 'packageCache'
+  static shortcut = 'packageCache'
 
   featureWasEnabled(o) {
-    this.initializeFolder(o).then(() => {})
+    this.initializeFolder(o)
+      .then(() => {})
+      .catch(error => {})
   }
 
   observables(options = {}, context = {}) {
@@ -56,19 +58,28 @@ export default class PackageCacheFeature extends Feature {
       : runtime.resolve(baseFolder, '.cache', name, 'snapshots')
   }
 
-  async initializeFolder(options = {}, context = {}) {
-    const { runtime = this.runtime } = context
-    const { mkdirpAsync: mkdirp } = runtime.fsx
+  get cachePath() {
+    return this.getCachePath()
+  }
+
+  async initializeFolder() {
+    const { mkdirpAsync: mkdirp } = this.runtime.fsx
     await mkdirp(this.cachePath)
+    return this.cachePath
   }
 
   async exportSnapshot(options = {}) {
     if (typeof options === 'string') {
       options = { fileName: options }
     }
-    const { snapshot } = options
-    const fileName = (options.fileName || this.runtime.currentPackage.name).replace(/\.json$/, '')
-    const snapshotPath = this.runtime.resolve(this.cachePath, `${fileName}.json`)
+
+    const { snapshot, fileName = this.currentPackage.name } = options
+    const snapshotPath = this.runtime.resolve(
+      this.cachePath,
+      `${fileName.replace('.json', '')}.json`
+    )
+    await this.runtime.fsx.mkdirpAsync(this.runtime.pathUtils.dirname(snapshotPath))
+
     await this.runtime.fsx.writeFileAsync(snapshotPath, JSON.stringify(snapshot, null))
 
     return snapshot
@@ -78,8 +89,11 @@ export default class PackageCacheFeature extends Feature {
     if (typeof options === 'string') {
       options = { fileName: options }
     }
-    const fileName = (options.fileName || this.runtime.currentPackage.name).replace(/\.json$/, '')
-    const snapshotPath = this.runtime.resolve(this.cachePath, `${fileName}.json`)
+    const { fileName = this.currentPackage.name } = options
+    const snapshotPath = this.runtime.resolve(
+      this.cachePath,
+      `${fileName.replace('.json', '')}.json`
+    )
     const snapshot = await this.runtime.fsx.readJsonAsync(snapshotPath)
 
     this.updateSnapshot(fileName.replace('.json', ''), snapshot)
@@ -91,8 +105,12 @@ export default class PackageCacheFeature extends Feature {
     if (typeof options === 'string') {
       options = { fileName: options }
     }
-    const fileName = (options.fileName || this.runtime.currentPackage.name).replace(/\.json$/, '')
-    const snapshotPath = this.runtime.resolve(this.cachePath, `${fileName}.json`)
+
+    const { fileName = this.currentPackage.name } = options
+    const snapshotPath = this.runtime.resolve(
+      this.cachePath,
+      `${fileName.replace('.json', '')}.json`
+    )
     return this.runtime.fsx.snapshotAsync(snapshotPath)
   }
 

@@ -197,6 +197,10 @@ export function enabledHook(options = {}) {
   runtime.hideGetter('attachedHelpers', () => attached)
 
   const lazyAttach = (baseName, fn) => {
+    runtime.setState(({ lazyAttached = [] }) => ({
+      lazyAttached: lazyAttached.concat([baseName]),
+    }))
+
     runtime.invoke('profiler.profileStart', `lazyAttached_${baseName}`)
     runtime.lazy(baseName, () => {
       if (attached[baseName]) {
