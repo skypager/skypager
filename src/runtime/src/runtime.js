@@ -1373,14 +1373,16 @@ export class Runtime {
       .invoke('featureStatus.toJSON')
       .pickBy({ status: 'enabled' })
       .mapValues(
-        ({ cacheKey } = {}, featureId) => this.cache.get(cacheKey) || this.feature(featureId)
+        ({ cacheKey } = {}) => this.cache.get(cacheKey)
       )
+      .omitBy((v) => !v)
       .value()
   }
 
   get enabledFeatureIds() {
     return this.chain
-      .get('enabledFeatures')
+      .invoke('featureStatus.toJSON')
+      .pickBy({ status: 'enabled' })
       .keys()
       .value()
   }
@@ -1395,7 +1397,17 @@ export class Runtime {
   }
 
   isFeatureEnabled(name) {
-    return this.lodash.has(this.enabledFeatures, name)
+    const item = this.featureStatus.get(name)
+
+    if (!item)  {
+      return false
+    }
+
+    if (item && item.status === 'enabled') {
+      return true
+    }
+
+    return false
   }
 
   enableFeatures(options = {}) {
