@@ -1,6 +1,6 @@
 {
   "name": "@skypager/web",
-  "version": "0.2.1",
+  "version": "0.2.3",
   "main": "lib/index.js",
   "browser": "lib/skypager-runtimes-web.min.js",
   "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
@@ -13,7 +13,7 @@
     "prepare": "yarn build && yarn docs:api"
   },
   "dependencies": {
-    "@skypager/runtime": "^0.2.1"
+    "@skypager/runtime": "^0.2.3"
   },
   "repository": {
     "type": "github",
