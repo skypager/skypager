@@ -1,0 +1,19 @@
+{
+  "name": "@skypager/features-browser-vm",
+  "version": "0.2.3",
+  "description": "a vm for running scripts in a jsdom context",
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "rimraf lib && babel --comments --source-maps -d lib src",
+    "docs:api": "skypager generate-api-docs",
+    "watch": "babel --watch --comments --source-maps -d lib src",
+    "prepare": "yarn build && yarn docs:api",
+    "test": "mocha --require @babel/register --file test/test.js --timeout 10000 test/**/*.spec.js",
+    "test:watch": "skypager test --webpack-config webpack.config.test.js --watch"
+  },
+  "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
+  "license": "MIT",
+  "dependencies": {
+    "jsdom": "^13.2.0"
+  }
+}
