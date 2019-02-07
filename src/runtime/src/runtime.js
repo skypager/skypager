@@ -227,7 +227,7 @@ export class Runtime {
      * @mixes Stateful
      */
     extendObservable(this, {
-      state: map(toPairs(this.initialState)),
+      state: observable.shallowMap(toPairs(this.initialState)),
       currentState: computed(this.getCurrentState.bind(this)),
       stateHash: computed(this.getStateHash.bind(this)),
       cacheKey: computed(this.getCacheKey.bind(this)),
@@ -1929,7 +1929,7 @@ export function makeStateful(obj = {}) {
   obj.stateVersion = 0
 
   extendObservable(obj, {
-    state: map(toPairs(obj.initialState || {})),
+    state: observable.shallowMap(toPairs(obj.initialState || {})),
     currentState: computed(() => obj.state.toJSON()),
   })
 
