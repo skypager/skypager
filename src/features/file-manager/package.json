@@ -26,5 +26,6 @@
     "md5-file": "3.1.1",
     "memory-fs": "^0.4.1",
     "skywalker": "^0.3.2"
-  }
+  },
+  "gitHead": "0c25af89efdec6b667504285b5cd14c02f702bf8"
 }

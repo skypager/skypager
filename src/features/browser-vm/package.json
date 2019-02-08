@@ -18,5 +18,6 @@
   "license": "MIT",
   "dependencies": {
     "jsdom": "^13.2.0"
-  }
+  },
+  "gitHead": "0c25af89efdec6b667504285b5cd14c02f702bf8"
 }

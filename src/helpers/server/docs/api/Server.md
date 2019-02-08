@@ -9,16 +9,18 @@ agnostic, and can rely on dependency injection to use express, hapi, feathers.js
 **Kind**: global class  
 
 * [Server](#Server)
-    * [.isCacheable](#Server+isCacheable)
-    * [.isServerHelper](#Server+isServerHelper)
-    * [.registryProp](#Server+registryProp)
-    * [.lookupProp](#Server+lookupProp)
-    * [.strictMode](#Server+strictMode)
-    * [.isObservable](#Server+isObservable)
-    * [.observables](#Server+observables)
-    * [.providerTypes](#Server+providerTypes)
-    * [.status](#Server+status)
-    * [.start()](#Server+start)
+    * _instance_
+        * [.isCacheable](#Server+isCacheable)
+        * [.isServerHelper](#Server+isServerHelper)
+        * [.registryProp](#Server+registryProp)
+        * [.lookupProp](#Server+lookupProp)
+        * [.strictMode](#Server+strictMode)
+        * [.isObservable](#Server+isObservable)
+        * [.providerTypes](#Server+providerTypes)
+        * [.status](#Server+status)
+        * [.start()](#Server+start)
+    * _static_
+        * [.observables()](#Server.observables)
 
 <a name="Server+isCacheable"></a>
 
@@ -75,13 +77,6 @@ By setting the Server class to be observable, we opt-in to various transformatio
 get fired in the global event bus system.
 
 **Kind**: instance property of [<code>Server</code>](#Server)  
-<a name="Server+observables"></a>
-
-### server.observables
-Since our Helper class is set to be observable, each instance of the server helper that is created will
-be extended with the following observable property interface.
-
-**Kind**: instance property of [<code>Server</code>](#Server)  
 <a name="Server+providerTypes"></a>
 
 ### server.providerTypes
@@ -119,4 +114,11 @@ Returns any recorded stats tracked by this server
 
 ### server.start()
 **Kind**: instance method of [<code>Server</code>](#Server)  
-**Access**: public
+**Access**: public  
+<a name="Server.observables"></a>
+
+### Server.observables()
+Since our Helper class is set to be observable, each instance of the server helper that is created will
+be extended with the following observable property interface.
+
+**Kind**: static method of [<code>Server</code>](#Server)

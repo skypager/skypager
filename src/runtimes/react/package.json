@@ -19,7 +19,8 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.3.1",
-    "@skypager/runtime": "^0.1.28",
+    "@skypager/runtime": "^0.2.3",
+    "@skypager/features-browser-vm",
     "prop-types": "^15.6.2",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
@@ -29,5 +30,6 @@
     "type": "github",
     "url": "https://github.com/skypager/skypager"
   },
-  "homepage": "https://skypager.io"
+  "homepage": "https://skypager.io",
+  "gitHead": "0c25af89efdec6b667504285b5cd14c02f702bf8"
 }
