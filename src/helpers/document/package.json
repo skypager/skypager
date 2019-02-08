@@ -1,6 +1,6 @@
 {
   "name": "@skypager/helpers-document",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "skypager document helper",
   "main": "lib/index.js",
   "browser": "lib/skypager-helpers-document.min.js",

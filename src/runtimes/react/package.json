@@ -1,6 +1,6 @@
 {
   "name": "@skypager/react",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "main": "index.js",
   "module": "lib/index.js",
   "browser": "lib/skypager-runtimes-react.min.js",
@@ -22,8 +22,8 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.3.1",
-    "@skypager/features-browser-vm": "^0.2.6",
-    "@skypager/runtime": "^0.2.6",
+    "@skypager/features-browser-vm": "^0.2.7",
+    "@skypager/runtime": "^0.2.7",
     "prop-types": "^15.6.2",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
