@@ -34,12 +34,10 @@ if (sig(next.dependencies) !== sig(current.dependencies)) {
   })
 
   const published = read()
-  /*
   spawnSync('npm', ['publish'], {
     cwd: mainRoot,
     stdio: 'inherit',
   })
-  */
   spawnSync('git', ['add', 'src', 'main'], {
     cwd: resolve(__dirname, '..'),
   })
