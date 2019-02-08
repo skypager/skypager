@@ -222,15 +222,21 @@ export class Feature extends Helper {
   }
 
   get runtimeMethods() {
-    return this.tryResult('runtimeMethods', () => this.hostMethods)
+    const { uniq, flatten } = this.lodash
+    // need to consolidate on one name
+    const hostMethods = this.tryGet('hostMethods', [])
+    const runtimeMethods = this.tryGet('runtimeMethods', [])
+    const projectMethods = this.tryGet('projectMethods', [])
+
+    return uniq(flatten(hostMethods, runtimeMethods, projectMethods))
   }
 
   get hostMethods() {
-    return this.tryResult('projectMethods', this.tryResult('hostMethods', []))
+    return this.runtimeMethods
   }
 
   get projectMethods() {
-    return this.tryResult('projectMethods', this.tryResult('hostMethods', []))
+    return this.runtimeMethods
   }
 
   get dependencies() {

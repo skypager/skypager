@@ -441,11 +441,17 @@ export class Helper {
   tryGet(
     property,
     defaultValue,
-    sources = ['options', 'provider', 'provider.default.prototype', 'provider.default']
+    sources = [
+      'options',
+      'provider',
+      'provider.default.prototype',
+      'provider.default',
+      'provider.prototype',
+    ]
   ) {
-    return (
-      this.at(...sources.map(s => `${s}.${property}`)).find(v => !isUndefined(v)) || defaultValue
-    )
+    const values = this.at(...sources.map(s => `${s}.${property}`)).filter(v => !isUndefined(v))
+
+    return values.length ? values[0] : defaultValue
   }
 
   /**

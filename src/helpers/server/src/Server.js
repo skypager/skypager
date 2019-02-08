@@ -448,7 +448,6 @@ function setupDevelopmentMiddlewares(app, options = {}) {
     publicPath: config.output.publicPath,
   })
 
-  console.log('Setting up Dev Middleware')
   app.use(middleware)
 
   if (hot) {
@@ -465,7 +464,6 @@ function setupDevelopmentMiddlewares(app, options = {}) {
 
     // it must be index.html
     if (ext === '') {
-      console.log(`history ${base} ${dir}`)
       res.end(
         middleware.fileSystem.readFileSync(runtime.pathUtils.join(config.output.path, 'index.html'))
       )
