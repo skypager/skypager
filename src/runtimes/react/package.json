@@ -1,0 +1,30 @@
+{
+  "name": "@skypager/react",
+  "version": "0.1.28",
+  "main": "index.js",
+  "module": "lib/index.js",
+  "browser": "lib/skypager-runtimes-react.min.js",
+  "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
+  "license": "MIT",
+  "scripts": {
+    "start": "skypager serve",
+    "build": "rimraf build && yarn build:lib && yarn build:web && cp -r lib build",
+    "build:lib": "cross-env NODE_ENV=production babel --comments --source-maps --config-file ./babelrc -d lib src",
+    "watch:lib": "cross-env NODE_ENV=production babel --comments --source-maps --config-file ./babelrc -d lib src --watch",
+    "build:web": "cross-env NODE_ENV=production webpack --config webpack.config.js",
+    "watch:web": "cross-env NODE_ENV=production webpack --config webpack.config.js --watch",
+    "prepare": "yarn build"
+  },
+  "dependencies": {
+    "@skypager/runtime": "^0.1.28",
+    "prop-types": "^15.6.2",
+    "react": "^16.7.0",
+    "react-dom": "^16.7.0",
+    "react-router-dom": "^4.3.1"
+  },
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/skypager/skypager"
+  },
+  "homepage": "https://skypager.io"
+}
