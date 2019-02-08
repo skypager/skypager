@@ -1,6 +1,6 @@
 {
   "name": "@skypager/helpers-sketch",
-  "version": "0.2.1",
+  "version": "0.2.4",
   "description": "skypager sketch design document helper",
   "main": "lib/index.js",
   "scripts": {
