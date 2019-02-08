@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "browser": "lib/skypager-runtime.min.js",
   "react-native": "lib/skypager-runtime.js",
-  "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
+  "author": "Jon Soeder <jon@chicago.com> https://github.com/soederpop",
   "license": "MIT",
   "scripts": {
     "build": "yarn build:lib && yarn build:web",
