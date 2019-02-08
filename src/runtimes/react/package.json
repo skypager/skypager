@@ -13,9 +13,12 @@
     "watch:lib": "cross-env NODE_ENV=production babel --comments --source-maps --config-file ./babelrc -d lib src --watch",
     "build:web": "cross-env NODE_ENV=production webpack --config webpack.config.js",
     "watch:web": "cross-env NODE_ENV=production webpack --config webpack.config.js --watch",
-    "prepare": "yarn build"
+    "prepare": "yarn build",
+    "test": "mocha --require @babel/register --file test/test.js --timeout 10000 test/**/*.spec.js",
+    "test:watch": "skypager test --webpack-config webpack.config.test.js --watch"
   },
   "dependencies": {
+    "@babel/runtime": "^7.3.1",
     "@skypager/runtime": "^0.1.28",
     "prop-types": "^15.6.2",
     "react": "^16.7.0",

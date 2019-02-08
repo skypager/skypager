@@ -59,7 +59,7 @@ export default class BrowserVmFeature extends Feature {
       sandbox.console = mockConsole()
     }
 
-    entries(options.context || {}).forEach(([key, value]) => {
+    entries(options.sandbox || {}).forEach(([key, value]) => {
       sandbox[key] = value
     })
 

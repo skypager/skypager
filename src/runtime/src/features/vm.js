@@ -129,7 +129,7 @@ export function createModule(code, options = {}, sandbox) {
   sandbox = sandbox || this.sandbox
   const wrapped = `(function (exports, require, module, __filename, __dirname) {\n\n${code}\n\n});`
   const script = this.createScript(wrapped)
-  const context = this.createContext(sandbox)
+  const context = this.vm.isContext(sandbox) ? sandbox : this.createContext(sandbox)
   const hash = this.hashObject({ code })
 
   const filename = options.filename || (this.resolve ? this.resolve(`${hash}.js`) : `${hash}.js`)
@@ -141,7 +141,7 @@ export function createModule(code, options = {}, sandbox) {
   const newModule = {
     id,
     children: [],
-    parent: undefined,
+    parent: this.get('currentModule'),
     require: req,
     exports: {},
     loaded: false,
