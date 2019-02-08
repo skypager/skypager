@@ -66,11 +66,13 @@ export class Server extends Helper {
    * Since our Helper class is set to be observable, each instance of the server helper that is created will
    * be extended with the following observable property interface.
    */
-  static observables = {
-    // the server throughout its operation can save state or statistic information in this observable map
-    stats: ['shallowMap', {}],
-    listening: false,
-  } // if the server is listening
+  static observables() {
+    return {
+      // the server throughout its operation can save state or statistic information in this observable map
+      stats: ['shallowMap', {}],
+      listening: false,
+    }
+  }
 
   /**
    * providerTypes describe the shape of the server helper implementation module.

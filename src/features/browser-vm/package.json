@@ -3,6 +3,9 @@
   "version": "0.2.3",
   "description": "a vm for running scripts in a jsdom context",
   "main": "lib/index.js",
+  "publishConfig": {
+    "registryAccess": "public"
+  },
   "scripts": {
     "build": "rimraf lib && babel --comments --source-maps -d lib src",
     "docs:api": "skypager generate-api-docs",

@@ -1372,10 +1372,8 @@ export class Runtime {
     return this.chain
       .invoke('featureStatus.toJSON')
       .pickBy({ status: 'enabled' })
-      .mapValues(
-        ({ cacheKey } = {}) => this.cache.get(cacheKey)
-      )
-      .omitBy((v) => !v)
+      .mapValues(({ cacheKey } = {}) => this.cache.get(cacheKey))
+      .omitBy(v => !v)
       .value()
   }
 
@@ -1399,7 +1397,7 @@ export class Runtime {
   isFeatureEnabled(name) {
     const item = this.featureStatus.get(name)
 
-    if (!item)  {
+    if (!item) {
       return false
     }
 
