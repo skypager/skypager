@@ -121,7 +121,7 @@ export default class PackageManager extends Feature {
    * @param {Object} [options={}]
    * @param {Boolean} [options.remote=false] whether to load remote repository information from npm
    * @param {Function} cb
-   * @returns
+   * @returns {PromiseLike<PackageManager>}
    * @memberof PackageManager
    */
   start(options = {}, cb) {
@@ -141,7 +141,7 @@ export default class PackageManager extends Feature {
    *
    * @param {Object} [options={}]
    * @param {Number} [options.timeout=30000]
-   * @returns {PromiseLike<>}
+   * @returns {PromiseLike<PackageManager>}
    * @memberof PackageManager
    */
   async activationEventWasFired(options = {}) {
@@ -511,16 +511,6 @@ export default class PackageManager extends Feature {
    */
   pickAllRemotes(...attributes) {
     return this.remoteData.map(p => this.lodash.pick(p, ...attributes))
-  }
-
-  /**
-   * For every package in the project, run the lodash pick function to get arbitrary attributes
-   *
-   * @param {...String} attributes list of attribute keys to pull from the package
-   * @returns {Array<Object>}
-   */
-  pickAll(...attributes) {
-    return this.packageData.map(p => this.lodash.pick(p, ...attributes))
   }
 
   /**

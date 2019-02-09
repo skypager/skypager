@@ -64,14 +64,35 @@ export default class ModuleManager extends Feature {
     }
   }
 
+  /**
+   * An array of the module ids found in the module manager
+   *
+   * @type {Array<String>}
+   * @readonly
+   * @memberof ModuleManager
+   */
   get packageIds() {
     return this.manifests.keys()
   }
 
+  /**
+   * Gets the latests manifest for each package in the module manager
+   *
+   * @type {Array<PackageManifest>}
+   * @readonly
+   * @memberof ModuleManager
+   */
   get latestPackages() {
     return this.packageIds.map(id => this.findLatestByName(id))
   }
 
+  /**
+   * Gets every manifest for every package, including multiple versions, found in the NODE_MODULES resolution paths
+   *
+   * @type {Array<PackageManifest>}
+   * @readonly
+   * @memberof ModuleManager
+   */
   get packageData() {
     return this.chain
       .result('manifests.values', [])
@@ -82,10 +103,23 @@ export default class ModuleManager extends Feature {
       .value()
   }
 
+  /**
+   * A unique list of all names of packages found in the module manager
+   *
+   * @readonly
+   * @memberof ModuleManager
+   */
   get packageNames() {
     return this.packageIds
   }
 
+  /**
+   * Gets all of the module manager manifests in entries form
+   *
+   * @type {Array<Array>}
+   * @readonly
+   * @memberof ModuleManager
+   */
   get entries() {
     return this.manifests.entries().map(v => [v[0], this.runtime.convertToJS(v[1])])
   }

@@ -10,14 +10,20 @@
   },
   "scripts": {
     "build": "babel -d lib src --source-maps --comments",
-    "prepare": "yarn build",
+    "docs:api": "skypager generate-api-docs",
+    "prepare": "yarn build && yarn docs:api",
     "test": "cross-env DISABLE_SKYPAGER_FILE_MANAGER=true skypager test --timeout 30000"
   },
   "skypager": {
     "webpack": {
       "build": "webpack.config.js"
     },
-    "category": "features"
+    "category": "features",
+    "apiDocs": [
+      "src/features/file-manager",
+      "src/features/package-manager",
+      "src/features/module-manager"
+    ]
   },
   "dependencies": {
     "@skypager/helpers-client": "^0.2.7",
