@@ -398,7 +398,7 @@ export default class ModuleManager extends Feature {
   }
 
   walkUp(options = {}) {
-    const testPaths = findModulePaths({
+    const testPaths = this.findModulePaths({
       cwd: this.runtime.cwd,
       filename: 'package.json',
       ...options,
@@ -410,7 +410,7 @@ export default class ModuleManager extends Feature {
   }
 
   walkUpSync(options = {}) {
-    const testPaths = findModulePaths({
+    const testPaths = this.findModulePaths({
       cwd: this.runtime.cwd,
       filename: 'package.json',
       ...options,

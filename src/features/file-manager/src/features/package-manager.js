@@ -302,14 +302,60 @@ export default class PackageManager extends Feature {
       .value()
   }
 
+  /**
+   * Returns the packages where the version in the local tree isn't published to npm
+   *
+   * @readonly
+   * @memberof PackageManager
+   */
+  get packagesAhead() {
+    const {
+      lodash: { pickBy },
+      finder: { semver },
+      versionMap,
+      latestMap,
+    } = this
+
+    return pickBy(versionMap, (v, k) => semver.gt(v, latestMap[k]))
+  }
+
+  /**
+   * Returns the packages who have a version number that doesn't exist in the npm registry
+   *
+   * @readonly
+   * @memberof PackageManager
+   */
   get unpublished() {
-    const { versionMap, latestMap } = this
-    return this.lodash.pickBy(versionMap, (v, k) => !latestMap[k])
+    const {
+      lodash: { pickBy },
+      versionMap,
+    } = this
+
+    return pickBy(versionMap, (v, k) => {
+      const remote = this.remotes.get(k)
+      return remote && remote.versions.indexOf(v) === -1
+    })
+  }
+
+  /**
+   * Returns the packages in the local tree whose versions are behind what is on npm.
+   *
+   * @readonly
+   * @memberof PackageManager
+   */
+  get packagesBehind() {
+    const {
+      lodash: { pickBy },
+      finder: { semver },
+      versionMap,
+      latestMap,
+    } = this
+
+    return pickBy(versionMap, (v, k) => semver.lt(v, latestMap[k]))
   }
 
   get outdated() {
-    const { versionMap, latestMap } = this
-    return this.lodash.pickBy(versionMap, (v, k) => v !== latestMap[k])
+    return this.packagesBehind
   }
 
   get latestMap() {

@@ -1,21 +1,22 @@
 export default (async function repositoryStatus(chain, options = {}) {
   const runtime = this
   const { fileManager } = runtime
+  const { packageManager } = runtime
+
+  await fileManager.startAsync({ startPackageManager: true })
 
   if (typeof options === 'string') {
     options = { packages: [options] }
   }
 
-  const { packages = fileManager.packageManager.manifests.values().map(p => p.name) } = options
+  const { packages = packageManager.packageNames } = options
 
   const checkRepo = packageName =>
-    skypager.proc.async
+    runtime.proc.async
       .exec(`npm info ${packageName} --json`)
+      .then(c => String(c.stdout))
       .catch(error => {
         return false
-      })
-      .then(c => {
-        c.stdout.toString()
       })
 
   const results = await Promise.all(
