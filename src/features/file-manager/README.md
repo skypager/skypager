@@ -4,15 +4,21 @@ The File Manager provides an interface for browsing / searching / manipulating t
 
 Under the hood it uses `git ls-files` to find all of the files in the project.
 
+[File Manager API Docs](docs/api/file-manager.md)
+
 ## Package Manager
 
 In addition to the file manager, a package manager feature is used to work with all of the package.json manifests that may be found inside a project.
 
 This is especially useful for monorepos and yarn workspaces.
 
+[Package Manager API Docs](docs/api/package-manager.md)
+
 ## Module Manager
 
 In addition to the file manager and package manager, the module manager feature is used to work with all of the package.json that can be found in the project's node_modules hierarchy.
+
+[Module Manager API Docs](docs/api/module-manager.md)
 
 ## Servers
 
