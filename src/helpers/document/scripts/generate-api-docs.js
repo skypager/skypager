@@ -11,7 +11,7 @@ async function main() {
     },
   })
 
-  const { apiDocs = [] } = runtime.projectConfig
+  const apiDocs = sourceFiles.length ? sourceFiles : runtime.get('projectConfig.apiDocs', [])
 
   if (apiDocs.length) {
     apiDocs.forEach(item => {
@@ -26,13 +26,17 @@ async function main() {
         sourceFiles.push(...runtime.scripts.available.filter(id => id === item))
       }
     })
-  } else if (!apiDocs.length && !sourceFiles.length) {
+  } else if (!sourceFiles.length) {
     sourceFiles.push(...runtime.scripts.available.filter(id => id.startsWith(baseFolder)))
   }
 
   const scripts = sourceFiles.map(id => runtime.script(id.replace(/\.js$/, '')))
 
   await Promise.all(scripts.map(generateMarkdown))
+
+  if (runtime.argv.interactive) {
+    await runtime.repl('interactive').launch({ runtime, sourceFiles, apiDocs })
+  }
 }
 
 async function generateMarkdown(script) {
@@ -45,7 +49,11 @@ async function generateMarkdown(script) {
       cmd: `jsdoc2md ${script.provider.relative}`,
       format: 'raw',
     })
-    .catch(error => false)
+    .catch(error => {
+      console.log(`Error Generating Markdown for ${script.provider.relative}`)
+      console.error(error.message)
+      console.log(String(error.stdout))
+    })
 
   if (output) {
     console.log(`${relative} to ${destination}`)
