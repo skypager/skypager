@@ -2,6 +2,15 @@
 
 ## Releases
 
+### 0.2.8
+
+- [@skypager/features-browser-vm] added a new feature for running a vm inside a JSDOM context
+- [@skypager/features-file-manager] added some new methods and getters on package manager
+    - packageManager.remoteVersionMap returns remote package version by name
+    - packageManager.remoteEntries returns remote packages
+    - packageManager.remoteData returns remote packages
+    - usesYarnWorkspaces, usesLerna, yarnWorkspacePatterns, lernaPackagePatterns, hasYarnLock, hasNpmPackageLock
+
 ### 0.2.2
 
 - [@skypager/features-file-manager] added hashTree function which gives a reliable checksum of the project file contents

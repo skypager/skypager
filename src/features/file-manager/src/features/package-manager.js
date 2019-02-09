@@ -251,17 +251,6 @@ export default class PackageManager extends Feature {
   }
 
   /**
-   * Returns all of the package manifests found.
-   *
-   * @type {Array<PackageManifest>}
-   * @readonly
-   * @memberof PackageManager
-   */
-  get remoteData() {
-    return Array.from(this.remotes.values()).map(v => this.runtime.convertToJS(v))
-  }
-
-  /**
    * Returns the names found in each manifest
    *
    * @type {Array<String>}
@@ -281,17 +270,6 @@ export default class PackageManager extends Feature {
    */
   get entries() {
     return this.manifests.entries().map(v => [v[0], this.runtime.convertToJS(v[1])])
-  }
-
-  /**
-   * Returns each remote manifest as entries
-   *
-   * @type {Array<Array>}
-   * @readonly
-   * @memberof PackageManager
-   */
-  get remoteEntries() {
-    return this.remotes.entries().map(v => [v[0], this.runtime.convertToJS(v[1])])
   }
 
   /**
@@ -384,19 +362,6 @@ export default class PackageManager extends Feature {
     return this.runtime.get('currentPackage.workspaces', [])
   }
 
-  /**
-   * Returns a table of all of the packages, their current version, and remote version
-   */
-  get remoteVersionMap() {
-    return this.chain
-      .get('versionMap')
-      .mapValues((local, name) => ({
-        local,
-        remote: this.get(['remotesByName', name, 'version'], local),
-      }))
-      .value()
-  }
-
   get allVersionsByPackage() {
     return this.chain
       .get('remoteEntries')
@@ -411,6 +376,39 @@ export default class PackageManager extends Feature {
       .result('manifests.values', [])
       .keyBy(v => v.name)
       .mapValues(v => v.version)
+      .value()
+  }
+  /**
+   * Returns all of the package manifests found.
+   *
+   * @type {Array<PackageManifest>}
+   * @readonly
+   * @memberof PackageManager
+   */
+  get remoteData() {
+    return Array.from(this.remotes.values()).map(v => this.runtime.convertToJS(v))
+  }
+
+  /**
+   * Returns each remote manifest as entries
+   *
+   * @type {Array<Array>}
+   * @readonly
+   * @memberof PackageManager
+   */
+  get remoteEntries() {
+    return this.remotes.entries().map(v => [v[0], this.runtime.convertToJS(v[1])])
+  }
+  /**
+   * Returns a table of all of the packages, their current version, and remote version
+   */
+  get remoteVersionMap() {
+    return this.chain
+      .get('versionMap')
+      .mapValues((local, name) => ({
+        local,
+        remote: this.get(['remotesByName', name, 'version'], local),
+      }))
       .value()
   }
 
