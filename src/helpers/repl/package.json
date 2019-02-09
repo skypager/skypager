@@ -2,8 +2,8 @@
   "name": "@skypager/helpers-repl",
   "version": "0.2.7",
   "description": "an awesome repl",
+  "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
-  "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
@@ -25,12 +25,15 @@
   "skypager": {
     "webpack": {
       "build": "webpack.config.js"
-    }
+    },
+    "category": "helpers"
   },
   "repository": {
     "type": "github",
     "url": "https://github.com/skypager/skypager"
   },
   "homepage": "https://skypager.io",
-  "gitHead": "4f161bd5a57a5d5969d19cf14b0e712be636467c"
+  "gitHead": "4f161bd5a57a5d5969d19cf14b0e712be636467c",
+  "keywords": [],
+  "contributors": []
 }

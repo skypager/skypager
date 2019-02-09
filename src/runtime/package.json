@@ -2,10 +2,10 @@
   "name": "@skypager/runtime",
   "version": "0.2.7",
   "description": "universal javascript application runtime",
+  "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
   "browser": "lib/skypager-runtime.min.js",
   "react-native": "lib/skypager-runtime.js",
-  "author": "Jon Soeder <jon@chicago.com> https://github.com/soederpop",
   "license": "MIT",
   "scripts": {
     "build": "yarn build:lib && yarn build:web",
@@ -41,7 +41,10 @@
       "babel": {
         "lodash": false
       }
-    }
+    },
+    "category": "runtimes"
   },
-  "gitHead": "4f161bd5a57a5d5969d19cf14b0e712be636467c"
+  "gitHead": "4f161bd5a57a5d5969d19cf14b0e712be636467c",
+  "keywords": [],
+  "contributors": []
 }

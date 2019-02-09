@@ -2,6 +2,7 @@
   "name": "@skypager/apps-webapp",
   "version": "0.2.7",
   "description": "skypager.io webapp",
+  "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
   "publishConfig": {
     "access": "public"
@@ -17,7 +18,6 @@
     "pretest": "yarn build",
     "test": "cross-env NODE_ENV=test skypager test --webpack-config webpack.config.test.js --timeout 30000"
   },
-  "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
   "license": "MIT",
   "dependencies": {
     "@skypager/cli": "^0.2.7",
@@ -37,7 +37,10 @@
     "webpack": {
       "build": "webpack.config.js",
       "scopeModules": false
-    }
+    },
+    "category": "apps"
   },
-  "gitHead": "4f161bd5a57a5d5969d19cf14b0e712be636467c"
+  "gitHead": "4f161bd5a57a5d5969d19cf14b0e712be636467c",
+  "keywords": [],
+  "contributors": []
 }

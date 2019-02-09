@@ -2,6 +2,7 @@
   "name": "@skypager/helpers-client",
   "version": "0.2.7",
   "description": "skypager client helper",
+  "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
   "browser": "lib/skypager-helpers-client.min.js",
   "react-native": "lib/index.js",
@@ -12,7 +13,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "author": "Jon Soeder <jon@chicago.com> https://github.com/datapimp",
   "license": "MIT",
   "dependencies": {
     "axios": "github:axios/axios"
@@ -22,5 +22,10 @@
     "url": "https://github.com/skypager/skypager"
   },
   "homepage": "https://skypager.io",
-  "gitHead": "4f161bd5a57a5d5969d19cf14b0e712be636467c"
+  "gitHead": "4f161bd5a57a5d5969d19cf14b0e712be636467c",
+  "keywords": [],
+  "contributors": [],
+  "skypager": {
+    "category": "helpers"
+  }
 }
