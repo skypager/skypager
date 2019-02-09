@@ -42,40 +42,27 @@ export default class PackageManager extends Feature {
 
       updateRemote: [
         'action',
-        function updateRemote(name, data) {
-          p.remotes.set(name, this.normalizePackage(data))
-        },
-      ],
-
-      manifestData: [
-        'computed',
-        function getManifestData() {
-          return this.chain
-            .result('manifests.toJSON', {})
-            .mapValues(v => this.runtime.convertToJS(v))
-            .value()
-        },
-      ],
-
-      remoteData: [
-        'computed',
-        function getRemoteData() {
-          return this.chain
-            .result('remotes.toJSON', {})
-            .mapValues(v => this.runtime.convertToJS(v))
-            .value()
+        function updateRemote(name, data, replace = false) {
+          if (replace) {
+            p.remotes.set(name, this.normalizePackage(data))
+          } else {
+            p.remotes.set(name, {
+              ...(this.remotes.get(name) || {}),
+              ...data,
+            })
+          }
         },
       ],
 
       checkRemoteStatus: [
         'action',
-        function getRemoteData() {
+        function checkRemoteStatus() {
           const p = this
 
           return p.runtime
             .select('package/repository-status')
             .then(data => {
-              Object.keys(data).forEach(pkg => p.updateRemote(pkg, data[pkg]))
+              Object.keys(data).forEach(pkg => p.updateRemote(pkg, data[pkg], true))
               return data
             })
             .catch(error => {
@@ -260,7 +247,18 @@ export default class PackageManager extends Feature {
    * @memberof PackageManager
    */
   get packageData() {
-    return Object.values(this.manifests.toJSON()).map(v => this.runtime.convertToJS(v))
+    return Array.from(this.manifests.values()).map(v => this.runtime.convertToJS(v))
+  }
+
+  /**
+   * Returns all of the package manifests found.
+   *
+   * @type {Array<PackageManifest>}
+   * @readonly
+   * @memberof PackageManager
+   */
+  get remoteData() {
+    return Array.from(this.remotes.values()).map(v => this.runtime.convertToJS(v))
   }
 
   /**
@@ -286,6 +284,17 @@ export default class PackageManager extends Feature {
   }
 
   /**
+   * Returns each remote manifest as entries
+   *
+   * @type {Array<Array>}
+   * @readonly
+   * @memberof PackageManager
+   */
+  get remoteEntries() {
+    return this.remotes.entries().map(v => [v[0], this.runtime.convertToJS(v[1])])
+  }
+
+  /**
    * Returns an object of every package manifest keyed by name
    *
    * @type {Object<String,PackageManifest>}
@@ -295,6 +304,21 @@ export default class PackageManager extends Feature {
   get byName() {
     return this.chain
       .invoke('manifests.values', [])
+      .keyBy(v => v.name)
+      .mapValues(v => this.runtime.convertToJS(v))
+      .value()
+  }
+
+  /**
+   * Returns an object of every remote package manifest keyed by name
+   *
+   * @type {Object<String,PackageManifest>}
+   * @readonly
+   * @memberof PackageManager
+   */
+  get remotesByName() {
+    return this.chain
+      .invoke('remotes.values', [])
       .keyBy(v => v.name)
       .mapValues(v => this.runtime.convertToJS(v))
       .value()
@@ -325,12 +349,59 @@ export default class PackageManager extends Feature {
   }
 
   get tarballUrls() {
-    const p = this
-    return p.chain
-      .result('remotes.values', [])
-      .keyBy(v => v.name)
-      .mapValues(v => v.dist && v.dist.tarball)
-      .compact()
+    const { remotes } = this
+    return Array.from(remotes.values()).reduce((memo, remote) => {
+      if (remote && remote.dist) {
+        memo[remote.name] = remote.dist && remote.dist.tarball
+      }
+      return memo
+    }, {})
+  }
+
+  get hasYarnPackageLock() {
+    return this.runtime.fsx.existsSync(this.runtime.resolve('yarn.lock'))
+  }
+
+  get hasNpmPackageLock() {
+    return this.runtime.fsx.existsSync(this.runtime.resolve('package-lock.json'))
+  }
+
+  get usesLerna() {
+    return this.runtime.fsx.existsSync(this.runtime.resolve('lerna.json'))
+  }
+
+  get usesYarnWorkspaces() {
+    return this.hasYarnPackageLock && this.yarnWorkspacePatterns.length
+  }
+
+  get lernaPackagePatterns() {
+    return !this.usesLerna
+      ? []
+      : this.runtime.fsx.readJsonSync(this.runtime.resolve('lerna.json')).packages
+  }
+
+  get yarnWorkspacePatterns() {
+    return this.runtime.get('currentPackage.workspaces', [])
+  }
+
+  /**
+   * Returns a table of all of the packages, their current version, and remote version
+   */
+  get remoteVersionMap() {
+    return this.chain
+      .get('versionMap')
+      .mapValues((local, name) => ({
+        local,
+        remote: this.get(['remotesByName', name, 'version'], local),
+      }))
+      .value()
+  }
+
+  get allVersionsByPackage() {
+    return this.chain
+      .get('remoteEntries')
+      .fromPairs()
+      .mapValues('versions')
       .value()
   }
 
@@ -409,6 +480,37 @@ export default class PackageManager extends Feature {
   pickAllBy(fn) {
     fn = typeof fn === 'function' ? fn : v => v
     return this.packageData.map(pkg => this.lodash.pickBy(pkg, fn))
+  }
+
+  /**
+   * For every package in the project, run the lodash pick function to get arbitrary attributes
+   *
+   * @param {...String} attributes list of attribute keys to pull from the package
+   * @returns {Array<Object>}
+   */
+  pickAll(...attributes) {
+    return this.packageData.map(p => this.lodash.pick(p, ...attributes))
+  }
+
+  /**
+   * For every package in the project, run the lodash pickBy function to get arbitrary attributes
+   *
+   * @param {Function} pickBy function which will get passed (value, key)
+   * @returns {Array<Object>}
+   */
+  pickAllRemotesBy(fn) {
+    fn = typeof fn === 'function' ? fn : v => v
+    return this.remoteData.map(pkg => this.lodash.pickBy(pkg, fn))
+  }
+
+  /**
+   * For every package in the project, run the lodash pick function to get arbitrary attributes
+   *
+   * @param {...String} attributes list of attribute keys to pull from the package
+   * @returns {Array<Object>}
+   */
+  pickAllRemotes(...attributes) {
+    return this.remoteData.map(p => this.lodash.pick(p, ...attributes))
   }
 
   /**

@@ -9,7 +9,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "skypager build",
+    "build": "babel -d lib src --source-maps --comments",
     "prepare": "yarn build",
     "test": "cross-env DISABLE_SKYPAGER_FILE_MANAGER=true skypager test --timeout 30000"
   },

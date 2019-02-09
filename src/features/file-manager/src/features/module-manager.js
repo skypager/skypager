@@ -446,7 +446,7 @@ export default class ModuleManager extends Feature {
     const folders = await fsx.readdirAsync(cacheDir)
 
     const found = folders.find(folderName => {
-    // eslint-disable-line
+      // eslint-disable-line
       const [hash, pkgVersion, ...rest] = folderName.split('-').reverse()
 
       if (version && pkgVersion !== version) {
