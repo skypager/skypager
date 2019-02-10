@@ -12,13 +12,11 @@ const isFunction = o => typeof o === 'function'
  * and enable them automatically.
  */
 export class Feature extends Helper {
-  static isSkypagerHelper = true
-
   /**
    * This lets you create feature instances using the `runtime.feature` factory method
    * without first registering the module with the `runtime.features` registry.
    */
-  static allowAnonymousProviders = true
+  static allowAnonymousProviders = false
 
   /**
    * Since features are cacheable, you will get the same instance of the feature back
@@ -275,3 +273,5 @@ export const isCacheable = true
 export const attach = Feature.attach
 
 Feature.registry = Feature.createRegistry()
+
+Feature.isSkypagerFeature = true

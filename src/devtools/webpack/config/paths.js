@@ -51,4 +51,5 @@ module.exports = {
   yarnLockFile: resolveApp('yarn.lock'),
   portfolioRoot,
   portfolioNodeModules: path.resolve(portfolioRoot, 'node_modules'),
+  sourcePaths: [resolveApp('src'), resolveApp('test')],
 }

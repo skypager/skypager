@@ -1,9 +1,9 @@
 const autoprefixer = require('autoprefixer')
 const webpack = require('webpack')
 const path = require('path')
-const fs = require('fs')
 const ModuleScopePlugin = require('react-dev-utils/ModuleScopePlugin')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const uniq = require('lodash/uniq')
 require('./env')
 
 /**
@@ -77,7 +77,9 @@ module.exports = function({ paths, ...options } = {}) {
         // Process JS with Babel.
         {
           test: /\.(js|jsx)$/,
-          include: [paths.appSrc, paths.devtoolsConfig].filter(Boolean),
+          include: uniq(
+            [paths.appSrc, paths.devtoolsConfig, ...(options.sourcePaths || [])].filter(Boolean)
+          ),
           loader: require.resolve('babel-loader'),
           options: require('./babel')({
             compact: process.env.NODE_ENV === 'production',

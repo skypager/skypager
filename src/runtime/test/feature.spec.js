@@ -20,13 +20,17 @@ describe('The Feature Helper', function() {
     runtime.feature('some-feature').featureMethods.should.include('a', 'b')
   })
 
-  it('can be created anonymously', function() {
-    const anon = runtime.feature('anonymous', {
-      featureMethods: ['a'],
-    })
+  it('can not be created anonymously', function() {
+    let threw
+    try {
+      runtime.feature('anonymous', {
+        featureMethods: ['a'],
+      })
+    } catch (error) {
+      threw = true
+    }
 
-    anon.should.be.instanceOf(Feature)
-    anon.name.should.equal('anonymous')
+    threw.should.equal(true)
   })
 
   it('can be enabled', async function() {
@@ -45,26 +49,27 @@ describe('The Feature Helper', function() {
   })
 
   it('can extend the runtime', async function() {
-    const runtimeExtension = runtime.feature('runtime-extension', {
+    runtime.features.register('runtime-extension', {
       hostMethods: ['runtimeExtendedMethod'],
       runtimeExtendedMethod() {
         return this.uuid
       },
     })
 
+    const runtimeExtension = runtime.feature('runtime-extension')
+
     runtimeExtension.hostMethods.should.include('runtimeExtendedMethod')
     runtimeExtension.hostMixin.should.have.property('runtimeExtendedMethod').that.is.a('function')
   })
 
   it('enables with a promise', async function() {
-    const asyncFeature = runtime.feature('async-feature', {
+    runtime.features.register('async-feature', {
       featureWasEnabled() {
-        return new Promise(resolve => setTimeout(resolve, 400)).then(
-          () => (asyncFeature.finally = true)
-        )
+        return new Promise(resolve => setTimeout(resolve, 400)).then(() => (this.finally = true))
       },
     })
 
+    const asyncFeature = runtime.feature('async-feature')
     const p = runtime.feature('profiler')
 
     p.enable()
@@ -78,15 +83,37 @@ describe('The Feature Helper', function() {
   })
 
   it('enables with a callback', function(done) {
-    const cbStyle = runtime.feature('callback-feature', {
+    runtime.features.register('callback-feature', () => ({
       featureWasEnabled() {
         this.done = true
       },
-    })
+    }))
+
+    const cbStyle = runtime.feature('callback-feature')
 
     cbStyle.enable(() => {
       cbStyle.done.should.equal(true)
       done()
     })
+  })
+
+  it('can be registered and enabled as a middleware', async function() {
+    const runtime = new Runtime()
+
+    class MiddlewareFeature extends Feature {
+      static featureId = 'middleware-feature'
+      featureWasEnabled() {
+        return true
+      }
+    }
+
+    MiddlewareFeature.should.have.property('isSkypagerFeature', true)
+    MiddlewareFeature.should.have.property('featureId', 'middleware-feature')
+    MiddlewareFeature.should.have.property('isSkypagerHelper', true)
+    runtime.use(MiddlewareFeature)
+    runtime.features.available.should.include('middleware-feature')
+    await runtime.start()
+
+    runtime.enabledFeatureIds.should.include('middleware-feature')
   })
 })

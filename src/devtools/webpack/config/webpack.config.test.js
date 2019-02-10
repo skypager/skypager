@@ -6,9 +6,7 @@ const { DefinePlugin } = require('webpack')
 const config = require('./webpack.config.builder')({
   target: 'node',
   paths,
-  targets: {
-    node: 'current',
-  },
+  sourcePaths: paths.sourcePaths,
   babel: {
     lodash: false,
   },
@@ -18,7 +16,7 @@ const { name, version } = require(paths.appPackageJson)
 
 config.plugins = config.plugins.filter(p => {
   if (p.constructor && p.constructor.name === 'DefinePlugin' && p.definitions['process.env']) {
-    return true
+    return false
   } else {
     return true
   }

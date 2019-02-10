@@ -2,6 +2,10 @@
 
 ## Releases
 
+### 0.2.9
+
+- [@skypager/runtime] you can now call runtime.use(FeatureClass) as a way of registering and enabling a feature
+
 ### 0.2.8
 
 - [@skypager/features-browser-vm] added a new feature for running a vm inside a JSDOM context

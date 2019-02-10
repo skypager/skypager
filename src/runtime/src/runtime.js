@@ -258,6 +258,147 @@ export class Runtime {
     if (this.autoInitialize) this.initialize()
   }
 
+  /**
+   * Extend the runtime with a middleware function, plugin object, or helper class.
+   *
+   * @example chain them as necessary
+   *
+   * runtime
+   *  .use((next) => { })
+   *  .use({ attach(runtime) { } })
+   *  .use(MyFeature)
+   *  .use('some-feature-thats-been-registered')
+   *
+   * @example using a function, deferred until runtime.start() is called
+   *
+   * runtime.use((next) => {
+   *  doSomethingAsync().then(() => next()).catch((error) => next(error))
+   * })
+   *
+   * @example using a plugin object with an attach function
+   *
+   * runtime.use({
+   *  attach(runtime) {
+   *    console.log('runs immediately')
+   *    runtime.use((next) => {
+   *      console.log('called at runtime start() like normal')
+   *    })
+   *  }
+   * })
+   *
+   * @example specifying the PREPARING stage to run before any starting middlewares are called
+   *
+   * runtime
+   *  .use(runOnStart)
+   *  .use(runBeforeStart, 'PREPARING')
+   *
+   * @example using a feature class will register and enable the feature
+   *
+   * export default class MyFeature extends Feature {
+   *  featureId = 'registered-in-the-registry-with-this'
+   *
+   *  featureWasEnabled(config) {
+   *    console.log('enabled with', config) // enabled with { option: 'passed to feature enable' }
+   *  }
+   * }
+   *
+   * // in another module
+   * import MyFeature from 'myFeature'
+   *
+   * runtime.use(MyFeature, { option: 'passed to feature enable' })
+   *
+   * @example passing a string which refers to an already existing feature
+   *
+   * runtime.use('some-registered-feature')
+   *
+   * @memberof Runtime
+   * @param {Function|Object|Feature|Helper} extension an object that meets the requirements to be an extension
+   * @param {String|Object} stage which stage to run this middleware in (INITIALIZING, PREPARING, STARTING)
+   * @returns {Runtime}
+   */
+  use(fn, stage) {
+    const runtime = this
+
+    if (isObject(fn) && isFunction(fn.initializer)) {
+      return this.use(fn.initializer.bind(this), INITIALIZING)
+    } else if (isFunction(fn) && fn.isSkypagerFeature) {
+      const featureId = fn.featureId || fn.shortcut || fn.prototype.shortcut || fn.name
+
+      if (!this.features.checkKey(featureId)) {
+        this.features.register(featureId, () => fn)
+
+        const myFeature = this.feature(
+          featureId,
+          isObject(stage) ? { ...this.options, ...stage } : this.options
+        )
+
+        myFeature.enable({
+          ...this.options,
+          ...(isObject(stage) ? stage : {}),
+        })
+
+        return this
+      }
+    } else if (isObject(fn) && isFunction(fn.attach)) {
+      fn.attach.call(
+        this,
+        this,
+        isObject(stage) ? { ...this.options, ...stage } : this.options,
+        this.context
+      )
+    } else if (isObject(fn) && fn.default) {
+      return this.use(fn.default, stage)
+    }
+
+    const m = fn.middleware || fn.use
+    if (isObject(fn) && isFunction(m)) {
+      fn = m
+    }
+
+    if (typeof fn === 'string') {
+      if (runtime.availableFeatures.indexOf(fn) >= 0) {
+        const featureId = fn
+        fn = () => runtime.feature(featureId).enable()
+        stage = stage || INITIALIZING
+      } else {
+        try {
+          console.error(`Can not do dynamic requires anymore: You tried: ${fn}`)
+        } catch (error) {}
+      }
+    }
+
+    if (isFunction(fn) && stage === INITIALIZING) {
+      fn.call(runtime, err => {
+        if (err) {
+          runtime.error(err.message || `Error while using fn ${fn.name}`, {
+            error: err,
+          })
+          throw err
+        }
+      })
+
+      return this
+    }
+
+    if (typeof fn !== 'function') {
+      return this
+    }
+
+    if (typeof stage === 'undefined' && this.isPrepared) {
+      stage = STARTING
+    }
+
+    const pipeline = runtime.result(['middlewares', stage || STARTING], () => {
+      const p = mware(runtime)
+      runtime.set(['middlewares', stage || STARTING], p)
+      return p
+    })
+
+    pipeline.use(fn.bind(runtime))
+
+    return this
+  }
+
   at(...paths) {
     return lodash.at(this, ...paths)
   }
@@ -1548,70 +1689,7 @@ export class Runtime {
   }
 
   get namespace() {
-    return this.get('options.namespace', '')
-  }
-
-  use(fn, stage) {
-    const runtime = this
-
-    if (typeof fn === 'object' && typeof fn.initializer === 'function') {
-      return this.use(fn.initializer.bind(this), INITIALIZING)
-    } else if (typeof fn === 'object' && typeof fn.attach === 'function') {
-      fn.attach.call(
-        this,
-        this,
-        typeof stage === 'object' ? { ...this.options, ...stage } : this.options,
-        this.context
-      )
-    }
-
-    if (typeof fn === 'object' && typeof (fn.middleware || fn.use) === 'function') {
-      fn = fn.middleware || fn.use || fn.default
-      stage = stage || PREPARING
-    }
-
-    if (typeof fn === 'string') {
-      if (runtime.availableFeatures.indexOf(fn) >= 0) {
-        const featureId = fn.toString()
-        fn = () => runtime.feature(featureId).enable()
-        stage = stage || INITIALIZING
-      } else {
-        try {
-          console.error(`Can not do dynamic requires anymore: You tried: ${fn}`)
-        } catch (error) {}
-      }
-    }
-
-    if (fn && typeof fn.call === 'function' && stage === INITIALIZING) {
-      fn.call(runtime, err => {
-        if (err) {
-          runtime.error(err.message || `Error while using fn ${fn.name}`, {
-            error: err,
-          })
-          throw err
-        }
-      })
-
-      return this
-    }
-
-    if (typeof fn !== 'function') {
-      return this
-    }
-
-    if (typeof stage === 'undefined' && this.isPrepared) {
-      stage = STARTING
-    }
-
-    const pipeline = runtime.result(['middlewares', stage || STARTING], () => {
-      const p = mware(runtime)
-      runtime.set(['middlewares', stage || STARTING], p)
-      return p
-    })
-
-    pipeline.use(fn.bind(runtime))
-
-    return this
+    return this.get('options.namespace', 'runtime')
   }
 
   createRegistry(name, options = {}) {

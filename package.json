@@ -10,6 +10,7 @@
   "scripts": {
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
+    "build:runtime": "skypager run-all runtime/test runtime/build --sequential",
     "build:all": "lerna run build",
     "watch": "node scripts/watch.js",
     "prettify": "node scripts/prettify.js",
@@ -21,7 +22,7 @@
     "postrelease": "node scripts/postrelease.js && yarn deploy",
     "deploy": "lerna run deploy --stream && yarn deploy:website",
     "deploy:website": "node scripts/deploy-website.js",
-    "test": "yarn test:unit && yarn test:portfolio && yarn test:web",
+    "test": "yarn build:runtime && yarn test:unit && yarn test:portfolio && yarn test:web",
     "test:unit": "mocha",
     "pretest:web": "node scripts/prepare-web-release.js",
     "test:web": "skypager start-and-test --start start:test:webserver --test test:web:build",
