@@ -1,6 +1,6 @@
 {
   "name": "@skypager/node",
-  "version": "0.2.8",
+  "version": "0.2.10",
   "description": "the skypager node runtime",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
@@ -19,7 +19,7 @@
     "@skypager/helpers-client": "^0.2.8",
     "@skypager/helpers-repl": "^0.2.8",
     "@skypager/helpers-server": "^0.2.8",
-    "@skypager/runtime": "^0.2.8",
+    "@skypager/runtime": "^0.2.10",
     "bluebird": "^3.5.0",
     "child-process-promise": "^2.2.1",
     "cli-spinner": "^0.2.8",

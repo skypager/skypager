@@ -1,13 +1,13 @@
 {
   "name": "@skypager/devtools",
-  "version": "0.2.8",
+  "version": "0.2.10",
   "description": "skypager framework developer tools",
   "author": "Jon Soeder <jon@chicago.com>",
   "homepage": "https://devtools.skypager.io",
   "license": "SEE LICENSE IN LICENSE.md",
   "main": "index.js",
   "dependencies": {
-    "@skypager/node": "^0.2.8",
+    "@skypager/node": "^0.2.10",
     "@skypager/webpack": "^0.2.8",
     "chai": "^4.1.2",
     "chai-as-promised": "^7.1.1",

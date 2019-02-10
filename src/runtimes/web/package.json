@@ -1,6 +1,6 @@
 {
   "name": "@skypager/web",
-  "version": "0.2.8",
+  "version": "0.2.10",
   "description": "",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
@@ -14,7 +14,7 @@
     "prepare": "yarn build && yarn docs:api"
   },
   "dependencies": {
-    "@skypager/runtime": "^0.2.8"
+    "@skypager/runtime": "^0.2.10"
   },
   "repository": {
     "type": "github",
