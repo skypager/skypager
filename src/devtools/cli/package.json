@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@babel/register": "^7.0.0",
+    "@babel/runtime": "^7.0.0",
     "@skypager/helpers-repl": "^0.2.8",
     "@skypager/helpers-server": "^0.2.8",
     "@skypager/node": "^0.2.10",
