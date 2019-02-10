@@ -4,6 +4,7 @@ export default (async function selectPackageSnapshot(chain, options = {}) {
 
   await fileManager.startAsync()
   await packageManager.startAsync()
+  await packageManager.checkRemoteStatus()
 
   return chain.plant(await packageManager.createSnapshot(options))
 })

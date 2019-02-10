@@ -1,0 +1,25 @@
+{
+  "name": "@skypager/features-module-manager",
+  "version": "0.2.7",
+  "description": "an observable state machine for a projects node modules",
+  "author": "Jon Soeder <jon@chicago.com>",
+  "main": "lib/index.js",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "babel -d lib src --source-maps --comments",
+    "docs:api": "skypager generate-api-docs",
+    "prepare": "yarn build && yarn docs:api",
+    "test": "cross-env DISABLE_SKYPAGER_MODULE_MANAGER=true skypager test --timeout 30000"
+  },
+  "skypager": {
+    "webpack": {
+      "build": "webpack.config.js"
+    },
+    "category": "features"
+  },
+  "keywords": [],
+  "contributors": []
+}

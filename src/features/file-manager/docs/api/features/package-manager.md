@@ -70,15 +70,12 @@ The PackageManager is a database that contains all of the package.json files fou
     * [.finder](#PackageManager.finder) : <code>PackageFinder</code>
     * [.packageIds](#PackageManager.packageIds)
     * [.packageData](#PackageManager.packageData) : [<code>Array.&lt;PackageManifest&gt;</code>](#PackageManifest)
+    * [.remoteData](#PackageManager.remoteData) : [<code>Array.&lt;PackageManifest&gt;</code>](#PackageManifest)
     * [.packageNames](#PackageManager.packageNames) : <code>Array.&lt;String&gt;</code>
     * [.entries](#PackageManager.entries) : <code>Array.&lt;Array&gt;</code>
+    * [.remoteEntries](#PackageManager.remoteEntries) : <code>Array.&lt;Array&gt;</code>
     * [.byName](#PackageManager.byName) : <code>Object.&lt;String, PackageManifest&gt;</code>
     * [.remotesByName](#PackageManager.remotesByName) : <code>Object.&lt;String, PackageManifest&gt;</code>
-    * [.packagesAhead](#PackageManager.packagesAhead)
-    * [.unpublished](#PackageManager.unpublished)
-    * [.packagesBehind](#PackageManager.packagesBehind)
-    * [.remoteData](#PackageManager.remoteData) : [<code>Array.&lt;PackageManifest&gt;</code>](#PackageManifest)
-    * [.remoteEntries](#PackageManager.remoteEntries) : <code>Array.&lt;Array&gt;</code>
     * [.dependenciesMap](#PackageManager.dependenciesMap)
     * [.startAsync([options])](#PackageManager.startAsync) ⇒ [<code>PromiseLike.&lt;PackageManager&gt;</code>](#PackageManager)
     * [.start([options], cb)](#PackageManager.start) ⇒ [<code>PromiseLike.&lt;PackageManager&gt;</code>](#PackageManager)
@@ -138,6 +135,13 @@ Returns all of the package manifests found.
 
 **Kind**: static property of [<code>PackageManager</code>](#PackageManager)  
 **Read only**: true  
+<a name="PackageManager.remoteData"></a>
+
+### PackageManager.remoteData : [<code>Array.&lt;PackageManifest&gt;</code>](#PackageManifest)
+Returns all of the package manifests found.
+
+**Kind**: static property of [<code>PackageManager</code>](#PackageManager)  
+**Read only**: true  
 <a name="PackageManager.packageNames"></a>
 
 ### PackageManager.packageNames : <code>Array.&lt;String&gt;</code>
@@ -149,6 +153,13 @@ Returns the names found in each manifest
 
 ### PackageManager.entries : <code>Array.&lt;Array&gt;</code>
 Returns each manifest as entries
+
+**Kind**: static property of [<code>PackageManager</code>](#PackageManager)  
+**Read only**: true  
+<a name="PackageManager.remoteEntries"></a>
+
+### PackageManager.remoteEntries : <code>Array.&lt;Array&gt;</code>
+Returns each remote manifest as entries
 
 **Kind**: static property of [<code>PackageManager</code>](#PackageManager)  
 **Read only**: true  
@@ -166,23 +177,13 @@ Returns an object of every remote package manifest keyed by name
 
 **Kind**: static property of [<code>PackageManager</code>](#PackageManager)  
 **Read only**: true  
-<a name="PackageManager.packagesAhead"></a>
+<a name="PackageManager.dependenciesMap"></a>
 
-### PackageManager.packagesAhead
-Returns the packages where the version in the local tree isn't published to npm
-
-**Kind**: static property of [<code>PackageManager</code>](#PackageManager)  
-**Read only**: true  
-<a name="PackageManager.unpublished"></a>
-
-### PackageManager.unpublished
-Returns the packages who have a version number that doesn't exist in the npm registry
+### PackageManager.dependenciesMap
+Gets a map of packages and their dependents
 
 **Kind**: static property of [<code>PackageManager</code>](#PackageManager)  
 **Read only**: true  
-<a name="PackageManager.packagesBehind"></a>
+<a name="PackageManager.startAsync"></a>
 
-### PackageManager.packagesBehind
-Returns the packages in the local tree whose versions are behind what is on npm.
-
-**Kind**: static property
+### PackageManager.startAsync([options]) ⇒ [<code>PromiseLike
