@@ -182,4 +182,272 @@ argv will refer to the initial options passed to the runtime, along with any def
 Returns true if the runtime is running inside of a browser.
 
 **Kind**: instance property of [<code>Runtime</code>](#Runtime)  
-**Read only**: true
+**Read only**: true  
+<a name="Runtime+isNode"></a>
+
+### runtime.isNode
+Returns true if the runtime is running inside of node.
+
+**Kind**: instance property of [<code>Runtime</code>](#Runtime)  
+**Read only**: true  
+<a name="Runtime+isElectron"></a>
+
+### runtime.isElectron
+Returns true if the runtime is running inside of electron
+
+**Kind**: instance property of [<code>Runtime</code>](#Runtime)  
+**Read only**: true  
+<a name="Runtime+isElectronRenderer"></a>
+
+### runtime.isElectronRenderer
+Returns true if the runtime is running inside of electron's renderer process
+
+**Kind**: instance property of [<code>Runtime</code>](#Runtime)  
+**Read only**: true  
+<a name="Runtime+isReactNative"></a>
+
+### runtime.isReactNative
+Returns true if the runtime is running inside of React-Native
+
+**Kind**: instance property of [<code>Runtime</code>](#Runtime)  
+**Read only**: true  
+<a name="Runtime+isDebug"></a>
+
+### runtime.isDebug
+Returns true if the process was started with a debug flag
+
+**Kind**: instance property of [<code>Runtime</code>](#Runtime)  
+**Read only**: true  
+<a name="Runtime+isCI"></a>
+
+### runtime.isCI
+Returns true if the runtime is running in node process and common CI environment variables are detected
+
+**Kind**: instance property of [<code>Runtime</code>](#Runtime)  
+**Read only**: true  
+<a name="Runtime+isDevelopment"></a>
+
+### runtime.isDevelopment
+returns true when running in a process where NODE_ENV is set to development, or in a process started with the development flag
+
+**Kind**: instance property of [<code>Runtime</code>](#Runtime)  
+**Read only**: true  
+<a name="Runtime+isTest"></a>
+
+### runtime.isTest
+returns true when running in a process where NODE_ENV is set to test, or in a process started with the test flag
+
+**Kind**: instance property of [<code>Runtime</code>](#Runtime)  
+**Read only**: true  
+<a name="Runtime+isProduction"></a>
+
+### runtime.isProduction
+returns true when running in a process where NODE_ENV is set to production, or in a process started with the test flag
+
+**Kind**: instance property of [<code>Runtime</code>](#Runtime)  
+**Read only**: true  
+<a name="Runtime+use"></a>
+
+### runtime.use(extension, stage) ⇒ [<code>Runtime</code>](#Runtime)
+Extend the runtime with a middleware function, plugin object, or helper class.
+
+**Kind**: instance method of [<code>Runtime</code>](#Runtime)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| extension | <code>function</code> \| <code>Object</code> \| <code>Feature</code> \| <code>Helper</code> | an object that meets the requirements to be an extension |
+| stage | <code>String</code> \| <code>Object</code> | which stage to run this middleware in (INITIALIZING, PREPARING, STARTING) |
+
+**Example**  
+```js
+chain them as necessary
+
+runtime
+ .use((next) => { })
+ .use({ attach(runtime) { } })
+ .use(MyFeature)
+ .use('some-feature-thats-been-registered')
+```
+**Example**  
+```js
+using a function, deferred until runtime.start() is called
+
+runtime.use((next) => {
+ doSomethingAsync().then(() => next()).catch((error) => next(error))
+})
+```
+**Example**  
+```js
+using a plugin object with an attach function
+
+runtime.use({
+ attach(runtime) {
+   console.log('runs immediately')
+   runtime.use((next) => {
+     console.log('called at runtime start() like normal')
+   })
+ }
+})
+```
+**Example**  
+```js
+specifying the PREPARING stage to run before any starting middlewares are called
+
+runtime
+ .use(runOnStart)
+ .use(runBeforeStart, 'PREPARING')
+```
+**Example**  
+```js
+using a feature class will register and enable the feature
+
+export default class MyFeature extends Feature {
+ featureId = 'registered-in-the-registry-with-this'
+
+ featureWasEnabled(config) {
+   console.log('enabled with', config) // enabled with { option: 'passed to feature enable' }
+ }
+}
+
+// in another module
+import MyFeature from 'myFeature'
+
+runtime.use(MyFeature, { option: 'passed to feature enable' })
+```
+**Example**  
+```js
+passing a string which refers to an already existing feature
+
+runtime.use('some-registered-feature')
+```
+<a name="Runtime+set"></a>
+
+### runtime.set(path, value) ⇒ <code>?</code>
+Set the value at an object path. Uses lodash.set
+
+**Kind**: instance method of [<code>Runtime</code>](#Runtime)  
+
+| Param | Type |
+| --- | --- |
+| path | <code>\*</code> | 
+| value | <code>\*</code> | 
+
+<a name="Runtime+get"></a>
+
+### runtime.get(path, defaultValue) ⇒ <code>?</code>
+Get the value at an object path.  Uses lodash.get
+
+**Kind**: instance method of [<code>Runtime</code>](#Runtime)  
+
+| Param | Type |
+| --- | --- |
+| path | <code>String</code> | 
+| defaultValue | <code>\*</code> | 
+
+<a name="Runtime+result"></a>
+
+### runtime.result(path, defaultValue) ⇒ <code>?</code>
+Get the value at an object path. If that path is a function, we'll call it.
+Uses lodash.result
+
+**Kind**: instance method of [<code>Runtime</code>](#Runtime)  
+
+| Param | Type |
+| --- | --- |
+| path | <code>\*</code> | 
+| defaultValue | <code>\*</code> | 
+
+<a name="Runtime+has"></a>
+
+### runtime.has(path, defaultValue) ⇒ <code>Boolean</code>
+Check if runtime has a property
+
+**Kind**: instance method of [<code>Runtime</code>](#Runtime)  
+
+| Param | Type |
+| --- | --- |
+| path | <code>\*</code> | 
+| defaultValue | <code>\*</code> | 
+
+<a name="Runtime+invoke"></a>
+
+### runtime.invoke(functionAtPath, ...args) ⇒ <code>?</code>
+Invoke a function at a nested path
+
+**Kind**: instance method of [<code>Runtime</code>](#Runtime)  
+
+| Param | Type |
+| --- | --- |
+| functionAtPath | <code>\*</code> | 
+| ...args | <code>\*</code> | 
+
+<a name="Runtime+onRegistration"></a>
+
+### runtime.onRegistration(registryPropName, callback)
+If you have code that depends on a particular helper registry being available
+on the runtime, you can pass a callback which will run when ever it exists and
+is ready.  This is useful for example, when developing a feature which includes a
+client and a server helper to go along with it.  If the runtime is web, you wouldn't
+have a server helper so you wouldn't want to load that code.  If the same runtime is
+used on a server, then you would run that code.
+
+**Kind**: instance method of [<code>Runtime</code>](#Runtime)  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| registryPropName | <code>string</code> | the name of the registry you want to wait for |
+| callback | <code>function</code> | a function that will be called with runtime, the helperClass, and the options passed when attaching that helper |
+
+**Example** *(Conditionally running code when the servers helper is attached)*  
+```js
+
+runtime.onRegistration("servers", () => {
+ runtime.servers.register('my-server', () => require('./my-server'))
+})
+```
+<a name="Runtime+registerHelper"></a>
+
+### runtime.registerHelper(helperName, helperClass) ⇒ <code>Class</code>
+Register a Helper class as being available to our Runtime class
+
+**Kind**: instance method of [<code>Runtime</code>](#Runtime)  
+**Returns**: <code>Class</code> - the helper class you registered  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| helperName | <code>String</code> | the name of the helper class |
+| helperClass | <code>Class</code> | a subclass of Helper |
+
+<a name="Runtime+mixin"></a>
+
+### runtime.mixin(mixin, options)
+A Mixin is an object of functions.  These functions will get created as properties on this instance.
+
+**Kind**: instance method of [<code>Runtime</code>](#Runtime)  
+
+| Param | Type |
+| --- | --- |
+| mixin | [<code>Mixin</code>](#Mixin) | 
+| options | [<code>MixinOptions</code>](#MixinOptions) | 
+
+<a name="Runtime+whenStarted"></a>
+
+### runtime.whenStarted(fn) ⇒ [<code>Runtime</code>](#Runtime)
+Accepts a callback function which will be called when the runtime is started
+
+**Kind**: instance method of [<code>Runtime</code>](#Runtime)  
+
+| Param | Type |
+| --- | --- |
+| fn | <code>function</code> | 
+
+<a name="Runtime+whenStartedAsync"></a>
+
+### runtime.whenStartedAsync() ⇒ [<code>PromiseLike.&lt;Runtime&gt;</code>](#Runtime)
+Returns a promise that will resolve when the runtime is started.
+
+**Kind**: instance method of [<code>Runtime</code>](#Runtime)  
+<a name="Runtime+whenPrepared"></a>
+
+### runtime.whenPrepared(fn, onError) ⇒ [<code>PromiseLike.&lt;Runtime&gt;</code>](#Runtime)
+Takes a callback
