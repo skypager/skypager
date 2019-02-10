@@ -126,7 +126,26 @@ export class Runtime {
     enhanceObject(this, { includeLodashMethods: false, includeChain: true }, lodash)
     attachEmitter(this)
 
-    this.events.emit('runtimeWasCreated', this, this.constructor)
+    /**
+     * @mixin Stateful
+     * @property {Map} state
+     * @property {Object} currentState
+     * @property {Function} setState
+     * @property {Function} replaceState
+     * @property {String} cacheKey
+     * @property {String} stateHash
+     */
+    /**
+     * @mixes Stateful
+     */
+    extendObservable(this, {
+      state: observable.shallowMap(toPairs(this.initialState)),
+      currentState: computed(this.getCurrentState.bind(this)),
+      stateHash: computed(this.getStateHash.bind(this)),
+      cacheKey: computed(this.getCacheKey.bind(this)),
+      setState: action(this.setState.bind(this)),
+      replaceState: action(this.replaceState.bind(this)),
+    })
 
     /**
      * @property {Logger} logger
@@ -185,7 +204,7 @@ export class Runtime {
 
     this.hide('initialize', initializeSequence.bind(this, this, initialize), true)
     this.hide('prepare', prepareSequence.bind(this, this, prepare), true)
-    this.hide('start', startSequence.bind(this, this, start), true)
+    this.start = startSequence.bind(this, this, start)
 
     this.hide('middlewares', { [STARTING]: mware(this), [PREPARING]: mware(this) })
 
@@ -214,27 +233,7 @@ export class Runtime {
       return selectorCache.get(this)
     })
 
-    /**
-     * @mixin Stateful
-     * @property {Map} state
-     * @property {Object} currentState
-     * @property {Function} setState
-     * @property {Function} replaceState
-     * @property {String} cacheKey
-     * @property {String} stateHash
-     */
-    /**
-     * @mixes Stateful
-     */
-    extendObservable(this, {
-      state: observable.shallowMap(toPairs(this.initialState)),
-      currentState: computed(this.getCurrentState.bind(this)),
-      stateHash: computed(this.getStateHash.bind(this)),
-      cacheKey: computed(this.getCacheKey.bind(this)),
-      setState: action(this.setState.bind(this)),
-      replaceState: action(this.replaceState.bind(this)),
-    })
-
+    this.events.emit('runtimeWasCreated', this, this.constructor)
     this.applyRuntimeInitializers()
 
     // autoAdd refers to require.contexts that should be added to our registries
@@ -246,15 +245,15 @@ export class Runtime {
 
     this.attachAllHelpers()
 
-    if (typeof middlewareFn === 'function') {
-      this.use(middlewareFn.bind(this), INITIALIZING)
-    }
-
     Feature.attach(this)
 
     this.features.register('profiler', () => ({ default: ProfilerFeature }))
     this.features.register('vm', () => VmFeature)
     this.enableFeatures(this.autoEnabledFeatures)
+
+    if (typeof middlewareFn === 'function') {
+      this.use(middlewareFn.bind(this), INITIALIZING)
+    }
 
     if (this.autoInitialize) this.initialize()
   }
@@ -806,7 +805,7 @@ export class Runtime {
   }
 
   /**
-   * Returns `true` if the runtime is running inside of a browser.
+   * Returns true if the runtime is running inside of a browser.
    *
    * @readonly
    * @memberof Runtime
@@ -823,7 +822,7 @@ export class Runtime {
   }
 
   /**
-   * Returns `true` if the runtime is running inside of node.
+   * Returns true if the runtime is running inside of node.
    *
    * @readonly
    * @memberof Runtime
@@ -841,7 +840,7 @@ export class Runtime {
   }
 
   /**
-   * Returns `true` if the runtime is running inside of electron
+   * Returns true if the runtime is running inside of electron
    *
    * @readonly
    * @memberof Runtime
@@ -856,7 +855,7 @@ export class Runtime {
   }
 
   /**
-   * Returns `true` if the runtime is running inside of electron's renderer process
+   * Returns true if the runtime is running inside of electron's renderer process
    *
    * @readonly
    * @memberof Runtime
@@ -871,7 +870,7 @@ export class Runtime {
   }
 
   /**
-   * Returns `true` if the runtime is running inside of React-Native
+   * Returns true if the runtime is running inside of React-Native
    *
    * @readonly
    * @memberof Runtime
@@ -885,7 +884,7 @@ export class Runtime {
   }
 
   /**
-   * Returns `true` if the process was started with a debug flag
+   * Returns true if the process was started with a debug flag
    *
    * @readonly
    * @memberof Runtime
@@ -895,7 +894,7 @@ export class Runtime {
   }
 
   /**
-   * Returns `true` if the runtime is running in node process and common CI environment variables are detected
+   * Returns true if the runtime is running in node process and common CI environment variables are detected
    *
    * @readonly
    * @memberof Runtime
@@ -905,7 +904,7 @@ export class Runtime {
   }
 
   /**
-   * returns `true` when running in a process where NODE_ENV is set to development, or in a process started with the development flag
+   * returns true when running in a process where NODE_ENV is set to development, or in a process started with the development flag
    *
    * @readonly
    * @memberof Runtime
@@ -923,7 +922,7 @@ export class Runtime {
   }
 
   /**
-   * returns `true` when running in a process where NODE_ENV is set to test, or in a process started with the test flag
+   * returns true when running in a process where NODE_ENV is set to test, or in a process started with the test flag
    *
    * @readonly
    * @memberof Runtime
@@ -938,7 +937,7 @@ export class Runtime {
   }
 
   /**
-   * returns `true` when running in a process where NODE_ENV is set to production, or in a process started with the test flag
+   * returns true when running in a process where NODE_ENV is set to production, or in a process started with the test flag
    *
    * @readonly
    * @memberof Runtime
@@ -952,6 +951,11 @@ export class Runtime {
     )
   }
 
+  /**
+   * Any middleware functions which were added to runtime using the use function
+   * get pushed onto a queue.  This function runs that queue
+   * @private
+   */
   runMiddleware(stage) {
     stage = stage || this.stage
 
@@ -981,7 +985,7 @@ export class Runtime {
 
   get initialState() {
     return defaults(
-      {},
+      { stage: 'CREATED' },
       this.get('argv.initialState'),
       global.__INITIAL_STATE__,
       result(global, 'SkypagerInitialState'),
@@ -996,8 +1000,7 @@ export class Runtime {
   getCurrentState() {
     const { convertToJS } = this
     const { mapValues } = this.lodash
-
-    return mapValues(this.state.toJSON(), v => convertToJS(v))
+    return this.state.toJSON()
   }
 
   getCacheKey() {
@@ -1012,60 +1015,109 @@ export class Runtime {
     return this.get('currentState.initialized', false)
   }
 
+  /**
+   * Accepts a callback function which will be called when the runtime is started
+   *
+   * @param {Function} fn
+   * @returns {Runtime}
+   * @memberof Runtime
+   */
   whenStarted(fn) {
+    if (typeof fn !== 'function') {
+      return this.whenStartedAsync()
+    }
+
     if (this.isStarted) {
       fn.call(this, this, this.options, this.context)
+    } else if (this.isFailed) {
+      fn.call(this, this.currentStart.error, this.options, this.context)
     } else {
       this.once('runtimeDidStart', () => fn.call(this, this.options, this.context))
+      this.once('runtimeFailedStart', error => fn.call(this, error, this.options, this.context))
     }
 
     return this
   }
 
+  /**
+   * Returns a promise that will resolve when the runtime is started.
+   *
+   * @returns {PromiseLike<Runtime>}
+   * @memberof Runtime
+   */
   whenStartedAsync() {
     return new Promise((resolve, reject) => {
-      this.whenStarted(() => {
+      if (this.isStarted) {
         resolve(this)
-      })
+        return
+      } else if (this.sandbox.isFailed) {
+        reject(this.currentState.error)
+        return
+      }
+
+      this.once('runtimeDidStart', () => resolve(this))
+      this.once('runtimeFailedToStart', error => reject(error))
     })
   }
 
-  whenReady(fn) {
-    if (!isFunction(fn)) {
-      return this.whenReadyAsync()
-    }
-
-    return this.whenPrepared(fn)
+  /**
+   * @alias whenPrepared
+   */
+  whenReady(fn, onError) {
+    return this.whenPrepared(fn, onError)
   }
 
+  /**
+   * @alias whenReadyAsync
+   */
   whenReadyAsync() {
-    return new Promise((resolve, reject) => {
-      this.whenReady(() => {
-        resolve(this)
-      })
-    })
+    return this.whenPreparedAsync()
   }
 
-  whenPrepared(fn) {
+  /**
+   * Takes a callback which will get called once this runtime is prepared
+   *
+   * @param {Function} fn
+   * @param {Function} onError
+   * @returns {PromiseLike<Runtime>}
+   * @memberof Runtime
+   */
+  whenPrepared(fn, onError) {
     if (!isFunction(fn)) {
       return this.whenPreparedAsync()
     }
 
-    if (this.isPrepared) {
-      fn.call(this, this, this.options, this.context)
-    } else {
-      this.once('runtimeIsPrepared', () => fn.call(this, this.options, this.context))
+    try {
+      if (this.isPrepared) {
+        fn.call(this, this, this.options, this.context)
+      } else {
+        this.once('runtimeIsPrepared', () => fn.call(this, this.options, this.context))
+      }
+    } catch (error) {
+      onError && onError(error)
     }
 
     return this
   }
 
+  /**
+   * Returns a promise which will resolve once the runtime is prepared
+   *
+   * @returns {PromiseLike<Runtime>}
+   * @memberof Runtime
+   */
   whenPreparedAsync() {
     return new Promise((resolve, reject) => {
-      this.whenPrepared(() => {
+      if (this.isPrepared) {
         resolve(this)
-      })
+      } else {
+        this.once('runtimeIsPrepared', () => resolve(this))
+      }
     })
+  }
+
+  get isFailed() {
+    return this.stage === START_FAILURE
   }
 
   get isPrepared() {
@@ -1551,11 +1603,9 @@ export class Runtime {
       stage = STARTING
     }
 
-    // Get the middleware pipeline for this particular stage
-
-    const pipeline = runtime.result(['middlewares', stage], () => {
+    const pipeline = runtime.result(['middlewares', stage || STARTING], () => {
       const p = mware(runtime)
-      runtime.set(['middlewares', stage], p)
+      runtime.set(['middlewares', stage || STARTING], p)
       return p
     })
 
@@ -1896,6 +1946,7 @@ export async function startSequence(runtime, startMethod) {
     try {
       await Promise.all(beforeHooks.map(fn => fn.call(runtime, runtime.argv, runtime.sandbox)))
     } catch (error) {
+      events.emit('runtimeStartFailure', error, runtime, runtime.constructor)
       runtime.setState({ stage: START_FAILURE, error, failureStage: 'beforeHooks' })
       throw error
     }
@@ -1905,6 +1956,8 @@ export async function startSequence(runtime, startMethod) {
     runtime.setState({ stage: STARTING })
     await this.runMiddleware(STARTING)
   } catch (error) {
+    events.emit('runtimeFailedStart', error, runtime, runtime.constructor)
+    runtime.fireHook('runtimeFailedStart', error, runtime, runtime.constructor)
     runtime.setState({ stage: START_FAILURE, error, failureStage: 'middlewares' })
     throw error
   }
@@ -1912,7 +1965,9 @@ export async function startSequence(runtime, startMethod) {
   try {
     await startMethod.call(runtime, runtime.options)
   } catch (error) {
-    runtime.setState({ stage: START_FAILURE, error })
+    events.emit('runtimeFailedStart', error, runtime, runtime.constructor)
+    runtime.setState({ stage: START_FAILURE, error, failureStage: 'startMethod' })
+    runtime.fireHook('runtimeFailedStart', error, runtime, runtime.currentState)
     throw error
   }
 
