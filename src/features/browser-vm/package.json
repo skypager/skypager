@@ -1,6 +1,6 @@
 {
   "name": "@skypager/features-browser-vm",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "a vm for running scripts in a jsdom context",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
