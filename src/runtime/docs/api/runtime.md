@@ -15,6 +15,15 @@ module registry, dependency injector.  Typically you can just do this with featu
 <dd></dd>
 </dl>
 
+## Functions
+
+<dl>
+<dt><a href="#whenPrepared">whenPrepared()</a></dt>
+<dd></dd>
+<dt><a href="#whenReadyAsync">whenReadyAsync()</a></dt>
+<dd></dd>
+</dl>
+
 ## Typedefs
 
 <dl>
@@ -57,6 +66,7 @@ module registry, dependency injector.  Typically you can just do this with featu
         * [.isDevelopment](#Runtime+isDevelopment)
         * [.isTest](#Runtime+isTest)
         * [.isProduction](#Runtime+isProduction)
+        * [.use(extension, stage)](#Runtime+use) ⇒ [<code>Runtime</code>](#Runtime)
         * [.set(path, value)](#Runtime+set) ⇒ <code>?</code>
         * [.get(path, defaultValue)](#Runtime+get) ⇒ <code>?</code>
         * [.result(path, defaultValue)](#Runtime+result) ⇒ <code>?</code>
@@ -65,6 +75,10 @@ module registry, dependency injector.  Typically you can just do this with featu
         * [.onRegistration(registryPropName, callback)](#Runtime+onRegistration)
         * [.registerHelper(helperName, helperClass)](#Runtime+registerHelper) ⇒ <code>Class</code>
         * [.mixin(mixin, options)](#Runtime+mixin)
+        * [.whenStarted(fn)](#Runtime+whenStarted) ⇒ [<code>Runtime</code>](#Runtime)
+        * [.whenStartedAsync()](#Runtime+whenStartedAsync) ⇒ [<code>PromiseLike.&lt;Runtime&gt;</code>](#Runtime)
+        * [.whenPrepared(fn, onError)](#Runtime+whenPrepared) ⇒ [<code>PromiseLike.&lt;Runtime&gt;</code>](#Runtime)
+        * [.whenPreparedAsync()](#Runtime+whenPreparedAsync) ⇒ [<code>PromiseLike.&lt;Runtime&gt;</code>](#Runtime)
         * [.replaceState([newState], [cb])](#Runtime+replaceState) ⇒ <code>Object</code>
         * [.setState([newState], [cb])](#Runtime+setState) ⇒ <code>Object</code>
         * *[.stateDidChange()](#Runtime+stateDidChange)*
@@ -165,29 +179,7 @@ argv will refer to the initial options passed to the runtime, along with any def
 <a name="Runtime+isBrowser"></a>
 
 ### runtime.isBrowser
-Returns `true` if the runtime is running inside of a browser.
+Returns true if the runtime is running inside of a browser.
 
 **Kind**: instance property of [<code>Runtime</code>](#Runtime)  
-**Read only**: true  
-<a name="Runtime+isNode"></a>
-
-### runtime.isNode
-Returns `true` if the runtime is running inside of node.
-
-**Kind**: instance property of [<code>Runtime</code>](#Runtime)  
-**Read only**: true  
-<a name="Runtime+isElectron"></a>
-
-### runtime.isElectron
-Returns `true` if the runtime is running inside of electron
-
-**Kind**: instance property of [<code>Runtime</code>](#Runtime)  
-**Read only**: true  
-<a name="Runtime+isElectronRenderer"></a>
-
-### runtime.isElectronRenderer
-Returns `true` if the runtime is running inside of electron's renderer process
-
-**Kind**: instance property of [<code>Runtime</code>](#Runtime)  
-**Read only**: true  
-<a name="Runtime+isReactNative"></
+**Read only**: true
