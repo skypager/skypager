@@ -1,6 +1,6 @@
 {
   "name": "@skypager/helpers-document",
-  "version": "0.2.8",
+  "version": "0.3.0",
   "description": "skypager document helper",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",

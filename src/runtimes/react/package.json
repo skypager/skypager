@@ -1,6 +1,6 @@
 {
   "name": "@skypager/react",
-  "version": "0.2.10",
+  "version": "0.3.0",
   "description": "",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "index.js",
@@ -23,8 +23,8 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.3.1",
-    "@skypager/features-browser-vm": "^0.2.8",
-    "@skypager/runtime": "^0.2.10",
+    "@skypager/features-browser-vm": "^0.3.0",
+    "@skypager/runtime": "^0.3.0",
     "prop-types": "^15.6.2",
     "react": "^16.7.0",
     "react-dom": "^16.7.0",

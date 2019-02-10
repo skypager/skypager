@@ -1,6 +1,6 @@
 {
   "name": "@skypager/webpack",
-  "version": "0.2.8",
+  "version": "0.3.0",
   "description": "provides common webpack dependencies, configs, and scripts",
   "author": "Jon Soeder <jon@chicago.com>",
   "homepage": "https://webpack.skypager.io",
