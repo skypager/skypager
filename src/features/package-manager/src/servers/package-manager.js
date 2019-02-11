@@ -1,7 +1,4 @@
-import * as fileManager from './file-manager'
-
 export async function appDidMount(...args) {
-  await fileManager.appDidMount.call(this, ...args)
   await this.packageManager.startAsync()
 }
 
@@ -9,8 +6,6 @@ export function appWillMount(app, ...args) {
   const { runtime } = this
 
   const packageManager = (this.packageManager = runtime.feature('package-manager'))
-
-  fileManager.appWillMount.call(this, app, ...args)
 
   app.get('/api/package-manager', (req, res) => {
     res.json({
