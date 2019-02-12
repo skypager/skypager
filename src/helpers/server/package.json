@@ -12,7 +12,7 @@
     "build": "rimraf lib && babel --comments --source-maps -d lib src",
     "watch": "babel --watch --comments --source-maps -d lib src",
     "test": "skypager test",
-    "postbuild": "skypager smoke-test",
+    "prepublish": "skypager smoke-test",
     "docs:api": "skypager generate-api-docs"
   },
   "skypager": {

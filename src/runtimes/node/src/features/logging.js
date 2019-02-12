@@ -82,7 +82,11 @@ export function _lazyLogger() {
       filename,
       maxSize: '1m',
       type: 'file',
-      level: this.argv.debug || this.isDevelopment ? 'debug' : 'info',
+      level:
+        this.argv.logLevel ||
+        process.env.SKYPAGER_LOG_LEVEL ||
+        process.env.LOG_LEVEL ||
+        (this.isDevelopment ? 'debug' : 'info'),
     },
     console: {
       prettyPrint: true,
@@ -90,7 +94,11 @@ export function _lazyLogger() {
       json: false,
       timestamp: false,
       type: 'console',
-      level: this.argv.debug || this.isDevelopment ? 'debug' : 'info',
+      level:
+        this.argv.logLevel ||
+        process.env.SKYPAGER_LOG_LEVEL ||
+        process.env.LOG_LEVEL ||
+        (this.isDevelopment ? 'debug' : 'info'),
     },
   }
 
