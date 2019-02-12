@@ -1,9 +1,6 @@
 export default (async function(chain, options = {}) {
   const skypager = this
 
-  //await skypager.fileManager.whenActivated()
-  //await skypager.fileManager.hashFiles("")
-
   return chain
     .plant(skypager.fileManager)
     .result('files.values', [])

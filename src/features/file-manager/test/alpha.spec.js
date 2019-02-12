@@ -26,7 +26,7 @@ describe('The File Manager Feature', function() {
   })
 
   it('can match files using a route pattern', function() {
-    const matches = runtime.fileManager.matchRoute('src/features/:name.js')
+    const matches = runtime.fileManager.matchRoute('src/:name.js')
     matches.should.be.an('array').that.is.not.empty
     matches[0].should.be
       .an('object')
@@ -38,5 +38,9 @@ describe('The File Manager Feature', function() {
   it('is based on the underlying git feature of the node runtime', function() {
     runtime.fileManager.directoryIds.length.should.equal(runtime.git.directoryIds.length)
     runtime.fileManager.fileIds.length.should.equal(runtime.git.fileIds.length)
+  })
+
+  it('has functions for accessing files', function() {
+    runtime.fileManager.should.have.property('file').that.is.a('function')
   })
 })

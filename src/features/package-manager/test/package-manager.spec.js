@@ -1,46 +1,65 @@
-import { packageManager, fileManager } from './runtime'
+import { runtime } from './runtime'
 
 describe('The Package Manager', function() {
+  let packageManager
+
   before(async function() {
+    await runtime.fileManager.startAsync()
+    packageManager = runtime.feature('package-manager')
+    packageManager.enable()
+  })
+
+  it('shares a file manager with runtime', function() {
+    runtime.fileManager.uuid.should.equal(packageManager.fileManager.uuid)
+    runtime.fileManager.status.should.equal(packageManager.fileManager.status)
+  })
+
+  it('has test fixtures', function() {
+    runtime.fileManager.fileIds.should.include('test/fixtures/test-package-2/package.json')
+  })
+
+  it('has a lifecyle', async function() {
+    packageManager.status.should.equal('CREATED')
     await packageManager.startAsync()
+    packageManager.status.should.equal('READY')
   })
 
-  it('tells us about the manifests in the project', function() {
-    packageManager.manifests.keys().should.include('package.json')
-    packageManager.manifests.keys().should.include('test/fixtures/test-package/package.json')
+  it('finds packages', function() {
+    packageManager.packageNames.should.include('@skypager/features-package-manager')
+    packageManager.packageNames.should.include('test-package-2')
   })
 
-  it('has a map of packages found by name', function() {
-    packageManager.byName.should.be
-      .an('object')
-      .that.has.property('@skypager/features-file-manager')
+  it('should not fail to load any', function() {
+    packageManager.failed.should.be.empty
   })
 
-  it('can find packages by name', function() {
+  it('can find a package by its name', function() {
     packageManager
-      .findByName('test-package')
+      .findByName('@skypager/features-package-manager')
       .should.be.an('object')
-      .with.property('name', 'test-package')
+      .with.property('name', '@skypager/features-package-manager')
+    packageManager
+      .findByName('test-package-2')
+      .should.be.an('object')
+      .with.property('name', 'test-package-2')
   })
 
-  it('can find packages by their dependencies', function() {
-    packageManager.findDependentsOf('test-package').should.have.property('test-package-2')
+  it('can check the remote status of packages', async function() {
+    packageManager.should.have.property('checkRemoteStatus').that.is.a('function')
+    packageManager.should.have.property('remotes')
+    packageManager.remotes.should.have.property('get')
+    packageManager.remotes.should.have.property('set')
+    packageManager.remotes.should.have.property('keys')
   })
 
-  it('maps packages by their dependencies', function() {
-    packageManager.dependenciesMap.should.be.an('object').that.is.not.empty
-  })
+  it('has a map of the current packages and their versions', function() {
+    const { versionMap } = packageManager
 
-  it('can find a package using a function', function() {
-    packageManager.findBy(v => false).should.be.empty
-    packageManager.findBy(v => true).should.not.be.empty
-  })
-
-  describe('Package Graph', function() {
-    it('generates a graph of package dependencies', async function() {
-      const { graph } = await packageManager.exportGraph()
-      graph.should.be.an('object').that.has.property('nodes')
-      graph.should.be.an('object').that.has.property('edges')
-    })
+    versionMap.should.have.property('test-package-2')
+    versionMap.should.have.property('test-package')
+    versionMap.should.have.property(
+      '@skypager/features-package-manager',
+      packageManager.runtime.currentPackage.version
+    )
   })
 })

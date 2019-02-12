@@ -285,18 +285,18 @@ export default class ModuleManager extends Feature {
     return packages
   }
 
-  checkRepo(name, version) {
+  async checkRepo(name, version = 'latest') {
     let request = name
 
     if (typeof version === 'string') {
       request = [name, version].join('@')
     }
 
-    return this.runtime.proc.async
-      .exec(`npm info ${request} --json`)
-      .then(c => c && c.stdout && c.stdout.toString())
-      .then(json => json && json.length && JSON.parse(json))
-      .catch(e => undefined)
+    try {
+      return JSON.parse(this.runtime.proc.execSync(`npm view ${request} --json`).toString())
+    } catch (error) {
+      return false
+    }
   }
 
   find(name, version) {

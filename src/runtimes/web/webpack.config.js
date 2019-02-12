@@ -15,11 +15,16 @@ const minifiedWebConfig = merge.strategy({ node: 'replace', entry: 'replace' })(
     name: 'web',
     output: {
       library: 'skypager',
-      libraryTarget: 'umd',
+      libraryTarget: 'var',
     },
     entry: {
       'skypager-runtimes-web.min': path.resolve(cwd, 'src', 'index.js'),
     },
+    externals: [
+      {
+        lodash: 'window _',
+      },
+    ],
   }
 )
 
@@ -34,6 +39,11 @@ const webConfig = merge.strategy({ node: 'replace', entry: 'replace', plugins: '
     entry: {
       'skypager-runtimes-web': path.resolve(cwd, 'src', 'index.js'),
     },
+    externals: [
+      {
+        lodash: 'window _',
+      },
+    ],
     plugins: baseProductionConfig.plugins.filter(
       p => !p.constructor || !p.constructor.name === 'UglifyJsPlugin'
     ),

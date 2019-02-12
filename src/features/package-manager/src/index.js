@@ -1,5 +1,7 @@
 import PackageManager from './package-manager'
 
+export { PackageManager }
+
 export function attach(runtime, options = {}) {
   runtime.features.register('package-manager', () => PackageManager)
   runtime.selectors.register('package/changed', () => require('./selectors/package/changed'))

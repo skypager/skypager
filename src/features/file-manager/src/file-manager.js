@@ -5,8 +5,6 @@ import * as computedProperties from './file-manager/computed'
 import * as actions from './file-manager/actions'
 import Promise from 'bluebird'
 import Memory from 'memory-fs'
-export { walkUp, walkUpSync } from './package-manager'
-
 export const createGetter = 'fileManager'
 
 export function observables(options = {}) {
@@ -126,12 +124,7 @@ export const hostMixinOptions = {
 }
 
 export function requireContext(rule, options = {}) {
-  const {
-    requireFn = __non_webpack_require__,
-    keyBy = 'name',
-    mapValues = 'path',
-    formatId,
-  } = options
+  const { requireFn = require, keyBy = 'name', mapValues = 'path', formatId } = options
 
   if (!this.fileManager) {
     throw new Error(`The Require Context feature depends on the file-manager feature.`)
@@ -984,3 +977,47 @@ export const LIFECYCLE_HOOKS = {
 export const getStatuses = () => STATUSES
 
 export const getLifeCycleHooks = () => LIFECYCLE_HOOKS
+
+export function walkUp(options = {}) {
+  const testPaths = this.findModulePaths({
+    cwd: this.runtime.cwd,
+    filename: 'package.json',
+    ...options,
+  })
+
+  return options.sync
+    ? this.runtime.fsx.existingSync(...testPaths)
+    : Promise.resolve(this.runtime.fsx.existingAsync(...testPaths))
+}
+
+export function walkUpSync(options = {}) {
+  const testPaths = this.findModulePaths({
+    cwd: this.runtime.cwd,
+    filename: 'package.json',
+    ...options,
+  })
+
+  return this.runtime.fsx.existingSync(...testPaths)
+}
+
+export function findModulePaths(options = {}) {
+  if (typeof options === 'string') {
+    options = { cwd: options }
+  }
+
+  const cwd = options.cwd
+  const filename = options.filename || options.file || options.filename || 'skypager.js'
+
+  const parts = cwd.split('/').slice(1)
+
+  parts[0] = `/${parts[0]}`
+
+  const testPaths = []
+
+  while (parts.length) {
+    testPaths.push([...parts, filename].join('/'))
+    parts.pop()
+  }
+
+  return testPaths
+}

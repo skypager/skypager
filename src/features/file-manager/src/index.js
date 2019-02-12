@@ -1,30 +1,16 @@
+import { attach as attachPackageManager } from '@skypager/features-package-manager'
+import { attach as attachModuleManager } from '@skypager/features-module-manager'
+
 export function attach(runtime, options = {}) {
   runtime = runtime || this
 
-  runtime.features.register('file-manager', () => require('./features/file-manager.js'))
-  runtime.features.register('package-manager', () => require('./features/package-manager.js'))
-  runtime.features.register('module-manager', () => require('./features/module-manager.js'))
+  runtime.features.register('file-manager', () => require('./file-manager'))
 
-  runtime.selectors.register('files/asts', () => require('./selectors/files/asts'))
-  runtime.selectors.register('files/cache', () => require('./selectors/files/asts'))
-  runtime.selectors.register('files/changed', () => require('./selectors/files/asts'))
-  runtime.selectors.register('files/documents', () => require('./selectors/files/asts'))
-  runtime.selectors.register('files/extensions', () => require('./selectors/files/asts'))
-  runtime.selectors.register('files/mimeTypes', () => require('./selectors/files/asts'))
-  runtime.selectors.register('files/tree', () => require('./selectors/files/asts'))
-  runtime.selectors.register('modules/keywords', () => require('./selectors/modules/keywords'))
-  runtime.selectors.register('modules/maintainers', () =>
-    require('./selectors/modules/maintainers')
-  )
-  runtime.selectors.register('package/changed', () => require('./selectors/package/changed'))
-  runtime.selectors.register('package/locations', () => require('./selectors/package/locations'))
-  runtime.selectors.register('package/outdated-remotes', () =>
-    require('./selectors/package/outdated-remotes')
-  )
-  runtime.selectors.register('package/repository-status', () =>
-    require('./selectors/package/repository-status')
-  )
-  runtime.selectors.register('package/snapshot', () => require('./selectors/package/snapshot'))
+  runtime.selectors.register('files/cache', () => require('./selectors/files/cache'))
+  runtime.selectors.register('files/changed', () => require('./selectors/files/changed'))
+  runtime.selectors.register('files/extensions', () => require('./selectors/files/extensions'))
+  runtime.selectors.register('files/mimeTypes', () => require('./selectors/files/mimeTypes'))
+  runtime.selectors.register('files/tree', () => require('./selectors/files/tree'))
 
   options = runtime.lodash.defaults(
     {},
@@ -42,7 +28,7 @@ export function attach(runtime, options = {}) {
     options.sourceRoot = runtime.fsx.existsSync(runtime.resolve('src')) ? 'src' : '.'
   }
 
-  const { sourceRoot } = options
+  const { disableModuleManager, disablePackageManager, sourceRoot } = options
 
   const baseFolder = runtime.resolve(
     options.baseFolder || options.base || sourceRoot || runtime.cwd
@@ -57,16 +43,17 @@ export function attach(runtime, options = {}) {
 
   const fileManager = runtime.feature('file-manager', fileManagerOptions)
 
+  if (!disablePackageManager) {
+    runtime.use({ attach: attachPackageManager })
+    runtime.feature('package-manager').enable(fileManagerOptions)
+  }
+
+  if (!disableModuleManager) {
+    runtime.use({ attach: attachModuleManager })
+    runtime.feature('module-manager').enable(fileManagerOptions)
+  }
+
   fileManager.enable(fileManagerOptions)
-
-  // is this necessary
-  if (runtime.argv.moduleManager !== false) {
-    runtime.feature('module-manager').enable()
-  }
-
-  if (runtime.argv.packageManager !== false) {
-    runtime.feature('package-manager').enable()
-  }
 
   if (runtime.argv.startFileManager) {
     fileManager
@@ -80,11 +67,9 @@ export function attach(runtime, options = {}) {
 
   runtime.onRegistration('clients', () => {
     runtime.clients.register('file-manager', () => require('./clients/file-manager'))
-    runtime.clients.register('package-manager', () => require('./clients/package-manager'))
   })
 
   runtime.onRegistration('servers', () => {
     runtime.servers.register('file-manager', () => require('./servers/file-manager'))
-    runtime.servers.register('package-manager', () => require('./servers/package-manager'))
   })
 }

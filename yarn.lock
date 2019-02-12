@@ -1589,6 +1589,42 @@
   version "2.1.3"
   resolved "https://registry.yarnpkg.com/@sinonjs/samsam/-/samsam-2.1.3.tgz#62cf2a9b624edc795134135fe37fc2ae8ea36be3"
 
+"@skypager/features-browser-vm@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@skypager/features-browser-vm/-/features-browser-vm-0.3.0.tgz#bff3224d046a45506eb51df89e328c1b7abfb8bb"
+  dependencies:
+    jsdom "^13.2.0"
+
+"@skypager/features-file-manager@^0.3.0":
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/@skypager/features-file-manager/-/features-file-manager-0.3.0.tgz#986c6e285240c6d7742fc9f09218cd44154917ba"
+  dependencies:
+    "@skypager/helpers-client" "^0.3.0"
+    "@skypager/helpers-server" "^0.3.0"
+    fs-extra-promise "^1.0.1"
+    gaze "^1.1.3"
+    md5-file "3.1.1"
+    memory-fs "^0.4.1"
+    skywalker "^0.3.2"
+
+"@skypager/helpers-client@^0.2.7":
+  version "0.2.8"
+  resolved "https://registry.yarnpkg.com/@skypager/helpers-client/-/helpers-client-0.2.8.tgz#5f3b76e7e4b1c647331b85c2dfa6d11a3f9044eb"
+  dependencies:
+    axios "github:axios/axios"
+
+"@skypager/helpers-server@^0.2.7":
+  version "0.2.8"
+  resolved "https://registry.yarnpkg.com/@skypager/helpers-server/-/helpers-server-0.2.8.tgz#d360a647ffe2a64aa34ac46bdfe71106a4978ed6"
+  dependencies:
+    body-parser "^1.18.3"
+    cors "^2.8.4"
+    express "^4.15.2"
+    express-history-api-fallback "^2.2.1"
+    express-prettify "^0.1.0"
+    express-winston "^3.0.1"
+    winston "^3.1.0"
+
 "@types/accepts@^1.3.5":
   version "1.3.5"
   resolved "https://registry.yarnpkg.com/@types/accepts/-/accepts-1.3.5.tgz#c34bec115cfc746e04fe5a059df4ce7e7b391575"
@@ -1883,6 +1919,10 @@ anymatch@^2.0.0:
   dependencies:
     micromatch "^3.1.4"
     normalize-path "^2.1.1"
+
+api-npm@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/api-npm/-/api-npm-1.0.0.tgz#5b33589a8c58ebe78721d3c9a11f6e8182f00a26"
 
 apollo-boost@^0.1.23:
   version "0.1.27"
@@ -2372,7 +2412,7 @@ axios@^0.18.0:
   version "0.19.0-beta.1"
   resolved "https://codeload.github.com/axios/axios/tar.gz/2eeb59af4de41e07c7dd1eec09af0230960c029c"
   dependencies:
-    follow-redirects "1.5.10"
+    follow-redirects "^1.4.1"
     is-buffer "^2.0.2"
 
 axobject-query@^2.0.2:
@@ -5423,13 +5463,7 @@ flush-write-stream@^1.0.0:
     inherits "^2.0.3"
     readable-stream "^2.3.6"
 
-follow-redirects@1.5.10:
-  version "1.5.10"
-  resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.5.10.tgz#7b7a9f9aea2fdff36786a94ff643ed07f4ff5e2a"
-  dependencies:
-    debug "=3.1.0"
-
-follow-redirects@^1.0.0, follow-redirects@^1.3.0:
+follow-redirects@^1.0.0, follow-redirects@^1.3.0, follow-redirects@^1.4.1:
   version "1.6.1"
   resolved "https://registry.yarnpkg.com/follow-redirects/-/follow-redirects-1.6.1.tgz#514973c44b5757368bad8bddfe52f81f015c94cb"
   dependencies:
@@ -8787,6 +8821,12 @@ npm-which@^3.0.1:
     commander "^2.9.0"
     npm-path "^2.0.2"
     which "^1.2.10"
+
+npmjs-api@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/npmjs-api/-/npmjs-api-1.0.3.tgz#ec98acc1199b7160f49af15af0b15f57130c3d05"
+  dependencies:
+    request "^2.87.0"
 
 "npmlog@0 || 1 || 2 || 3 || 4", npmlog@^4.0.2, npmlog@^4.1.2:
   version "4.1.2"

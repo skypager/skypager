@@ -3,21 +3,25 @@ export default (async function repositoryStatus(chain, options = {}) {
   const { fileManager } = runtime
   const { packageManager } = runtime
 
-  await fileManager.startAsync({ startPackageManager: true })
+  await fileManager.whenActivated()
+  await packageManager.whenActivated()
 
   if (typeof options === 'string') {
     options = { packages: [options] }
   }
 
-  const { packages = packageManager.packageNames } = options
+  const { filter = Boolean, packages = packageManager.packageNames.filter(filter) } = options
 
-  const checkRepo = packageName =>
-    runtime.proc.async
-      .exec(`npm info ${packageName} --json`)
-      .then(c => String(c.stdout))
-      .catch(error => {
-        return false
+  const checkRepo = packageName => {
+    return runtime.proc
+      .spawnAndCapture({
+        cmd: 'npm',
+        args: ['info', packageName, '--json'],
       })
+      .then(response => {
+        return JSON.parse(response.normalOutput.join(''))
+      })
+  }
 
   const results = await Promise.all(
     packages.map(packageName =>

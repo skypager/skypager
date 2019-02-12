@@ -1,4 +1,4 @@
-import { Feature } from '@skypager/runtime'
+import { Feature } from '@skypager/node'
 
 /**
  * @class PackageManager
@@ -56,11 +56,11 @@ export default class PackageManager extends Feature {
 
       checkRemoteStatus: [
         'action',
-        function checkRemoteStatus() {
+        function checkRemoteStatus(options = {}) {
           const p = this
 
           return p.runtime
-            .select('package/repository-status')
+            .select('package/repository-status', options)
             .then(data => {
               Object.keys(data).forEach(pkg => p.updateRemote(pkg, data[pkg], true))
               return data
@@ -823,11 +823,54 @@ export default class PackageManager extends Feature {
   }
 
   async loadManifests(options = {}) {
-    const packageIds = await this.fileManager.matchPaths(/package.json$/)
-    const absolute = packageIds.map(p => this.runtime.resolve(p))
     const { defaults, compact, castArray, flatten } = this.lodash
+    const { runtime, fileManager } = this
+    const packageIds = await fileManager.matchPaths(/package.json$/)
+    const absolute = packageIds.map(p => runtime.resolve(p))
 
-    const include = compact(flatten([...absolute, ...castArray(options.include || [])]))
+    const include = compact(flatten([...absolute, ...castArray(options.include)]))
+
+    await this.fileManager.readAllContent({
+      hash: true,
+      ...options,
+      include: p => include.indexOf(p) >= 0,
+    })
+
+    this.failed = this.failed || []
+
+    packageIds.forEach(id => {
+      try {
+        const _file = fileManager.files.get(id)
+        const _packageId = id
+        const data = JSON.parse(_file.content)
+        this.manifests.set(
+          id,
+          this.normalizePackage(
+            defaults(
+              {},
+              data,
+              {
+                _packageId,
+                _file,
+              },
+              this.manifests.get(id)
+            )
+          )
+        )
+      } catch (error) {
+        this.failed.push({ id, error })
+      }
+    })
+  }
+
+  async _loadManifests(options = {}) {
+    const { defaults, compact, castArray, flatten } = this.lodash
+    const { runtime, fileManager } = this
+    const { manifestPath } = runtime
+    const packageIds = await fileManager.matchPaths(/package.json$/)
+    const absolute = packageIds.map(p => runtime.resolve(p))
+
+    const include = compact(flatten([...absolute, ...castArray(options.include)]))
 
     const results = await this.fileManager.readAllContent({
       hash: true,
@@ -850,20 +893,6 @@ export default class PackageManager extends Feature {
 
       try {
         const data = JSON.parse(content || '{}')
-        this.manifests.set(
-          id,
-          this.normalizePackage(
-            defaults(
-              {},
-              data,
-              {
-                _packageId: id,
-                _file: this.fileManager.file(id),
-              },
-              this.manifests.get(id)
-            )
-          )
-        )
       } catch (error) {
         this.failed.push([id, error])
       }
@@ -873,7 +902,7 @@ export default class PackageManager extends Feature {
   }
 
   walkUp(options = {}) {
-    const testPaths = findModulePaths({
+    const testPaths = this.findModulePaths({
       cwd: this.runtime.cwd,
       filename: 'package.json',
       ...options,
@@ -885,7 +914,7 @@ export default class PackageManager extends Feature {
   }
 
   walkUpSync(options = {}) {
-    const testPaths = findModulePaths({
+    const testPaths = this.findModulePaths({
       cwd: this.runtime.cwd,
       filename: 'package.json',
       ...options,

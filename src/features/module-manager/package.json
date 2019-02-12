@@ -21,5 +21,9 @@
     "category": "features"
   },
   "keywords": [],
-  "contributors": []
+  "contributors": [],
+  "dependencies": {
+    "api-npm": "^1.0.0",
+    "npmjs-api": "^1.0.3"
+  }
 }

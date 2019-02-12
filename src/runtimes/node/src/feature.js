@@ -21,9 +21,16 @@ export function enabledHook(options = {}) {
 
   defaultsDeep(runtime.argv, runtime.parseArgv(runtime.argv))
 
+  /* 
+    these are flags that help me test these modules.  when this env is set
+    i am usually running untranspiled src code, and don't want the node runtime to
+    load the transpiled version first
+ */
   const {
     disableHelpers = process.env.DISABLE_SKYPAGER_HELPERS || '',
     disableFileManager = !!process.env.DISABLE_SKYPAGER_FILE_MANAGER,
+    disablePackageManager = !!process.env.DISABLE_SKYPAGER_PACKAGE_MANAGER,
+    disableModuleManager = !!process.env.DISABLE_SKYPAGER_MODULE_MANAGER,
   } = runtime.argv
 
   if (runtime.argv.profile) {
@@ -162,7 +169,10 @@ export function enabledHook(options = {}) {
     runtime.lazy('fileManager', () => {
       try {
         runtime.invoke('profiler.profileStart', 'fileManagerEnabled')
-        require('@skypager/features-file-manager').attach(runtime)
+        require('@skypager/features-file-manager').attach(runtime, {
+          disableModuleManager,
+          disablePackageManager,
+        })
         runtime.invoke('profiler.profileEnd', 'fileManagerEnabled')
         return runtime.feature('file-manager')
       } catch (e) {

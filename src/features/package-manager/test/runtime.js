@@ -1,13 +1,13 @@
 import runtime from '@skypager/node'
-import * as FileManagerFeature from '../src'
-import * as ServerHelper from '@skypager/helpers-server'
+import * as PackageManager from '../src'
 
-runtime.use(ServerHelper).use(FileManagerFeature)
-runtime.feature('file-manager').enable()
+runtime.use(PackageManager)
+
+runtime.fileManager.enable()
 runtime.feature('package-manager').enable()
 
-const { fileManager, packageManager } = runtime
+export const packageManager = runtime.packageManager
 
-export { packageManager, fileManager, runtime }
+export { runtime }
 
 export default runtime
