@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { runtime, fileManager } from './runtime'
 
-describe('Servers', function() {
+xdescribe('Servers', function() {
   it('registers the file manager server if the server helper is in use', function() {
     runtime.use(__non_webpack_require__('@skypager/helpers-server'))
     runtime.should.have
