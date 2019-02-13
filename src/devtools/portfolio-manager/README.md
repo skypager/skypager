@@ -1,6 +1,8 @@
 # Skypager Portfolio Manager
 
-Provides useful information and capabilities at a portfolio level for your mono repo
+Provides useful information and capabilities at a portfolio level for your monorepo.
+
+Use it to aggregate information about each project, to run tasks in various projects, etc.
 
 ## Usage
 
