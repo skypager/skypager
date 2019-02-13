@@ -44,6 +44,10 @@ async function main() {
   const server = runtime.server('portfolio')
   console.log(server.provider)
   await server.start()
+
+  if (runtime.argv.interactive) {
+    runtime.repl('interactive').launch({ server, portfolio: runtime.portfolio })
+  }
 }
 
 main()

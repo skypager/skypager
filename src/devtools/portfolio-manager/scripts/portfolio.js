@@ -26,6 +26,36 @@ async function main() {
   if (command === 'export') {
     await runExport(...commands.slice(1))
   }
+
+  if (command === 'restore') {
+    await runRestore(...commands.slice(1))
+  }
+}
+
+async function runRestore(slice = 'builds') {
+  const { versionMap } = portfolio.packageManager
+
+  await portfolio.packageManager.checkRemoteStatus()
+
+  if (slice === 'builds') {
+    await Promise.all(
+      portfolio.scopedPackageNames.map(packageName => {
+        print(`Restoring ${packageName} ${versionMap[packageName]}`)
+        restore(packageName, versionMap[packageName])
+      })
+    )
+  }
+}
+
+async function restore(packageName, requestedVersion) {
+  try {
+    const buildFolders = await portfolio.restore(packageName, requestedVersion)
+    print(`Restored ${packageName}@${requestedVersion}`)
+    print(buildFolders, 4)
+  } catch (error) {
+    print(`Error restoring ${packageName}`)
+    print(error.message, 2)
+  }
 }
 
 async function runExport(slice = 'graphs') {

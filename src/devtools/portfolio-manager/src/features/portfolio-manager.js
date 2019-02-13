@@ -188,7 +188,9 @@ export default class PortfolioManager extends Feature {
 
     const scope = name.split('/')[0]
 
-    return packageNames.filter(packageName => packageName.startsWith(scope))
+    return packageNames.filter(
+      packageName => packageName.startsWith(scope) || `@${packageName}` === scope
+    )
   }
 
   /**
@@ -322,6 +324,67 @@ export default class PortfolioManager extends Feature {
     })
 
     return this.projects.get(projectName)
+  }
+
+  /**
+   * Restores the build folders for a portfolio project from the tarball archives
+   *
+   * @param {String} packageName
+   * @param {Object} [options={}] options for the restore
+   * @param {Boolean} [options.overwrite=false] whether to override the contents that are already there
+   * @memberof PortfolioManager
+   */
+  async restore(packageName, requestedVersion, options = {}) {
+    const { buildFolders = ['build', 'dist', 'lib'] } = options
+    const { packageManager, runtime } = this
+
+    const remote = packageManager.remotes.get(packageName)
+    const local = packageManager.findByName(packageName)
+
+    if (!local) {
+      throw new Error(`Could not restore package ${packageName}, not found in package manager`)
+    }
+
+    if (!remote) {
+      return
+    }
+
+    const { dir } = local._file
+
+    const { version = requestedVersion, name } = remote
+
+    const localTarballPath = runtime.resolve(
+      'build',
+      ...name.split('/').concat([version, `package-${version}.tgz`])
+    )
+
+    const extractPath = runtime.resolve('build', ...name.split('/').concat([version]))
+
+    const tarballExists = await runtime.fsx.existsAsync(localTarballPath)
+
+    if (!tarballExists) {
+      await this.downloadTarball(remote)
+    }
+
+    const { intersection } = this.lodash
+    const extracted = await this.extractTarball(remote)
+
+    const extractedBuildFolders = intersection(
+      extracted,
+      buildFolders.map(f => runtime.resolve(extractPath, f))
+    )
+
+    const { basename } = this.runtime.pathUtils
+
+    const restoredFolders = await Promise.all(
+      extractedBuildFolders.map(buildFolderPath =>
+        runtime.fsx
+          .copyAsync(buildFolderPath, runtime.resolve(dir, basename(buildFolderPath)))
+          .then(() => runtime.resolve(dir, basename(buildFolderPath)))
+      )
+    )
+
+    return restoredFolders
   }
 
   /**
@@ -524,6 +587,88 @@ export default class PortfolioManager extends Feature {
     this.hide('managers', managers)
 
     return managers
+  }
+
+  /**
+   * Extracts the downloaded tar archive from npm for a package
+   *
+   * @private
+   * @param {Object} [remote={ name, version }={}]
+   * @param {Object} [options={}]
+   * @memberof PortfolioManager
+   */
+  async extractTarball({ name, version } = {}, options = {}) {
+    const { runtime } = this
+    const destination = runtime.resolve('build', name, version, `package-${version}.tgz`)
+    const exists = await runtime.fsx.existsAsync(destination)
+    const folder = runtime.pathUtils.dirname(destination)
+
+    if (exists) {
+      await runtime.proc.async.spawn('tar', ['zxvf', destination], {
+        cwd: folder,
+      })
+
+      const items = await runtime.fsx.readdirAsync(runtime.resolve(folder, 'package'))
+
+      if (items.indexOf('lib') !== -1) {
+        await runtime.fsx.copyAsync(
+          runtime.resolve(folder, 'package', 'lib'),
+          runtime.resolve(folder, 'lib')
+        )
+      }
+
+      if (items.indexOf('dist') !== -1) {
+        await runtime.fsx.copyAsync(
+          runtime.resolve(folder, 'package', 'dist'),
+          runtime.resolve(folder, 'dist')
+        )
+      }
+
+      if (items.indexOf('build') !== -1) {
+        await runtime.fsx.copyAsync(
+          runtime.resolve(folder, 'package', 'build'),
+          runtime.resolve(folder, 'build')
+        )
+      }
+
+      await runtime.fsx.copyAsync(
+        runtime.resolve(folder, 'package', 'package.json'),
+        runtime.resolve(folder, 'package.json')
+      )
+    }
+
+    if (options.clean !== false) {
+      await runtime.fsx.removeAsync(runtime.resolve(folder, 'package'))
+    }
+
+    const entries = await runtime.fsx.readdirAsync(runtime.resolve(folder))
+
+    return entries.map(e => runtime.resolve(folder, e))
+  }
+
+  /**
+   * Downloads a tar archive of a package from npm
+   *
+   * @private
+   * @param {Object} [{ name, version, dist: { tarball } }={}]
+   * @returns {String}
+   * @memberof PortfolioManager
+   */
+  async downloadTarball({ name, version, dist: { tarball } } = {}) {
+    const { runtime } = this
+    const destination = runtime.resolve('build', name, version, `package-${version}.tgz`)
+    const exists = await runtime.fsx.existsAsync(destination)
+
+    if (exists) {
+      return destination
+    }
+
+    const folder = runtime.pathUtils.dirname(destination)
+
+    await runtime.fsx.mkdirpAsync(folder)
+    await runtime.fileDownloader.downloadAsync(tarball, runtime.relative(destination))
+
+    return destination
   }
 }
 
