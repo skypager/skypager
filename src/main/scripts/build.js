@@ -12,7 +12,7 @@ const universal = require('../../runtime/package.json')
 const node = require('../../runtimes/node/package.json')
 const cli = require('../../devtools/cli/package.json')
 const main = require('../package.json')
-const mainDistPath = path.resolve(__dirname, '..', 'dist')
+const mainDistPath = path.resolve(__dirname, '..', 'lib')
 
 const sig = deps =>
   Object.keys(deps)
