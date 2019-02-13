@@ -34,6 +34,8 @@ process.env.DISABLE_SKYPAGER_FILE_MANAGER = true
 
 const stageOne = [
   ['@skypager/helpers-client', 'src/helpers/client', 'lib'],
+  ['@skypager/features-module-manager', 'src/features/module-manager', 'lib'],
+  ['@skypager/features-package-manager', 'src/features/package-manager', 'lib'],
   ['@skypager/features-file-manager', 'src/features/file-manager', 'lib'],
   ['@skypager/node', 'src/runtimes/node', 'lib'],
 ]
