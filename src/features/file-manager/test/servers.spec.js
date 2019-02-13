@@ -1,11 +1,10 @@
 import axios from 'axios'
-import { runtime, fileManager } from './runtime'
+import { runtime } from './runtime'
 
-xdescribe('Servers', function() {
-  it('registers the file manager server if the server helper is in use', function() {
-    runtime.use(__non_webpack_require__('@skypager/helpers-server'))
+describe('Servers', function() {
+  it('registers the file manager endpoints server if the server helper is in use', function() {
     runtime.should.have
-      .property('servers')
+      .property('endpoints')
       .that.has.property('available')
       .that.is.an('array')
       .that.includes('file-manager')
@@ -14,8 +13,8 @@ xdescribe('Servers', function() {
   let server
   it('provides a REST API', async function() {
     const openPort = await runtime.networking.findOpenPort()
-    server = runtime.server('package-manager', {
-      fileManager: () => fileManager,
+
+    server = runtime.server('file-manager', {
       port: openPort,
       hostname: 'localhost',
       showBanner: false,
@@ -31,33 +30,6 @@ xdescribe('Servers', function() {
     const { port, hostname } = server
     return axios.get(`http://${hostname}:${port}/${url.replace(/^\//, '')}`).then(r => r.data)
   }
-
-  it('provides access to the package manager', async function() {
-    const response = await get('/api/package-manager')
-    response.should.be
-      .an('object')
-      .that.has.property('packageIds')
-      .that.is.an('array')
-      .that.includes('@skypager/features-file-manager')
-    response.should.be
-      .an('object')
-      .that.has.property('versions')
-      .that.has.property('test-package', '0.0.1')
-  })
-
-  it('provides info about all the packages', async function() {
-    const response = await get('/api/package-manager/packages')
-    response.should.be.an('array')
-    const names = response.map(p => p.name)
-    names.should.include('@skypager/features-file-manager')
-    names.should.include('test-package')
-    names.should.include('test-package-2')
-  })
-
-  it('provides access to package info', async function() {
-    const response = await get('/api/package-manager/package/@skypager/features-file-manager')
-    response.should.be.an('object').that.has.property('name', '@skypager/features-file-manager')
-  })
 
   it('provides access to the in memory file system', async function() {
     const response = await get('/api/file-manager')

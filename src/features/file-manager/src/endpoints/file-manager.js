@@ -1,27 +1,6 @@
-export const pretty = true
-
-export async function appDidMount() {
-  this.runtime.debug('app did mount hook')
-  const fileManager = this.tryResult('fileManager', () => this.runtime.fileManager)
-  this.runtime.debug('starting file manager')
-  await fileManager.startAsync()
-  await fileManager.syncMemoryFileSystem({
-    fallback: true,
-    content: true,
-    hash: true,
-    include: [/.*/],
-  })
-  this.runtime.debug('file manager started')
-  this.fm = fileManager
-  return true
-}
-
-export function appWillMount(app) {
-  this.runtime.debug('app will mount')
-  const fm = this.tryResult('fileManager', () => this.runtime.fileManager)
-
-  this.runtime.debug({ fm: fm.uuid, runtime: this.runtime.uuid })
-
+export default function fileManagerEndpoints(app) {
+  const { runtime } = this
+  const { fileManager: fm } = runtime
   const cleanPath = realPath => realPath.replace(this.runtime.cwd, '~')
 
   app.get('/api/file-manager', (req, res) => {
@@ -62,4 +41,6 @@ export function appWillMount(app) {
       res.status(404).send({ error: true, notFound: true, id })
     }
   })
+
+  return app
 }

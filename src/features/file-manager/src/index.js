@@ -70,6 +70,6 @@ export function attach(runtime, options = {}) {
   })
 
   runtime.onRegistration('servers', () => {
-    runtime.servers.register('file-manager', () => require('./servers/file-manager'))
+    runtime.endpoints.register('file-manager', () => require('./endpoints/file-manager'))
   })
 }

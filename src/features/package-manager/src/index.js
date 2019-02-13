@@ -23,6 +23,6 @@ export function attach(runtime, options = {}) {
   })
 
   runtime.onRegistration('servers', () => {
-    runtime.servers.register('package-manager', () => require('./servers/package-manager'))
+    runtime.endpoints.register('package-manager', () => require('./endpoints/package-manager'))
   })
 }

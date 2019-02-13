@@ -1,10 +1,5 @@
-export async function appDidMount(...args) {
-  await this.packageManager.startAsync()
-}
-
-export function appWillMount(app, ...args) {
+export default function packageManagerEndpoints(app, options = {}) {
   const { runtime } = this
-
   const packageManager = (this.packageManager = runtime.feature('package-manager'))
 
   app.get('/api/package-manager', (req, res) => {
