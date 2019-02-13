@@ -55,7 +55,6 @@ export default class FileDownloaderFeature extends Feature {
         response.pipe(file)
 
         file.on('finish', () => {
-          console.log('file finished')
           file.close(() => cb(null, dest))
         })
       })
