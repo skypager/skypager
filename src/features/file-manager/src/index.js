@@ -39,6 +39,7 @@ export function attach(runtime, options = {}) {
     sourceRoot,
     baseFolder,
     base: baseFolder,
+    cwd: runtime.cwd,
   }
 
   const fileManager = runtime.feature('file-manager', fileManagerOptions)

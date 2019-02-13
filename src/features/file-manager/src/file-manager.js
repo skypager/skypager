@@ -52,6 +52,8 @@ export const featureMethods = [
   // Read an md5 hash of a file
   'hashFile',
 
+  'hashBuildTree',
+
   // Read the md5 hash of all files within a given tree
   'hashFiles',
 
@@ -511,7 +513,7 @@ export async function readAllContent(options = {}) {
 }
 
 export function getGit() {
-  return this.runtime.git
+  return this.runtime.feature('git')
 }
 
 export function getFiles() {
@@ -1020,4 +1022,62 @@ export function findModulePaths(options = {}) {
   }
 
   return testPaths
+}
+
+export async function hashBuildTree(options = {}) {
+  const { runtime } = this
+  const { baseFolder = runtime.resolve('lib') } = options
+
+  const buildFolderExists = await runtime.fsx.existsAsync(baseFolder)
+
+  if (!buildFolderExists) {
+    throw new Error(`Build folder does not exist: ${baseFolder}`)
+  }
+
+  const walker = runtime.skywalker.projectWalker({
+    baseFolder,
+    bare: true,
+  })
+
+  const tree = await new Promise((resolve, reject) => {
+    walker.start((err, tree) => {
+      err ? reject(err) : resolve(tree)
+    })
+  })
+
+  const files = []
+
+  function visit(node) {
+    const { _: info } = node
+
+    if (info.isDirectory) {
+      info.children.map(node => visit(node))
+    } else {
+      files.push(info)
+    }
+  }
+
+  visit(tree)
+
+  const hashedFiles = await Promise.all(
+    files.map(
+      file =>
+        new Promise((resolve, reject) =>
+          md5File(file.path, (err, hash) => (err ? reject(err) : resolve({ file, hash })))
+        )
+    )
+  )
+
+  const buildHash = this.runtime.hashObject(hashedFiles.map(e => e.hash))
+
+  return {
+    buildHash,
+    outputFiles: hashedFiles.map(({ file, hash }) => ({
+      size: file.size,
+      createdAt: file.birthtime,
+      name: this.runtime.pathUtils.relative(baseFolder, file.path),
+      mimeType: file && file.mime && file.mime.mimeType,
+      hash,
+    })),
+  }
 }
