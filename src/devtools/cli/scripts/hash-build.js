@@ -1,12 +1,19 @@
-const runtime = require('@skypager/node')
-const {
-  print,
-  colors: { green, cyan },
-} = runtime.cli
-
-main()
+main().catch(error => {
+  console.log('Error Generating Build Hash')
+  console.log(error.message)
+  process.exit(0)
+})
 
 async function main() {
+  const runtime = require('@skypager/node').use(require('@skypager/features-file-manager'))
+
+  runtime.feature('file-manager').enable()
+
+  const {
+    print,
+    colors: { green, cyan },
+  } = runtime.cli
+
   await runtime.fileManager.startAsync()
 
   const buildFolderNames = ['dist', 'build', 'lib']
