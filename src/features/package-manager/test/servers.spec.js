@@ -11,6 +11,12 @@ describe('Servers', function() {
   })
 
   let server
+
+  const get = url => {
+    const { port, hostname } = server
+    return axios.get(`http://${hostname}:${port}/${url.replace(/^\//, '')}`).then(r => r.data)
+  }
+
   it('provides a REST API', async function() {
     const openPort = await runtime.networking.findOpenPort()
 
@@ -26,10 +32,6 @@ describe('Servers', function() {
     result.should.not.equal(openPort)
   })
 
-  const get = url => {
-    const { port, hostname } = server
-    return axios.get(`http://${hostname}:${port}/${url.replace(/^\//, '')}`).then(r => r.data)
-  }
   it('provides access to the package manager', async function() {
     const response = await get('/api/package-manager')
     response.should.be
@@ -55,5 +57,6 @@ describe('Servers', function() {
   it('provides access to package info', async function() {
     const response = await get('/api/package-manager/package/@skypager/features-package-manager')
     response.should.be.an('object').that.has.property('name', '@skypager/features-package-manager')
+    await server.stop()
   })
 })

@@ -6,6 +6,15 @@ export default class PortfolioManager extends Feature {
 
   static runtimes = new Map()
 
+  observables() {
+    return {
+      status: 'CREATED',
+      projects: ['shallowMap', []],
+      updateProject: ['action', PortfolioManager.prototype.updateProject],
+      projectTable: ['computed', PortfolioManager.prototype.getProjectTable],
+    }
+  }
+
   async dump(options = {}) {
     await this.hashProjectTrees()
 
@@ -44,14 +53,6 @@ export default class PortfolioManager extends Feature {
     }
 
     return data
-  }
-
-  observables() {
-    return {
-      projects: ['shallowMap', []],
-      updateProject: ['action', PortfolioManager.prototype.updateProject],
-      projectTable: ['computed', PortfolioManager.prototype.getProjectTable],
-    }
   }
 
   getProjectTable() {
@@ -240,8 +241,46 @@ export default class PortfolioManager extends Feature {
 
   async featureWasEnabled() {
     await this.attachPortfolioManagers()
-    await this.fileManager.startAsync({ startPackageManager: true })
-    await this.moduleManager.startAsync({ maxDepth: 1 })
+  }
+
+  async startAsync(options = {}) {
+    const { maxDepth = 1, moduleManager = false } = options
+
+    if (this.packageManager.status === 'READY' && this.fileManager.status === 'READY') {
+      this.emit('ready')
+      this.status = 'READY'
+      return this
+    }
+
+    if (this.status === 'READY') {
+      return this
+    } else if (this.status === 'STARTING') {
+      return new Promise((resolve, reject) => {
+        this.once('ready', () => resolve(this))
+        this.once('failed', error => reject(error))
+      })
+    }
+
+    this.status = 'STARTING'
+
+    await this.fileManager.startAsync({ startPackageManager: true }).catch(error => {
+      this.status = 'FAILED'
+      this.emit('failed', error)
+      throw error
+    })
+
+    if (moduleManager !== false) {
+      await this.moduleManager.startAsync({ maxDepth }).catch(error => {
+        this.status = 'FAILED'
+        this.emit('failed', error)
+        throw error
+      })
+    }
+
+    this.emit('ready')
+    this.status = 'READY'
+
+    return this
   }
 
   /**

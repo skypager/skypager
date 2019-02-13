@@ -363,7 +363,6 @@ export class Server extends Helper {
     return new Promise((resolve, reject) => {
       const handler = this.starter.bind(this, ...args)
       handler(err => (err ? reject(err) : resolve(this)))
-      this.hide('handler', handler)
     })
   }
 
@@ -381,13 +380,16 @@ export class Server extends Helper {
 
   get starter() {
     const fn = this.tryGet('createStarter', function(cb) {
-      return this.app.listen(this.port, this.hostname, err => {
+      const server = this.app.listen(this.port, this.hostname, err => {
         if (err) {
           this.runtime.error(`Server failed to start: ${err.message}`)
           cb(err)
           return
         }
-        cb()
+
+        this.stop = cb => server.close(cb)
+
+        cb(null, server)
       })
     })
 
