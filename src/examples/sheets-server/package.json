@@ -11,6 +11,7 @@
     "start": "cross-env NODE_ENV=production skypager serve --esm",
     "dev": "cross-env NODE_ENV=development skypager serve --esm --hot",
     "build": "cross-env NODE_ENV=production webpack --config webpack.config.js",
+    "postbuild": "skypager hash-build",
     "deploy": "node scripts/deploy.js --verbose",
     "watch": "skypager watch",
     "console": "skypager console",
@@ -33,6 +34,7 @@
     "semantic-ui-react": "^0.82.5"
   },
   "skypager": {
+    "buildFolders": ["build", "lib"],
     "webpack": {
       "build": "webpack.config.js",
       "scopeModules": false

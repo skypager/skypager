@@ -11,8 +11,9 @@
   "scripts": {
     "prebuild": "rimraf lib",
     "build": "babel -d lib src --source-maps --comments",
+    "postbuild": "skypager hash-build",
     "docs:api": "skypager generate-api-docs",
-    "prepare": "yarn build && yarn docs:api",
+    "prepare": "yarn docs:api && yarn build",
     "test": "mocha --require @babel/register --file test/test.js --timeout 10000 test/**/*.spec.js"
   },
   "skypager": {

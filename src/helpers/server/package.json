@@ -8,8 +8,9 @@
   },
   "main": "lib/index.js",
   "scripts": {
-    "prepare": "yarn build && yarn docs:api",
+    "prepare": "yarn docs:api && yarn build",
     "build": "rimraf lib && babel --comments --source-maps -d lib src",
+    "postbuild": "skypager hash-build",
     "watch": "babel --watch --comments --source-maps -d lib src",
     "test": "skypager test",
     "prepublish": "skypager smoke-test",

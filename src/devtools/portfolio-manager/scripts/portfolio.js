@@ -35,6 +35,102 @@ async function main() {
   if (command === 'restore') {
     await runRestore(...commands.slice(1))
   }
+
+  if (command === 'check') {
+    await runCheck(...commands.slice(1))
+  }
+}
+
+async function runCheck(slice = 'builds', options = {}) {
+  await portfolio.hashProjectTrees()
+  const { isArray } = runtime.lodash
+
+  if (slice === 'builds') {
+    const checks = await Promise.all(
+      portfolio.scopedPackageNames
+        .filter(name => name !== portfolio.packageName)
+        .map(packageName =>
+          checkIfBuildIsRequired(packageName, options).then(result => ({
+            packageName,
+            result,
+          }))
+        )
+    )
+
+    checks.forEach(check => {
+      const { packageName, result = [] } = check
+      const requiresBuild = !!(
+        result === true ||
+        (isArray(result) && result.length && result.find(i => !i.match))
+      )
+
+      if (requiresBuild) {
+        print(`A Rebuild is required for ${packageName}`)
+      }
+    })
+  }
+}
+
+async function checkIfBuildIsRequired(projectName, options = {}) {
+  let { buildFolders = ['build', 'dist', 'lib'] } = options
+  const project = portfolio.packageManager.findByName(projectName)
+
+  if (!project) {
+    return false
+  }
+
+  // the project doesn't require being built
+  if (
+    !project.scripts ||
+    !project.scripts.build ||
+    (project.scripts.build && project.scripts.build === 'exit 0')
+  ) {
+    return false
+  }
+
+  if (project && project.skypager && project.skypager.buildFolder) {
+    buildFolders = [project.skypager.buildFolder]
+  }
+
+  if (project && project.skypager && project.skypager.buildFolders) {
+    buildFolders = project.skypager.buildFolders
+  }
+
+  const { dir: cwd } = project._file
+  const checkBuildFolders = buildFolders.map(p => runtime.pathUtils.resolve(cwd, p))
+  const existingBuildFolders = await runtime.fsx.existingAsync(...checkBuildFolders)
+
+  // there are no build folders, we obviously need to build
+  if (!existingBuildFolders.length) {
+    return true
+  }
+
+  const buildManifests = existingBuildFolders.map(folder =>
+    runtime.pathUtils.resolve(folder, 'build-manifest.json')
+  )
+  const existingManifests = await runtime.fsx.existingAsync(...buildManifests)
+
+  // there aren't any manifests, we should build to be safe
+  if (!existingManifests.length) {
+    return true
+  }
+
+  const record = portfolio.projects.get(projectName)
+
+  if (!record) {
+    return true
+  }
+
+  return Promise.all(
+    existingManifests.map(p =>
+      runtime.fsx.readJsonAsync(p).then(({ sourceHash }) => ({
+        manifest: p,
+        actual: sourceHash,
+        match: sourceHash === record.sourceHash,
+        current: record.sourceHash,
+      }))
+    )
+  )
 }
 
 async function runRestore(slice = 'builds') {

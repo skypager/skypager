@@ -16,7 +16,10 @@
     "webpack.config.js"
   ],
   "scripts": {
-    "build": "skypager build"
+    "build": "skypager build",
+    "postbuild": "skypager hash-build",
+    "prebuild": "rimraf lib",
+    "test": "exit 0"
   },
   "dependencies": {
     "bluebird": "^3.5.0",

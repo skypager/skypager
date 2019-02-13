@@ -8,7 +8,9 @@
   "react-native": "lib/index.js",
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack --config webpack.config.js",
-    "test": "skypager test"
+    "test": "skypager test",
+    "prepare": "yarn build",
+    "postbuild": "skypager hash-build"
   },
   "publishConfig": {
     "access": "public"

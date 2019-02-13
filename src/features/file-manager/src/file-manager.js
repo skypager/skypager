@@ -1083,7 +1083,7 @@ export async function hashBuildTree(options = {}) {
   }))
 
   const { max } = runtime.lodash
-  const maxUpdatedAt = max(outputFiles, 'updatedAt').updatedAt
+  const maxUpdatedAt = outputFiles.length ? max(outputFiles, 'updatedAt').updatedAt : 0
   const count = outputFiles.length
 
   outputFiles = sortBy(outputFiles, 'name')

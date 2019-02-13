@@ -5,6 +5,9 @@
   "publishConfig": {
     "access": "public"
   },
+  "skypager": {
+    "buildFolder": "dist"
+  },
   "browser": "dist/skypager-runtimes-web.min.js",
   "react-native": "native.js",
   "license": "MIT",
@@ -27,6 +30,7 @@
   "contributors": [],
   "scripts": {
     "prepare": "skypager build",
-    "build": "skypager build"
+    "build": "skypager build",
+    "postbuild": "skypager hash-build"
   }
 }

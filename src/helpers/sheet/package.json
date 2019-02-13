@@ -9,6 +9,7 @@
   "scripts": {
     "prepare": "yarn build",
     "build": "cross-env NODE_ENV=production webpack --config webpack.config.js",
+    "postbuild": "skypager hash-build",
     "smoke-test": "skypager smoke-test",
     "test": "skypager test --timeout 10000"
   },

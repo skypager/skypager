@@ -20,6 +20,8 @@ coverage/
 
 # build folders
 /build/
+**/build/**
+**/lib/**
 /dist/*
 **/dist/**
 /.npmrc

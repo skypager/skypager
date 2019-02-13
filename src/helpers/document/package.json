@@ -9,7 +9,9 @@
   "scripts": {
     "build": "cross-env NODE_ENV=production webpack --config webpack.config.js",
     "test": "skypager test",
-    "console": "skypager console"
+    "console": "skypager console",
+    "postbuild": "skypager hash-build",
+    "prepare": "yarn build"
   },
   "publishConfig": {
     "access": "public"

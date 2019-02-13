@@ -1,5 +1,8 @@
 const runtime = require('@skypager/node')
-const { print } = runtime.cli
+const {
+  print,
+  colors: { green, cyan },
+} = runtime.cli
 
 main()
 
@@ -13,12 +16,15 @@ async function main() {
     topLevel.map(name =>
       runtime.fsx
         .statAsync(runtime.resolve(name))
-        .then(stats => (stats.isDirectory() ? name : false))
+        .catch(error => false)
+        .then(stats => (stats && stats.isDirectory() ? name : false))
     )
   ).then(results => results.filter(Boolean))
 
   const { basename } = runtime.pathUtils
-  const buildFolders = directories.filter(dir => buildFolderNames.indexOf(basename(dir)) !== -1)
+  let buildFolders = directories.filter(dir => buildFolderNames.indexOf(basename(dir)) !== -1)
+
+  buildFolders = await runtime.fsx.existingAsync(...buildFolders)
 
   const hashTables = await Promise.all(
     buildFolders.map(baseFolder =>
@@ -33,7 +39,11 @@ async function main() {
             .then(() => hashTable)
         )
         .then(hashTable => {
-          print(`Generated build hash ${hashTable.buildHash} for ${baseFolder}`)
+          print(
+            `${green(runtime.currentPackage.name)} Generated build hash ${cyan(
+              hashTable.buildHash
+            )} for ${baseFolder}`
+          )
         })
     )
   )

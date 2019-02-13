@@ -5,11 +5,13 @@
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
   "scripts": {
+    "prebuild": "yarn docs:api",
     "build": "rimraf lib && babel --comments --source-maps -d lib src",
+    "postbuild": "skypager hash-build",
     "docs:api": "skypager generate-api-docs",
     "watch": "babel --watch --comments --source-maps -d lib src",
     "console": "skypager console",
-    "prepare": "yarn build && yarn docs:api",
+    "prepare": "yarn build",
     "test": "mocha --require @babel/register --file test/test.js --timeout 10000 test/**/*.spec.js",
     "test:watch": "skypager test --webpack-config webpack.config.test.js --watch"
   },
@@ -21,6 +23,7 @@
     "@skypager/node": "^0.3.0"
   },
   "skypager": {
+    "buildFolder": "lib",
     "webpack": {
       "build": "webpack.config.js",
       "scopeModules": false

@@ -6,10 +6,11 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "rimraf lib && babel --comments --source-maps -d lib src",
+    "postbuild": "skypager hash-build",
     "docs:api": "skypager generate-api-docs",
     "watch": "babel --watch --comments --source-maps -d lib src",
     "console": "skypager console",
-    "prepare": "yarn build && yarn docs:api",
+    "prepare": "yarn docs:api && yarn build",
     "test": "mocha --require @babel/register --file test/test.js --timeout 10000 test/**/*.spec.js",
     "test:watch": "skypager test --webpack-config webpack.config.test.js --watch"
   },

@@ -8,7 +8,8 @@
   "main": "./lib/index.js",
   "scripts": {
     "build": "babel -d lib src",
-    "prepare": "exit 0",
+    "postbuild": "skypager hash-build",
+    "prepare": "yarn build",
     "test": "exit 0"
   },
   "bin": {
@@ -29,6 +30,7 @@
   "keywords": [],
   "contributors": [],
   "skypager": {
-    "category": "tools"
+    "category": "tools",
+    "buildFolder": "lib"
   }
 }

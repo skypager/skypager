@@ -13,6 +13,7 @@
   "scripts": {
     "start": "skypager serve",
     "build": "rimraf build && yarn build:lib && yarn build:web && cp -r lib build",
+    "postbuild": "skypager hash-build",
     "build:lib": "cross-env NODE_ENV=production babel --comments --source-maps --config-file ./babelrc -d lib src",
     "watch:lib": "cross-env NODE_ENV=production babel --comments --source-maps --config-file ./babelrc -d lib src --watch",
     "build:web": "cross-env NODE_ENV=production webpack --config webpack.config.js",
@@ -39,6 +40,7 @@
   "keywords": [],
   "contributors": [],
   "skypager": {
-    "category": "runtimes"
+    "category": "runtimes",
+    "buildFolders": ["lib","build"]
   }
 }
