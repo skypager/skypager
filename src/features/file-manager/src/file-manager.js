@@ -1083,7 +1083,7 @@ export async function hashBuildTree(options = {}) {
   }))
 
   const { max } = runtime.lodash
-  const maxUpdatedAt = max(outputFiles, 'updatedAt')
+  const maxUpdatedAt = max(outputFiles, 'updatedAt').updatedAt
   const count = outputFiles.length
 
   outputFiles = sortBy(outputFiles, 'name')
@@ -1094,10 +1094,10 @@ export async function hashBuildTree(options = {}) {
     buildHash,
     maxUpdatedAt,
     count,
-    outputFiles,
     cacheKey: `${runtime.currentPackage.name}:${count}:${maxUpdatedAt}`,
     version: runtime.currentPackage.version,
     sourceHash,
     sha: runtime.gitInfo.sha,
+    outputFiles,
   }
 }
