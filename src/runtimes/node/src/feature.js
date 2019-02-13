@@ -164,6 +164,12 @@ export function enabledHook(options = {}) {
     downloader.enable()
     return downloader
   })
+  try {
+    runtime.feature('git').enable()
+    runtime.setState({ gitInitialized: typeof runtime.git !== 'undefined' })
+  } catch (error) {
+    runtime.setState({ gitInitialized: false, gitError: error })
+  }
 
   if (!disableFileManager) {
     runtime.lazy('fileManager', () => {

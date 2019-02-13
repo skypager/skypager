@@ -20,8 +20,10 @@ runtime.features.register('runtimes/node', () => NodeFeature)
 runtime.feature('runtimes/node').enable()
 
 try {
-  runtime.feature('git').enable()
-  runtime.setState({ gitInitialized: typeof runtime.git !== 'undefined' })
+  if (!runtime.has('git')) {
+    runtime.feature('git').enable()
+    runtime.setState({ gitInitialized: typeof runtime.git !== 'undefined' })
+  }
 } catch (error) {
   console.log('error enabling git feature')
 }
