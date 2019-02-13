@@ -332,11 +332,15 @@ export default class PortfolioManager extends Feature {
    * @param {String} packageName
    * @param {Object} [options={}] options for the restore
    * @param {Boolean} [options.overwrite=false] whether to override the contents that are already there
+   * @param {Boolean} [options.allowDowngrade=false] if the remote version is older than the local, do nothing
+   * @param {Array<String>} [options.buildFolders = ['build','dist','lib']] which folders are considered build folders
    * @memberof PortfolioManager
    */
   async restore(packageName, requestedVersion, options = {}) {
-    const { buildFolders = ['build', 'dist', 'lib'] } = options
+    const { allowDowngrade, overwrite, buildFolders = ['build', 'dist', 'lib'] } = options
     const { packageManager, runtime } = this
+    const { packageFinder } = runtime
+    const { semver } = packageFinder
 
     const remote = packageManager.remotes.get(packageName)
     const local = packageManager.findByName(packageName)
@@ -352,6 +356,10 @@ export default class PortfolioManager extends Feature {
     const { dir } = local._file
 
     const { version = requestedVersion, name } = remote
+
+    if (semver.gt(version, local.version) && !allowDowngrade) {
+      return []
+    }
 
     const localTarballPath = runtime.resolve(
       'build',
@@ -369,10 +377,17 @@ export default class PortfolioManager extends Feature {
     const { intersection } = this.lodash
     const extracted = await this.extractTarball(remote)
 
-    const extractedBuildFolders = intersection(
+    let extractedBuildFolders = intersection(
       extracted,
       buildFolders.map(f => runtime.resolve(extractPath, f))
     )
+
+    const alreadyExisting = await runtime.fsx.existingAsync(...extractedBuildFolders)
+
+    // unless you want to rewrite, if the folder already exists we don't do anything
+    if (!overwrite) {
+      extractedBuildFolders = extractedBuildFolders.filter(f => alreadyExisting.indexOf(f) === -1)
+    }
 
     const { basename } = this.runtime.pathUtils
 

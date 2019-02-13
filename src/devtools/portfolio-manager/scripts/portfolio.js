@@ -1,5 +1,10 @@
 const runtime = require('@skypager/node').use(require('..'))
-const { clear, print, randomBanner } = runtime.cli
+const {
+  clear,
+  print,
+  randomBanner,
+  colors: { yellow, green, red },
+} = runtime.cli
 const portfolio = runtime.feature('portfolio-manager')
 
 async function main() {
@@ -39,21 +44,30 @@ async function runRestore(slice = 'builds') {
 
   if (slice === 'builds') {
     await Promise.all(
-      portfolio.scopedPackageNames.map(packageName => {
-        print(`Restoring ${packageName} ${versionMap[packageName]}`)
-        restore(packageName, versionMap[packageName])
-      })
+      portfolio.scopedPackageNames
+        .filter(name => name !== portfolio.packageName)
+        .map(packageName => {
+          print(`Restoring ${packageName} ${versionMap[packageName]}`)
+          restore(packageName, versionMap[packageName])
+        })
     )
   }
 }
 
 async function restore(packageName, requestedVersion) {
   try {
-    const buildFolders = await portfolio.restore(packageName, requestedVersion)
-    print(`Restored ${packageName}@${requestedVersion}`)
-    print(buildFolders, 4)
+    const buildFolders = await portfolio.restore(packageName, requestedVersion, {
+      overwrite: !!runtime.argv.overwrite,
+    })
+
+    if (buildFolders.length) {
+      print(`${green('Restored')} ${packageName}@${requestedVersion}`)
+      print(buildFolders, 4)
+    } else {
+      print(`${yellow('Skipped')} ${packageName}@${requestedVersion}`)
+    }
   } catch (error) {
-    print(`Error restoring ${packageName}`)
+    print(`${red('Error')} restoring ${packageName}`)
     print(error.message, 2)
   }
 }

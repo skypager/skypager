@@ -1026,8 +1026,9 @@ export function findModulePaths(options = {}) {
 
 export async function hashBuildTree(options = {}) {
   const { runtime } = this
-  const { baseFolder = runtime.resolve('lib') } = options
+  const { exclude = [], baseFolder = runtime.resolve('lib') } = options
 
+  const sourceHash = await this.hashTree()
   const buildFolderExists = await runtime.fsx.existsAsync(baseFolder)
 
   if (!buildFolderExists) {
@@ -1045,7 +1046,7 @@ export async function hashBuildTree(options = {}) {
     })
   })
 
-  const files = []
+  let files = []
 
   function visit(node) {
     const { _: info } = node
@@ -1060,24 +1061,43 @@ export async function hashBuildTree(options = {}) {
   visit(tree)
 
   const hashedFiles = await Promise.all(
-    files.map(
-      file =>
-        new Promise((resolve, reject) =>
-          md5File(file.path, (err, hash) => (err ? reject(err) : resolve({ file, hash })))
-        )
-    )
+    files
+      .filter(file => !exclude.length || !pathMatcher(exclude, file.path))
+      .map(
+        file =>
+          new Promise((resolve, reject) =>
+            md5File(file.path, (err, hash) => (err ? reject(err) : resolve({ file, hash })))
+          )
+      )
   )
 
-  const buildHash = this.runtime.hashObject(hashedFiles.map(e => e.hash))
+  const { sortBy } = this.lodash
+
+  let outputFiles = hashedFiles.map(({ file, hash }) => ({
+    size: file.size,
+    createdAt: file.birthtime,
+    updatedAt: file.mtime,
+    name: this.runtime.pathUtils.relative(baseFolder, file.path),
+    mimeType: file && file.mime && file.mime.mimeType,
+    hash,
+  }))
+
+  const { max } = runtime.lodash
+  const maxUpdatedAt = max(outputFiles, 'updatedAt')
+  const count = outputFiles.length
+
+  outputFiles = sortBy(outputFiles, 'name')
+
+  const buildHash = runtime.hashObject(outputFiles.map(file => file.hash))
 
   return {
     buildHash,
-    outputFiles: hashedFiles.map(({ file, hash }) => ({
-      size: file.size,
-      createdAt: file.birthtime,
-      name: this.runtime.pathUtils.relative(baseFolder, file.path),
-      mimeType: file && file.mime && file.mime.mimeType,
-      hash,
-    })),
+    maxUpdatedAt,
+    count,
+    outputFiles,
+    cacheKey: `${runtime.currentPackage.name}:${count}:${maxUpdatedAt}`,
+    version: runtime.currentPackage.version,
+    sourceHash,
+    sha: runtime.gitInfo.sha,
   }
 }
