@@ -12,6 +12,32 @@ export default class PortfolioManager extends Feature {
 
   static runtimes = new Map()
 
+  /**
+   * When the feature is enabled, it locates the portfolio repo
+   * and attaches references to the portfolio's packageManager, moduleManager, fileManager
+   * to the portfolio instance.
+   */
+  async featureWasEnabled() {
+    await this.attachPortfolioManagers()
+    return this
+  }
+
+  get version() {
+    return this.portfolioRuntime.currentPackage.version
+  }
+
+  get packageName() {
+    return this.portfolioRuntime.currentPackage.name
+  }
+
+  get cwd() {
+    return this.portfolioRuntime.cwd
+  }
+
+  get manifest() {
+    return this.portfolioRuntime.currentPackage
+  }
+
   observables() {
     return {
       status: 'CREATED',
@@ -19,6 +45,26 @@ export default class PortfolioManager extends Feature {
       updateProject: ['action', PortfolioManager.prototype.updateProject],
       projectTable: ['computed', PortfolioManager.prototype.getProjectTable],
     }
+  }
+
+  async whenReady() {
+    if (this.status === 'READY') {
+      return this
+    }
+
+    return new Promise((resolve, reject) => {
+      if (this.status === 'CREATED') {
+        this.startAsync()
+          .then(() => {
+            resolve(this)
+          })
+          .catch(error => reject(error))
+        return
+      }
+
+      this.once('ready', () => resolve(this))
+      this.once('failed', error => reject(error))
+    })
   }
 
   get projectInfo() {
@@ -295,6 +341,25 @@ export default class PortfolioManager extends Feature {
     return this.projectTable
   }
 
+  async dumpFileTree(projectName, options = {}) {
+    const { artifacts = false } = options
+    const runtime = this.createRuntime(projectName)
+
+    const fm = runtime.fileManager
+
+    await fm.startAsync()
+    await fm.readAllContent()
+    await fm.hashFiles()
+
+    return fm.fileObjects
+      .map(file => ({
+        ...file,
+        path: file.path.replace(file.dir, '~'),
+        dir: '~',
+      }))
+      .filter(({ relative }) => artifacts || !relative.match(/^(lib|dist|build)/i))
+  }
+
   /**
    * Create a runtime for a project in the portfolio
    *
@@ -360,10 +425,6 @@ export default class PortfolioManager extends Feature {
     return this.get('managers.moduleManager')
   }
 
-  async featureWasEnabled() {
-    await this.attachPortfolioManagers()
-  }
-
   /**
    * Start the various services the portfolioManager depends on to learn about the project
    * @param {Object} [options={}]
@@ -375,9 +436,11 @@ export default class PortfolioManager extends Feature {
    * @memberof PortfolioManager
    */
   async startAsync(options = {}) {
+    const { fileManager } = this
+    const { packageManager } = this
     const { maxDepth = 1, moduleManager = false } = options
 
-    if (this.packageManager.status === 'READY' && this.fileManager.status === 'READY') {
+    if (fileManager.status === 'READY' && packageManager.status === 'READY') {
       this.emit('ready')
       this.status = 'READY'
       return this
@@ -394,7 +457,7 @@ export default class PortfolioManager extends Feature {
 
     this.status = 'STARTING'
 
-    await this.fileManager.startAsync({ startPackageManager: true }).catch(error => {
+    await fileManager.startAsync({ startPackageManager: true }).catch(error => {
       this.status = 'FAILED'
       /**
        * @event failed

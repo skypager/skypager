@@ -31,7 +31,7 @@ async function main() {
 }
 
 async function extract({ name, version, dist: { tarball } } = {}) {
-  const destination = runtime.resolve('lib', name, version, `package-${version}.tgz`)
+  const destination = runtime.resolve('build', name, version, `package-${version}.tgz`)
   const exists = await runtime.fsx.existsAsync(destination)
   const folder = runtime.pathUtils.dirname(destination)
 
@@ -79,7 +79,7 @@ async function extract({ name, version, dist: { tarball } } = {}) {
 }
 
 async function download({ name, version, dist: { tarball } } = {}) {
-  const destination = runtime.resolve('lib', name, version, `package-${version}.tgz`)
+  const destination = runtime.resolve('build', name, version, `package-${version}.tgz`)
   const exists = await runtime.fsx.existsAsync(destination)
 
   print(`${name}@${green(version)}`)
