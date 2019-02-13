@@ -1,6 +1,6 @@
 {
   "name": "@skypager/features-module-manager",
-  "version": "0.2.7",
+  "version": "0.3.0",
   "description": "an observable state machine for a projects node modules",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
@@ -9,6 +9,7 @@
     "access": "public"
   },
   "scripts": {
+    "prebuild": "rimraf lib",
     "build": "babel -d lib src --source-maps --comments",
     "docs:api": "skypager generate-api-docs",
     "prepare": "yarn build && yarn docs:api",

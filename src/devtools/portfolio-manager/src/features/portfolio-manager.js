@@ -11,11 +11,41 @@ export default class PortfolioManager extends Feature {
 
     const { portfolioRuntime } = this
 
-    if (portfolioRuntime.packageManager.usesLerna)
-      return {
-        projectTable: this.projectTable,
-      }
+    const packageHash = await new Promise((resolve, reject) =>
+      md5File(portfolioRuntime.resolve('package.json'), (err, hash) =>
+        err ? reject(err) : resolve(hash)
+      )
+    )
+
+    const yarnLockHash = await new Promise((resolve, reject) =>
+      md5File(portfolioRuntime.resolve('yarn.lock'), (err, hash) =>
+        err ? reject(err) : resolve(hash)
+      )
+    )
+
+    const data = {
+      projectTable: this.projectTable,
+      packageHash,
+      yarnLockHash,
+      name: portfolioRuntime.currentPackage.name,
+      version: portfolioRuntime.currentPackage.version,
+      gitSha: portfolioRuntime.gitInfo.sha,
+      gitBranch: portfolioRuntime.gitInfo.branch,
+      platform: portfolioRuntime.os.platform,
+      arch: portfolioRuntime.os.arch,
+    }
+
+    if (portfolioRuntime.packageManager.usesLerna) {
+      const lernaConfig = await portfolioRuntime.fsx.readJsonAsync(
+        portfolioRuntime.resolve('lerna.json')
+      )
+      data.lernaVersion = lernaConfig.version
+      data.lernaPackages = lernaConfig.packages
+    }
+
+    return data
   }
+
   observables() {
     return {
       projects: ['shallowMap', []],
