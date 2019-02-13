@@ -21,6 +21,21 @@ export default class PortfolioManager extends Feature {
     }
   }
 
+  get projectInfo() {
+    return this.scopedPackageNames.map(packageName => {
+      const pkg = this.packageManager.findByName(packageName)
+      return {
+        name: pkg.name,
+        description: pkg.description,
+        version: pkg.version,
+        main: pkg.main,
+        browser: pkg.browser,
+        native: pkg.native,
+        module: pkg.module,
+        esNextMain: pkg['esnext:main'],
+      }
+    })
+  }
   /**
    * Generate a graph structure from the moduleManager node_module manifests
    *
@@ -227,7 +242,7 @@ export default class PortfolioManager extends Feature {
       outputFiles: hashedFiles.map(({ file, hash }) => ({
         size: file.size,
         createdAt: file.birthtime,
-        name: this.runtime.pathUtils.relative(baseFolder, file.path),
+        name: this.portfolioRuntime.pathUtils.relative(baseFolder, file.path),
         mimeType: file && file.mime && file.mime.mimeType,
         hash,
       })),
