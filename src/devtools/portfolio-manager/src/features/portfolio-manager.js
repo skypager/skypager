@@ -1,11 +1,21 @@
 import { Feature } from '@skypager/node'
-import mdfFile from 'md5-file'
+import md5File from 'md5-file'
 
 export default class PortfolioManager extends Feature {
   static shortcut = 'portfolio'
 
   static runtimes = new Map()
 
+  async dump(options = {}) {
+    await this.hashProjectTrees()
+
+    const { portfolioRuntime } = this
+
+    if (portfolioRuntime.packageManager.usesLerna)
+      return {
+        projectTable: this.projectTable,
+      }
+  }
   observables() {
     return {
       projects: ['shallowMap', []],
@@ -107,7 +117,7 @@ export default class PortfolioManager extends Feature {
       files.map(
         file =>
           new Promise((resolve, reject) =>
-            mdfFile(file.path, (err, hash) => (err ? reject(err) : resolve({ file, hash })))
+            md5File(file.path, (err, hash) => (err ? reject(err) : resolve({ file, hash })))
           )
       )
     )

@@ -1,5 +1,5 @@
 module.exports = {
-    attach(runtime) {
-      runtime.use(require('.'))
-    }
+  attach(runtime) {
+    runtime.use(require('.'))
+  },
 }
