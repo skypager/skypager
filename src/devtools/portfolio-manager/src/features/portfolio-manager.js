@@ -2,6 +2,11 @@ import { Feature } from '@skypager/node'
 import md5File from 'md5-file'
 
 /**
+ * A Map that ensures only one runtime exists per project
+ */
+export const runtimes = new Map()
+
+/**
  * @class PortfolioManager
  * @extends Feature
  * @classdesc The PortfolioManager can be used by any monorepo, and provides a way of
@@ -9,8 +14,6 @@ import md5File from 'md5-file'
  */
 export default class PortfolioManager extends Feature {
   static shortcut = 'portfolio'
-
-  static runtimes = new Map()
 
   /**
    * When the feature is enabled, it locates the portfolio repo
@@ -22,10 +25,22 @@ export default class PortfolioManager extends Feature {
     return this
   }
 
+  /**
+   * The version of the portfolio package
+   *
+   * @readonly
+   * @memberof PortfolioManager
+   */
   get version() {
     return this.portfolioRuntime.currentPackage.version
   }
 
+  /**
+   * The name of the portfolio package
+   *
+   * @readonly
+   * @memberof PortfolioManager
+   */
   get packageName() {
     return this.portfolioRuntime.currentPackage.name
   }
@@ -81,9 +96,19 @@ export default class PortfolioManager extends Feature {
     return result
   }
 
+  /**
+   * Run a yarn task inside of a nested project
+   *
+   * @param {*} packageName
+   * @param {string} [task='build']
+   * @param {*} [options={}]
+   * @returns
+   * @memberof PortfolioManager
+   */
   async runProjectTask(packageName, task = 'build', options = {}) {
     const { args = [] } = options
-    const runtime = this.createRuntime(packageName)
+    const runtime =
+      this.packageName === packageName ? this.runtime : this.createRuntime(packageName)
 
     const result = await runtime.proc.spawnAndCapture({
       cmd: 'yarn',
@@ -471,13 +496,13 @@ export default class PortfolioManager extends Feature {
    * @param {String} packageName
    * @param {Object} [options={}]
    * @param {Object} [context={}]
-   * @param {Function} middleWareFn
+   * @param {Function} [middleWareFn]
    * @returns {Runtime}
    * @memberof PortfolioManager
    */
   createRuntime(packageName, options = {}, context = {}, middleWareFn) {
-    if (this.constructor.runtimes.has(packageName)) {
-      return this.constructor.runtimes.get(packageName)
+    if (runtimes.has(packageName)) {
+      return runtimes.get(packageName)
     }
 
     const entry = this.packageManager.findByName(packageName)
@@ -615,7 +640,9 @@ export default class PortfolioManager extends Feature {
         .use('runtimes/node')
     }
 
+    this.portfolioRuntime = portfolio
     this.hide('portfolioRuntime', portfolio)
+
     await portfolio.start()
 
     const { fileManager } = portfolio
