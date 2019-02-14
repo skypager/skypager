@@ -38,6 +38,12 @@ export default class PortfolioManager extends Feature {
     return this.portfolioRuntime.currentPackage
   }
 
+  get scope() {
+    return this.portfolioRuntime
+      .get('currentPackage.name', this.runtime.currentPackage.name)
+      .split('/')[0]
+  }
+
   observables() {
     return {
       status: 'CREATED',
@@ -65,6 +71,27 @@ export default class PortfolioManager extends Feature {
       this.once('ready', () => resolve(this))
       this.once('failed', error => reject(error))
     })
+  }
+
+  async runTask(task, options = {}) {
+    const result = await this.portfolioRuntime.proc.spawnAndCapture({
+      ...options,
+    })
+
+    return result
+  }
+
+  async runProjectTask(packageName, task = 'build', options = {}) {
+    const { args = [] } = options
+    const runtime = this.createRuntime(packageName)
+
+    const result = await runtime.proc.spawnAndCapture({
+      cmd: 'yarn',
+      args: [task, ...args],
+      options,
+    })
+
+    return result
   }
 
   get projectInfo() {

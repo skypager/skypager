@@ -822,6 +822,20 @@ export default class PackageManager extends Feature {
       .value()
   }
 
+  async sortPackages(options = {}) {
+    if (!this.usesLerna) {
+      throw new Error(`We rely on lerna currently for their topological sorting.`)
+    }
+
+    const sorted = await this.runtime
+      .select('process/output', {
+        cmd: `lerna ls --toposort --json`,
+      })
+      .then(lines => JSON.parse(lines.join('\n')))
+
+    return sorted.map(s => s.name)
+  }
+
   async loadManifests(options = {}) {
     const { defaults, compact, castArray, flatten } = this.lodash
     const { runtime, fileManager } = this

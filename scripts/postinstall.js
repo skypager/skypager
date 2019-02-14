@@ -50,6 +50,7 @@ const stageThree = [
   ['@skypager/helpers-sheet', 'src/helpers/sheet', 'lib'],
   ['@skypager/helpers-document', 'src/helpers/document', 'lib'],
   ['@skypager/features-browser-vm', 'src/features/browser-vm', 'lib'],
+  ['@skypager/cli', 'src/devtools/cli', 'lib'],
 ]
 
 const first = stageOne

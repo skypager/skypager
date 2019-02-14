@@ -3,9 +3,12 @@ const {
   clear,
   print,
   randomBanner,
-  colors: { yellow, green, red },
+  icon,
+  colors: { yellow, green, red, underline: u },
 } = runtime.cli
+
 const portfolio = runtime.feature('portfolio-manager')
+const { max, padEnd } = runtime.lodash
 
 async function main() {
   const commands = runtime.argv._
@@ -13,6 +16,7 @@ async function main() {
 
   clear()
   randomBanner('Skypager')
+  print(`Portfolio Manager Task Runner`)
 
   if (command === 'help') {
     showHelp()
@@ -20,6 +24,7 @@ async function main() {
   }
 
   await portfolio.enable()
+  print(`Starting up the portfolio services.`)
   await portfolio.whenReady()
   await runtime.fsx.mkdirpAsync(runtime.resolve('build', portfolio.packageName, portfolio.version))
 
@@ -41,42 +46,125 @@ async function main() {
   }
 }
 
-async function runCheck(slice = 'builds', options = {}) {
-  await portfolio.hashProjectTrees()
-  const { isArray } = runtime.lodash
-
-  if (slice === 'builds') {
-    const checks = await Promise.all(
-      portfolio.scopedPackageNames
-        .filter(name => name !== portfolio.packageName)
-        .map(packageName =>
-          checkIfBuildIsRequired(packageName, options).then(result => ({
-            packageName,
-            result,
-          }))
-        )
-    )
-
-    checks.forEach(check => {
-      const { packageName, result = [] } = check
-      const requiresBuild = !!(
-        result === true ||
-        (isArray(result) && result.length && result.find(i => !i.match))
-      )
-
-      if (requiresBuild) {
-        print(`A Rebuild is required for ${packageName}`)
-      }
-    })
+async function runCheck(slice = 'builds', checkType) {
+  if (slice === 'builds' || slice === 'build' || slice === 'all') {
+    if (!checkType || checkType === 'status') {
+      await checkPackagesThatNeedToBeBuilt({
+        build: (runtime.argv.fix || runtime.argv.build) && !runtime.argv.dryRun,
+        restore: !runtime.argv.build && runtime.argv.restore && !runtime.argv.dryRun,
+      })
+    }
   }
 }
 
-async function checkIfBuildIsRequired(projectName, options = {}) {
+async function checkPackagesThatNeedToBeBuilt(options = {}) {
+  await portfolio.hashProjectTrees()
+
+  const checks = await Promise.all(
+    portfolio.scopedPackageNames
+      .filter(name => name !== portfolio.packageName)
+      .map(packageName =>
+        checkIfBuildIsRequired(packageName, options)
+          .then((info = {}) => ({
+            ...info,
+            packageName,
+          }))
+          .catch(error => {
+            if (error.message === 'MISSING_BUILD') {
+              return {
+                packageName,
+                result: true,
+                message: 'Project has not been built.',
+              }
+            } else if (error.message === 'NO_MANIFEST' && !error.retried) {
+              return {
+                packageName,
+                result: true,
+                message: 'Project is missing the build manifest.',
+              }
+            } else if (error.message === 'PROJECT_NOT_FOUND') {
+              return {
+                packageName,
+                result: false,
+                message: 'Project not found in the portfolio.',
+              }
+            }
+          })
+      )
+  )
+
+  if (!checks.find(check => check.result)) {
+    print(
+      `${icon(
+        'rocket'
+      )}  Everything looks NICE.  All projects have the correct build hash to match their current source tree.`
+    )
+    return
+  }
+
+  const needsRebuild = checks.filter(check => check.result && check.message.match(/match/))
+  const notBuilt = checks.filter(check => check.result && check.message.match(/not been built/))
+
+  if (notBuilt.length) {
+    console.log('')
+    print(u(`The following packages have not been built:`))
+    print(notBuilt.map(({ packageName }) => packageName), 4)
+  }
+
+  const padding = max(needsRebuild.map(p => p.packageName.length)) + 6
+
+  console.log('')
+  print(u(`The following packages need to be rebuilt:`))
+  print(
+    needsRebuild.map(({ packageName, message }) => `${padEnd(packageName, padding)} ${message}`),
+    4
+  )
+
+  if (!options.restore && !options.build && !options.fix) {
+    console.log('\n\n')
+    print(`Passing the --build or --restore flag can automatically remedy this.`)
+    print(`--restore will download the build artifacts from npm.`)
+    print(`--build will build the artifacts locally.`)
+    console.log('\n\n')
+    return
+  }
+
+  if (options.restore) {
+    print(`Please wait while we restore your projects from NPM.`)
+    await restoreProjects(checks.filter(check => check.result))
+  } else if (options.build) {
+    print(`Please wait while we build your projects.`)
+    await buildProjects(checks.filter(check => check.result))
+  }
+}
+
+async function restoreProjects(checks = []) {
+  const { versionMap } = portfolio.packageManager
+  return Promise.all(checks.map(({ packageName }) => restore(packageName, versionMap[packageName])))
+}
+
+async function buildProjects(checks = []) {
+  const queue = checks.map(c => c.packageName)
+  const sorted = await portfolio.packageManager
+    .sortPackages()
+    .then(list => list.filter(item => queue.indexOf(item) !== -1))
+
+  const tasks = sorted.map(name => `${name}/build`)
+
+  await portfolio.portfolioRuntime.proc.async.spawn(
+    'skypager',
+    ['run-all'].concat(tasks).concat(['--progress']),
+    {
+      stdio: 'inherit',
+    }
+  )
+}
+
+async function checkIfBuildIsRequired(packageName, options = {}) {
   let { buildFolders = ['build', 'dist', 'lib'] } = options
-  const project = portfolio.packageManager.findByName(projectName)
+  const project = portfolio.packageManager.findByName(packageName)
 
   if (!project) {
-    return false
   }
 
   // the project doesn't require being built
@@ -85,7 +173,11 @@ async function checkIfBuildIsRequired(projectName, options = {}) {
     !project.scripts.build ||
     (project.scripts.build && project.scripts.build === 'exit 0')
   ) {
-    return false
+    return {
+      result: false,
+      packageName,
+      message: `This package does not require building.`,
+    }
   }
 
   if (project && project.skypager && project.skypager.buildFolder) {
@@ -102,7 +194,13 @@ async function checkIfBuildIsRequired(projectName, options = {}) {
 
   // there are no build folders, we obviously need to build
   if (!existingBuildFolders.length) {
-    return true
+    const error = new Error(`MISSING_BUILD`)
+    error.packageName = packageName
+    error.buildFolders = buildFolders
+    error.cwd = cwd
+    error.checkBuildFolders = checkBuildFolders
+    error.existingBuildFolders = existingBuildFolders
+    throw error
   }
 
   const buildManifests = existingBuildFolders.map(folder =>
@@ -112,24 +210,51 @@ async function checkIfBuildIsRequired(projectName, options = {}) {
 
   // there aren't any manifests, we should build to be safe
   if (!existingManifests.length) {
-    return true
+    const error = new Error(`NO_MANIFEST`)
+    error.cwd = cwd
+    error.packageName = packageName
+    error.checkBuildFolders = checkBuildFolders
+    error.existingBuildFolders = existingBuildFolders
+    error.buildManifests = buildManifests
+    throw error
   }
 
-  const record = portfolio.projects.get(projectName)
+  const record = portfolio.projects.get(packageName)
 
   if (!record) {
-    return true
+    const error = new Error(`PROJECT_NOT_FOUND`)
+    error.cwd = cwd
+    error.packageName = packageName
+    error.checkBuildFolders = checkBuildFolders
+    error.existingBuildFolders = existingBuildFolders
+    error.buildManifests = buildManifests
+    throw error
   }
 
-  return Promise.all(
+  const results = await Promise.all(
     existingManifests.map(p =>
-      runtime.fsx.readJsonAsync(p).then(({ sourceHash }) => ({
+      runtime.fsx.readJsonAsync(p).then(({ cacheKey, sourceHash }) => ({
         manifest: p,
         actual: sourceHash,
         match: sourceHash === record.sourceHash,
         current: record.sourceHash,
       }))
     )
+  )
+
+  return results.reduce(
+    (memo, { actual, current, match } = {}) => {
+      if (!match) {
+        memo.result = true
+        memo.message = `The current source tree hash ${actual.substr(
+          0,
+          8
+        )} does not match ${current.substr(0, 8)}`
+      }
+
+      return memo
+    },
+    { packageName }
   )
 }
 
@@ -206,10 +331,10 @@ async function dump() {
   )
 }
 
-async function dumpFileTree(projectName) {
-  const pkg = portfolio.packageManager.findByName(projectName)
-  const tree = await portfolio.dumpFileTree(projectName)
-  const projectRoot = runtime.resolve('build', ...projectName.split('/'))
+async function dumpFileTree(packageName) {
+  const pkg = portfolio.packageManager.findByName(packageName)
+  const tree = await portfolio.dumpFileTree(packageName)
+  const projectRoot = runtime.resolve('build', ...packageName.split('/'))
   const folder = runtime.resolve(projectRoot, pkg.version)
   await runtime.fsx.mkdirpAsync(folder)
   await runtime.fsx.writeJsonAsync(runtime.resolve(folder, 'source.json'), tree)
