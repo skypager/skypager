@@ -1,6 +1,6 @@
 {
   "name": "@skypager/helpers-server",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "skypager server helper",
   "author": "Jon Soeder <jon@chicago.com>",
   "publishConfig": {

@@ -1,6 +1,6 @@
 {
   "name": "@skypager/apps-portfolio-browser",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "an api and application for browsing a portfolio",
   "author": "Jon Soeder <jon@chicago.com>",
   "skypager": {
@@ -28,9 +28,9 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@skypager/helpers-document": "^0.3.1",
-    "@skypager/node": "^0.3.1",
-    "@skypager/web": "^0.3.1",
+    "@skypager/helpers-document": "^0.3.2",
+    "@skypager/node": "^0.3.2",
+    "@skypager/web": "^0.3.2",
     "apollo-boost": "^0.1.23",
     "apollo-server": "^2.3.1",
     "apollo-server-express": "^2.3.1",
@@ -52,7 +52,7 @@
     "semantic-ui-react": "^0.82.5"
   },
   "devDependencies": {
-    "@skypager/webpack": "^0.3.1"
+    "@skypager/webpack": "^0.3.2"
   },
   "gitHead": "ae542b32070401f678270edbfc9ee6f44811c282",
   "keywords": [],
