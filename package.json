@@ -1,7 +1,7 @@
 {
   "name": "@skypager/portfolio",
   "private": true,
-  "version": "0.2.5",
+  "version": "0.3.1",
   "description": "The Skypager Framework Monorepo",
   "main": "index.js",
   "resolutions": {
