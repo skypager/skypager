@@ -1,6 +1,6 @@
 {
   "name": "@skypager/features-module-manager",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "an observable state machine for a projects node modules",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",

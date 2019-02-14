@@ -1,6 +1,6 @@
 {
   "name": "@skypager/sheets-server",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "a google sheets api server",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
@@ -20,12 +20,12 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@skypager/cli": "^0.3.0",
-    "@skypager/helpers-server": "^0.3.0",
-    "@skypager/helpers-sheet": "^0.3.0",
-    "@skypager/node": "^0.3.0",
-    "@skypager/web": "^0.3.0",
-    "@skypager/webpack": "^0.3.0",
+    "@skypager/cli": "^0.3.1",
+    "@skypager/helpers-server": "^0.3.1",
+    "@skypager/helpers-sheet": "^0.3.1",
+    "@skypager/node": "^0.3.1",
+    "@skypager/web": "^0.3.1",
+    "@skypager/webpack": "^0.3.1",
     "prop-types": "^15.6.2",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",
@@ -34,7 +34,10 @@
     "semantic-ui-react": "^0.82.5"
   },
   "skypager": {
-    "buildFolders": ["build", "lib"],
+    "buildFolders": [
+      "build",
+      "lib"
+    ],
     "webpack": {
       "build": "webpack.config.js",
       "scopeModules": false
