@@ -1,19 +1,23 @@
-/**
- * @class       Helper
- * @classdesc   Helpers act as a registry for specific types of Javascript modules
- *              that are to be made available to a project runtime.  Helpers exist to provide
- *              common behavior, interfaces, and life cycle events and hooks for all types of things
- *              such as servers, compilers, commands, or anything else that can be categorized and grouped.
- *              Helpers are designed to be shared across multiple projects, and there are event Project Type helpers
- *              which exist to make specific types of helpers available to specific types of projects.
- */
-
 import lodash from 'lodash'
-import { hashObject, hideProperty, lazy, enhanceObject } from '../utils/properties'
+import { hashObject, hideProperty, lazy, enhanceObject, propertyUtils } from '../utils/properties'
 import { camelCase, snakeCase, singularize, pluralize } from '../utils/string'
 import ContextRegistry from '../registries/context'
 import { attach as attachEmitter } from '../utils/emitter'
 
+// we use this to stash the local properties in the constructor
+const privates = new WeakMap()
+
+/**
+ * @typedef { import("./runtime").Runtime } Runtime
+ */
+
+/**
+ * @typedef { import("./utils/properties").Mixin } Mixin
+ */
+
+/**
+ * @typedef { import("./utils/properties").MixinOptions } MixinOptions
+ */
 const {
   flatten,
   castArray,
@@ -49,6 +53,16 @@ export class HostError extends Error {}
 export class OptionsError extends Error {}
 export class ProviderError extends Error {}
 
+/**
+ * @class       Helper
+ * @classdesc   Helpers act as a registry for specific types of Javascript modules
+ *              that are to be made available to a project runtime.  Helpers exist to provide
+ *              common behavior, interfaces, and life cycle events and hooks for all types of things
+ *              such as servers, compilers, commands, or anything else that can be categorized and grouped.
+ *              Helpers are designed to be shared across multiple projects, and there are event Project Type helpers
+ *              which exist to make specific types of helpers available to specific types of projects.
+ */
+
 export class Helper {
   static isSkypagerHelper = true
 
@@ -61,8 +75,6 @@ export class Helper {
   static ContextError = ContextError
 
   static OptionsError = OptionsError
-
-  static ContextError = ContextError
 
   static ProviderError = ProviderError
 
@@ -93,24 +105,34 @@ export class Helper {
     }
   }
 
-  static createInstance(options = {}, context = {}, runtime, helperClass) {
+  /**
+   * Creates an instance of the Helper class.  This is usually called via the factory function
+   * that gets attached to the runtime when you say Helper.attach, which makes it possible to only
+   * specify options but still get context, runtime, and helper class passed automatically.
+   *
+   * @param {Object} options properties that get attached to the helper instance
+   * @param {Object} context context to be passed down from the parent
+   * @param {Runtime} runtime the parent runtime that is creating this helper
+   * @param {Class} helperClass any subclass of Helper
+   */
+  static createInstance(options = {}, context = {}, runtime, helperClass = this) {
     helperClass = helperClass || this
+    const shortcut = helperClass.shortcut || helperClass.prototype.shortcut
+
+    if (runtime.has(shortcut)) {
+      runtime.warn(`Shortcut is being reused ${shortcut}`)
+    }
+
     const helperInstance = new helperClass(
       {
-        shortcut: helperClass.shortcut || helperClass.prototype.shortcut,
         ...options,
+        ...(shortcut ? { shortcut } : {}),
       },
-      context
+      {
+        ...context,
+        runtime,
+      }
     )
-
-    /*
-    runtime.debug("Helper Instance Created", {
-      helperClass: helperClass.name,
-      instanceName: helperInstance.name,
-      cacheKey: helperInstance.cacheKey,
-      uuid: helperInstance.uuid,
-    })
-    */
 
     return helperInstance
   }
@@ -145,6 +167,8 @@ export class Helper {
   /**
    * Individual helper modules can reference the provdier type configuration from their constructor, and can override
    * them by passing in a providerTypes object in their options, by exporting a providerTypes object themselves.
+   *
+   * @memberof Helper#
    */
   get providerTypes() {
     return defaults(
@@ -158,6 +182,7 @@ export class Helper {
   /**
    * Individual helper modules can reference the options type configuration from their constructor, and can override
    * them by passing in optionTypes object in their options, by exporting a optionTypes object themselves.
+   * @memberof Helper#
    */
   get optionTypes() {
     return defaults(
@@ -171,6 +196,7 @@ export class Helper {
   /**
    * Individual helper modules can reference the context type configuration from their constructor, and can override
    * them by passing in a contextTypes object in their options, by exporting a contextTypes object themselves.
+   * @memberof Helper#
    */
   get contextTypes() {
     return defaults(
@@ -242,104 +268,243 @@ export class Helper {
     return new ContextRegistry(...args)
   }
 
+  /**
+   * @abstract
+   */
   static willCreateHelper(host, opts) {}
 
+  /**
+   * @abstract
+   */
   static didCreateHelper(host, helperInstance, opts) {}
 
-  static _decorateProvider(providerModule, helperInstance) {
-    if (this.decorateProvider) {
-      return this.decorateProvider(providerModule, helperInstance)
-    } else {
-      return providerModule
-    }
-  }
-
+  /**
+   * @private
+   */
   isInitialized = false
-  isConfigured = false
 
+  /**
+   * @param {Object} options
+   * @param {Object} [options.provider={}] the exports of module which is being wrapped
+   * @param {String} [options.name] the name of the helper
+   * @param {Boolean} [options.initialize] whether or not to run the initialize function, useful for testing
+   */
   constructor(options = {}, context = {}) {
     enhanceObject(
       this,
       {
+        propUtils: false,
         includeLodashMethods: false,
-        includeChain: true,
+        includeChain: false,
       },
       lodash
     )
 
     attachEmitter(this)
 
-    options.provider = options.provider || {}
+    const runtime = context.runtime || context.host || context.project
+    const id = [runtime.id || this.registryName, this.name, Math.floor(new Date() / 100)].join(':')
+    const { provider = {}, ...restOfOptions } = options
 
-    /**
-     * @property {string} name - the name for this helper
-     */
-    !this.name && this.lazy('name', options.name)
-
-    /**
-     * @property {string} uuid - a unique id for this helper instance
-     */
-    !this.uuid && this.hide('uuid', options.uuid || require('uuid')())
-
-    /**
-     * @property {object} context - the helper context
-     */
-    this.hide('context', context)
+    this.hideProperties({
+      _id: id,
+      _runtime: runtime,
+      _provider: provider,
+      _context: context,
+      _options: restOfOptions,
+      _name: options.name,
+    })
 
     try {
       this.hideGetter(`is${this.constructor.helperName || this.constructor.name}`, () => true)
     } catch (error) {}
 
-    /**
-     * @property {string} registryName - the default name for the registry of helper modules
-     */
-    this.hide(
-      'registryName',
-      this.constructor.registryName ||
-        Helper.propNames(this.constructor.helperName || this.constructor.name).registryProp
-    )
-
-    /**
-     * @property {Runtime} project - a reference to the runtime that created this helper
-     */
-
-    this.hideGetter('project', () => context.project || context.host || context.runtime)
-
-    /**
-     * @property {Runtime} host - a reference to the runtime that created this helper
-     */
-
-    this.hideGetter('host', () => context.project || context.host || context.runtime)
-
-    /**
-     * @property {Runtime} runtime - a reference to the runtime that created this helper
-     */
-    this.hideGetter('runtime', () => context.project || context.host || context.runtime)
-
-    if (this.runtime.beforeHelperCreate) {
-      this.runtime.beforeHelperCreate.call(this.runtime, this, options, context, this.constructor)
+    if (runtime.beforeHelperCreate) {
+      runtime.beforeHelperCreate(this, options, context, this.constructor)
     }
-
-    this.getter('options', () => omit({ ...this.defaultOptions, ...options }, 'provider'))
-    this.hide('provider', this.constructor._decorateProvider(options.provider, this))
-
-    this.lazy('id', () =>
-      [
-        this.get('project.id', this.constructor.name),
-        options.name,
-        Math.floor(new Date() / 100),
-      ].join(':')
-    )
 
     if (options.initialize !== false) {
       this.doInitialize()
     }
+  }
 
-    this.hide('configureWith', (...a) => {
-      console.log('> configWith is deprecated!')
-      console.trace()
-      return this.conifgure(...a)
-    })
+  /**
+   * Returns the name of this helper
+   *
+   * @readonly
+   * @memberof Helper
+   */
+  get name() {
+    return this._name
+  }
+
+  /**
+   * A Unique ID for this helper instance
+   *
+   * @readonly
+   * @memberof Helper
+   */
+  get id() {
+    return this._id
+  }
+
+  /**
+   * @readonly
+   * @memberof Helper#
+   * @type {Runtime}
+   */
+  get runtime() {
+    return this._runtime
+  }
+
+  /**
+   * @alias Helper#runtime
+   * @deprecated
+   */
+  get host() {
+    return this.runtime
+  }
+
+  /**
+   * @alias Helper#runtime
+   * @deprecated
+   */
+  get project() {
+    return this.runtime
+  }
+
+  /**
+   * Gets the options this helper was created with
+   *
+   * @readonly
+   * @memberof Helper#
+   */
+  get options() {
+    return this._options
+  }
+
+  /**
+   * Gets the context this helper was created with
+   *
+   * @readonly
+   * @memberof Helper#
+   */
+  get context() {
+    return this._context
+  }
+
+  get provider() {
+    return this._provider
+  }
+
+  /**
+   * Returns the name of the registry this helper will belong to,
+   * which can be used to emit global events to helper specific channels
+   *
+   * @readonly
+   * @memberof Helper
+   */
+  get registryName() {
+    return (
+      this.constructor.registryName ||
+      Helper.propNames(this.constructor.helperName || this.constructor.name).registryProp
+    )
+  }
+
+  /**
+   * Returns a lodash chain object, using this helper instance as the source value
+   *
+   * @readonly
+   * @memberof Helper
+   */
+  get chain() {
+    return lodash.chain(this)
+  }
+
+  /**
+   * Creates a lazy loading property on an object.
+   *
+   * @param {String} attribute The property name
+   * @param {Function} fn The function that will be memoized
+   * @param {Boolean} enumerable Whether to make the property enumerable when it is loaded
+   * @return {Helper#}
+   */
+  lazy(attribute, fn, enumerable = false) {
+    return propertyUtils(this).lazy(attribute, fn, enumerable)
+  }
+
+  /**
+   * creates a non enumerable property on the target object
+   *
+   * @param {String} attribute
+   * @param {*} value
+   * @param {Object} options
+   * @memberof Helper#
+   *
+   */
+  hide(attribute, value, options = {}) {
+    return propertyUtils(this).hide(attribute, value, options)
+  }
+
+  /**
+   * creates a non enumerable property on the helper
+   *
+   * @param {String} attribute
+   * @param {*} value
+   * @param {Object} options
+   * @memberof Helper#
+   *
+   */
+  hideProperty(attribute, value, options = {}) {
+    return propertyUtils(this).hide(attribute, value, options)
+  }
+
+  /**
+   * creates multiple non-enumerable properties on the helper
+   *
+   * @param {Object<string,object>} properties
+   * @memberof Helper#
+   *
+   */
+  hideProperties(properties = {}) {
+    return propertyUtils(this).hideProperties(properties)
+  }
+  /**
+   * Create a hidden getter property on the object.
+   *
+   * @param {String} attribute    The name of the property
+   * @param {Function} fn      A function to call to return the desired value
+   * @param {Object} [options={}]
+   * @param {Object} [options.scope=this]
+   * @param {Array} [options.args=[]] arguments that will be passed to the function
+   * @memberof Helper#
+   * @return {Helper#}
+   */
+  hideGetter(attribute, fn, options = {}) {
+    return propertyUtils(this).hideGetter(attribute, fn, options)
+  }
+
+  /**
+   * Create a hidden getter property on the object.
+   *
+   * @param {String} attribute    The name of the property
+   * @param {Function} fn      A function to call to return the desired value
+   * @param {Object} [options={}]
+   * @param {Object} [options.scope=this]
+   * @param {Array} [options.args=[]] arguments that will be passed to the function
+   * @memberof Helper#
+   * @return {Helper}
+   */
+  getter(attribute, fn, options = {}) {
+    return propertyUtils(this).getter(attribute, fn, options)
+  }
+
+  /**
+   * @param {Mixin} methods - an object of functions that will be applied to the target
+   * @param {MixinOptions} options - options for the mixin attributes
+   */
+  applyInterface(methods = {}, options = {}) {
+    return propertyUtils(this).applyInterface(methods, options)
   }
 
   at(...paths) {
@@ -386,13 +551,15 @@ export class Helper {
     return this.get('options.cacheKey')
   }
 
-  /** */
+  /**
+   * @private
+   */
   async doInitialize() {
-    const initializer = this.tryGet('initialize', this.initialize)
+    const initialize = this.tryGet('initialize', this.initialize)
     this.fireHook('beforeInitialize')
 
-    if (initializer) {
-      await Promise.resolve(initializer.call(this, this.options, this.context))
+    if (initialize) {
+      await Promise.resolve(initialize.call(this, this.options, this.context))
       this.hide('isInitialized', true)
     }
 
@@ -433,13 +600,13 @@ export class Helper {
    * Access the first value we find in our options hash in our provider hash
    *
    * @param {String} objectPath the dot.path to the property
-   * @param {*} defaultValue the default value
+   * @param {*} [defaultValue] the default value
    * @param {Array<String>} sources property paths to search
    * @returns {*}
    * @memberof Helper
    */
   tryGet(
-    property,
+    objectPath,
     defaultValue,
     sources = [
       'options',
@@ -449,7 +616,7 @@ export class Helper {
       'provider.prototype',
     ]
   ) {
-    const values = this.at(...sources.map(s => `${s}.${property}`)).filter(v => !isUndefined(v))
+    const values = this.at(...sources.map(s => `${s}.${objectPath}`)).filter(v => !isUndefined(v))
 
     return values.length ? values[0] : defaultValue
   }
@@ -607,6 +774,10 @@ export class Helper {
       .value()
   }
 
+  get argv() {
+    return omit(this.get('runtime.argv', this.get('host.argv', {})), '_', '')
+  }
+
   get defaultOptions() {
     return defaultsDeep({}, this.argv, this.runtimeSettings)
   }
@@ -638,10 +809,6 @@ export class Helper {
       `runtime.options.${groupName}.${camelCase(snakeCase(name))}`,
       `runtime.settings.${groupName}.${camelCase(snakeCase(name))}`,
     ].map(str => str.replace(/(\\|\/)/g, '.'))
-  }
-
-  get argv() {
-    return omit(this.get('runtime.argv', this.get('host.argv', {})), '_', '')
   }
 
   static propNames(name = '') {

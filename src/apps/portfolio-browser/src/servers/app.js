@@ -26,7 +26,7 @@ export default class PortfolioBrowserServer extends Server {
 
     runtime.hideGetter('portfolio', () => portfolio)
 
-    portfolio.use('runtimes/node')
+    portfolio.use('runtimes/node').use(require('@skypager/portfolio-manager'))
 
     await portfolio.fileManager.startAsync({ startPackageManager: true })
     await portfolio.moduleManager.startAsync()
@@ -96,6 +96,7 @@ export default class PortfolioBrowserServer extends Server {
       )
     })
 
+    setupGraphQL.call(this, app, runtime.portfolio)
     if (runtime.isDevelopment) {
       setupDevelopment.call(this, app)
     }
