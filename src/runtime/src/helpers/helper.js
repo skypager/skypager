@@ -551,15 +551,13 @@ export class Helper {
     return this.get('options.cacheKey')
   }
 
-  /**
-   * @private
-   */
+  /** */
   async doInitialize() {
-    const initialize = this.tryGet('initialize', this.initialize)
+    const initializer = this.tryGet('initialize', this.initialize)
     this.fireHook('beforeInitialize')
 
-    if (initialize) {
-      await Promise.resolve(initialize.call(this, this.options, this.context))
+    if (initializer) {
+      await Promise.resolve(initializer.call(this, this.options, this.context))
       this.hide('isInitialized', true)
     }
 
