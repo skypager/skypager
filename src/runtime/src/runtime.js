@@ -2,6 +2,7 @@ import '@babel/polyfill/noConflict'
 import { relative, join, resolve, parse, sep, basename, dirname } from 'path'
 import { parse as parseUrl, format as formatUrl } from 'url'
 import { parse as parseQueryString } from 'querystring'
+import uuid from 'uuid'
 
 import * as mobx from 'mobx'
 import lodash from 'lodash'
@@ -15,6 +16,8 @@ import WeakCache from './weak-cache'
 import * as stringUtils from './utils/string'
 import ProfilerFeature from './features/profiler'
 import VmFeature from './features/vm'
+
+const { propertyUtils } = propUtils
 
 export { propUtils, stringUtils, Helper }
 
@@ -30,7 +33,6 @@ export const helpers = Helper.registry
 export const features = Feature.registry
 export const events = attachEmitter({})
 
-const map = observableMap
 const { camelCase, snakeCase } = stringUtils
 const { hashObject, createEntity: entity, hide, enhanceObject } = propUtils
 const { observe, extendObservable, observable, toJS, computed, action, autorun } = mobx
@@ -98,15 +100,26 @@ const enableStrictMode = get(
  */
 
 /**
+ * @mixin Stateful
+ * @property {Map} state
+ * @property {Object} currentState
+ * @property {Function} setState
+ * @property {Function} replaceState
+ * @property {String} cacheKey
+ * @property {String} stateHash
+ */
+
+/**
  * Create a new instance of the skypager.Runtime
  *
  * @class Runtime
  * @classdesc The Runtime is similar to the window or document global in the browser, or the module / process globals in node.
  * You can extend Runtime and define your own process global singleton that acts as a state machine, event emitter,
  * module registry, dependency injector.  Typically you can just do this with features instead of subclassing.
- * @param {object} options - the props, or argv, for the runtime instance at the time it is created
- * @param {object} context - the context, environment, static config, or similar global values that may be relevant to some component in the runtime
- * @param {function} middlewareFn - this function will be called when the runtime is asynchronously loaded and the plugins have run *
+ * @mixes Stateful
+ * @param {object} [options] - the props, or argv, for the runtime instance at the time it is created
+ * @param {object} [context] - the context, environment, static config, or similar global values that may be relevant to some component in the runtime
+ * @param {function} [middlewareFn] - this function will be called when the runtime is asynchronously loaded and the plugins have run *
  */
 export class Runtime {
   displayName = 'Skypager'
@@ -123,21 +136,14 @@ export class Runtime {
       context = {}
     }
 
-    enhanceObject(this, { includeLodashMethods: false, includeChain: true }, lodash)
+    enhanceObject(
+      this,
+      { propUtils: false, includeLodashMethods: false, includeChain: false },
+      lodash
+    )
+
     attachEmitter(this)
 
-    /**
-     * @mixin Stateful
-     * @property {Map} state
-     * @property {Object} currentState
-     * @property {Function} setState
-     * @property {Function} replaceState
-     * @property {String} cacheKey
-     * @property {String} stateHash
-     */
-    /**
-     * @mixes Stateful
-     */
     extendObservable(this, {
       state: observable.shallowMap(toPairs(this.initialState)),
       currentState: computed(this.getCurrentState.bind(this)),
@@ -147,46 +153,29 @@ export class Runtime {
       replaceState: action(this.replaceState.bind(this)),
     })
 
-    /**
-     * @property {Logger} logger
-     * @memberof Runtime
-     */
-    this.lazy('logger', () => console, true)
-
-    /**
-     * @property {Runtime} parent
-     * @memberof Runtime
-     */
-    this.hideGetter('parent', () => context.parent || singleton)
-
-    /**
-     * @property {String} cwd
-     * @memberof Runtime
-     */
-    this.hide(
-      'cwd',
-      result(options, 'cwd', () => (!isUndefined(process) ? result(process, 'cwd', '/') : '/'))
+    const cwd = result(options, 'cwd', () =>
+      !isUndefined(process) ? result(process, 'cwd', '/') : '/'
     )
 
-    this.hide('uuid', require('uuid')())
-
-    this.hideGetter('_name', () => options.name || camelCase(snakeCase(this.cwd.split('/').pop())))
-    this.hideGetter('name', () => this._name)
-
-    /**
-     * @this Runtime
-     * @property {Cache} cache
-     */
-    this.hide('cache', new Cache(options.cacheData || []))
-
-    /**
-     * @this Runtime
-     * @property {WeakCache} weakCache
-     */
-    this.hide('weakCache', new WeakCache(options.cacheData || [], this))
-
-    this.hide('rawOptions', options)
-    this.hide('rawContext', context)
+    this.hideProperties({
+      _logger: console,
+      _parent: context.parent || singleton,
+      _cwd: cwd,
+      _uuid: uuid(),
+      _name: options.name || camelCase(snakeCase(cwd.split('/').pop())),
+      _cache: new Cache(options.cacheData || []),
+      _weakCache: new WeakCache(options.cacheData || []),
+      rawOptions: options,
+      rawContext: context,
+      _enabledFeatures: {},
+      middlewares: { [STARTING]: mware(this), [PREPARING]: mware(this) },
+      _registries: new ContextRegistry('registries', {
+        context: Helper.createMockContext({}),
+      }),
+      _selectors: new ContextRegistry('selectors', {
+        context: Helper.createMockContext({}),
+      }),
+    })
 
     let { start, initialize, prepare } = this
 
@@ -202,36 +191,9 @@ export class Runtime {
         options.prepare
       )
 
-    this.hide('initialize', initializeSequence.bind(this, this, initialize), true)
-    this.hide('prepare', prepareSequence.bind(this, this, prepare), true)
+    this.initialize = initializeSequence.bind(this, this, initialize)
+    this.prepare = prepareSequence.bind(this, this, prepare)
     this.start = startSequence.bind(this, this, start)
-
-    this.hide('middlewares', { [STARTING]: mware(this), [PREPARING]: mware(this) })
-
-    this.hide('_enabledFeatures', {})
-
-    this.hide(
-      'registries',
-      new ContextRegistry('registries', {
-        context: Helper.createMockContext({}),
-      })
-    )
-
-    this.hide(
-      'selectors',
-      new ContextRegistry('selectors', {
-        context: Helper.createMockContext({}),
-      })
-    )
-
-    this.hideGetter('selectorCache', () => {
-      if (selectorCache.has(this)) {
-        return selectorCache.get(this)
-      }
-      selectorCache.set(this, new Map([]))
-
-      return selectorCache.get(this)
-    })
 
     this.events.emit('runtimeWasCreated', this, this.constructor)
     this.applyRuntimeInitializers()
@@ -397,6 +359,141 @@ export class Runtime {
     pipeline.use(fn.bind(runtime))
 
     return this
+  }
+
+  get uuid() {
+    return this._uuid
+  }
+
+  get cwd() {
+    return this._cwd
+  }
+
+  get name() {
+    return this._name
+  }
+
+  get logger() {
+    return this._logger
+  }
+
+  get cache() {
+    return this._cache
+  }
+
+  get selectors() {
+    return this._selectors
+  }
+
+  get selectorCache() {
+    return selectorCache.get(this)
+  }
+
+  /**
+   * Yo dawg, I heard you like registries so here's a registry for your registries.
+   *
+   * @type {ContextRegistry}
+   * @readonly
+   * @memberof Runtime
+   */
+  get registries() {
+    return this._registries
+  }
+
+  /**
+   * Returns a lodash chain object, using this helper instance as the source value
+   *
+   * @readonly
+   * @memberof Helper
+   */
+  get chain() {
+    return lodash.chain(this)
+  }
+
+  /**
+   * Creates a lazy loading property on an object.
+   *
+   * @param {String} attribute The property name
+   * @param {Function} fn The function that will be memoized
+   * @param {Boolean} enumerable Whether to make the property enumerable when it is loaded
+   * @return {Helper#}
+   */
+  lazy(attribute, fn, enumerable = false) {
+    return propertyUtils(this).lazy(attribute, fn, enumerable)
+  }
+
+  /**
+   * creates a non enumerable property on the target object
+   *
+   * @param {String} attribute
+   * @param {*} value
+   * @param {Object} options
+   * @memberof Helper#
+   *
+   */
+  hide(attribute, value, options = {}) {
+    return propertyUtils(this).hide(attribute, value, options)
+  }
+
+  /**
+   * creates a non enumerable property on the helper
+   *
+   * @param {String} attribute
+   * @param {*} value
+   * @param {Object} options
+   * @memberof Helper#
+   *
+   */
+  hideProperty(attribute, value, options = {}) {
+    return propertyUtils(this).hide(attribute, value, options)
+  }
+
+  /**
+   * creates multiple non-enumerable properties on the helper
+   *
+   * @param {Object<string,object>} properties
+   * @memberof Helper#
+   *
+   */
+  hideProperties(properties = {}) {
+    return propertyUtils(this).hideProperties(properties)
+  }
+  /**
+   * Create a hidden getter property on the object.
+   *
+   * @param {String} attribute    The name of the property
+   * @param {Function} fn      A function to call to return the desired value
+   * @param {Object} [options={}]
+   * @param {Object} [options.scope=this]
+   * @param {Array} [options.args=[]] arguments that will be passed to the function
+   * @memberof Helper#
+   * @return {Helper#}
+   */
+  hideGetter(attribute, fn, options = {}) {
+    return propertyUtils(this).hideGetter(attribute, fn, options)
+  }
+
+  /**
+   * Create a hidden getter property on the object.
+   *
+   * @param {String} attribute    The name of the property
+   * @param {Function} fn      A function to call to return the desired value
+   * @param {Object} [options={}]
+   * @param {Object} [options.scope=this]
+   * @param {Array} [options.args=[]] arguments that will be passed to the function
+   * @memberof Helper#
+   * @return {Helper}
+   */
+  getter(attribute, fn, options = {}) {
+    return propertyUtils(this).getter(attribute, fn, options)
+  }
+
+  /**
+   * @param {Mixin} methods - an object of functions that will be applied to the target
+   * @param {MixinOptions} options - options for the mixin attributes
+   */
+  applyInterface(methods = {}, options = {}) {
+    return propertyUtils(this).applyInterface(methods, options)
   }
 
   at(...paths) {
@@ -586,6 +683,15 @@ export class Runtime {
     return attachEmitter(...args)
   }
 
+  /**
+   * Spawn a new Runtime instance
+   *
+   * @param {Object} [options={}]
+   * @param {Object} [context={}]
+   * @param {Function} [middlewareFn]
+   * @returns {Runtime}
+   * @memberof Runtime
+   */
   spawn(options = {}, context = {}, middlewareFn) {
     if (isFunction(options)) {
       middlewareFn = options
@@ -636,7 +742,9 @@ export class Runtime {
     return this.constructor.runtimes || Runtime.runtimes
   }
 
-  /** */
+  /**
+   * @type {EventEmitter}
+   */
   static events = events
 
   registerRuntime(...args) {
@@ -653,6 +761,7 @@ export class Runtime {
    *
    * @param {string} registryPropName - the name of the registry you want to wait for
    * @param {Function} callback - a function that will be called with runtime, the helperClass, and the options passed when attaching that helper
+   * @memberof Runtime#
    *
    * @example @lang js <caption>Conditionally running code when the servers helper is attached</caption>
    *
@@ -873,6 +982,7 @@ export class Runtime {
    *
    * @abstract
    * @private
+   * @memberof Runtime#
    * @returns {Runtime}
    */
   initialize() {
@@ -885,6 +995,7 @@ export class Runtime {
    * @abstract
    * @private
    * @returns {PromiseLike<Runtime>}
+   * @memberof Runtime#
    */
   async prepare() {
     return this
@@ -895,6 +1006,7 @@ export class Runtime {
    *
    * @abstract
    * @private
+   * @memberof Runtime#
    * @returns {PromiseLike<Runtime>}
    */
   async start() {
@@ -902,7 +1014,7 @@ export class Runtime {
   }
 
   get url() {
-    return this.isBrowser ? window.location : urlUtils.parse(`file://${argv.cwd}`)
+    return this.isBrowser ? window.location : urlUtils.parse(`file://${this.cwd}`)
   }
 
   /**

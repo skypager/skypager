@@ -7,6 +7,15 @@ require('@babel/polyfill/noConflict')
 const { createSingleton } = require('./runtime')
 
 /**
+ * @typedef {import("./runtime").Runtime} Runtime
+ */
+
+/**
  * @type {Runtime}
  */
-module.exports = createSingleton()
+const runtime = createSingleton()
+
+/**
+ * @type {Runtime}
+ */
+module.exports = runtime

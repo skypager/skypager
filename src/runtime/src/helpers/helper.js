@@ -3,9 +3,7 @@ import { hashObject, hideProperty, lazy, enhanceObject, propertyUtils } from '..
 import { camelCase, snakeCase, singularize, pluralize } from '../utils/string'
 import ContextRegistry from '../registries/context'
 import { attach as attachEmitter } from '../utils/emitter'
-
-// we use this to stash the local properties in the constructor
-const privates = new WeakMap()
+import uuid from 'uuid'
 
 /**
  * @typedef { import("./runtime").Runtime } Runtime
@@ -64,7 +62,61 @@ export class ProviderError extends Error {}
  */
 
 export class Helper {
-  static isSkypagerHelper = true
+  /**
+   * @param {Object} options
+   * @param {Object} [options.provider={}] the exports of module which is being wrapped
+   * @param {String} [options.name] the name of the helper
+   * @param {Boolean} [options.initialize] whether or not to run the initialize function, useful for testing
+   */
+  constructor(options = {}, context = {}) {
+    enhanceObject(
+      this,
+      {
+        propUtils: false,
+        includeLodashMethods: false,
+        includeChain: false,
+      },
+      lodash
+    )
+
+    attachEmitter(this)
+
+    const runtime = context.runtime || context.host || context.project
+    const id = [runtime.id || this.registryName, this.name, Math.floor(new Date() / 100)].join(':')
+    const { provider = {}, ...restOfOptions } = options
+
+    this.hideProperties({
+      _id: id,
+      _runtime: runtime,
+      _provider: provider,
+      _context: context,
+      _options: restOfOptions,
+      _name: options.name,
+      uuid: uuid(),
+    })
+
+    try {
+      this.hideGetter(`is${this.constructor.helperName || this.constructor.name}`, () => true)
+    } catch (error) {}
+
+    if (runtime.beforeHelperCreate) {
+      runtime.beforeHelperCreate(this, options, context, this.constructor)
+    }
+
+    if (options.initialize !== false) {
+      this.doInitialize()
+    }
+  }
+
+  /**
+   * This is a special property that provides a safe way of detecting if something is a class and subclasses Helper
+   * @static
+   * @readonly
+   * @memberof Helper
+   */
+  static get isSkypagerHelper() {
+    return true
+  }
 
   static helperName = 'Helper'
 
@@ -282,51 +334,6 @@ export class Helper {
    * @private
    */
   isInitialized = false
-
-  /**
-   * @param {Object} options
-   * @param {Object} [options.provider={}] the exports of module which is being wrapped
-   * @param {String} [options.name] the name of the helper
-   * @param {Boolean} [options.initialize] whether or not to run the initialize function, useful for testing
-   */
-  constructor(options = {}, context = {}) {
-    enhanceObject(
-      this,
-      {
-        propUtils: false,
-        includeLodashMethods: false,
-        includeChain: false,
-      },
-      lodash
-    )
-
-    attachEmitter(this)
-
-    const runtime = context.runtime || context.host || context.project
-    const id = [runtime.id || this.registryName, this.name, Math.floor(new Date() / 100)].join(':')
-    const { provider = {}, ...restOfOptions } = options
-
-    this.hideProperties({
-      _id: id,
-      _runtime: runtime,
-      _provider: provider,
-      _context: context,
-      _options: restOfOptions,
-      _name: options.name,
-    })
-
-    try {
-      this.hideGetter(`is${this.constructor.helperName || this.constructor.name}`, () => true)
-    } catch (error) {}
-
-    if (runtime.beforeHelperCreate) {
-      runtime.beforeHelperCreate(this, options, context, this.constructor)
-    }
-
-    if (options.initialize !== false) {
-      this.doInitialize()
-    }
-  }
 
   /**
    * Returns the name of this helper
