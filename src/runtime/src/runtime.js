@@ -19,7 +19,7 @@ import VmFeature from './features/vm'
 
 const { propertyUtils } = propUtils
 
-export { propUtils, stringUtils, Helper }
+export { propUtils, stringUtils, Helper, Feature }
 
 export const observableMap = mobx.observable.map
 export const urlUtils = { parseUrl, formatUrl, parseQueryString }
@@ -52,7 +52,6 @@ const {
   uniq,
   castArray,
   defaultsDeep: defaults,
-  isEmpty,
   isArray,
   isObject,
   isUndefined,
@@ -63,6 +62,10 @@ let runtimesRegistry
 let frameworkRuntime
 
 let singleton
+
+const windowIsAvailable = typeof window !== 'undefined'
+const documentIsAvailable = typeof document !== 'undefined'
+const processIsAvailable = typeof process !== 'undefined'
 
 const defaultOptions = result(global, 'SkypagerDefaultOptions', {})
 const defaultContext = result(global, 'SkypagerDefaultContext', {})
@@ -124,6 +127,7 @@ const enableStrictMode = get(
 export class Runtime {
   displayName = 'Skypager'
 
+
   constructor(options = {}, context = {}, middlewareFn) {
     if (isFunction(options)) {
       middlewareFn = options
@@ -151,6 +155,7 @@ export class Runtime {
       cacheKey: computed(this.getCacheKey.bind(this)),
       setState: action(this.setState.bind(this)),
       replaceState: action(this.replaceState.bind(this)),
+      featureStatus: observable.shallowMap([])
     })
 
     const cwd = result(options, 'cwd', () =>
@@ -361,20 +366,6 @@ export class Runtime {
     return this
   }
 
-
-  /**
-   * Get or create an instance of a registered Feature module.  Will return an instance of Feature,
-   * or an instance of a subclass of Feature.
-   *
-   * @param {String} featureId
-   * @param {Object} [options={}]
-   * @param {Object} [context={}]
-   * @returns {Feature}
-   * @memberof Runtime#
-   */
-  feature(featureId, options = {}, context = {}) {
-        
-  }
 
   get uuid() {
     return this._uuid
@@ -786,6 +777,11 @@ export class Runtime {
    *
    */
   onRegistration(registryPropName, callback) {
+    // to refactor the dynamic method attachment of various helpers,
+    // i an prefixing their names with _ and then creating actual properties
+    // on runtime so that I can jsdoc them
+    registryPropName = registryPropName.replace(/^_/, '')
+
     if (typeof callback !== 'function') {
       throw new Error('Must pass a callback')
     }
@@ -795,6 +791,7 @@ export class Runtime {
     if (!alreadyRegistered) {
       Helper.events.on('attached', (runtime, helperClass, options = {}) => {
         const { registry = {} } = options || {}
+
         if (registry && registry.name === registryPropName) {
           callback(null, runtime, helperClass, options)
         }
@@ -847,28 +844,32 @@ export class Runtime {
   }
 
   log(...args) {
+    this.emit('loggingInfo', ...args)
     console.log(...args)
   }
 
   warn(...args) {
+    this.emit('loggingWarning', ...args)
     console.warn ? console.warn(...args) : console.log(...args)
   }
 
   debug(...args) {
+    this.emit('loggingDebug', ...args)
     console.debug ? console.debug(...args) : console.log(...args)
   }
 
   error(...args) {
+    this.emit('loggingError', ...args)
     console.error ? console.error(...args) : console.log(...args)
   }
 
   info(...args) {
+    this.emit('loggingInfo', ...args)
     console.info ? console.info(...args) : console.log(...args)
   }
 
   set name(val) {
     this.hide('_name', val, true)
-    return val
   }
 
   get autoInitialize() {
@@ -1039,7 +1040,7 @@ export class Runtime {
     return this.get('rawOptions', {})
   }
 
-  set argv(val = {}) {
+  set argv(val) {
     this.set('rawOptions', { ...this.rawOptions, ...val })
   }
 
@@ -1051,17 +1052,40 @@ export class Runtime {
     return 'development'
   }
 
+  /**
+   * Based on the detected or specified platform the Runtime thinks it is in,
+   * target will give us its name.  This can be used to auto-discover and register certain 
+   * helpers and features.
+   *
+   * @type {String}
+   * @readonly
+   * @memberof Runtime#
+   */
   get target() {
-    if (this.get('argv.universal')) return 'universal'
-    if (this.get('argv.target')) return this.get('argv.target')
+    const { universal, target } = this.argv
+
+    if (universal) return 'universal'
+    if(target) return target 
     if (this.isElectron) return 'electron'
     if (this.isNode) return 'node'
     if (this.isBrowser) return 'web'
+    if (this.isReactNative) return 'native'
 
     return 'node'
   }
 
-  // Helps the runtime search for helper packages based on the environment and target combo
+  /**
+   * Returns a list of tags that can be used to filter all of the available helpers and features
+   * to only those whose registry id or alias includes one of the tags.
+   *
+   * @type {Array<String>}
+   * @readonly
+   * @memberof Runtime#
+   * 
+   * @example
+   * 
+   *  runtime.helperTags // => ['development', 'development/node', 'node', 'node/development', 'universal']
+   */
   get helperTags() {
     return this.get('options.helperTags', [
       this.env,
@@ -1076,24 +1100,17 @@ export class Runtime {
    * Returns true if the runtime is running inside of a browser.
    *
    * @readonly
-   * @memberof Runtime
+   * @memberof Runtime#
    */
   get isBrowser() {
-    return !!(
-      typeof window !== 'undefined' &&
-      typeof document !== 'undefined' &&
-      (typeof process === 'undefined' ||
-        typeof process.type === 'undefined' ||
-        process.type === 'web' ||
-        process.type === 'browser')
-    )
+    return windowIsAvailable && documentIsAvailable 
   }
 
   /**
    * Returns true if the runtime is running inside of node.
    *
    * @readonly
-   * @memberof Runtime
+   * @memberof Runtime#
    */
   get isNode() {
     try {
@@ -1101,71 +1118,69 @@ export class Runtime {
       return isNode
     } catch (e) {
       return (
-        typeof global.process !== 'undefined' &&
+        processIsAvailable &&
         (process.title === 'node' || `${process.title}`.endsWith('.exe'))
       )
     }
   }
 
   /**
+   * Returns true if running node in windows
+   *
+   * @readonly
+   * @memberof Runtime#
+   */
+  get isWindows() {
+    return this.isNode && `${process.title}`.endsWith('.exe') 
+  }
+
+  /**
    * Returns true if the runtime is running inside of electron
    *
    * @readonly
-   * @memberof Runtime
+   * @memberof Runtime#
    */
   get isElectron() {
-    return !!(
-      typeof process !== 'undefined' &&
-      typeof process.type !== 'undefined' &&
-      typeof process.title !== 'undefined' &&
+    return processIsAvailable && !isUndefined(process.type) && !isUndefined(process.title) &&
       (process.title.match(/electron/i) || process.versions['electron'])
-    )
   }
 
   /**
    * Returns true if the runtime is running inside of electron's renderer process
    *
    * @readonly
-   * @memberof Runtime
+   * @memberof Runtime#
    */
   get isElectronRenderer() {
-    return !!(
-      typeof process !== 'undefined' &&
-      process.type === 'renderer' &&
-      typeof window !== 'undefined' &&
-      typeof document !== 'undefined'
-    )
+    return !isUndefined(process) && process.type === 'renderer' && windowIsAvailable && documentIsAvailable 
   }
 
   /**
    * Returns true if the runtime is running inside of React-Native
    *
    * @readonly
-   * @memberof Runtime
+   * @memberof Runtime#
    */
   get isReactNative() {
-    return !!(
-      typeof global !== 'undefined' &&
-      typeof navigator !== 'undefined' &&
-      navigator.product === 'ReactNative'
-    )
+    return !isUndefined(global) && !isUndefined(navigator) && navigator.product === 'ReactNative'
   }
 
   /**
    * Returns true if the process was started with a debug flag
    *
    * @readonly
-   * @memberof Runtime
+   * @memberof Runtime#
    */
   get isDebug() {
-    return !!this.get('argv.debug')
+    const { argv = {} } = this
+    return !!argv.debug
   }
 
   /**
    * Returns true if the runtime is running in node process and common CI environment variables are detected
    *
    * @readonly
-   * @memberof Runtime
+   * @memberof Runtime#
    */
   get isCI() {
     return this.isNode && (process.env.CI || (process.env.JOB_NAME && process.env.BRANCH_NAME))
@@ -1175,48 +1190,33 @@ export class Runtime {
    * returns true when running in a process where NODE_ENV is set to development, or in a process started with the development flag
    *
    * @readonly
-   * @memberof Runtime
+   * @memberof Runtime#
    */
   get isDevelopment() {
-    return (
-      !this.isProduction &&
-      !this.isTest &&
-      (this.get('argv.env') === 'development' ||
-        !!this.get('argv.development') ||
-        !!this.get('argv.dev') ||
-        process.env.NODE_ENV === 'development' ||
-        isEmpty(process.env.NODE_ENV))
-    )
+    const { argv = {} } = this
+    return !this.isProduction && !this.isTest && (argv.env === 'development' || process.env.NODE_ENV === 'development')   
   }
 
   /**
    * returns true when running in a process where NODE_ENV is set to test, or in a process started with the test flag
    *
    * @readonly
-   * @memberof Runtime
+   * @memberof Runtime#
    */
   get isTest() {
-    return (
-      !this.isProduction &&
-      (this.get('argv.env') === 'test' ||
-        !!this.get('argv.test') ||
-        process.env.NODE_ENV === 'test')
-    )
+    const { argv = {} } = this
+    return argv.env === 'test' || process.env.NODE_ENV === 'test'   
   }
 
   /**
    * returns true when running in a process where NODE_ENV is set to production, or in a process started with the test flag
    *
    * @readonly
-   * @memberof Runtime
+   * @memberof Runtime#
    */
   get isProduction() {
-    return (
-      this.get('argv.env') === 'production' ||
-      !!this.get('argv.production') ||
-      !!this.get('argv.prod') ||
-      process.env.NODE_ENV === 'production'
-    )
+    const { argv } = this
+    return argv.env === 'production' || process.env.NODE_ENV === 'production'
   }
 
   /**
@@ -1673,10 +1673,23 @@ export class Runtime {
     return events
   }
 
+  /**
+   * Provides access to the global event bus shared by all runtime or helper instances
+   *
+   * @readonly
+   * @memberof Runtime
+   */
   get events() {
     return events
   }
 
+  /**
+   * Creates a context variable that can be pass down to helpers, or used with the VM
+   * to run scripts or modules in an arbitrary global scope
+   *
+   * @readonly
+   * @memberof Runtime
+   */
   get sandbox() {
     return this.createSandbox(this.context)
   }
@@ -1811,6 +1824,17 @@ export class Runtime {
     })
   }
 
+  /**
+   * Runs a life cycle hook method on the runtime. A hook method can either be
+   * a standard instance method on runtime, and if one does not exist, an event is 
+   * also emitted by the same name
+   *
+   * @param {String} hookName the name of the hook method
+   * @param {...*} args any args you want to pass to the hook
+   * @returns {Runtime}
+   * @memberof Runtime#
+   * @emits Runtime#firingHook 
+   */
   fireHook(hookName, ...args) {
     if (this.argv.debugHooks) {
       this.debug(`Firing Hook`, { hookName, argsLength: args.length })
@@ -1839,20 +1863,80 @@ export class Runtime {
     return this
   }
 
-  get Helper() {
-    return this.get('options.helperClass', this.get('context.helperClass', Helper))
-  }
-
-  get helperOptions() {
-    return this.get('options.helperOptions', this.get('context.helperOptions'), {})
-  }
-
+  /**
+   * Returns the base Feature class that the runtime uses.  You shouldn't need to change this,
+   * however you can use one class in production and another in dev / test if you want to,
+   *
+   * @readonly
+   * @type {Class}
+   * @memberof Runtime#
+   */
+  Helper = Helper
+  
+  /**
+   * Provides access to the Helper registry 
+   *
+   * @readonly
+   * @memberof Runtime
+   */
   get helpers() {
     return this.Helper.registry
   }
 
+  /**
+   * Provides access to all of the Helper classes that have been registered
+   *
+   * @readonly
+   * @memberof Runtime
+   */
   get allHelpers() {
     return this.Helper.allHelpers
+  }
+
+  /**
+   * The default options that will be passed to Helper.attach. 
+   *
+   * @type {import("./helper").HelperAttachOptions} 
+   * @readonly
+   * @memberof Runtime#
+   */
+  get helperOptions() {
+    return this.get('options.helperOptions', this.get('context.helperOptions', {}))
+  }
+
+  /**
+   * Returns the base Feature class that the runtime uses.  You shouldn't need to change this,
+   * however you can use one class in production and another in dev / test if you want to,
+   *
+   * @type {Class}
+   * @memberof Runtime#
+   */
+  Feature = Feature
+
+  /**
+   * Create an instance of a Feature from one of the available Feature providers in the registry.
+   * 
+   * Calling this method more than once with the same options, will return the same object, unless that
+   * Helper class or the registry it is a part sets isCacheable = false
+   *
+   * @param {String} featureModuleId
+   * @param {Object} [options={}]
+   * @param {Object} [context={}]
+   * @returns {Feature}
+   * @memberof Runtime
+   */
+  feature(featureModuleId, options = {}, context = {}) {
+    return this._feature(featureModuleId, options, context)    
+  }
+
+  /**
+   * Provides access to the Feature helper's registry
+   *
+   * @readonly
+   * @memberof Runtime#
+   */
+  get features() {
+    return this._features || Feature.registry
   }
 
   get namespace() {
@@ -2091,7 +2175,24 @@ export class Runtime {
     return (singleton = singleton || new this(options, context, middlewareFn))
   }
 
+  /**
+   * Access the Helper class, which you can extend to create your own Helpers 
+   *
+   * @static
+   * @memberof Runtime
+   */
+  static Helper = Helper
+
+  /**
+   * Access the Feature class, one of the core Helpers available in the Skypager Runtime
+   *
+   * @static
+   * @memberof Runtime
+   */
+  static Feature = Feature
+
   static autoConfigs = []
+
   static autoAdd = []
 }
 

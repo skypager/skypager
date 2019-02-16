@@ -1,4 +1,5 @@
-import runtime, { Feature } from '@skypager/runtime'
+import runtime, { Feature } from '@skypager/node'
+
 import { JSDOM } from 'jsdom'
 
 runtime.features.register('browser-vm', () => BrowserVmFeature)
@@ -11,6 +12,15 @@ export function attach(runtime, options = {}) {
   runtime.browserVm.enable(options)
 }
 
+/**
+ * The Browser VM Feature provides a JSDOM sandbox that lets you use the runtime.vm as if it was really inside a browser.
+ *
+ * This lets you run browser scripts in node, for testing, server rendering, whatever.
+ *
+ * @export
+ * @class BrowserVmFeature
+ * @extends {Feature}
+ */
 export default class BrowserVmFeature extends Feature {
   runScript(code, options = {}) {
     const { runtime } = this

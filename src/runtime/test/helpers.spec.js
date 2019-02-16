@@ -28,9 +28,6 @@ describe('The Helpers System', function() {
     runtime.should.have.property('onRegistration').that.is.a('function')
     runtime.onRegistration('someRandomShit', spy)
     spy.should.not.have.been.called
-    // features will already exist so it gets called immediately
-    runtime.onRegistration('features', spy)
-    spy.should.have.been.called
 
     // this other helper will be registered
     const conceptSpy = require('sinon').spy()

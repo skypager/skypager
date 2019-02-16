@@ -3,6 +3,9 @@ import Helper from './helper.js'
 const isFunction = o => typeof o === 'function'
 
 /**
+ * @typedef {import("./runtime").Runtime} Runtime
+ */
+/**
  * @class Feature
  * @extends Helper
  * @classdesc The Feature Class is used to provide an interface to something which can be
@@ -56,20 +59,14 @@ export class Feature extends Helper {
    * @returns {Runtime}
    */
   static attach(runtime, options = {}) {
-    runtime.Feature = this
-
     const result = Helper.attach(runtime, Feature, {
-      registryProp: 'features',
-      lookupProp: 'feature',
+      registryProp: '_features',
+      lookupProp: '_feature',
       cacheHelper: true,
       isCacheable: true,
       registry: Feature.registry,
       ...options,
     })
-
-    if (runtime.makeObservable && !runtime.has('featureStatus')) {
-      runtime.makeObservable({ featureStatus: ['shallowMap', {}] })
-    }
 
     return result
   }
@@ -77,7 +74,7 @@ export class Feature extends Helper {
   /**
    * @private
    */
-  initialize() {
+  afterInitialize() {
     this.applyInterface(this.featureMixin, this.featureMixinOptions)
   }
 

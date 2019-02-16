@@ -16,6 +16,15 @@ import uuid from 'uuid'
 /**
  * @typedef { import("./utils/properties").MixinOptions } MixinOptions
  */
+
+/**
+ * @typedef {Object<string,*>} HelperAttachOptions
+ * @property {String} lookupProp the property name to use for the factory function that will be attached to the Helper's host.
+ * @property {String} registryProp the property name to use for the registry that will know about each of the Helpers available.
+ * @property {ContextRegistry} registry an instance of a registry that will contain references to each of the Helper modules.
+ * @property {Boolean} cacheHelper whether to cache the helper instance.
+ * @property {Boolean} isCacheable whether to cache the helper instance.
+ */
 const {
   flatten,
   castArray,
@@ -261,7 +270,17 @@ export class Helper {
   }
 
   /**
-   * A Helper class is attached to a host.
+   * Attaching a Helper class to a host, usually an instance of Runtime,
+   * will create a factory function that can be used to create Helper instances,
+   * as well as a Registry that contains all known providers of the specific Helper class
+   * we are attaching.
+   *
+   * @static
+   * @param {Runtime} host
+   * @param {Class} helperClass
+   * @param {HelperAttachOptions} options
+   * @returns {Runtime}
+   * @memberof Helper
    */
   static attach(host, helperClass, options) {
     Helper.events.emit('attach', host, helperClass, options)

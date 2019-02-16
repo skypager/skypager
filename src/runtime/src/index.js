@@ -1,21 +1,11 @@
-/**
- * @module @skypager/runtime
- * @description Importing the @skypager/runtime module will give you a global singleton instance of Runtime
- */
-require('@babel/polyfill/noConflict')
+import '@babel/polyfill/noConflict'
+import { Runtime, createSingleton, Feature, Helper } from './runtime'
 
-const { createSingleton } = require('./runtime')
-
-/**
- * @typedef {import("./runtime").Runtime} Runtime
- */
+export { Runtime, Helper, Feature }
 
 /**
  * @type {Runtime}
  */
 const runtime = createSingleton()
 
-/**
- * @type {Runtime}
- */
-module.exports = runtime
+export default runtime
