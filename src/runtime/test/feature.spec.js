@@ -1,5 +1,5 @@
 import { Runtime, Helper } from 'runtime'
-import { Feature } from 'helpers/feature'
+import { Feature } from 'feature'
 
 describe('The Feature Helper', function() {
   const runtime = new Runtime()

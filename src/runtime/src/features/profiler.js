@@ -1,4 +1,4 @@
-import { Feature } from '../helpers/feature'
+import { Feature } from '../feature'
 
 /**
  * @class ProfilerFeature

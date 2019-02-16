@@ -9,8 +9,8 @@ import lodash from 'lodash'
 import * as propUtils from './utils/properties'
 import { attachEmitter } from './utils/emitter'
 import mware from './utils/mware'
-import { Helper } from './helpers/helper'
-import { Feature } from './helpers/feature'
+import { Helper } from './helper'
+import { Feature } from './feature'
 import Cache from './cache'
 import WeakCache from './weak-cache'
 import * as stringUtils from './utils/string'
@@ -359,6 +359,21 @@ export class Runtime {
     pipeline.use(fn.bind(runtime))
 
     return this
+  }
+
+
+  /**
+   * Get or create an instance of a registered Feature module.  Will return an instance of Feature,
+   * or an instance of a subclass of Feature.
+   *
+   * @param {String} featureId
+   * @param {Object} [options={}]
+   * @param {Object} [context={}]
+   * @returns {Feature}
+   * @memberof Runtime#
+   */
+  feature(featureId, options = {}, context = {}) {
+        
   }
 
   get uuid() {
@@ -1666,39 +1681,72 @@ export class Runtime {
     return this.createSandbox(this.context)
   }
 
+  /**
+   * Gets the ids of all of the features that are available in the runtime's feature registry,
+   * as well as any features that are part of the runtime's class level feature registry.
+   * @type {Array<String>}
+   * @readonly
+   * @memberof Runtime#
+   */
   get availableFeatures() {
     const mine = this.get('features.available', [])
     const constructors = this.get('constructor.features.available', [])
-
     return uniq([...mine, ...constructors])
   }
 
+  /**
+   * Returns an object the features that are enabled.  The keys are going to be
+   * the registry id of that feature, and the values will be the feature helper instance
+   *  
+   * @type {Object<String, Feature>}
+   * @readonly
+   * @memberof Runtime#
+   */
   get enabledFeatures() {
     return this.chain
       .invoke('featureStatus.toJSON')
-      .pickBy({ status: 'enabled' })
-      .mapValues(({ cacheKey } = {}) => this.cache.get(cacheKey))
+      .pickBy((v) => v.status === 'enabled')
+      .mapValues((v) => this.cache.get(v.cacheKey))
       .omitBy(v => !v)
       .value()
   }
 
+  /**
+   * Returns the ids of the features that are enabled.
+   *
+   * @type {Array<String>}
+   * @readonly
+   * @memberof Runtime#
+   */
   get enabledFeatureIds() {
-    return this.chain
-      .invoke('featureStatus.toJSON')
-      .pickBy({ status: 'enabled' })
-      .keys()
-      .value()
+    const { keys } = this.lodash
+    return keys(this.enabledFeatures)
   }
 
+  /**
+   * Returns an object of the enabled features, the keys will be the shortcut property
+   * that is defined on the feature.  If the feature does not define one, then it won't
+   * show up here.
+   *
+   * @readonly
+   * @memberof Runtime#
+   */
   get featureRefs() {
-    const { isEmpty } = this.lodash
-    return this.chain
-      .get('enabledFeatures')
-      .mapKeys(feature => feature.provider.createGetter || feature.provider.getter)
-      .omitBy((v, k) => isEmpty(k))
-      .value()
+    const { mapKeys, omitBy, isEmpty } = this.lodash
+    const { enabledFeatures } = this
+
+    const withShortcuts = mapKeys(enabledFeatures, (feature) => feature.tryGet('shortcut', feature.tryGet('createGetter')))
+
+    return omitBy(withShortcuts, (v,k) => isEmpty(k))
   }
 
+  /**
+   * Tells you if a feature is enabled or not.
+   *
+   * @param {String} name
+   * @returns {Boolean}
+   * @memberof Runtime#
+   */
   isFeatureEnabled(name) {
     const item = this.featureStatus.get(name)
 
@@ -1713,6 +1761,13 @@ export class Runtime {
     return false
   }
 
+  /**
+   * Enable multiple features at a time
+   *
+   * @param {*} [options={}]
+   * @returns
+   * @memberof Runtime
+   */
   enableFeatures(options = {}) {
     const { availableFeatures } = this
 
