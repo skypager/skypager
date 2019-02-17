@@ -1781,13 +1781,6 @@
   resolved "https://registry.yarnpkg.com/@sinonjs/samsam/-/samsam-2.1.3.tgz#62cf2a9b624edc795134135fe37fc2ae8ea36be3"
   integrity sha512-8zNeBkSKhU9a5cRNbpCKau2WWPfan+Q2zDlcXvXyhn9EsMqgYs4qzo0XHNVlXC6ABQL8fT6nV+zzo5RTHJzyXw==
 
-"@skypager/features-browser-vm@^0.3.0":
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/@skypager/features-browser-vm/-/features-browser-vm-0.3.0.tgz#bff3224d046a45506eb51df89e328c1b7abfb8bb"
-  integrity sha512-Hr8AJYcad/Fm/aBG457vurKoXWwxnADHq0w0Q7RJ9wLYNZoBQM90O0xrvSShX9nKfQRzvzV2jKrVuZDfSt86kA==
-  dependencies:
-    jsdom "^13.2.0"
-
 "@skypager/helpers-client@^0.2.7":
   version "0.2.8"
   resolved "https://registry.yarnpkg.com/@skypager/helpers-client/-/helpers-client-0.2.8.tgz#5f3b76e7e4b1c647331b85c2dfa6d11a3f9044eb"
@@ -2743,7 +2736,7 @@ axios@^0.18.0:
   version "0.19.0-beta.1"
   resolved "https://codeload.github.com/axios/axios/tar.gz/2eeb59af4de41e07c7dd1eec09af0230960c029c"
   dependencies:
-    follow-redirects "1.5.10"
+    follow-redirects "^1.4.1"
     is-buffer "^2.0.2"
 
 axobject-query@^2.0.2:
@@ -8309,6 +8302,11 @@ jsdoc-parse@^3.0.1:
     reduce-extract "^1.0.0"
     sort-array "^2.0.0"
     test-value "^3.0.0"
+
+jsdoc-plugin-typescript@^1.0.7:
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/jsdoc-plugin-typescript/-/jsdoc-plugin-typescript-1.0.7.tgz#72d8dd6d8bb07bc9c70e6dabac2103e9cb88bf10"
+  integrity sha512-JpNiDrikHNl8w1sJAvM3jhCxnj8q4wQMfQbf7rx2KBCuNPsM+hjf9hK0wfUz1YtoUwRLGxfSQpB1PFx0HbQUQw==
 
 jsdoc-to-markdown@^4.0.1:
   version "4.0.1"

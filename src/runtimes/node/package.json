@@ -18,7 +18,7 @@
   "dependencies": {
     "@skypager/features-file-manager": "^0.3.2",
     "@skypager/features-package-manager": "^0.3.2",
-    "@skypager/features-module--manager": "^0.3.2",
+    "@skypager/features-module-manager": "^0.3.2",
     "@skypager/helpers-client": "^0.3.2",
     "@skypager/helpers-repl": "^0.3.2",
     "@skypager/helpers-server": "^0.3.2",

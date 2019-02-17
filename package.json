@@ -59,6 +59,7 @@
     "cross-env": "^5.2.0",
     "husky": "^1.1.1",
     "jsdoc": "^3.5.5",
+    "jsdoc-plugin-typescript": "^1.0.7",
     "jsdoc-to-markdown": "^4.0.1",
     "lerna": "^3.4.0",
     "lint-staged": "^7.3.0",

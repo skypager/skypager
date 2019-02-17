@@ -7,6 +7,10 @@
         "tutorials": "docs/tutorials"
     },
     "plugins": [
-        "node_modules/better-docs/category"
-    ]
+        "node_modules/better-docs/category",
+        "jsdoc-plugin-typescript"
+    ],
+    "typescript": {
+      "moduleRoot": "src"
+    }
 }
