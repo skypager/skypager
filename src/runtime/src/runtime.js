@@ -127,7 +127,6 @@ const enableStrictMode = get(
 export class Runtime {
   displayName = 'Skypager'
 
-
   constructor(options = {}, context = {}, middlewareFn) {
     if (isFunction(options)) {
       middlewareFn = options
@@ -155,7 +154,7 @@ export class Runtime {
       cacheKey: computed(this.getCacheKey.bind(this)),
       setState: action(this.setState.bind(this)),
       replaceState: action(this.replaceState.bind(this)),
-      featureStatus: observable.shallowMap([])
+      featureStatus: observable.shallowMap([]),
     })
 
     const cwd = result(options, 'cwd', () =>
@@ -365,7 +364,6 @@ export class Runtime {
 
     return this
   }
-
 
   get uuid() {
     return this._uuid
@@ -1054,7 +1052,7 @@ export class Runtime {
 
   /**
    * Based on the detected or specified platform the Runtime thinks it is in,
-   * target will give us its name.  This can be used to auto-discover and register certain 
+   * target will give us its name.  This can be used to auto-discover and register certain
    * helpers and features.
    *
    * @type {String}
@@ -1065,7 +1063,7 @@ export class Runtime {
     const { universal, target } = this.argv
 
     if (universal) return 'universal'
-    if(target) return target 
+    if (target) return target
     if (this.isElectron) return 'electron'
     if (this.isNode) return 'node'
     if (this.isBrowser) return 'web'
@@ -1081,9 +1079,9 @@ export class Runtime {
    * @type {Array<String>}
    * @readonly
    * @memberof Runtime#
-   * 
+   *
    * @example
-   * 
+   *
    *  runtime.helperTags // => ['development', 'development/node', 'node', 'node/development', 'universal']
    */
   get helperTags() {
@@ -1103,7 +1101,7 @@ export class Runtime {
    * @memberof Runtime#
    */
   get isBrowser() {
-    return windowIsAvailable && documentIsAvailable 
+    return windowIsAvailable && documentIsAvailable
   }
 
   /**
@@ -1117,10 +1115,7 @@ export class Runtime {
       const isNode = Object.prototype.toString.call(global.process) === '[object process]'
       return isNode
     } catch (e) {
-      return (
-        processIsAvailable &&
-        (process.title === 'node' || `${process.title}`.endsWith('.exe'))
-      )
+      return processIsAvailable && (process.title === 'node' || `${process.title}`.endsWith('.exe'))
     }
   }
 
@@ -1131,7 +1126,7 @@ export class Runtime {
    * @memberof Runtime#
    */
   get isWindows() {
-    return this.isNode && `${process.title}`.endsWith('.exe') 
+    return this.isNode && `${process.title}`.endsWith('.exe')
   }
 
   /**
@@ -1141,8 +1136,12 @@ export class Runtime {
    * @memberof Runtime#
    */
   get isElectron() {
-    return processIsAvailable && !isUndefined(process.type) && !isUndefined(process.title) &&
+    return (
+      processIsAvailable &&
+      !isUndefined(process.type) &&
+      !isUndefined(process.title) &&
       (process.title.match(/electron/i) || process.versions['electron'])
+    )
   }
 
   /**
@@ -1152,7 +1151,12 @@ export class Runtime {
    * @memberof Runtime#
    */
   get isElectronRenderer() {
-    return !isUndefined(process) && process.type === 'renderer' && windowIsAvailable && documentIsAvailable 
+    return (
+      !isUndefined(process) &&
+      process.type === 'renderer' &&
+      windowIsAvailable &&
+      documentIsAvailable
+    )
   }
 
   /**
@@ -1194,7 +1198,11 @@ export class Runtime {
    */
   get isDevelopment() {
     const { argv = {} } = this
-    return !this.isProduction && !this.isTest && (argv.env === 'development' || process.env.NODE_ENV === 'development')   
+    return (
+      !this.isProduction &&
+      !this.isTest &&
+      (argv.env === 'development' || process.env.NODE_ENV === 'development')
+    )
   }
 
   /**
@@ -1205,7 +1213,7 @@ export class Runtime {
    */
   get isTest() {
     const { argv = {} } = this
-    return argv.env === 'test' || process.env.NODE_ENV === 'test'   
+    return argv.env === 'test' || process.env.NODE_ENV === 'test'
   }
 
   /**
@@ -1517,23 +1525,34 @@ export class Runtime {
     // WOW clean this up
     // prettier-ignore
     return extendObservable(target, mapValues(properties, val => {
-        if (isArray(val) && val[0] === "map" && isObject(val[1])) {
-          return observable.map(toPairs(val[1]))
-        } else if (isArray(val) && val[0] === "shallowMap" && isObject(val[1])) {
-          return observable.shallowMap(toPairs(val[1]))
-        } else if (isArray(val) && val[0] === "object") {
-          return observable.object(val[1] || {})
-        } else if (isArray(val) && val[0] === "shallowObject") {
-          return observable.shallowObject(val[1] || {})
-        } else if (isArray(val) && val[0] === "shallowArray") {
-          return observable.shallowArray(val[1] || [])
-        } else if (isArray(val) && val[0] === "array") {
-          return observable.array(val[1] || [])
-        } else if (isArray(val) && val[0] === "struct") {
-          return observable.struct(val[1] || [])
-        } else if (isArray(val) && val[0] === "computed" && isFunction(val[1])) {
+        if (!isArray(val)) {
+          return val
+        }
+
+        const [observableType, initialValue] = val
+        const f = observable[observableType]
+
+        if (observableType !== 'action' && observableType !== 'computed' && !f) {
+          throw new Error(`Invalid Observable: ${observableType}`)
+        }
+
+        if (observableType === "map" && isObject(initialValue)) {
+          return f(toPairs(initialValue))
+        } else if (observableType === "shallowMap" && isObject(initialValue)) {
+          return f(toPairs(initialValue))
+        } else if (observableType === "object") {
+          return f(val[1] || {})
+        } else if (observableType === "shallowObject") {
+          return f(val[1] || {})
+        } else if (observableType === "shallowArray") {
+          return f(val[1] || [])
+        } else if (observableType === "array") {
+          return f(val[1] || [])
+        } else if (observableType === "struct") {
+          return f(val[1] || [])
+        } else if (observableType === "computed" && isFunction(initialValue)) {
           return computed(val[1].bind(target))
-        } else if (isArray(val) && val[0] === "action" && isFunction(val[1])) {
+        } else if (observableType === "action" && isFunction(initialValue)) {
           return action(val[1].bind(target))
         } else {
           return val
@@ -1571,11 +1590,6 @@ export class Runtime {
 
   convertToJS(...args) {
     return toJS(...args)
-  }
-
-  strftime(...args) {
-    console.warn('skypager-runtime strftime will be deprecated')
-    return require('./strftime')(...args)
   }
 
   /**
@@ -1710,7 +1724,7 @@ export class Runtime {
   /**
    * Returns an object the features that are enabled.  The keys are going to be
    * the registry id of that feature, and the values will be the feature helper instance
-   *  
+   *
    * @type {Object<String, Feature>}
    * @readonly
    * @memberof Runtime#
@@ -1718,8 +1732,8 @@ export class Runtime {
   get enabledFeatures() {
     return this.chain
       .invoke('featureStatus.toJSON')
-      .pickBy((v) => v.status === 'enabled')
-      .mapValues((v) => this.cache.get(v.cacheKey))
+      .pickBy(v => v.status === 'enabled')
+      .mapValues(v => this.cache.get(v.cacheKey))
       .omitBy(v => !v)
       .value()
   }
@@ -1748,9 +1762,11 @@ export class Runtime {
     const { mapKeys, omitBy, isEmpty } = this.lodash
     const { enabledFeatures } = this
 
-    const withShortcuts = mapKeys(enabledFeatures, (feature) => feature.tryGet('shortcut', feature.tryGet('createGetter')))
+    const withShortcuts = mapKeys(enabledFeatures, feature =>
+      feature.tryGet('shortcut', feature.tryGet('createGetter'))
+    )
 
-    return omitBy(withShortcuts, (v,k) => isEmpty(k))
+    return omitBy(withShortcuts, (v, k) => isEmpty(k))
   }
 
   /**
@@ -1826,14 +1842,14 @@ export class Runtime {
 
   /**
    * Runs a life cycle hook method on the runtime. A hook method can either be
-   * a standard instance method on runtime, and if one does not exist, an event is 
+   * a standard instance method on runtime, and if one does not exist, an event is
    * also emitted by the same name
    *
    * @param {String} hookName the name of the hook method
    * @param {...*} args any args you want to pass to the hook
    * @returns {Runtime}
    * @memberof Runtime#
-   * @emits Runtime#firingHook 
+   * @emits Runtime#firingHook
    */
   fireHook(hookName, ...args) {
     if (this.argv.debugHooks) {
@@ -1872,9 +1888,9 @@ export class Runtime {
    * @memberof Runtime#
    */
   Helper = Helper
-  
+
   /**
-   * Provides access to the Helper registry 
+   * Provides access to the Helper registry
    *
    * @readonly
    * @memberof Runtime
@@ -1894,9 +1910,9 @@ export class Runtime {
   }
 
   /**
-   * The default options that will be passed to Helper.attach. 
+   * The default options that will be passed to Helper.attach.
    *
-   * @type {import("./helper").HelperAttachOptions} 
+   * @type {import("./helper").HelperAttachOptions}
    * @readonly
    * @memberof Runtime#
    */
@@ -1915,7 +1931,7 @@ export class Runtime {
 
   /**
    * Create an instance of a Feature from one of the available Feature providers in the registry.
-   * 
+   *
    * Calling this method more than once with the same options, will return the same object, unless that
    * Helper class or the registry it is a part sets isCacheable = false
    *
@@ -1926,7 +1942,7 @@ export class Runtime {
    * @memberof Runtime
    */
   feature(featureModuleId, options = {}, context = {}) {
-    return this._feature(featureModuleId, options, context)    
+    return this._feature(featureModuleId, options, context)
   }
 
   /**
@@ -2176,7 +2192,7 @@ export class Runtime {
   }
 
   /**
-   * Access the Helper class, which you can extend to create your own Helpers 
+   * Access the Helper class, which you can extend to create your own Helpers
    *
    * @static
    * @memberof Runtime
