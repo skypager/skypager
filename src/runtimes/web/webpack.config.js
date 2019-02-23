@@ -15,10 +15,10 @@ const minifiedWebConfig = merge.strategy({ node: 'replace', entry: 'replace' })(
     name: 'web',
     output: {
       library: 'skypager',
-      libraryTarget: 'var',
+      libraryTarget: 'umd',
     },
     entry: {
-      'skypager-runtimes-web.min': path.resolve(cwd, 'src', 'index.js'),
+      'skypager-runtimes-web.min': path.resolve(cwd, 'src', 'index.web.js'),
     },
     externals: [
       {
@@ -37,7 +37,7 @@ const webConfig = merge.strategy({ node: 'replace', entry: 'replace', plugins: '
       libraryTarget: 'umd',
     },
     entry: {
-      'skypager-runtimes-web': path.resolve(cwd, 'src', 'index.js'),
+      'skypager-runtimes-web': path.resolve(cwd, 'src', 'index.web.js'),
     },
     externals: [
       {

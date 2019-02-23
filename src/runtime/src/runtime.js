@@ -278,19 +278,20 @@ export class Runtime {
    *
    * @memberof Runtime
    * @param {Function|Object|Feature|Helper} extension an object that meets the requirements to be an extension
-   * @param {String|Object} stage which stage to run this middleware in (INITIALIZING, PREPARING, STARTING)
+   * @param {String|Object} [stage=INITIALIZING] which stage to run this middleware in (INITIALIZING, PREPARING, STARTING)
    * @returns {Runtime}
    */
-  use(fn, stage) {
+  use(extension, stage) {
     const runtime = this
 
-    if (isObject(fn) && isFunction(fn.initializer)) {
-      return this.use(fn.initializer.bind(this), INITIALIZING)
-    } else if (isFunction(fn) && fn.isSkypagerFeature) {
-      const featureId = fn.featureId || fn.shortcut || fn.prototype.shortcut || fn.name
+    if (isObject(extension) && isFunction(extension.initializer)) {
+      return this.use(extension.initializer.bind(this), INITIALIZING)
+    } else if (isFunction(extension) && extension.isSkypagerFeature) {
+      const featureId =
+        extension.featureId || extension.shortcut || extension.prototype.shortcut || extension.name
 
       if (!this.features.checkKey(featureId)) {
-        this.features.register(featureId, () => fn)
+        this.features.register(featureId, () => extension)
 
         const myFeature = this.feature(
           featureId,
@@ -304,38 +305,38 @@ export class Runtime {
 
         return this
       }
-    } else if (isObject(fn) && isFunction(fn.attach)) {
-      fn.attach.call(
+    } else if (isObject(extension) && isFunction(extension.attach)) {
+      extension.attach.call(
         this,
         this,
         isObject(stage) ? { ...this.options, ...stage } : this.options,
         this.context
       )
-    } else if (isObject(fn) && fn.default) {
-      return this.use(fn.default, stage)
+    } else if (isObject(extension) && extension.default) {
+      return this.use(extension.default, stage)
     }
 
-    const m = fn.middleware || fn.use
-    if (isObject(fn) && isFunction(m)) {
-      fn = m
+    const m = extension.middleware || extension.use
+    if (isObject(extension) && isFunction(m)) {
+      extension = m
     }
 
-    if (typeof fn === 'string') {
-      if (runtime.availableFeatures.indexOf(fn) >= 0) {
-        const featureId = fn
-        fn = () => runtime.feature(featureId).enable()
+    if (typeof extension === 'string') {
+      if (runtime.availableFeatures.indexOf(extension) >= 0) {
+        const featureId = extension
+        extension = () => runtime.feature(featureId).enable()
         stage = stage || INITIALIZING
       } else {
         try {
-          console.error(`Can not do dynamic requires anymore: You tried: ${fn}`)
+          console.error(`Can not do dynamic requires anymore: You tried: ${extension}`)
         } catch (error) {}
       }
     }
 
-    if (isFunction(fn) && stage === INITIALIZING) {
-      fn.call(runtime, err => {
+    if (isFunction(extension) && stage === INITIALIZING) {
+      extension.call(runtime, err => {
         if (err) {
-          runtime.error(err.message || `Error while using fn ${fn.name}`, {
+          runtime.error(err.message || `Error while using extension ${extension.name}`, {
             error: err,
           })
           throw err
@@ -345,7 +346,7 @@ export class Runtime {
       return this
     }
 
-    if (typeof fn !== 'function') {
+    if (typeof extension !== 'function') {
       return this
     }
 
@@ -359,7 +360,7 @@ export class Runtime {
       return p
     })
 
-    pipeline.use(fn.bind(runtime))
+    pipeline.use(extension.bind(runtime))
 
     return this
   }

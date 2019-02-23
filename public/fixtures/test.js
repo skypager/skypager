@@ -1,1 +1,1 @@
-global.skypager.testScriptLoaded = true
+window.skypager.testScriptLoaded = true

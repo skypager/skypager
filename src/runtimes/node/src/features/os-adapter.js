@@ -1,4 +1,4 @@
-import { Feature } from '@skypager/runtime/lib/helpers/feature'
+import { Feature } from '@skypager/runtime/lib/feature'
 import * as os from 'os'
 
 export default class OsAdapterFeature extends Feature {

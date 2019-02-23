@@ -1,19 +1,27 @@
-if (typeof global === 'undefined' && typeof window !== 'undefined') {
-  window.global = window
-}
+import runtime, { Runtime } from '@skypager/runtime'
+import * as ClientHelper from '@skypager/helpers-client'
+import AssetLoaders from './features/asset-loaders'
+import Babel from './features/babel'
+import * as WindowMessaging from './features/window-messaging'
 
-const skypager = require('@skypager/runtime').use(require('@skypager/helpers-client'))
+const webRuntime = runtime
 
-skypager.features.register('asset-loaders', () => require('./features/asset-loaders'))
-skypager.features.register('babel', () => require('./features/babel'))
-skypager.features.register('window-messaging', () => require('./features/window-messaging'))
+webRuntime.features.register('asset-loaders', () => AssetLoaders)
+webRuntime.features.register('babel', () => Babel)
+webRuntime.features.register('window-messaging', WindowMessaging)
 
-module.exports = skypager.use('asset-loaders')
+webRuntime
+  /**
+   * The @skypager/web runtime bundles the ClientHelper which lets build REST clients using the axios library.
+   */
+  .use(ClientHelper)
+  /**
+   * The asset loaders feature is enabled by default
+   */
+  .use('asset-loaders')
 
-skypager.hide('runtimeProvider', 'web', true)
-skypager.hide('runtimeModule', module.id, true)
-
-if (typeof __PACKAGE__ !== 'undefined') {
-  // eslint-disable-next-line
-  skypager.hide('runtimePackageInfo', __PACKAGE__, true)
-}
+/**
+ * @typedef {Object} WebRuntime
+ * @property {Function} client
+ */
+export default webRuntime

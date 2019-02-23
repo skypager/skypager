@@ -5,6 +5,15 @@ const isFunction = o => typeof o === 'function'
 /**
  * @typedef {import("./runtime").Runtime} Runtime
  */
+
+/**
+ * @typedef {import("./utils.properties").Mixin} Mixin
+ */
+
+/**
+ * @typedef {import("./utils.properties").MixinOptions} MixinOptions
+ */
+
 /**
  * @class Feature
  * @extends Helper
@@ -13,6 +22,13 @@ const isFunction = o => typeof o === 'function'
  * throughout their object lifecyle.  Extended runtimes such as @skypager/node
  * are just a normal runtime which packages certain node specific features
  * and enable them automatically.
+ */
+
+/**
+ * The options this feature was created with, combined with the options it was enabled with.
+ * @name featureSettings
+ * @type {Object}
+ * @memberof Feature#
  */
 export class Feature extends Helper {
   /**
@@ -37,11 +53,18 @@ export class Feature extends Helper {
   static isCacheable = true
 
   /**
+   * Creates a Feature registry.
    *
+   * @param {Object} options options for the context registry
+   * @param {String} [options.name='features'] the name of the registry
+   * @param {Object<String,Function>} [options.features={}] items to populate the registry with
+   *
+   * @returns {ContextRegistry}
    */
-  static createRegistry(...args) {
-    const reg = Helper.createContextRegistry('features', {
-      context: Helper.createMockContext({}),
+  static createRegistry(options = {}) {
+    const reg = Helper.createContextRegistry(options.name || 'features', {
+      context: Helper.createMockContext(options.features || {}),
+      ...options,
     })
 
     reg.enabled = {}
@@ -78,18 +101,47 @@ export class Feature extends Helper {
     this.applyInterface(this.featureMixin, this.featureMixinOptions)
   }
 
+  /**
+   * A Feature helper can define a featureMixinOptions or mixinOptions property
+   * which is used to control the behavior of the interface that gets built for the feature.
+   * This is based on @skypager/runtime/src/utils/properties applyInterface method, which takes
+   * an object of functions and binds it to the target object, which in this case is the feature instance,
+   * and automatically appends the runtime context as the last argument to every function.
+   *
+   * This is only useful for module of function style feature helpers, and is not needed so much
+   * for class based Features.
+   *
+   * @readonly
+   * @memberof Feature
+   */
   get featureMixinOptions() {
     const { defaults } = this.lodash
     const opts = this.tryResult('featureMixinOptions') || this.tryResult('mixinOptions') || {}
     return defaults({}, opts, this.defaultMixinOptions)
   }
 
+  /**
+   * A Feature Helper which defines a runtime or host mixin will extend the runtime with
+   * the specified functions / properties.  The hostMixinOptions controls the binding, and argument
+   * signature of these functions, similar to featureMixinOptions
+   *
+   * @readonly
+   * @memberof Feature
+   */
   get hostMixinOptions() {
     const { defaults } = this.lodash
     const opts = this.tryResult('hostMixinOptions') || this.tryResult('mixinOptions') || {}
     return defaults({}, { scope: this.host }, opts, this.defaultMixinOptions)
   }
 
+  /**
+   * The default mixin options that will be used when the feature doesn't declare its own.
+   * These will be passed to the applyInterface calls for both feature and host mixins.
+   *
+   * @type {MixinOptions}
+   * @readonly
+   * @memberof Feature
+   */
   get defaultMixinOptions() {
     return {
       transformKeys: true,
@@ -105,8 +157,9 @@ export class Feature extends Helper {
   /**
    * Enable the feature.
    *
-   * @param {object|function}
-   *
+   * @param {Object} options options to enable this feature with
+   * @param {Function} [callback] a callback that will get called when the feature is finished enabling.
+   * @returns {PromiseLike<Feature>}
    */
   enable(options = {}, callback) {
     const { runtime } = this
@@ -130,9 +183,6 @@ export class Feature extends Helper {
       return this
     }
 
-    /**
-     * @property {Object} featureSettings contains the settings or configuration for this feature based on how it was initialized and created
-     */
     try {
       this.hide('featureSettings', defaultsDeep({}, options, this.options), {
         configurable: true,

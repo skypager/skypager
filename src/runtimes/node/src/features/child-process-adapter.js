@@ -1,4 +1,4 @@
-import { Feature } from '@skypager/runtime/lib/helpers/feature'
+import { Feature } from '@skypager/runtime/lib/feature'
 
 import * as cp from 'child_process'
 import * as cpAsync from 'child-process-promise'

@@ -5,9 +5,55 @@ const { Feature } = runtime
 /**
  * @class BabelCompiler
  * @extends Feature
- * @classdesc provides a standalone babel compiler that runs in the browser
+ * @classdesc loads the babel standalone library from a CDN and provides a way to run code written with the latest features
+ * directly in the browser.  Can be used to power editable code blocks that contain JSX for example, and render the output as
+ * the editor is saved.
  *
-
+ * @example
+ *
+ * import skypager from '@skypager/web'
+ * import React, { Component } from 'react'
+ * import AceEditor from 'react-ace'
+ *
+ * skypager.use('babel')
+ *
+ * class ComponentSandbox extends Component {
+ *   state = {
+ *     es6Source: '',
+ *     transpiledOutput: '',
+ *   }
+ *
+ *   async componentDidMount() {
+ *      const { debounce } = skypager.lodash
+ *      await skypager.babel.whenReady()
+ *      // give the programmer a chance to finish typing
+ *      this.handleCodeChange = debounce(this.compileCode, 300)
+ *   }
+ *
+ *   compileCode = () => {
+ *      const transpiledOutput = await skypager.babel.compile(this.state.es6Source)
+ *      this.setState({ transpiledOutput })
+ *   }
+ *
+ *   handleEdit = (es6Source) => {
+ *     this.setState({ es6Source }, this.handleCodeChange)
+ *     const transpiledOutput = skypager.babel.compile(source)
+ *   }
+ *
+ *   render() {
+ *
+ *      return (
+ *        <div>
+ *          <AceEditor
+ *            onChange={this.handleEdit}
+ *            value={this.state.es6Source} />
+ *          <br/>
+ *          <ComponentRenderer source={this.transpiledOutput} />
+ *        </div>
+ *      )
+ *   }
+ * }
+ *
  */
 export default class BabelCompiler extends Feature {
   static shortcut = 'babel'
@@ -34,18 +80,23 @@ export default class BabelCompiler extends Feature {
    *   console.log(result)
    * })
    */
-  createCodeRunner(code, options = {}) {
+  createCodeRunner(code, options = {}, context = {}) {
     const { runtime } = this
     const { vm } = runtime
     const { mapValues, pick } = this.lodash
     const compiled = this.compile(code)
     const script = vm.createScript(compiled)
 
-    return (vars = {}) => {
+    return codeRunner
+
+    /**
+     * @param {Object} vars variables that will be considered part of window inside your code
+     */
+    function codeRunner(vars = {}) {
       const sandbox = vm.createContext({
-        ...pick(runtime.sandbox, 'mobx', 'lodash'),
-        ...pick(global, 'React', 'ReactDOM', 'ReactRouter'),
-        ...(global.semanticUIReact || {}),
+        runtime,
+        skypager: runtime,
+        ...context,
       })
 
       mapValues(vars, (v, k) => {
@@ -59,6 +110,7 @@ export default class BabelCompiler extends Feature {
       return options.sandbox ? { vars, result, sandbox, compiled } : result
     }
   }
+
   /**
    * Compile es6 code with babel
    *
@@ -68,7 +120,7 @@ export default class BabelCompiler extends Feature {
    * @memberof BabelCompiler
    */
   compile(code, options = {}) {
-    const { Babel } = global
+    const { Babel } = window
     const { omit } = this.lodash
 
     const babelOptions = {
@@ -105,7 +157,7 @@ export default class BabelCompiler extends Feature {
     }
 
     if (this.ready) {
-      fn(null, global.Babel)
+      fn(null, window.Babel)
     } else {
       this.once('ready', Babel => {
         fn(null, Babel)
@@ -127,10 +179,10 @@ export default class BabelCompiler extends Feature {
       }).then(() => this.loadBabel())
     }
 
-    if (global.Babel) {
+    if (window.Babel) {
       this.ready = true
-      this.emit('ready', global.Babel)
-      return global.Babel
+      this.emit('ready', window.Babel)
+      return window.Babel
     }
 
     this.loading = true
@@ -139,7 +191,7 @@ export default class BabelCompiler extends Feature {
     this.ready = true
     this.loading = false
 
-    this.emit('ready', global.Babel)
-    return global.Babel
+    this.emit('ready', window.Babel)
+    return window.Babel
   }
 }
