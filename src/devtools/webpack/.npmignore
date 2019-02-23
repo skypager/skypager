@@ -5,5 +5,5 @@
 !README.md
 !LICENSE.md
 !markdown-loader.js
-!scripts/
+!scripts/**
 !mdx-parser.js

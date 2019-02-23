@@ -35,10 +35,14 @@ function getServedPath(appPackageJson) {
 }
 
 const portfolioRoot = path.dirname(findUp.sync('package.json', { cwd: resolveApp('.') }))
+const manifest = require(resolveApp('package.json'))
+
+const { skypager = {} } = manifest
+const { buildFolder = 'lib' } = skypager
 
 module.exports = {
   appRoot: resolveApp('.'),
-  appBuild: resolveApp('lib'),
+  appBuild: resolveApp(buildFolder),
   appNodeModules: resolveApp('node_modules'),
   appHtml: resolveApp('public/index.html'),
   appIndexJs: resolveApp('src/launch.js'),
