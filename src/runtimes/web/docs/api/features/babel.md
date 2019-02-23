@@ -2,7 +2,9 @@
 
 <dl>
 <dt><a href="#BabelCompiler">BabelCompiler</a> ⇐ <code>Feature</code></dt>
-<dd><p>provides a standalone babel compiler that runs in the browser</p>
+<dd><p>loads the babel standalone library from a CDN and provides a way to run code written with the latest features
+directly in the browser.  Can be used to power editable code blocks that contain JSX for example, and render the output as
+the editor is saved.</p>
 </dd>
 </dl>
 
@@ -16,7 +18,9 @@
 <a name="BabelCompiler"></a>
 
 ## BabelCompiler ⇐ <code>Feature</code>
-provides a standalone babel compiler that runs in the browser
+loads the babel standalone library from a CDN and provides a way to run code written with the latest features
+directly in the browser.  Can be used to power editable code blocks that contain JSX for example, and render the output as
+the editor is saved.
 
 **Kind**: global class  
 **Extends**: <code>Feature</code>  
