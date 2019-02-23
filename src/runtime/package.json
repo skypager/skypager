@@ -1,6 +1,6 @@
 {
   "name": "@skypager/runtime",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "universal javascript application runtime",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",

@@ -1,6 +1,6 @@
 {
   "name": "@skypager/portfolio-manager",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "the skypager portfolio manager",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
@@ -23,7 +23,7 @@
     "@skypager/features-file-manager": "^0.3.2",
     "@skypager/features-module-manager": "^0.3.2",
     "@skypager/features-package-manager": "^0.3.2",
-    "@skypager/node": "^0.3.2"
+    "@skypager/node": "^0.3.3"
   },
   "skypager": {
     "buildFolder": "lib",
