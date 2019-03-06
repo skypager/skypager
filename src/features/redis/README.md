@@ -1,22 +1,32 @@
-# Browser VM
+# Redis Feature
 
-This feature makes it easy to take a chunk of javascript code as a string,
-and run it as if it were inside of a browser using JSDOM.  You will get back the 
-code, the result of the code, and the global context variable in a state after the script ran. 
+Provides a wrapper around the node redis client that will self configure based on the runtime settings and process.env
+
+## Usage
 
 ```javascript
-import runtime from '@skypager/node'
-import '@skypager/features-browser-vm'
+const runtime = require('@skypager/node')
+const redisFeature = require('@skypager/features-redis')
 
-const browserVm = runtime.feature('browser-vm')
+runtime.use(redisFeature, {
+  url: process.env.REDIS_URL
+})
 
-async function main() {
-  const webpackBundledApp = await runtime.fsx.readFileAsync(runtime.resolve('build', 'app.js'))
-  const { result, context } = await browserVm.runScript(webpackBundledApp)
-  const { App } = context
+runtime.redis.async.keys('*').then((keys) => console.log('Redis KEYS', keys))
+```
 
-  console.log('App Component', App)
-}
+## Async Wrapper
 
-main()
+The `redis.async` property returns promisified versions of all of the core redis commands 
+
+## Pubsub
+
+The redis feature can maintain two clients, one that is in subscribe mode, and another that is free to publish and run any other command.
+
+```javascript
+runtime.redis.subscribe('channel', (message) => {
+  console.log('got message')
+})
+
+runtime.redis.publish('channel', 'some message')
 ```

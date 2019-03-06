@@ -2,6 +2,10 @@
 
 ## Releases
 
+### 0.3.3
+
+- [@skypager/features-redis] added a redis feature
+
 ### 0.2.9
 
 - [@skypager/runtime] you can now call runtime.use(FeatureClass) as a way of registering and enabling a feature
