@@ -30,6 +30,22 @@ runtime.features.register('redis', () => RedisFeature)
 @param {Function} [options.retry_strategy]	A function that receives an options object as parameter including the retry attempt, the total_retry_time indicating how much time passed since the last time connected, the error why the connection was lost and the number of times_connected in total. If you return a number from this function, the retry will happen exactly after that time in milliseconds. If you return a non-number, no further retry will happen and all offline commands are flushed with errors. Return an error to return that specific error to all offline commands. Example below.
 */
 export function attach(runtime, options = {}) {
+  if (process.env.REDIS_HOST) {
+    options.host = options.host || process.env.REDIS_HOST
+  }
+
+  if (process.env.REDIS_URL) {
+    options.url = options.url || process.env.REDIS_URL
+  }
+
+  if (process.env.REDIS_PASSWORD) {
+    options.password = options.password || process.env.REDIS_PASSWORD
+  }
+
+  if (process.env.REDIS_DB) {
+    options.db = options.db || process.env.REDIS_DB
+  }
+
   runtime.feature('redis').enable(options)
 }
 
