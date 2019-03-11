@@ -23,7 +23,7 @@
     "@skypager/node": "^0.3.3",
     "chalk": "^2.4.2",
     "esm": "^3.0.84",
-    "ink": "^2.0.0-11",
+    "ink": "^2.0.0-17",
     "react": "16.6.1"
   },
   "gitHead": "3afe91f6ff7fd3bff7fe47a351619d5281155cd9",
