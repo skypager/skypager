@@ -1,6 +1,7 @@
 import runtime, { Helper } from '@skypager/node'
 import { google } from 'googleapis'
 import GoogleSpreadsheet from 'google-spreadsheet'
+import Worksheet from './Worksheet'
 
 export class Sheet extends Helper {
   static isCacheable = true
@@ -24,6 +25,7 @@ export class Sheet extends Helper {
   async initialize() {
     this.hide('state', this.runtime.mobx.observable.shallowMap([]))
     this.hide('spreadsheet', this.createSpreadsheet())
+    this.hide('worksheetsIndex', new Map())
 
     await this.authorize()
     await this.getInfo()
@@ -35,6 +37,25 @@ export class Sheet extends Helper {
     this.applySheetInterface()
 
     return this.authorized
+  }
+
+  sheet(worksheetTitle) {
+    const key = String(worksheetTitle).toString()
+
+    if (this.worksheetsIndex.has(key)) {
+      return this.worksheetsIndex.get(key)
+    }
+
+    const ws =
+      this.worksheets.find(
+        ws => String(ws.title).toLowerCase() === String(worksheetTitle).toLowerCase()
+      ) || this.worksheets[0]
+
+    const worksheet = new Worksheet(ws, this)
+
+    this.worksheetsIndex.set(key, worksheet)
+
+    return worksheet
   }
 
   applySheetInterface(iface = this.sheetInterface) {
@@ -114,6 +135,7 @@ export class Sheet extends Helper {
   async getRows(worksheet, options = {}) {
     if (typeof worksheet === 'string') {
       worksheet = { id: worksheet }
+      worksheet.id = this.findSheetId(worksheet.id)
     }
 
     const hasRows = worksheet.getRows && typeof worksheet.getRows === 'function'
@@ -127,6 +149,27 @@ export class Sheet extends Helper {
         this.spreadsheet.getRows(worksheet.id, (err, rows) => (err ? reject(err) : resolve(rows)))
       }
     })
+  }
+
+  async getCells(worksheet, options = {}) {
+    if (typeof worksheet === 'string') {
+      worksheet = { id: worksheet }
+    }
+
+    worksheet.id = this.findSheetId(worksheet.id)
+
+    return new Promise((resolve, reject) => {
+      this.spreadsheet.getCells(worksheet.id, (err, cells) => (err ? reject(err) : resolve(cells)))
+    })
+  }
+
+  findSheetId(alias) {
+    const ws = this.worksheets.find(
+      ws =>
+        String(ws.title).toLowerCase() === String(alias).toLowerCase() ||
+        String(ws.id).toLowerCase() === String(alias).toLowerCase()
+    )
+    return ws.id
   }
 
   /*
@@ -154,13 +197,6 @@ export class Sheet extends Helper {
     })
   }
 
-  async getCells(...args) {
-    return new Promise((resolve, reject) => {
-      this.spreadsheet.getCells(
-        ...args.push((err, ...resp) => (err ? reject(err) : resolve(...resp)))
-      )
-    })
-  }
   */
 
   get authorized() {
