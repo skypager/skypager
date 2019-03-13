@@ -1,6 +1,6 @@
 {
   "name": "@skypager/features-redis",
-  "version": "0.3.3",
+  "version": "0.3.6",
   "description": "skypager runtime redis integration",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",

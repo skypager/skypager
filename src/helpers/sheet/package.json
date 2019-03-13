@@ -1,6 +1,6 @@
 {
   "name": "@skypager/helpers-sheet",
-  "version": "0.3.2",
+  "version": "0.3.6",
   "description": "skypager sheet helper",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
