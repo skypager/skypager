@@ -2,6 +2,10 @@
 
 ## Releases
 
+### 0.3.5
+
+- [@skypager/helpers-sheet] add support for writing to a google sheet
+
 ### 0.3.3
 
 - [@skypager/features-redis] added a redis feature
