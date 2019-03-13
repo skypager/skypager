@@ -24,7 +24,13 @@
     "chalk": "^2.4.2",
     "esm": "^3.0.84",
     "ink": "^2.0.0-17",
-    "react": "16.6.1"
+    "ink-big-text": "^1.0.1",
+    "ink-box": "^1.0.0",
+    "ink-gradient": "^1.0.0",
+    "ink-select-input": "^3.0.2",
+    "ink-spinner": "^3.0.0",
+    "ink-text-input": "^3.0.0",
+    "react": "^16.8.3"
   },
   "gitHead": "3afe91f6ff7fd3bff7fe47a351619d5281155cd9",
   "keywords": [],
