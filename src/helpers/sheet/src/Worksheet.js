@@ -96,7 +96,15 @@ export default class Worksheet {
   }
 
   get entities() {
-    return this.dataRows.map(this.createEntity.bind(this))
+    return this.dataRows.map(row => this.createEntity(row))
+  }
+
+  get RowEntity() {
+    return this.parent.getEntityClass(this.googleWorksheet.id)
+  }
+
+  get autoSaveEnabled() {
+    return this.parent.autoSaveEnabled
   }
 
   /**
@@ -109,7 +117,7 @@ export default class Worksheet {
    * @returns {RowEntity}
    * @memberof Worksheet
    */
-  createEntity(rowNumber) {
+  createEntity(rowNumber, RowEntityClass = this.RowEntity) {
     const row = this.getCellsInRow(rowNumber)
     const { columnsMap } = this
 
@@ -118,7 +126,13 @@ export default class Worksheet {
       {}
     )
 
-    return new RowEntity({ attributes, row, rowNumber, columnsMap }, this.context)
+    if (!RowEntityClass.isRowEntity) {
+      throw new Error(
+        `Invalid RowEntity Class.  Expected to find class.isRowEntity property that is truthy.`
+      )
+    }
+
+    return new RowEntityClass({ attributes, row, rowNumber, columnsMap }, this.context)
   }
 
   /**
@@ -183,7 +197,7 @@ export default class Worksheet {
    */
   getCellsInRow(rowNumber) {
     const { sortBy } = this.lodash
-    const keys = Array.from(this.cellsMap.keys()).filter(index => index.startsWith(`${rowNumber}:`))
+    const keys = Array.from(this.cellsMap.keys()).filter(index => index.endsWith(`:${rowNumber}`))
     return sortBy(keys.map(key => this.cellsMap.get(key)), 'row')
   }
 
@@ -197,7 +211,7 @@ export default class Worksheet {
   getCellsInColumn(columnNumber) {
     const { sortBy } = this.lodash
     const keys = Array.from(this.cellsMap.keys()).filter(index =>
-      index.endsWith(`:${columnNumber}`)
+      index.startsWith(`${columnNumber}:`)
     )
     return sortBy(keys.map(key => this.cellsMap.get(key)), 'row')
   }

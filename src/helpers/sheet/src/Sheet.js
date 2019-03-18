@@ -2,6 +2,7 @@ import runtime, { Helper } from '@skypager/node'
 import { google } from 'googleapis'
 import GoogleSpreadsheet from 'google-spreadsheet'
 import Worksheet from './Worksheet'
+import RowEntity from './RowEntity'
 
 export class Sheet extends Helper {
   static isCacheable = true
@@ -9,6 +10,12 @@ export class Sheet extends Helper {
   static allowAnonymousProviders = true
   static strictMode = false
   static google = google
+
+  static RowEntity = RowEntity
+
+  get RowEntity() {
+    return this.tryGet('RowEntity', RowEntity)
+  }
 
   get data() {
     return this.state.get('data')
@@ -22,10 +29,33 @@ export class Sheet extends Helper {
     return this.get('info.worksheets', [])
   }
 
+  get state() {
+    return this._state
+  }
+
+  get spreadsheet() {
+    return this._spreadsheet
+  }
+
+  get worksheetsIndex() {
+    return this._worksheetsIndex
+  }
+
+  get runtime() {
+    return super.runtime
+  }
+
   async initialize() {
-    this.hide('state', this.runtime.mobx.observable.shallowMap([]))
-    this.hide('spreadsheet', this.createSpreadsheet())
-    this.hide('worksheetsIndex', new Map())
+    this.hide(
+      '_state',
+      (this._state = this.runtime.mobx.observable.shallowMap([
+        ['autoSave', this.tryGet('autoSave', true)],
+      ]))
+    )
+
+    this.hide('_spreadsheet', (this._spreadsheet = this.createSpreadsheet()))
+    this.hide('_worksheetsIndex', (this._worksheetsIndex = new Map()))
+    this.hide('_entityHandlers', (this._entityHandlers = new Map()))
 
     await this.authorize()
     await this.getInfo()
@@ -39,12 +69,92 @@ export class Sheet extends Helper {
     return this.authorized
   }
 
+  /**
+   * Provides an Entity class to represent a row in one of your sheets.
+   *
+   * For example, if you have a google spreadsheet with two worksheets: products, stock
+   *
+   * You can define a class Product which extends our generic RowEntity, that has a getter method
+   * isInStock that allows a product entity (a row from your products sheet) to reference an attribute
+   * of a related row in the stock table.
+   *
+   * @example
+   *
+   * sheet.registerEntity('products', ({ RowEntity, sheet }) => {
+   *   class Product extends RowEntity {
+   *     get isInStock() {
+   *       sheet.parent.sheet('stock').findByProductId(this.productId).stockLevel > 0
+   *     }
+   *   }
+   *
+   *   return Product
+   * })
+   *
+   * @param {*} sheetName
+   * @param {*} fn
+   * @memberof Sheet
+   */
+  registerEntity(sheetName, fn) {
+    const sheetId = this.findSheetId(sheetName)
+    const EntityClass = fn(this.RowEntity)
+    this.entityHandlers.set(sheetId, EntityClass)
+    return EntityClass
+  }
+
+  getEntityClass(sheetName) {
+    const sheetId = this.findSheetId(sheetName)
+    return this.entityHandlers.get(sheetId) || this.RowEntity
+  }
+
+  get entityHandlers() {
+    return this._entityHandlers
+  }
+
+  get autoSaveEnabled() {
+    return !!this.state.get('autoSave')
+  }
+
+  enableAutoSave() {
+    this.state.set('autoSave', true)
+    return true
+  }
+
+  disableAutoSave() {
+    this.state.set('autoSave', false)
+    return false
+  }
+
+  /**
+   * Gets the Worksheet class that represents one of the worksheets in the google spreadsheet.
+   *
+   * @readonly
+   * @memberof Sheet
+   * @type {Array<Worksheet>}
+   */
   get sheets() {
     return this.worksheets.map(ws => this.sheet(ws.id))
   }
 
+  /**
+   * Gets the internal worksheet ids for the worksheets in this google spreadsheet.
+   *
+   * @readonly
+   * @memberof Sheet
+   * @type {Array<String>}
+   */
   get worksheetIds() {
     return this.worksheets.map(w => w.id)
+  }
+
+  /**
+   * Gets the worksheet titles for the worksheets in this google spreadsheet.
+   *
+   * @readonly
+   * @memberof Sheet
+   * @type {Array<String>}
+   */
+  get worksheetTitles() {
+    return this.worksheets.map(w => w.title)
   }
 
   async allEntities() {
@@ -69,7 +179,7 @@ export class Sheet extends Helper {
   }
 
   sheet(worksheetTitle) {
-    const key = String(worksheetTitle).toLowerCase()
+    const key = this.findSheetId(String(worksheetTitle).toLowerCase())
 
     if (this.worksheetsIndex.has(key)) {
       return this.worksheetsIndex.get(key)
@@ -194,11 +304,22 @@ export class Sheet extends Helper {
   }
 
   findSheetId(alias) {
-    const ws = this.worksheets.find(
-      ws =>
-        String(ws.title).toLowerCase() === String(alias).toLowerCase() ||
-        String(ws.id).toLowerCase() === String(alias).toLowerCase()
-    )
+    const ws = this.worksheets
+      .filter(Boolean)
+      .find(
+        ws =>
+          String(ws.title).toLowerCase() === String(alias).toLowerCase() ||
+          String(ws.id).toLowerCase() === String(alias).toLowerCase()
+      )
+
+    if (!ws) {
+      throw new Error(
+        `Could not find worksheet using ${alias}. Worksheet IDs: ${this.worksheetIds.join(
+          ','
+        )} Sheet Titles: ${this.worksheetTitles.join(',')}`
+      )
+    }
+
     return ws.id
   }
 

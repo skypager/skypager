@@ -21,10 +21,14 @@ describe('The Sheets Helper', function() {
   })
 
   it('discovers available sheets from google drive', async function() {
-    runtime.sheets.should.have.property('available').that.is.an('array').that.is.empty
-
     await runtime.sheets.discover()
-
     runtime.sheets.should.have.property('available').that.is.an('array').that.is.not.empty
+  })
+
+  it('exposes a RowEntity class', function() {
+    runtime
+      .sheet(runtime.sheets.available[0])
+      .should.have.property('RowEntity')
+      .that.is.a('function')
   })
 })

@@ -10,8 +10,10 @@ class RowWrapper {
 }
 
 export default class RowEntity {
+  static isRowEntity = true
+
   constructor(data = {}, context = {}) {
-    Object.defineProperty(this, '_row', {
+    Object.defineProperty(this, '__row', {
       value: new RowWrapper(data, {
         runtime: context.runtime,
         parent: context.parent,
@@ -19,14 +21,28 @@ export default class RowEntity {
       enumerable: false,
     })
 
-    Object.defineProperty(this, '_context', {
+    Object.defineProperty(this, '__context', {
       value: context,
       enumerable: false,
+    })
+
+    Object.defineProperty(this, '__autoSave', {
+      value: context.parent.autoSaveEnabled,
+      enumerable: false,
+      configurable: true,
     })
 
     this.lodash
       .values(this.row.columnsMap)
       .map(({ attribute }) => this.createGettersAndSetters(attribute))
+  }
+
+  enableAutoSave() {
+    return (this.__autoSave = true)
+  }
+
+  disableAutoSave() {
+    return (this.__autoSave = false)
   }
 
   createGettersAndSetters(attributeName) {
@@ -42,7 +58,7 @@ export default class RowEntity {
       set: newValue => {
         const cell = entity.attributesToCellsMap[attributeName]
         cell.value = newValue
-        cell.save()
+        this.__autoSave && cell.save()
         return newValue
       },
     })
@@ -78,7 +94,7 @@ export default class RowEntity {
   }
 
   get row() {
-    return this._row
+    return this.__row
   }
 
   get rowId() {
@@ -90,7 +106,7 @@ export default class RowEntity {
   }
 
   get context() {
-    return this._context
+    return this.__context
   }
 
   get parent() {

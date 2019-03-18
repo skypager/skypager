@@ -97,6 +97,55 @@ async function main() {
 }
 ```
 
+## Row Level Entities
+
+The spreadsheet helper can load all of the data as plain old javascript objects.  
+
+Your column headers in row one determine the attributes, and all of the rows 2 and above get turned into objects with properties that match the column names.
+
+You can also work with each row as an entity, using the Active Record pattern.
+
+By default, each entity is an instance of the [RowEntity](src/RowEntity.js) class, which is just an object that has getters and setters for each of the attributes.  Setting the value actually writes the value to the cell in google spreadsheets.
+
+You can define a custom `RowEntity` class for an individual worksheet.
+
+In the example below, you have a google spreadsheet that has a worksheet titled `users`.  
+
+This worksheet includes two columns, firstName, lastName.
+
+We can define a User entity that lets us define a computed property `fullName`
+
+```javascript
+const googleSpreadsheet = runtime.sheet('master-users-list')
+
+class User extends googleSpreadsheet.RowEntity {
+  set fullName(value) {
+    const parts = value.split(" ")
+
+    this.firstName = parts.shift()
+    this.lastName = parts.join(" ")
+
+    return value
+  }
+
+  get fullName() {
+    return this.firstName + ' ' + this.lastName
+  }
+}
+
+googleSpreadsheet.registerEntity('users', () => User)
+
+async function main() {
+  const users = googleSpreadsheet.sheet('users')
+  await users.indexCells()
+
+  const user = users.entities[0]
+  console.log('User full name' + user.fullName)
+}
+
+main()
+```
+
 ## Internals
 
 Internally, this library uses the [Node Google Spreadsheet](https://github.com/theoephraim/node-google-spreadsheet) library, as well as the official googleapis
