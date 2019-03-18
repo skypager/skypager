@@ -39,8 +39,37 @@ export class Sheet extends Helper {
     return this.authorized
   }
 
+  get sheets() {
+    return this.worksheets.map(ws => this.sheet(ws.id))
+  }
+
+  get worksheetIds() {
+    return this.worksheets.map(w => w.id)
+  }
+
+  async allEntities() {
+    const entities = {}
+    const sheets = this.sheets
+
+    await Promise.all(
+      sheets.map(sheet =>
+        sheet.indexCells().then(sheet => {
+          entities[sheet.key] = sheet.entities
+        })
+      )
+    )
+
+    return entities
+  }
+
+  async ws(worksheetTitle) {
+    const sheet = this.sheet(worksheetTitle)
+    await sheet.indexCells()
+    return sheet
+  }
+
   sheet(worksheetTitle) {
-    const key = String(worksheetTitle).toString()
+    const key = String(worksheetTitle).toLowerCase()
 
     if (this.worksheetsIndex.has(key)) {
       return this.worksheetsIndex.get(key)
@@ -48,7 +77,8 @@ export class Sheet extends Helper {
 
     const ws =
       this.worksheets.find(
-        ws => String(ws.title).toLowerCase() === String(worksheetTitle).toLowerCase()
+        ws =>
+          String(ws.title).toLowerCase() === String(worksheetTitle).toLowerCase() || ws.id === key
       ) || this.worksheets[0]
 
     const worksheet = new Worksheet(ws, this)
