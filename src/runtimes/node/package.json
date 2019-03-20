@@ -1,6 +1,6 @@
 {
   "name": "@skypager/node",
-  "version": "0.3.6",
+  "version": "0.3.8",
   "description": "the skypager node runtime",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",

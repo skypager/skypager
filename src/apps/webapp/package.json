@@ -1,6 +1,6 @@
 {
   "name": "@skypager/apps-webapp",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "skypager.io webapp",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
@@ -21,10 +21,10 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@skypager/cli": "^0.3.6",
+    "@skypager/cli": "^0.3.8",
     "@skypager/helpers-server": "^0.3.2",
     "@skypager/helpers-sheet": "^0.3.7",
-    "@skypager/node": "^0.3.6",
+    "@skypager/node": "^0.3.8",
     "@skypager/web": "^0.3.6",
     "@skypager/webpack": "^0.3.6",
     "prop-types": "^15.6.2",
