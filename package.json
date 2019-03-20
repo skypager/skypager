@@ -17,7 +17,7 @@
     "new": "skypager create",
     "link:devDependencies": "node scripts/link-dev-dependencies.js",
     "console": "node scripts/console.js",
-    "prerelease": "yarn clean && yarn --frozen-lockfile && yarn test && node scripts/prerelease.js",
+    "prerelease": "cross-env CI=true yarn clean && yarn --frozen-lockfile && yarn test && node scripts/prerelease.js",
     "release": "lerna publish patch --yes",
     "postrelease": "node scripts/postrelease.js && yarn deploy",
     "deploy": "lerna run deploy --stream && yarn deploy:website",
@@ -30,7 +30,7 @@
     "test:web:build": "mocha --file test/test.js test/web/**/*.spec.js",
     "start:test:webserver": "skypager serve public --hostname localhost",
     "postinstall": "node scripts/postinstall.js",
-    "clean": "lerna exec rimraf lib && lerna exec rimraf build && lerna exec rimraf dist && lerna clean --yes && rimraf node_modules yarn.lock"
+    "clean": "lerna exec rimraf lib && lerna exec rimraf build && lerna exec rimraf dist && lerna clean --yes && rimraf node_modules"
   },
   "keywords": [
     "Skypager"
