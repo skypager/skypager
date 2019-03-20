@@ -66,14 +66,15 @@ export function lazyLogger(options = {}) {
 }
 
 export function _lazyLogger() {
+  const { enableFileLogging = !String(process.env.DISABLE_FILE_LOGGING).length } = this.argv
   let filename = this.get('argv.logFile', process.env.SKYPAGER_LOGFILE)
 
-  if (!filename) {
+  if (!filename && enableFileLogging) {
     this.fsx.mkdirpSync(this.resolve('log'))
     filename = this.resolve('log', `skypager.${this.env}.${this.target}.log`)
   }
 
-  const transports = {
+  const fileTransportOptions = {
     file: {
       prettyPrint: true,
       colorize: true,
@@ -88,6 +89,10 @@ export function _lazyLogger() {
         process.env.LOG_LEVEL ||
         (this.isDevelopment ? 'debug' : 'info'),
     },
+  }
+
+  const transports = {
+    ...(enableFileLogging ? fileTransportOptions : {}),
     console: {
       prettyPrint: true,
       colorize: true,

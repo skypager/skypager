@@ -17,7 +17,7 @@
     "new": "skypager create",
     "link:devDependencies": "node scripts/link-dev-dependencies.js",
     "console": "node scripts/console.js",
-    "prerelease": "yarn clean && yarn && yarn test && node scripts/prerelease.js",
+    "prerelease": "yarn clean && yarn --frozen-lockfile && yarn test && node scripts/prerelease.js",
     "release": "lerna publish patch --yes",
     "postrelease": "node scripts/postrelease.js && yarn deploy",
     "deploy": "lerna run deploy --stream && yarn deploy:website",
