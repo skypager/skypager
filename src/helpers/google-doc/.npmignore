@@ -1,0 +1,7 @@
+*
+!src/
+!lib/
+!package.json
+!README.md
+!index.js
+!scripts/
