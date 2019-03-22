@@ -1,6 +1,6 @@
 {
   "name": "@skypager/helpers-google-doc",
-  "version": "0.3.7",
+  "version": "0.3.9",
   "description": "skypager google docs helper",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
