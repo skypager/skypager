@@ -1,5 +1,6 @@
 import runtime from '@skypager/runtime'
 import * as GoogleFeature from './feature'
+import * as GoogleSheet from './GoogleSheet'
 
 if (runtime.isBrowser) {
   attach(runtime)
@@ -11,7 +12,7 @@ export function attach(runtime, options = {}) {
     runtime.feature('google').enable(options.google || options)
   }
 
-  runtime.use(require('./Sheet'))
+  runtime.use(GoogleSheet)
 
   if (options.autoDiscover) {
     runtime.sheets.discover(options.discover || options).catch(error => error)

@@ -4,7 +4,7 @@ import GoogleSpreadsheet from 'google-spreadsheet'
 import Worksheet from './Worksheet'
 import RowEntity from './RowEntity'
 
-export class Sheet extends Helper {
+export class GoogleSheet extends Helper {
   static isCacheable = true
   static isObservable = true
   static allowAnonymousProviders = true
@@ -378,7 +378,7 @@ export class Sheet extends Helper {
   }
 
   static attach(host = runtime, options = {}) {
-    Helper.attach(host, Sheet, {
+    Helper.attach(host, GoogleSheet, {
       registry: Helper.createContextRegistry('sheets', {
         context: Helper.createMockContext(),
       }),
@@ -386,6 +386,9 @@ export class Sheet extends Helper {
       registryProp: 'sheets',
       ...options,
     })
+
+    host.googleSheet = host.sheet.bind(host)
+    host.getter('googleSheets', () => host.sheets)
 
     host.sheets.applyInterface({ discover: discover.bind(host, host) }, { configurable: true })
 
@@ -411,8 +414,8 @@ export async function discover(host = runtime, options = {}) {
 
 export function attach(host = runtime) {
   try {
-    Helper.registerHelper('sheet', () => Sheet)
-    Sheet.attach(host)
+    Helper.registerHelper('sheet', () => GoogleSheet)
+    GoogleSheet.attach(host)
   } catch (error) {
     host.setState({ sheetHelpersError: error })
     throw error

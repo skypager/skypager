@@ -19,8 +19,12 @@ jobs:
             - node_modules
           key: 'v1-dependencies-{{ checksum "package.json" }}'
       - run: >-
-          mkdir -p src/helpers/sheet/secrets && echo $SERVICE_ACCOUNT_DATA >
-          src/helpers/sheet/secrets/serviceAccount.json
+          mkdir -p src/helpers/google-sheet/secrets && echo
+          $SERVICE_ACCOUNT_DATA >
+          src/helpers/google-sheet/secrets/serviceAccount.json
+      - run: >-
+          mkdir -p src/helpers/google-doc/secrets && echo $SERVICE_ACCOUNT_DATA
+          > src/helpers/google-doc/secrets/serviceAccount.json         
       - run: yarn test
       - persist_to_workspace:
           root: ~/repo

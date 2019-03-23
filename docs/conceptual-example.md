@@ -11,7 +11,7 @@ Code is a great way to express most systems, and I really believe anyone can do 
 ## A Hypothetical Example
 > Create a franchise. Be the next Jimmy John.
 
-Since The [Google Sheets Helper](../src/helpers/sheet) lets us turn any google sheet into a lazy loadable JavaScript module 
+Since The [Google Sheets Helper](../src/helpers/google-sheet) lets us turn any google sheet into a lazy loadable JavaScript module 
 
 Since it lets us a take any collection of google sheets and combine them into a full blown API that runs anywhere... 
 
