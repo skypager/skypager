@@ -123,7 +123,7 @@ function setupDevelopment(app) {
         'semantic-ui-react': 'global semanticUIReact',
         'prop-types': 'global PropTypes',
         '@skypager/web': 'global skypager',
-        '@skypagr/runtime': 'global skypager',
+        '@skypager/runtime': 'global skypager',
       },
     ],
   })

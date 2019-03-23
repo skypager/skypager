@@ -119,9 +119,11 @@ export default class GraphExplorer extends Component {
       <Segment basic inverted style={{ minWidth: '640px' }}>
         <Form inverted style={{ paddingRight: '24px', paddingLeft: '24px' }}>
           <Form.Group inline>
+            {/* test */}
             <Form.Dropdown
               label="Root Package"
               name="rootNode"
+              search
               selection
               options={Array.from(index.keys())
                 .sort()
