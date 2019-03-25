@@ -557,6 +557,52 @@ export default class PackageManager extends Feature {
     return this.remoteData.map(p => this.lodash.pick(p, ...attributes))
   }
 
+  async npmClient(options = {}) {
+    if (this._npmClient && !options.fresh) {
+      return this._npmClient
+    }
+
+    const npmToken = await this.findAuthToken(options)
+
+    const client = this.runtime.client('npm', {
+      npmToken,
+      ...options,
+    })
+
+    return (this._npmClient = client)
+  }
+
+  async findAuthToken(options = {}) {
+    if (this.options.npmToken) {
+      return this.options.npmToken
+    } else if (process.env.NPM_TOKEN) {
+      return process.env.NPM_TOKEN
+    }
+
+    const { cwd = this.runtime.cwd } = options
+
+    const npmrcPath = await this.runtime.fsx.findUpAsync('.npmrc', {
+      cwd,
+    })
+
+    if (npmrcPath) {
+      const contents = await this.runtime.fsx.readFileAsync(npmrcPath).then(buf => String(buf))
+      const lines = contents.split('\n')
+      const authTokenLine = lines.find(line => {
+        if (line.match(options.registry || 'registry.npmjs.org') && line.match(':_authToken=')) {
+          return true
+        }
+      })
+
+      if (!authTokenLine) {
+        return this.findAuthToken({ cwd: this.runtime.resolve(cwd, '..') })
+      } else {
+        return authTokenLine.split(':_authToken=')[1]
+      }
+    } else {
+      return undefined
+    }
+  }
   /**
    * Find node module packages using the PackageFnder
    *
@@ -943,7 +989,7 @@ export default class PackageManager extends Feature {
     }
 
     const cwd = options.cwd
-    const filename = options.filename || options.file || options.filename || 'skypager.js'
+    const filename = options.filename || options.file || 'skypager.js'
 
     const parts = cwd.split('/').slice(1)
 
@@ -969,6 +1015,105 @@ export default class PackageManager extends Feature {
       contributors: [],
       scripts: {},
     })
+  }
+
+  /**
+   * Uses npm-packlist to tell us everything in a project that will be published to npm
+   *
+   * @param {String} packageName the name of the package
+   * @param {Object} options
+   * @param {Boolean} [options.relative=false] whether to return the relative path, returns absolute by default.
+   */
+  async listPackageContents(packageName, { relative = false, hash = false, stats = false } = {}) {
+    const pkg = this.findByName(packageName)
+
+    if (!pkg) {
+      throw new Error(`Package ${packageName} not found`)
+    }
+
+    const dir = pkg._file.dir
+
+    const { resolve: resolvePath } = this.runtime.pathUtils
+    const files = await require('npm-packlist')({ path: dir })
+
+    const response = files.map(rel => ({ path: relative ? rel : resolvePath(dir, rel) }))
+
+    const hashFile = file =>
+      new Promise((resolve, reject) => {
+        require('md5-file')(resolvePath(resolvePath(dir, file.path)), (err, hash) =>
+          err ? reject(err) : resolve((file.hash = hash))
+        )
+      })
+
+    const fileSize = file =>
+      this.runtime.fsx
+        .statAsync(resolvePath(dir, file.path))
+        .then(stats => (file.size = stats.size))
+
+    if (hash && stats) {
+      await Promise.all(response.map(file => Promise.all([hashFile(file), fileSize(file)])))
+    } else if (hash) {
+      await Promise.all(response.map(file => hashFile(file)))
+    } else if (stats) {
+      await Promise.all(response.map(file => fileSize(file)))
+    }
+
+    return response
+  }
+  /**
+   * Uses npm-packlist to build the list of files that will be published to npm,
+   * calculates an md5 hash of the contents of each of the files listed, and then
+   * sorts them by the filename.  Creates a hash of that unique set of objects, to
+   * come up with a unique hash for the package source that is being released.
+   *
+   * @param {String} packageName
+   * @param {Object} options
+   * @param {Boolean} [options.compress=true] compress all the hashes into a single hash string value, setting to false will show the individual hashes of every file
+   * @returns {String|Object}
+   * @memberof PackageManager
+   */
+  async calculatePackageHash(packageName, { compress = true } = {}) {
+    const pkg = this.findByName(packageName)
+
+    if (!pkg) {
+      throw new Error(`Package ${packageName} not found`)
+    }
+
+    const { resolve: resolvePath } = this.runtime.pathUtils
+    const { dir } = pkg._file
+
+    const hash = file =>
+      new Promise((resolve, reject) => {
+        file = resolvePath(dir, file)
+        require('md5-file')(file, (err, hash) => (err ? reject(err) : resolve(hash)))
+      })
+
+    const files = await require('npm-packlist')({ path: dir })
+
+    const { hashObject } = this.runtime
+    const { sortBy } = this.lodash
+
+    const hashes = await Promise.all(files.map(file => hash(file).then(hash => [file, hash])))
+
+    return compress ? hashObject(sortBy(hashes, entry => entry[0])) : hashes
+  }
+
+  async packageProject(packageName, options = {}) {
+    await tar.create(
+      {
+        cwd: dir,
+        prefix: 'package/',
+        portable: true,
+        // Provide a specific date in the 1980s for the benefit of zip,
+        // which is confounded by files dated at the Unix epoch 0.
+        mtime: new Date('1985-10-26T08:15:00.000Z'),
+        gzip: true,
+      },
+      // NOTE: node-tar does some Magic Stuff depending on prefixes for files
+      //       specifically with @ signs, so we just neutralize that one
+      //       and any such future "features" by prepending `./`
+      files.map(f => `./${f}`)
+    )
   }
 }
 export const CREATED = 'CREATED'

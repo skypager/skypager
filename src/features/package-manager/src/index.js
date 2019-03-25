@@ -20,6 +20,7 @@ export function attach(runtime, options = {}) {
 
   runtime.onRegistration('clients', () => {
     runtime.clients.register('package-manager', () => require('./clients/package-manager'))
+    runtime.clients.register('npm', () => require('./clients/npm'))
   })
 
   runtime.onRegistration('servers', () => {

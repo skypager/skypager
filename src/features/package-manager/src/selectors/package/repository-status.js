@@ -12,7 +12,7 @@ export default (async function repositoryStatus(chain, options = {}) {
 
   const { filter = Boolean, packages = packageManager.packageNames.filter(filter) } = options
 
-  const checkRepo = packageName => {
+  const checkRepoWithCLI = packageName => {
     return runtime.proc
       .spawnAndCapture({
         cmd: 'npm',
@@ -22,6 +22,14 @@ export default (async function repositoryStatus(chain, options = {}) {
         return JSON.parse(response.normalOutput.join(''))
       })
   }
+
+  const checkRepoWithAPI = async packageName => {
+    const client = await packageManager.npmClient(this.lodash.pick(options, 'registry', 'npmToken'))
+    return client.fetchPackageInfo(packageName)
+  }
+
+  const checkRepo = packageName =>
+    options.api ? checkRepoWithAPI(packageName) : checkRepoWithCLI(packageName)
 
   const results = await Promise.all(
     packages.map(packageName =>

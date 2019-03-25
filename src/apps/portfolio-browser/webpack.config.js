@@ -4,6 +4,7 @@ const nodeExternals = require('webpack-node-externals')
 const { name, version } = require('./package.json')
 const { DefinePlugin } = require('webpack')
 const SourceMapSupport = require('webpack-source-map-support')
+const CopyPlugin = require('copy-webpack-plugin')
 
 process.env.DISABLE_ENV_INJECTION = true
 const production = require('@skypager/webpack/config/webpack.config.prod')
@@ -56,6 +57,16 @@ const webConfig = merge.strategy({ entry: 'replace' })(production, {
   output: {
     path: path.resolve(__dirname, 'build'),
   },
+  plugins: [
+    new CopyPlugin([
+      {
+        from: path.resolve(__dirname, 'public', 'module-graph.json'),
+      },
+      {
+        from: path.resolve(__dirname, 'public', 'package-graph.json'),
+      },
+    ]),
+  ],
   externals: [
     {
       'prop-types': 'global PropTypes',

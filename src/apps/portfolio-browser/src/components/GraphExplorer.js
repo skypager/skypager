@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import types from 'prop-types'
 import Cytoscape from 'components/Cytoscape'
-import { Button, Popup, Grid, Form, Segment, Divider, Header } from 'semantic-ui-react'
+import { Button, Popup, Grid, Form, Segment, Divider, Container, Header } from 'semantic-ui-react'
 import * as Layouts from 'components/Cytoscape/layouts'
 import SettingsForm from 'components/Cytoscape/components/SettingsForm'
 
@@ -94,7 +94,8 @@ export default class GraphExplorer extends Component {
     const { index } = this.state
 
     if (index && index.has(id)) {
-      console.log(index.get(id))
+      const selectedPackage = index.get(id)
+      this.setState({ selectedPackage })
     }
   }
 
@@ -163,32 +164,49 @@ export default class GraphExplorer extends Component {
     )
   }
 
+  renderSelectedPackage() {
+    const { selectedPackage } = this.state
+
+    if (!selectedPackage) {
+      return
+    }
+
+    return (
+      <Segment style={{ position: 'absolute', left: '40px', top: '40px', width: '640px' }}>
+        <Header content={selectedPackage.name} subheader={`Version ${selectedPackage.version}`} />
+      </Segment>
+    )
+  }
+
   render() {
     const { rootNode, layoutType, graphSource } = this.state
 
     return (
-      <Grid style={{ height: '100%', width: '100%' }}>
-        <Grid.Column width={16} style={{ position: 'relative' }}>
-          <div style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 5000 }}>
-            <Popup
-              trigger={<Button icon="settings" />}
-              content={() => this.renderSettingsForm()}
-              on="click"
-              position="top right"
+      <Container style={{ position: 'relative', height: '100%', width: '100%' }}>
+        <Grid style={{ height: '100%', width: '100%' }}>
+          <Grid.Column width={16} style={{ position: 'relative' }}>
+            <div style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 5000 }}>
+              <Popup
+                trigger={<Button icon="settings" />}
+                content={() => this.renderSettingsForm()}
+                on="click"
+                position="top right"
+              />
+            </div>
+            <Cytoscape
+              styles={graphStyles}
+              graphSource={graphSource}
+              ref="cytoscape"
+              fetchGraph={this.fetchGraph.bind(this)}
+              layoutType={layoutType}
+              rootNode={rootNode}
+              renderVersion={this.state.renderVersion}
+              onNodeTap={this.handleNodeTap}
             />
-          </div>
-          <Cytoscape
-            styles={graphStyles}
-            graphSource={graphSource}
-            ref="cytoscape"
-            fetchGraph={this.fetchGraph.bind(this)}
-            layoutType={layoutType}
-            rootNode={rootNode}
-            renderVersion={this.state.renderVersion}
-            onNodeTap={this.handleNodeTap}
-          />
-        </Grid.Column>
-      </Grid>
+          </Grid.Column>
+        </Grid>
+        {this.renderSelectedPackage()}
+      </Container>
     )
   }
 }

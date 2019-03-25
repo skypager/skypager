@@ -15,11 +15,11 @@ async function main() {
 
   print('Exporting portfolio package graph')
   const packageGraph = await portfolio.packageManager.exportGraph()
-  await runtime.fsx.writeJsonAsync(runtime.resolve('build', 'package-graph.json'), packageGraph)
+  await runtime.fsx.writeJsonAsync(runtime.resolve('public', 'package-graph.json'), packageGraph)
 
   print('Exporting portfolio module graph')
   const moduleGraph = await portfolio.moduleManager.exportGraph()
-  await runtime.fsx.writeJsonAsync(runtime.resolve('build', 'module-graph.json'), moduleGraph)
+  await runtime.fsx.writeJsonAsync(runtime.resolve('public', 'module-graph.json'), moduleGraph)
 }
 
 main().catch(error => {
