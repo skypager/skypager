@@ -103,14 +103,32 @@ export default class GitFeature extends Feature {
     const { runtime } = this
     const path = runtime.pathUtils
     const fs = runtime.fs
-    const gitPath = this.findRepo()
+    const { isNull } = this.lodash
+    let gitPath = this.findRepo()
+
+    let noGit = false
+
+    if (isNull(gitPath) || !gitPath) {
+      noGit = true
+    }
 
     const result = {
       sha: null,
       abbreviatedSha: null,
       branch: null,
       tag: null,
-      root: path.resolve(gitPath, '..'),
+      root: noGit ? runtime.cwd : path.resolve(gitPath, '..'),
+    }
+
+    if (noGit) {
+      return {
+        ...result,
+        sha: '',
+        abbreviatedSha: '',
+        branch: '',
+        tag: '',
+        root: runtime.cwd,
+      }
     }
 
     function findPackedTag(sha) {
