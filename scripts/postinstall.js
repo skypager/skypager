@@ -43,20 +43,22 @@ const stageOne = [
 const stageTwo = [
   ['@skypager/helpers-server', 'src/helpers/server', 'lib'],
   ['@skypager/helpers-repl', 'src/helpers/repl', 'lib'],
-  ['@skypager/helpers-document', 'src/helpers/document', 'lib'],
 ]
 
 const stageThree = [
   ['@skypager/web', 'src/runtimes/web', 'lib'],
   ['@skypager/helpers-sheet', 'src/helpers/google-sheet', 'lib'],
+  ['@skypager/helpers-document', 'src/helpers/document', 'lib'],
   ['@skypager/features-browser-vm', 'src/features/browser-vm', 'lib'],
   ['@skypager/cli', 'src/devtools/cli', 'lib'],
-  ['@skypager/portfolio-manager', 'src/devtools/portfolio-manager', 'lib'],
 ]
+
+const stageFour = [['@skypager/portfolio-manager', 'src/devtools/portfolio-manager', 'lib']]
 
 const first = stageOne
 const rest = stageTwo
-const last = stageThree
+const third = stageThree
+const fourth = stageFour
 
 class CISpinner {
   constructor(projectNames) {
@@ -96,13 +98,15 @@ async function main() {
       ? new CISpinner(
           first
             .concat(rest)
-            .concat(last)
+            .concat(third)
+            .concat(fourth)
             .map(i => i[0])
         )
       : new MultiSpinner(
           first
             .concat(rest)
-            .concat(last)
+            .concat(third)
+            .concat(fourth)
             .map(i => i[0]),
           {
             autoStart: false,
@@ -153,7 +157,7 @@ async function main() {
     process.exit(1)
   })
   await Promise.all(
-    last.map(([project, subfolder]) =>
+    third.map(([project, subfolder]) =>
       spawn('yarn', ['build', ARGV.force && '--force'].filter(Boolean), {
         cwd: resolve(cwd, subfolder),
         stdio,
@@ -173,7 +177,27 @@ async function main() {
     print(error.stack)
     process.exit(1)
   })
-
+  await Promise.all(
+    fourth.map(([project, subfolder]) =>
+      spawn('yarn', ['build', ARGV.force && '--force'].filter(Boolean), {
+        cwd: resolve(cwd, subfolder),
+        stdio,
+      })
+        .then(() => {
+          spinner.success(project)
+        })
+        .catch(error => {
+          print(red(`Error in ${project}`))
+          print(red(error.message), 2, 2, 2)
+          spinner.error(project)
+          throw error
+        })
+    )
+  ).catch(error => {
+    print(red(error.message))
+    print(error.stack)
+    process.exit(1)
+  })
   return new Promise(resolve => {
     setTimeout(resolve, 3000)
   })
