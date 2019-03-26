@@ -3,6 +3,7 @@
   "registry": "https://registry.npmjs.org/",
   "packages": [
     "src/apps/*",
+    "src/clients/*",
     "src/devtools/*",
     "src/examples/*",
     "src/features/*",

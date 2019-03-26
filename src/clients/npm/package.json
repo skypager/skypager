@@ -1,0 +1,31 @@
+{
+  "name": "@skypager/clients-npm",
+  "version": "0.3.2",
+  "description": "a REST client for repository.npmjs.org",
+  "author": "Jon Soeder <jon@chicago.com>",
+  "main": "lib/index.js",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "prebuild": "rimraf lib",
+    "build": "babel -d lib src --source-maps --comments",
+    "postbuild": "skypager hash-build",
+    "docs:api": "skypager generate-api-docs",
+    "prepare": "yarn docs:api && yarn build",
+    "test": "mocha --require @babel/register --file test/test.js --timeout 10000 test/**/*.spec.js"
+  },
+  "skypager": {
+    "webpack": {
+      "build": "webpack.config.js"
+    },
+    "category": "features"
+  },
+  "dependencies": {
+    "@skypager/helpers-client": "^0.2.7"
+  },
+  "gitHead": "ae542b32070401f678270edbfc9ee6f44811c282",
+  "keywords": [],
+  "contributors": []
+}

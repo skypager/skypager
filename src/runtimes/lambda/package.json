@@ -1,0 +1,44 @@
+{
+  "name": "@skypager/lambda",
+  "version": "0.3.8",
+  "description": "the skypager lambda runtime, offers a slimmed down node runtime for use in lambda like environments",
+  "author": "Jon Soeder <jon@chicago.com>",
+  "main": "lib/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "rimraf lib && babel --comments --source-maps -d lib src",
+    "postbuild": "skypager hash-build",
+    "docs:api": "skypager generate-api-docs",
+    "watch": "babel --watch --comments --source-maps -d lib src",
+    "console": "skypager console",
+    "prepare": "yarn docs:api && yarn build",
+    "test": "mocha --require @babel/register --file test/test.js --timeout 10000 test/**/*.spec.js",
+    "test:watch": "skypager test --webpack-config webpack.config.test.js --watch"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@skypager/helpers-client": "^0.3.2",
+    "@skypager/runtime": "^0.3.6",
+    "bluebird": "^3.5.0",
+    "child-process-promise": "^2.2.1",
+    "find-up": "^2.1.0",
+    "fs-extra-promise": "^0.4.1",
+    "micromatch": "^3.1.4",
+    "mime": "^2.4.0",
+    "minimatch": "^3.0.3",
+    "semver": "^5.3.0",
+    "minimist": "1.2.0"
+  },
+  "skypager": {
+    "webpack": {
+      "build": "webpack.config.js",
+      "scopeModules": false
+    },
+    "category": "runtimes"
+  },
+  "gitHead": "3afe91f6ff7fd3bff7fe47a351619d5281155cd9",
+  "keywords": [],
+  "contributors": []
+}

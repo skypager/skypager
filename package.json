@@ -39,6 +39,7 @@
   "license": "MIT",
   "workspaces": [
     "src/apps/*",
+    "src/clients/*",
     "src/devtools/*",
     "src/runtime",
     "src/runtimes/*",
