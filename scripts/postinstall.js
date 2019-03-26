@@ -43,14 +43,15 @@ const stageOne = [
 const stageTwo = [
   ['@skypager/helpers-server', 'src/helpers/server', 'lib'],
   ['@skypager/helpers-repl', 'src/helpers/repl', 'lib'],
+  ['@skypager/helpers-document', 'src/helpers/document', 'lib'],
 ]
 
 const stageThree = [
   ['@skypager/web', 'src/runtimes/web', 'lib'],
   ['@skypager/helpers-sheet', 'src/helpers/google-sheet', 'lib'],
-  ['@skypager/helpers-document', 'src/helpers/document', 'lib'],
   ['@skypager/features-browser-vm', 'src/features/browser-vm', 'lib'],
   ['@skypager/cli', 'src/devtools/cli', 'lib'],
+  ['@skypager/portfolio-manager', 'src/devtools/portfolio-manager', 'lib'],
 ]
 
 const first = stageOne
