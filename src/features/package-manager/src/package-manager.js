@@ -1017,6 +1017,44 @@ export default class PackageManager extends Feature {
     })
   }
 
+  async createTarball(packageName, options = {}) {
+    const pkg = this.findByName(packageName)
+
+    if (!pkg) {
+      throw new Error(`Package ${packageName} not found`)
+    }
+
+    const dir = pkg._file.dir
+
+    const tar = require('tar')
+
+    const files = await this.listPackageContents(packageName, {
+      relative: false,
+      hash: false,
+      stats: false,
+    }).then(results => results.map(r => r.path))
+
+    const { output = `${packageName.replace(/\//g, '-')}.tgz` } = options
+    const file = this.runtime.resolve(output)
+    const outputDir = this.runtime.pathUtils.dirname(file)
+
+    await this.runtime.fsx.mkdirpAsync(outputDir)
+
+    await tar.create(
+      {
+        gzip: true,
+        portable: true,
+        mtime: new Date('1985-10-26T08:15:00.000Z'),
+        prefix: 'package/',
+        file,
+        cwd: dir,
+        ...options,
+      },
+      files
+    )
+
+    return file
+  }
   /**
    * Uses npm-packlist to tell us everything in a project that will be published to npm
    *
