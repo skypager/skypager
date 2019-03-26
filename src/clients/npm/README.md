@@ -1,7 +1,24 @@
-## Package Manager
+# NPM Repository Client 
 
-the package manager feature is used to work with all of the package.json manifests that may be found inside a project.
+An axios client for working with the npm registry.
 
-This is especially useful for monorepos and yarn workspaces.
+Currently supports authorized communications to:
 
-[Package Manager API Docs](docs/api/package-manager.md)
+- Fetch info about a package in the npm repository 
+
+## Usage
+
+```javascript
+import runtime from '@skypager/web'
+import * as NpmClient from '@skypager/clients-npm'
+
+runtime.use(NpmClient)
+
+const npm = runtime.client('npm', {
+  npmToken: process.env.NPM_TOKEN
+})
+
+npm.fetchPackageInfo('@some/private-repo').then((packageInfo) => {
+  const versions = Object.keys(packageInfo.versions)
+})
+```
