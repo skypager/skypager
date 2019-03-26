@@ -1,6 +1,6 @@
 {
   "name": "@skypager/web",
-  "version": "0.3.6",
+  "version": "0.4.0",
   "description": "",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
@@ -15,7 +15,7 @@
     "postbuild": "skypager hash-build"
   },
   "dependencies": {
-    "@skypager/runtime": "^0.3.6"
+    "@skypager/runtime": "^0.4.0"
   },
   "repository": {
     "type": "github",

@@ -1,6 +1,6 @@
 {
   "name": "@skypager/features-package-manager",
-  "version": "0.3.2",
+  "version": "0.4.0",
   "description": "an observable state machine for a projects packages",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
@@ -23,9 +23,9 @@
     "category": "features"
   },
   "dependencies": {
+    "@skypager/clients-npm": "^0.4.0",
     "@skypager/helpers-client": "^0.2.7",
     "@skypager/helpers-server": "^0.2.7",
-    "@skypager/clients-npm": "^0.3.2",
     "npm-packlist": "^1.4.1",
     "tar": "^4.4.8"
   },
