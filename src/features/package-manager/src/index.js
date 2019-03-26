@@ -1,4 +1,5 @@
 import PackageManager from './package-manager'
+import * as NpmClient from '@skypager/clients-npm'
 
 export { PackageManager }
 
@@ -18,9 +19,10 @@ export function attach(runtime, options = {}) {
     runtime.feature('package-manager').enable(options)
   }
 
+  runtime.use(NpmClient)
+
   runtime.onRegistration('clients', () => {
     runtime.clients.register('package-manager', () => require('./clients/package-manager'))
-    runtime.clients.register('npm', () => require('./clients/npm'))
   })
 
   runtime.onRegistration('servers', () => {

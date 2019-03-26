@@ -23,6 +23,7 @@
     "@skypager/features-file-manager": "^0.3.2",
     "@skypager/features-module-manager": "^0.3.2",
     "@skypager/features-package-manager": "^0.3.2",
+    "@skypager/clients-npm": "^0.3.2",
     "@skypager/node": "^0.3.8"
   },
   "skypager": {
