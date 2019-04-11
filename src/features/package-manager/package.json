@@ -27,7 +27,8 @@
     "@skypager/helpers-client": "^0.2.7",
     "@skypager/helpers-server": "^0.2.7",
     "npm-packlist": "^1.4.1",
-    "tar": "^4.4.8"
+    "tar": "^4.4.8",
+    "pacote": "^9.5.0"
   },
   "gitHead": "ae542b32070401f678270edbfc9ee6f44811c282",
   "keywords": [],

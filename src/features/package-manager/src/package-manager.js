@@ -1,4 +1,5 @@
 import { Feature } from '@skypager/node'
+import pacote from 'pacote'
 
 /**
  * @class PackageManager
@@ -14,6 +15,11 @@ export default class PackageManager extends Feature {
     if (this.runtime.argv.packageManager) {
       await this.startAsync()
     }
+  }
+
+  initialState = {
+    authenticated: false,
+    ...(process.env.NPM_TOKEN && { npmToken: process.env.NPM_TOKEN }),
   }
 
   observables() {
@@ -557,12 +563,43 @@ export default class PackageManager extends Feature {
     return this.remoteData.map(p => this.lodash.pick(p, ...attributes))
   }
 
+  get pacote() {
+    const { extract, packument, manifest, tarball } = pacote
+    const { npmToken = this.options.npmToken } = this.currentState
+
+    const twoArgs = fn => (spec, options = {}) =>
+      fn(spec, {
+        ...(npmToken && { token: npmToken }),
+        ...options,
+      })
+
+    const threeArgs = fn => (spec, dest, options = {}) =>
+      fn(spec, dest, {
+        ...(npmToken && { token: npmToken }),
+        ...options,
+      })
+
+    return {
+      ...pacote,
+      extract: threeArgs(extract),
+      manifest: twoArgs(manifest),
+      packument: twoArgs(packument),
+      tarball: {
+        ...twoArgs(tarball),
+        toFile: threeArgs(tarball.toFile),
+        stream: twoArgs(tarball.stream),
+      },
+    }
+  }
+
   async npmClient(options = {}) {
     if (this._npmClient && !options.fresh) {
       return this._npmClient
     }
 
-    const npmToken = await this.findAuthToken(options)
+    let npmToken = this.state.get('')
+
+    await this.findAuthToken(options)
 
     const client = this.runtime.client('npm', {
       npmToken,
@@ -573,10 +610,14 @@ export default class PackageManager extends Feature {
   }
 
   async findAuthToken(options = {}) {
-    if (this.options.npmToken) {
-      return this.options.npmToken
-    } else if (process.env.NPM_TOKEN) {
-      return process.env.NPM_TOKEN
+    if (!options.fresh || !options.refresh) {
+      if (this.options.npmToken) {
+        return this.options.npmToken
+      } else if (process.env.NPM_TOKEN) {
+        return process.env.NPM_TOKEN
+      } else if (this.state.has('npmToken')) {
+        return this.state.get('npmToken')
+      }
     }
 
     const { cwd = this.runtime.cwd } = options
@@ -597,9 +638,19 @@ export default class PackageManager extends Feature {
       if (!authTokenLine) {
         return this.findAuthToken({ cwd: this.runtime.resolve(cwd, '..') })
       } else {
-        return authTokenLine.split(':_authToken=')[1]
+        const value = authTokenLine.split(':_authToken=')[1]
+
+        if (value) {
+          this.state.set('authenticated', true)
+          this.state.set('npmToken', value)
+        }
+
+        return value
       }
     } else {
+      this.state.set('authenticated', true)
+      this.state.delete('npmToken')
+
       return undefined
     }
   }
@@ -1015,6 +1066,28 @@ export default class PackageManager extends Feature {
       contributors: [],
       scripts: {},
     })
+  }
+
+  async downloadTarball(spec, destination, options = {}) {
+    if (!spec) {
+      throw new Error('Please provide a valid package spec, e.g. @skypager/node@latest')
+    }
+
+    let [name, version] = spec.replace(/^@/, '').split('@')
+
+    if (!destination) {
+      if (!version || !version.length) {
+        const manifest = await this.pacote.manifest(spec)
+        version = manifest.version
+      }
+      destination = `build/packages/${name}/${version}/package.tgz`
+    }
+
+    destination = this.runtime.resolve(destination)
+
+    await this.pacote.tarball.toFile(spec, destination, options)
+
+    return destination
   }
 
   async createTarball(packageName, options = {}) {

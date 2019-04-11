@@ -719,25 +719,18 @@ export default class PortfolioManager extends Feature {
    * Downloads a tar archive of a package from npm
    *
    * @private
-   * @param {Object} [{ name, version, dist: { tarball } }={}]
+   * @param {Object} options
    * @returns {String}
    * @memberof PortfolioManager
    */
-  async downloadTarball({ name, version, dist: { tarball } } = {}) {
-    const { runtime } = this
-    const destination = runtime.resolve('build', name, version, `package-${version}.tgz`)
-    const exists = await runtime.fsx.existsAsync(destination)
+  async downloadTarball(options = {}) {
+    const {
+      name,
+      version,
+      destination = this.runtime.resolve(`build`, 'packages', name, version, `package.tgz`),
+    } = options
 
-    if (exists) {
-      return destination
-    }
-
-    const folder = runtime.pathUtils.dirname(destination)
-
-    await runtime.fsx.mkdirpAsync(folder)
-    await runtime.fileDownloader.downloadAsync(tarball, runtime.relative(destination))
-
-    return destination
+    return this.moduleManager.downloadTarball(`${name}@${version}`, destination, options)
   }
 }
 

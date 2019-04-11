@@ -1,4 +1,5 @@
 import { Feature } from '@skypager/node'
+import pacote from 'pacote'
 
 /**
  * @class ModuleManager
@@ -222,18 +223,8 @@ export default class ModuleManager extends Feature {
     return this
   }
 
-  async downloadTarball(packageName, version, destination) {
-    const info = await this.checkRepo(packageName, version)
-
-    if (info && info.dist && info.dist.tarball) {
-      const filename = destination
-        ? this.runtime.resolve(destination)
-        : this.runtime.resolve(info.dist.tarball.split('/').pop())
-
-      await this.runtime.fileDownloader.downloadAsync(info.dist.tarball, filename)
-
-      return filename
-    }
+  downloadTarball(spec, destination, options = {}) {
+    return this.runtime.packageManager.downloadTarball(spec, destination, options)
   }
 
   async findNodeModules(options = {}) {

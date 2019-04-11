@@ -26,7 +26,8 @@
   "contributors": [],
   "dependencies": {
     "api-npm": "^1.0.0",
-    "npmjs-api": "^1.0.3"
+    "npmjs-api": "^1.0.3",
+    "pacote": "^9.5.0"
   },
   "gitHead": "ae542b32070401f678270edbfc9ee6f44811c282"
 }
