@@ -5,6 +5,8 @@ import * as computedProperties from './file-manager/computed'
 import * as actions from './file-manager/actions'
 import Promise from 'bluebird'
 import Memory from 'memory-fs'
+import cacache from 'cacache'
+
 export const createGetter = 'fileManager'
 
 export function observables(options = {}) {
@@ -116,6 +118,12 @@ export const featureMethods = [
   'updateFileHash',
 
   'hashTree',
+
+  'downloadBuildArtifacts',
+
+  'lazyCache',
+
+  'createCache',
 ]
 
 export const hostMethods = ['requireContext']
@@ -167,6 +175,68 @@ export async function hashTree() {
 }
 
 const normalize = path => path.replace(/\\\\?/g, '/')
+
+/**
+ * Returns a cacache object with the cachePath argument
+ */
+export function lazyCache(options) {
+  return this.createCache({ ...this.options, ...options })
+}
+
+export function createCache(options = {}) {
+  const { isEmpty, partial } = this.lodash
+  const { runtime } = this
+  const { gitInfo } = runtime
+
+  const defaultCachePath =
+    process.env.SKYPAGER_CACHE_PATH ||
+    runtime.resolve(
+      isEmpty(gitInfo.root) ? gitInfo.root : runtime.cwd,
+      'node_modules',
+      '.cache',
+      'skypager-cache'
+    )
+
+  const { skypagerCachePath = defaultCachePath } = options
+
+  const arg = fn => partial(fn, this.runtime.resolve(skypagerCachePath))
+
+  const ls = arg(cacache.ls)
+  const get = arg(cacache.get)
+  const put = arg(cacache.put)
+  const rm = arg(cacache.rm)
+  const verify = arg(cacache.verify)
+
+  return {
+    ...cacache,
+    cachePath: skypagerCachePath,
+    ls: Object.assign(ls, {
+      stream: arg(cacache.ls.stream),
+    }),
+    get: Object.assign(get, {
+      stream: arg(cacache.get.stream),
+      byDigest: arg(cacache.get.byDigest),
+      copy: arg(cacache.get.copy),
+      info: arg(cacache.get.info),
+      hasContent: arg(cacache.get.hasContent),
+    }),
+    put: Object.assign(put, {
+      stream: arg(cacache.put.stream),
+    }),
+    rm: Object.assign(rm, {
+      all: arg(cacache.rm.all),
+      entry: arg(cacache.rm.entry),
+      content: arg(cacache.rm.content),
+    }),
+    tmp: {
+      mkdir: arg(cacache.tmp.mkdir),
+      withTmp: arg(cacache.tmp.withTmp),
+    },
+    verify: Object.assign(verify, {
+      lastRun: arg(cacache.verify.lastRun),
+    }),
+  }
+}
 
 export function file(options = {}) {
   const { runtime } = this
@@ -1024,9 +1094,37 @@ export function findModulePaths(options = {}) {
   return testPaths
 }
 
+export async function downloadBuildArtifacts(options = {}) {
+  const { packageManager } = this.runtime
+  const {
+    dryRun = false,
+    destination = this.runtime.cwd,
+    buildFolders = ['dist', 'lib', 'build'],
+  } = { ...this.options, ...options }
+  const {
+    name = this.runtime.currentPackage.name,
+    from = 'npm',
+    version = this.runtime.currentPackage.version,
+  } = options
+
+  if (from === 'npm') {
+    await packageManager.findAuthToken()
+
+    return packageManager.downloadPackage(`${name}@${version}`, {
+      extract: true,
+      destination,
+      folders: buildFolders,
+      dryRun,
+      ...options,
+    })
+  } else {
+    throw new Error('download location not implemented. valid options are: npm')
+  }
+}
+
 export async function hashBuildTree(options = {}) {
   const { runtime } = this
-  const { exclude = [], baseFolder = runtime.resolve('lib') } = options
+  const { exclude = [], buildFolder, baseFolder = buildFolder || runtime.resolve('lib') } = options
 
   const sourceHash = await this.hashTree()
   const buildFolderExists = await runtime.fsx.existsAsync(baseFolder)
