@@ -1,5 +1,7 @@
 import { Feature } from '@skypager/node'
 import pacote from 'pacote'
+import { tmpdir } from 'os'
+import { extract } from 'tar'
 
 /**
  * @class PackageManager
@@ -1068,9 +1070,131 @@ export default class PackageManager extends Feature {
     })
   }
 
+  async downloadPackage(packageName, options = {}) {
+    const pkg = this.findByName(packageName)
+
+    if (!pkg) {
+      throw new Error(`Package ${packageName} not found`)
+    }
+
+    const { name } = pkg
+    const { runtime } = this
+    const { resolve, dirname, relative, sep } = runtime.pathUtils
+    const { mkdirpAsync: mkdir, copyAsync: copy } = runtime.fsx
+    const { uniqBy } = this.lodash
+
+    let { destination } = options
+
+    const {
+      version = pkg.version,
+      folders = [],
+      filter = this.lodash.identity,
+      stripPrefix = 'package',
+    } = options
+
+    const defaultDestination = resolve(runtime.cwd, 'build', 'packages', name, version)
+
+    const tarballPath = await this.downloadTarball(
+      `${name}@${version}`,
+      options.extract
+        ? tmpdir()
+        : destination
+        ? resolve(runtime.cwd, destination)
+        : defaultDestination
+    )
+
+    if (options.extract) {
+      const extracted = []
+      let extractFolder = dirname(tarballPath)
+
+      await extract({
+        file: tarballPath,
+        cwd: extractFolder,
+        filter: path => {
+          const item = stripPrefix
+            ? path
+                .split(sep)
+                .slice(1)
+                .join(sep)
+            : path
+          let pass = !!filter(item)
+
+          if (pass && folders.length) {
+            pass = !!folders.find(i => item.startsWith(i))
+          }
+
+          if (pass) {
+            extracted.push(path)
+          }
+
+          return pass
+        },
+      })
+
+      const sourcePaths = extracted.map(p => resolve(extractFolder, p))
+
+      const response = {}
+
+      if (options.replace && !destination) {
+        destination = pkg._file.dir
+      }
+
+      if (destination) {
+        const ops = sourcePaths.map(sourceFile => {
+          const destId = relative(extractFolder, sourceFile)
+          const dest = resolve(
+            destination,
+            stripPrefix
+              ? destId
+                  .split(sep)
+                  .slice(1)
+                  .join(sep)
+              : destId
+          )
+          const destDir = dirname(dest)
+
+          return { destDir, destId, dest, sourceFile }
+        })
+
+        const destDirectories = uniqBy(ops, 'destDir').map(op => op.destDir)
+
+        response.ops = ops
+        response.destinationDirectories = destDirectories
+
+        if (!options.dryRun) {
+          // might just be able to tar extract directly on to the destination without making directories
+          await Promise.all(response.destinationDirectories.map(dir => mkdir(dir)))
+          await Promise.all(ops.map(({ sourceFile, dest }) => copy(sourceFile, dest)))
+        }
+      }
+
+      return {
+        ...response,
+        tarballPath,
+        extracted,
+        dirname: extractFolder,
+        destination,
+      }
+    }
+
+    return {
+      name,
+      version,
+      tarballPath,
+      extracted: [],
+      dirname: this.runtime.pathUtils.dirname(tarballPath),
+      destination,
+    }
+  }
+
   async downloadTarball(spec, destination, options = {}) {
     if (!spec) {
       throw new Error('Please provide a valid package spec, e.g. @skypager/node@latest')
+    }
+
+    if (typeof destination === 'object') {
+      options = destination
+      destination = options.destination || options.dest
     }
 
     let [name, version] = spec.replace(/^@/, '').split('@')
@@ -1081,6 +1205,15 @@ export default class PackageManager extends Feature {
         version = manifest.version
       }
       destination = `build/packages/${name}/${version}/package.tgz`
+    }
+
+    const isDirectory = await this.runtime.fsx
+      .statAsync(destination)
+      .then(stat => stat.isDirectory())
+
+    if (isDirectory) {
+      const fileName = `package-${name.replace('/', '-')}-${version}.tgz`
+      destination = this.runtime.resolve(destination, fileName)
     }
 
     destination = this.runtime.resolve(destination)

@@ -515,7 +515,7 @@ export default class PortfolioManager extends Feature {
 
     const newRuntime = this.runtime.spawn({ ...options, cwd: dir }, context, middleWareFn)
 
-    this.constructor.runtimes.set(packageName, newRuntime.use('runtimes/node').fileManager.runtime)
+    runtimes.set(packageName, newRuntime.use('runtimes/node').fileManager.runtime)
 
     return newRuntime
   }

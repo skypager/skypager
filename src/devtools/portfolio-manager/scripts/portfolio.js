@@ -246,10 +246,7 @@ async function checkIfBuildIsRequired(packageName, options = {}) {
     (memo, { actual, current, match } = {}) => {
       if (!match) {
         memo.result = true
-        memo.message = `The current source tree hash ${actual.substr(
-          0,
-          8
-        )} does not match ${current.substr(0, 8)}`
+        memo.message = `actual: ${actual.substr(0, 8)} expected: ${current.substr(0, 8)}`
       }
 
       return memo
