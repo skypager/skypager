@@ -1,7 +1,7 @@
 import { Feature } from '@skypager/node'
 import pacote from 'pacote'
 import { tmpdir } from 'os'
-import { extract } from 'tar'
+import { extract as extractTar } from 'tar'
 
 /**
  * @class PackageManager
@@ -87,7 +87,7 @@ export default class PackageManager extends Feature {
    *
    * @param {Object} [options={}]
    * @param {Boolean} [options.remote=false] whether to fetch the remote information about this package from npm
-   * @returns {PromiseLike<PackageManager>}
+   * @returns {Promise<PackageManager>}
    * @memberof PackageManager
    */
   async startAsync(options = {}) {
@@ -129,7 +129,7 @@ export default class PackageManager extends Feature {
    * @param {Object} [options={}]
    * @param {Boolean} [options.remote=false] whether to load remote repository information from npm
    * @param {Function} cb
-   * @returns {PromiseLike<PackageManager>}
+   * @returns {Promise<PackageManager>}
    * @memberof PackageManager
    */
   start(options = {}, cb) {
@@ -149,7 +149,7 @@ export default class PackageManager extends Feature {
    *
    * @param {Object} [options={}]
    * @param {Number} [options.timeout=30000]
-   * @returns {PromiseLike<PackageManager>}
+   * @returns {Promise<PackageManager>}
    * @memberof PackageManager
    */
   async activationEventWasFired(options = {}) {
@@ -176,7 +176,7 @@ export default class PackageManager extends Feature {
    * been started, this will start it.
    *
    * @param {Object} [options={}]
-   * @returns {PromiseLike<PackageManager>}
+   * @returns {Promise<PackageManager>}
    * @memberof PackageManager
    */
   async whenActivated(options = {}) {
@@ -660,7 +660,7 @@ export default class PackageManager extends Feature {
    * Find node module packages using the PackageFnder
    *
    * @param {Object} [options={}] options for the packageFinder.find method
-   * @returns {PromiseLike<Array<PackageManifest>>}
+   * @returns {Promise<Array<PackageManifest>>}
    * @memberof PackageManager
    */
   async findNodeModules(options = {}) {
@@ -867,7 +867,7 @@ export default class PackageManager extends Feature {
    * Returns all of the packages who have modifications in their tree
    *
    * @param {Object} [options={}]
-   * @returns {PromiseLike<Array>}
+   * @returns {Promise<Array>}
    * @memberof PackageManager
    */
   async selectModifiedPackages(options = {}) {
@@ -1081,108 +1081,126 @@ export default class PackageManager extends Feature {
     const { runtime } = this
     const { resolve, dirname, relative, sep } = runtime.pathUtils
     const { mkdirpAsync: mkdir, copyAsync: copy } = runtime.fsx
-    const { uniqBy } = this.lodash
+    const { uniqBy, identity } = this.lodash
 
     let { destination } = options
 
     const {
       version = pkg.version,
       folders = [],
-      filter = this.lodash.identity,
+      filter = identity,
       stripPrefix = 'package',
+      dryRun,
+      extract = false,
+      replace = false,
     } = options
 
     const defaultDestination = resolve(runtime.cwd, 'build', 'packages', name, version)
+    const downloadDestination = extract ? tmpdir() : destination || defaultDestination
 
-    const tarballPath = await this.downloadTarball(
-      `${name}@${version}`,
-      options.extract
-        ? tmpdir()
-        : destination
-        ? resolve(runtime.cwd, destination)
-        : defaultDestination
-    )
+    const tarballPath = await this.downloadTarball(`${name}@${version}`, downloadDestination)
 
-    if (options.extract) {
-      const extracted = []
-      let extractFolder = dirname(tarballPath)
+    if (!extract) {
+      return {
+        name,
+        version,
+        tarballPath,
+        dirname: dirname(tarballPath),
+      }
+    }
 
-      await extract({
+    const filterPaths = path => {
+      let pass = !!filter(path)
+
+      const item = stripPrefix
+        ? path
+            .split(sep)
+            .slice(1)
+            .join(sep)
+        : path
+
+      if (pass && folders.length) {
+        pass = !!folders.find(i => item.startsWith(i))
+      }
+
+      if (pass) {
+        extracted.push(resolve(extractFolder, path))
+      }
+
+      return pass
+    }
+
+    if (replace && !destination) {
+      destination = pkg._file.dir
+
+      await extractTar({
         file: tarballPath,
-        cwd: extractFolder,
-        filter: path => {
-          const item = stripPrefix
-            ? path
-                .split(sep)
-                .slice(1)
-                .join(sep)
-            : path
-          let pass = !!filter(item)
-
-          if (pass && folders.length) {
-            pass = !!folders.find(i => item.startsWith(i))
-          }
-
-          if (pass) {
-            extracted.push(path)
-          }
-
-          return pass
-        },
+        cwd: destination,
+        filter: filterPaths,
       })
 
-      const sourcePaths = extracted.map(p => resolve(extractFolder, p))
-
-      const response = {}
-
-      if (options.replace && !destination) {
-        destination = pkg._file.dir
-      }
-
-      if (destination) {
-        const ops = sourcePaths.map(sourceFile => {
-          const destId = relative(extractFolder, sourceFile)
-          const dest = resolve(
-            destination,
-            stripPrefix
-              ? destId
-                  .split(sep)
-                  .slice(1)
-                  .join(sep)
-              : destId
-          )
-          const destDir = dirname(dest)
-
-          return { destDir, destId, dest, sourceFile }
-        })
-
-        const destDirectories = uniqBy(ops, 'destDir').map(op => op.destDir)
-
-        response.ops = ops
-        response.destinationDirectories = destDirectories
-
-        if (!options.dryRun) {
-          // might just be able to tar extract directly on to the destination without making directories
-          await Promise.all(response.destinationDirectories.map(dir => mkdir(dir)))
-          await Promise.all(ops.map(({ sourceFile, dest }) => copy(sourceFile, dest)))
-        }
-      }
-
       return {
-        ...response,
+        name,
+        version,
         tarballPath,
-        extracted,
-        dirname: extractFolder,
+        dirname: dirname(tarballPath),
         destination,
       }
     }
 
+    const extracted = []
+
+    let extractFolder = dirname(tarballPath)
+
+    await extractTar({
+      file: tarballPath,
+      cwd: extractFolder,
+      filter: filterPaths,
+    })
+
+    const response = {}
+
+    destination = destination ? resolve(runtime.cwd, destination) : defaultDestination
+
+    const ops = extracted.map(sourceFile => {
+      const destId = stripPrefix
+        ? relative(extractFolder, sourceFile)
+            .split(sep)
+            .slice(1)
+            .join(sep)
+        : relative(extractFolder, sourceFile)
+
+      const dest = resolve(destination, destId)
+      const destDir = dirname(dest)
+      return { destDir, destId, dest, sourceFile }
+    })
+
+    const destDirectories = uniqBy(ops, 'destDir').map(op => op.destDir)
+
+    response.ops = ops
+    response.destinationDirectories = destDirectories
+
+    if (dryRun) {
+      response.destinationDirectories.map(dir => {
+        console.log(`mkdir -p ${dir}`)
+      })
+
+      ops.map(({ sourceFile, dest }) => {
+        console.log(
+          `cp ${sourceFile.replace(extractFolder, '~')} ${dest.replace(destination, '$dest')}`
+        )
+      })
+    } else {
+      // might just be able to tar extract directly on to the destination without making directories
+      await Promise.all(response.destinationDirectories.map(dir => mkdir(dir)))
+      await Promise.all(ops.map(({ sourceFile, dest }) => copy(sourceFile, dest)))
+    }
+
     return {
-      name,
-      version,
+      ...response,
       tarballPath,
-      extracted: [],
-      dirname: this.runtime.pathUtils.dirname(tarballPath),
+      extracted,
+      dirname: extractFolder,
       destination,
     }
   }

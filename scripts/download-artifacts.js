@@ -2,8 +2,11 @@ const runtime = require('@skypager/node')
 
 const { argv, fileManager, packageManager } = runtime
 const { colors, print } = runtime.cli
+const { castArray } = runtime.lodash
 
 const buildFolders = ['dist', 'lib', 'build']
+  .concat(castArray(argv.buildFolder))
+  .filter(v => v && v.length)
 
 main()
   .then(() => {
@@ -32,13 +35,9 @@ async function main() {
 }
 
 async function download(pkg) {
-  const result = await packageManager.downloadPackage(pkg.name, {
-    // dryRun: true,
-    replace: true,
+  await packageManager.downloadPackage(pkg.name, {
     folders: buildFolders,
     extract: true,
+    destination: pkg._file.dir,
   })
-
-  console.log(result)
-  // print(`${colors.green(pkg.name)}: Downloaded ${result.extracted.length} artifacts.`)
 }
