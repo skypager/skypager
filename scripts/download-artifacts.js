@@ -19,10 +19,16 @@ main()
   })
 
 async function main() {
+  if (runtime.argv.help || runtime.argv._.find(a => a.toLowerCase() === 'help')) {
+    displayHelp()
+    process.exit(0)
+  }
+
   await fileManager.startAsync({ startPackageManager: true })
   const { packageData } = packageManager
   const { castArray } = runtime.lodash
   const exclude = castArray(runtime.argv.exclude).filter(v => v && v.length)
+  const include = castArray(runtime.argv.include).filter(v => v && v.length)
 
   if (runtime.argv.excludeUpdated) {
     exclude.push(
@@ -38,11 +44,15 @@ async function main() {
 
   await Promise.all(
     packageData
+      .filter(pkg => pkg.name.startsWith(runtime.currentPackage.split('/')[0]) && !pkg.private)
       .filter(
         pkg =>
-          pkg.name.startsWith('@skypager') &&
-          !pkg.private &&
-          (!runtime.argv.only || runtime.argv.only === pkg.name)
+          !include.length ||
+          !!include.find(arg =>
+            arg.match(/\*/)
+              ? new RegExp(arg.replace(/\*/, '.*')).test(pkg.name)
+              : arg.toLowerCase() === pkg.name
+          )
       )
       .filter(
         pkg =>
@@ -77,4 +87,21 @@ async function download(pkg) {
       )}`
     )
   }
+}
+
+function displayHelp() {
+  runtime.cli.randomBanner('Skypager')
+  console.log(
+    `
+
+  Downloads build artifacts for all of your packages from npm
+    --exclude-updated         don't download any package that has been updated (using lerna updated)
+    --dry-run                 don't actually replace anything anything
+
+    the following flags can be supplied multiple times
+
+    --exclude <packageName>   don't download the specified package. use * for wildcard matches
+    --include <packageName>   only download the specified package. use * for wildcard matches
+  `.trim()
+  )
 }
