@@ -79,7 +79,7 @@ describe('The Feature Helper', function() {
     p.end('enableAsync')
 
     asyncFeature.finally.should.equal(true)
-    p.report.enableAsync.duration.should.be.greaterThan(400)
+    p.report.enableAsync.duration.should.be.greaterThan(300)
   })
 
   it('enables with a callback', function(done) {
