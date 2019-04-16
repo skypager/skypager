@@ -1093,10 +1093,15 @@ export default class PackageManager extends Feature {
       dryRun,
       extract = false,
       replace = false,
+      verbose = false,
     } = options
 
     const defaultDestination = resolve(runtime.cwd, 'build', 'packages', name, version)
-    const downloadDestination = extract ? tmpdir() : destination || defaultDestination
+    const downloadDestination = extract
+      ? resolve(tmpdir(), name, version)
+      : destination || defaultDestination
+
+    await mkdir(downloadDestination)
 
     const tarballPath = await this.downloadTarball(`${name}@${version}`, downloadDestination)
 
@@ -1181,15 +1186,20 @@ export default class PackageManager extends Feature {
     response.destinationDirectories = destDirectories
 
     if (dryRun) {
-      response.destinationDirectories.map(dir => {
-        console.log(`mkdir -p ${dir}`)
-      })
+      console.log(`# Source:`, extractFolder)
+      console.log(`# Destination:`, destination)
 
-      ops.map(({ sourceFile, dest }) => {
-        console.log(
-          `cp ${sourceFile.replace(extractFolder, '~')} ${dest.replace(destination, '$dest')}`
-        )
-      })
+      if (verbose) {
+        response.destinationDirectories.map(dir => {
+          console.log(`mkdir -p ${dir}`)
+        })
+
+        ops.map(({ sourceFile, dest }) => {
+          console.log(
+            `cp ${sourceFile.replace(extractFolder, '~')} ${dest.replace(destination, '$dest')}`
+          )
+        })
+      }
     } else {
       // might just be able to tar extract directly on to the destination without making directories
       await Promise.all(response.destinationDirectories.map(dir => mkdir(dir)))
