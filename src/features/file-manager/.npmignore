@@ -1,5 +1,8 @@
 *
 !src/**
 !lib/**
+!scripts/**
+!docs/**
+!test/**
 !README.md
 !LICENSE.md
