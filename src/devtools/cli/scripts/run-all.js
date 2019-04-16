@@ -7,7 +7,26 @@ const { red, green } = colors
 
 const { spawn } = runtime.proc.async
 const { fileManager, packageManager } = runtime
+const { flatten, padStart, max, uniq } = runtime.lodash
 
+const colorNames = ['green', 'yellow', 'blue', 'magenta', 'cyan', 'red', 'white'].map(name => str =>
+  colors[name](str)
+)
+
+let usedIndex = Math.ceil(Math.random() * colorNames.length)
+let colorMap = {}
+
+const randomColor = string => {
+  if (usedIndex >= colorNames.length) {
+    usedIndex = 0
+  }
+
+  const colorFn = (colorMap[string] = colorMap[string] || colorNames[usedIndex])
+  const result = colorFn(string)
+  usedIndex = usedIndex + 1
+
+  return result
+}
 /**
  * @usage
  *
@@ -120,9 +139,9 @@ async function main() {
 const sleep = (ms = 400) => new Promise(res => setTimeout(res, ms))
 
 function buildAssignments() {
-  const tasks = runtime.lodash.flatten(commands.map(parseItem))
+  const tasks = flatten(commands.map(parseItem))
 
-  return tasks
+  const assignments = tasks
     .map(({ projectName, task }) => {
       const project = packageManager.findByName(projectName)
 
@@ -159,6 +178,20 @@ function buildAssignments() {
         return true
       }
     })
+
+  const maxLabelLength = max(assignments.map(({ task }) => task.split(' ')[0].length))
+  const uniqueProjects = uniq(assignments.map(p => p.name))
+  const multipleProjects = uniqueProjects.length > 1
+
+  return assignments.map(assignment => ({
+    ...assignment,
+    label: multipleProjects
+      ? [
+          assignment.name,
+          randomColor(padStart(assignment.task.split(' ')[0], maxLabelLength)),
+        ].join(' ')
+      : [randomColor(padStart(assignment.task.split(' ')[0], maxLabelLength))].join(' '),
+  }))
 }
 async function handleAssignments(assignments) {
   if (sequential) {
@@ -170,7 +203,7 @@ async function handleAssignments(assignments) {
     return
   }
 
-  const spinner = createSpinner(assignments.map(p => p.name))
+  const spinner = createSpinner(assignments.map(p => p.label || p.name))
 
   progress && spinner.start()
 
@@ -180,10 +213,10 @@ async function handleAssignments(assignments) {
     assignments.map(item => {
       return run(item)
         .then(() => {
-          progress && spinner.success(item.name)
+          progress && spinner.success(item.label || item.name)
         })
         .catch(error => {
-          progress && spinner.error(item.name)
+          progress && spinner.error(item.label || item.name)
         })
     })
   )
@@ -197,7 +230,10 @@ async function handleAssignments(assignments) {
   }
 }
 
-async function run({ cwd, task, name, runner }, options = {}) {
+async function run(
+  { cwd, task, name, runner, label = name, labelLength = label.length },
+  options = {}
+) {
   const job = spawn(runner, [task], {
     cwd,
     ...options,
@@ -208,6 +244,8 @@ async function run({ cwd, task, name, runner }, options = {}) {
   const errorOutput = []
   const normalOutput = []
 
+  const taskPrefix = `${padStart(`${label}`, labelLength)}|`
+
   childProcess.stderr.on('data', buf => {
     const content = buf.toString()
 
@@ -215,7 +253,7 @@ async function run({ cwd, task, name, runner }, options = {}) {
 
     if (!progress) {
       if (prefix) {
-        print(content.split('\n').map(chunk => `[${name}]: ${chunk}`))
+        print(content.split('\n').map(chunk => `${taskPrefix}  ${chunk}`))
       } else {
         print(content)
       }
@@ -229,7 +267,7 @@ async function run({ cwd, task, name, runner }, options = {}) {
 
     if (!progress) {
       if (prefix) {
-        print(content.split('\n').map(chunk => `[${name}]: ${chunk}`))
+        print(content.split('\n').map(chunk => `${taskPrefix}  ${chunk}`))
       } else {
         print(content)
       }
