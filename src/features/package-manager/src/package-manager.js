@@ -568,16 +568,19 @@ export default class PackageManager extends Feature {
   get pacote() {
     const { extract, packument, manifest, tarball } = pacote
     const { npmToken = this.options.npmToken } = this.currentState
+    const { enablePackageCache, packageCachePath } = this
 
     const twoArgs = fn => (spec, options = {}) =>
       fn(spec, {
         ...(npmToken && { token: npmToken }),
+        ...(enablePackageCache && { cache: packageCachePath }),
         ...options,
       })
 
     const threeArgs = fn => (spec, dest, options = {}) =>
       fn(spec, dest, {
         ...(npmToken && { token: npmToken }),
+        ...(enablePackageCache && { cache: packageCachePath }),
         ...options,
       })
 
@@ -609,6 +612,45 @@ export default class PackageManager extends Feature {
     })
 
     return (this._npmClient = client)
+  }
+
+  get enablePackageCache() {
+    const isDisabled = !(
+      String(this.tryGet('disablePackageCache')) === 'true' ||
+      String(this.tryGet('enablePackageCache')) === 'false' ||
+      process.env.DISABLE_PACKAGE_CACHE ||
+      this.runtime.argv.noPackageCache ||
+      this.runtime.argv.disablePackageCache ||
+      String(this.runtime.argv.packageCache) === 'false'
+    )
+
+    return isDisabled
+  }
+
+  get packageCachePath() {
+    const { runtime } = this
+    const { isEmpty } = this.lodash
+
+    const packageCachePath = this.tryGet('packageCachePath', this.runtime.argv.packageCachePath)
+
+    if (packageCachePath && packageCachePath.length) {
+      return runtime.resolve(packageCachePath)
+    }
+
+    if (process.env.SKYPAGER_PACKAGE_CACHE_ROOT) {
+      return runtime.resolve(process.env.SKYPAGER_PACKAGE_CACHE_ROOT)
+    } else if (process.env.PORTFOLIO_CACHE_ROOT) {
+      return runtime.resolve(process.env.PORTFOLIO_CACHE_ROOT, 'skypager-package-manager')
+    } else if (!isEmpty(runtime.gitInfo.root)) {
+      return runtime.resolve(
+        runtime.gitInfo.root,
+        'node_modules',
+        '.cache',
+        'skypager-package-manager'
+      )
+    }
+
+    return runtime.resolve('node_modules', '.cache', 'skypager-package-manager')
   }
 
   async findAuthToken(options = {}) {

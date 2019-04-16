@@ -180,4 +180,233 @@ Returns the packages where the version in the local tree isn't published to npm
 <a name="PackageManager.unpublished"></a>
 
 ### PackageManager.unpublished
-Returns the packages who have a version number that doesn't exist in the npm
+Returns the packages who have a version number that doesn't exist in the npm registry
+
+**Kind**: static property of [<code>PackageManager</code>](#PackageManager)  
+**Read only**: true  
+<a name="PackageManager.packagesBehind"></a>
+
+### PackageManager.packagesBehind
+Returns the packages in the local tree whose versions are behind what is on npm.
+
+**Kind**: static property of [<code>PackageManager</code>](#PackageManager)  
+**Read only**: true  
+<a name="PackageManager.remoteData"></a>
+
+### PackageManager.remoteData : [<code>Array.&lt;PackageManifest&gt;</code>](#PackageManifest)
+Returns all of the package manifests found.
+
+**Kind**: static property of [<code>PackageManager</code>](#PackageManager)  
+**Read only**: true  
+<a name="PackageManager.remoteEntries"></a>
+
+### PackageManager.remoteEntries : <code>Array.&lt;Array&gt;</code>
+Returns each remote manifest as entries
+
+**Kind**: static property of [<code>PackageManager</code>](#PackageManager)  
+**Read only**: true  
+<a name="PackageManager.dependenciesMap"></a>
+
+### PackageManager.dependenciesMap
+Gets a map of packages and their dependents
+
+**Kind**: static property of [<code>PackageManager</code>](#PackageManager)  
+**Read only**: true  
+<a name="PackageManager.startAsync"></a>
+
+### PackageManager.startAsync([options]) ⇒ [<code>Promise.&lt;PackageManager&gt;</code>](#PackageManager)
+Starts the PackageManager service, which scans the local project for any package.json manifests
+and populates our manifests observable with the information
+
+**Kind**: static method of [<code>PackageManager</code>](#PackageManager)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>Object</code> | <code>{}</code> |  |
+| [options.remote] | <code>Boolean</code> | <code>false</code> | whether to fetch the remote information about this package from npm |
+
+<a name="PackageManager.start"></a>
+
+### PackageManager.start([options], cb) ⇒ [<code>Promise.&lt;PackageManager&gt;</code>](#PackageManager)
+Starts the package manager with the callback style
+
+**Kind**: static method of [<code>PackageManager</code>](#PackageManager)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>Object</code> | <code>{}</code> |  |
+| [options.remote] | <code>Boolean</code> | <code>false</code> | whether to load remote repository information from npm |
+| cb | <code>function</code> |  |  |
+
+<a name="PackageManager.activationEventWasFired"></a>
+
+### PackageManager.activationEventWasFired([options]) ⇒ [<code>Promise.&lt;PackageManager&gt;</code>](#PackageManager)
+Returns a promise which resolves when the package manager is finally activated.
+
+**Kind**: static method of [<code>PackageManager</code>](#PackageManager)  
+
+| Param | Type | Default |
+| --- | --- | --- |
+| [options] | <code>Object</code> | <code>{}</code> | 
+| [options.timeout] | <code>Number</code> | <code>30000</code> | 
+
+<a name="PackageManager.whenActivated"></a>
+
+### PackageManager.whenActivated([options]) ⇒ [<code>Promise.&lt;PackageManager&gt;</code>](#PackageManager)
+Returns a promise which will resolve when the package manager is finally activated.  If it hasn't yet
+been started, this will start it.
+
+**Kind**: static method of [<code>PackageManager</code>](#PackageManager)  
+
+| Param | Type | Default |
+| --- | --- | --- |
+| [options] | <code>Object</code> | <code>{}</code> | 
+
+<a name="PackageManager.findNodeModules"></a>
+
+### PackageManager.findNodeModules([options]) ⇒ <code>Promise.&lt;Array.&lt;PackageManifest&gt;&gt;</code>
+Find node module packages using the PackageFnder
+
+**Kind**: static method of [<code>PackageManager</code>](#PackageManager)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| [options] | <code>Object</code> | <code>{}</code> | options for the packageFinder.find method |
+
+<a name="PackageManager.selectPackageTree"></a>
+
+### PackageManager.selectPackageTree([options]) ⇒ <code>Array.&lt;{name: string, tree: array, manifest: PackageManifest}&gt;</code>
+Selects all of the files in the FileManager that live underneath a given package folder
+
+**Kind**: static method of [<code>PackageManager</code>](#PackageManager)  
+
+| Param | Type | Default |
+| --- | --- | --- |
+| [options] | <code>\*</code> | <code>{}</code> | 
+
+<a name="PackageManager.exportGraph"></a>
+
+### PackageManager.exportGraph([options]) ⇒ [<code>PackageGraph</code>](#PackageGraph)
+Exports nodes and edges for use in a graph visualization
+
+**Kind**: static method of [<code>PackageManager</code>](#PackageManager)  
+
+| Param | Type | Default |
+| --- | --- | --- |
+| [options] | <code>Object</code> | <code>{}</code> | 
+
+<a name="PackageManager.selectModifiedPackages"></a>
+
+### PackageManager.selectModifiedPackages([options]) ⇒ <code>Promise.&lt;Array&gt;</code>
+Returns all of the packages who have modifications in their tree
+
+**Kind**: static method of [<code>PackageManager</code>](#PackageManager)  
+
+| Param | Type | Default |
+| --- | --- | --- |
+| [options] | <code>Object</code> | <code>{}</code> | 
+
+<a name="PackageManager.createSnapshot"></a>
+
+### PackageManager.createSnapshot([options]) ⇒ [<code>PackageManagerSnapshot</code>](#PackageManagerSnapshot)
+Creates a JSON snapshot of all of the package manifests,
+along with additional metadata
+
+**Kind**: static method of [<code>PackageManager</code>](#PackageManager)  
+
+| Param | Type | Default |
+| --- | --- | --- |
+| [options] | <code>\*</code> | <code>{}</code> | 
+
+<a name="PackageManager.calculatePackageHash"></a>
+
+### PackageManager.calculatePackageHash(packageName, options) ⇒ <code>String</code> \| <code>Object</code>
+Uses npm-packlist to build the list of files that will be published to npm,
+calculates an md5 hash of the contents of each of the files listed, and then
+sorts them by the filename.  Creates a hash of that unique set of objects, to
+come up with a unique hash for the package source that is being released.
+
+**Kind**: static method of [<code>PackageManager</code>](#PackageManager)  
+
+| Param | Type | Default | Description |
+| --- | --- | --- | --- |
+| packageName | <code>String</code> |  |  |
+| options | <code>Object</code> |  |  |
+| [options.compress] | <code>Boolean</code> | <code>true</code> | compress all the hashes into a single hash string value, setting to false will show the individual hashes of every file |
+
+<a name="remoteVersionMap"></a>
+
+## remoteVersionMap
+Returns a table of all of the packages, their current version, and remote version
+
+**Kind**: global variable  
+<a name="find"></a>
+
+## find(id) ⇒ [<code>PackageManifest</code>](#PackageManifest)
+Finds a package by its id, or name
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| id | <code>String</code> | the package id, or name |
+
+<a name="findBy"></a>
+
+## findBy(iterator) ⇒ [<code>PackageManifest</code>](#PackageManifest)
+Finds a package by a function
+
+**Kind**: global function  
+
+| Param | Type |
+| --- | --- |
+| iterator | <code>function</code> | 
+
+<a name="findByName"></a>
+
+## findByName(name)
+Finds a package by its name
+
+**Kind**: global function  
+
+| Param | Type |
+| --- | --- |
+| name | <code>String</code> | 
+
+<a name="findDependentsOf"></a>
+
+## findDependentsOf(packageName) ⇒ <code>Object.&lt;String, PackageManifest&gt;</code>
+Find all dependents of a given package
+
+**Kind**: global function  
+
+| Param | Type |
+| --- | --- |
+| packageName | <code>String</code> | 
+
+<a name="pickAllBy"></a>
+
+## pickAllBy(pickBy) ⇒ <code>Array.&lt;Object&gt;</code>
+For every package in the project, run the lodash pickBy function to get arbitrary attributes
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| pickBy | <code>function</code> | function which will get passed (value, key) |
+
+<a name="pickAll"></a>
+
+## pickAll(...attributes) ⇒ <code>Array.&lt;Object&gt;</code>
+For every package in the project, run the lodash pick function to get arbitrary attributes
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| ...attributes | <code>String</code> | list of attribute keys to pull from the package |
+
+<a name="pickAllRemotesBy"></a>
+
+## pickAllRemotesBy(pickBy) ⇒ <code>Array.&lt;Object&gt;</code>
+For every package in the project, run the l
