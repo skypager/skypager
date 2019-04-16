@@ -1,6 +1,6 @@
 {
   "name": "@skypager/helpers-google-doc",
-  "version": "0.4.0",
+  "version": "0.4.2",
   "description": "skypager google docs helper",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
@@ -18,7 +18,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@skypager/helpers-sheet": "^0.4.0",
+    "@skypager/helpers-sheet": "^0.4.2",
     "googleapis": "^38.0.0"
   },
   "repository": {
