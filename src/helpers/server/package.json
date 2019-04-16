@@ -20,7 +20,8 @@
     "webpack": {
       "build": "webpack.config.js"
     },
-    "category": "helpers"
+    "category": "helpers",
+    "providesScripts": false
   },
   "license": "MIT",
   "dependencies": {

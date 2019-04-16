@@ -31,6 +31,7 @@
   "keywords": [],
   "contributors": [],
   "skypager": {
-    "category": "helpers"
+    "category": "helpers",
+    "providesScripts": false
   }
 }

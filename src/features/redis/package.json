@@ -23,6 +23,7 @@
   "keywords": [],
   "contributors": [],
   "skypager": {
-    "category": "features"
+    "category": "features",
+    "providesScripts": false
   }
 }

@@ -51,6 +51,9 @@
   "keywords": [],
   "contributors": [],
   "skypager": {
-    "category": "helpers"
+    "category": "helpers",
+    "providesScripts": [
+      "generate-api-docs"
+    ]
   }
 }

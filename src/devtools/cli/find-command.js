@@ -6,33 +6,18 @@ const { spawn } = runtime.proc.async
 const { get } = runtime.lodash
 
 async function findCommand(scriptFilename, checkPaths, runtimeArgs = [], commandArgs = []) {
-  const skypagerPackagePaths = await runtime.packageFinder.find(/@skypager\/.*/)
+  const searchPackagePaths = await runtime.packageFinder.find(/@skypager\/.*/)
   const portfolioName = runtime.currentPackage.name.split('/')[0]
 
   if (portfolioName !== '@skypager') {
     const portfolioPackagePaths = await runtime.packageFinder.find(new RegExp(`^${portfolioName}`))
-    skypagerPackagePaths.push(...portfolioPackagePaths)
+    searchPackagePaths.push(...portfolioPackagePaths)
   }
 
   const scriptPaths = await Promise.all(
-    skypagerPackagePaths.map(folder => {
+    searchPackagePaths.map(folder => {
       const check = resolve(folder, 'scripts')
-
-      let scripts
-
-      try {
-        const skypagerPackageManifest = require(`${folder}/package.json`)
-        scripts = get(skypagerPackageManifest, 'skypager.providesScripts', [])
-      } catch (error) {}
-
-      return exists(check).then(
-        yes =>
-          yes &&
-          check &&
-          String(scripts).toLowerCase() !== 'false' &&
-          (!scripts.length || scripts.indexOf(scriptFilename.replace(/\.js$/, '')) > -1) &&
-          check
-      )
+      return exists(check).then(yes => yes && check)
     })
   ).then(matches => matches.filter(Boolean))
 
@@ -43,12 +28,32 @@ async function findCommand(scriptFilename, checkPaths, runtimeArgs = [], command
       let scripts
 
       try {
-        const skypagerPackageManifest = require(runtime.pathUtils.resolve(
-          folder,
-          '..',
-          'package.json'
-        ))
-        scripts = get(skypagerPackageManifest, 'skypager.providesScripts', [])
+        const pkgManifest = require(runtime.pathUtils.resolve(folder, '..', 'package.json'))
+        scripts = get(pkgManifest, 'skypager.providesScripts', [])
+
+        if (scripts === false) {
+          scripts = []
+        }
+
+        // only pull scripts from certain @skypager packages
+        if (
+          !scripts.length &&
+          !pkgManifest.name.match(/@skypager\/(helpers|features|devtools|portfolio-manager)/)
+        ) {
+          scripts = []
+        }
+
+        if (portfolioName !== '@skypager') {
+          const portfolioScriptsConfig = get(pkgManifest, [
+            portfolioName.replace('@', ''),
+            'providesScripts',
+            [],
+          ])
+
+          if (portfolioScriptsConfig && portfolioScriptsConfig.length) {
+            scripts.push(...portfolioScriptsConfig)
+          }
+        }
       } catch (error) {
         console.error(error.message)
       }
@@ -57,7 +62,6 @@ async function findCommand(scriptFilename, checkPaths, runtimeArgs = [], command
         yes =>
           yes &&
           check &&
-          String(scripts).toLowerCase() !== 'false' &&
           (!scripts.length || scripts.indexOf(scriptFilename.replace(/\.js$/, '')) > -1) &&
           check
       )
