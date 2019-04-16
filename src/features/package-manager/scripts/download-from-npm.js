@@ -46,6 +46,8 @@ async function main() {
 }
 
 async function download({ name, destination }) {
+  await packageManager.findAuthToken()
+
   const result = await packageManager.downloadPackage(name, {
     dryRun: !!argv.dryRun,
     verbose: !!argv.verbose,
