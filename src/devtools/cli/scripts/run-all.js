@@ -7,7 +7,7 @@ const { red, green } = colors
 
 const { spawn } = runtime.proc.async
 const { fileManager, packageManager } = runtime
-const { flatten, padStart, max, uniq } = runtime.lodash
+const { flatten, padEnd, padStart, max, uniq } = runtime.lodash
 
 const colorNames = ['green', 'yellow', 'blue', 'magenta', 'cyan', 'red', 'white'].map(name => str =>
   colors[name](str)
@@ -179,18 +179,20 @@ function buildAssignments() {
       }
     })
 
-  const maxLabelLength = max(assignments.map(({ task }) => task.split(' ')[0].length))
   const uniqueProjects = uniq(assignments.map(p => p.name))
   const multipleProjects = uniqueProjects.length > 1
+  const maxLabelLength = max(
+    assignments.map(({ task, name }) =>
+      multipleProjects ? name.length : task.split(' ')[0].length
+    )
+  )
+
+  const multiLabel = ({ task, name }) => `${randomColor(padEnd(name, maxLabelLength))} ${task}`
+  const singleLabel = ({ task }) => randomColor(padStart(task, maxLabelLength))
 
   return assignments.map(assignment => ({
     ...assignment,
-    label: multipleProjects
-      ? [
-          assignment.name,
-          randomColor(padStart(assignment.task.split(' ')[0], maxLabelLength)),
-        ].join(' ')
-      : [randomColor(padStart(assignment.task.split(' ')[0], maxLabelLength))].join(' '),
+    label: multipleProjects ? multiLabel(assignment) : singleLabel(assignment),
   }))
 }
 async function handleAssignments(assignments) {
