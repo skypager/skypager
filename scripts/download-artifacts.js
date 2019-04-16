@@ -42,9 +42,11 @@ async function main() {
     )
   }
 
+  const scope = runtime.currentPackage.name.split('/')[0]
+
   await Promise.all(
     packageData
-      .filter(pkg => pkg.name.startsWith(runtime.currentPackage.split('/')[0]) && !pkg.private)
+      .filter(pkg => pkg.name.startsWith(scope) && !pkg.private)
       .filter(
         pkg =>
           !include.length ||
