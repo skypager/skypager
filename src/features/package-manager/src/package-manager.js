@@ -24,6 +24,14 @@ export default class PackageManager extends Feature {
     ...(process.env.NPM_TOKEN && { npmToken: process.env.NPM_TOKEN }),
   }
 
+  get runtime() {
+    return super.runtime
+  }
+
+  get options() {
+    return super.options
+  }
+
   observables() {
     const p = this
 
@@ -466,6 +474,48 @@ export default class PackageManager extends Feature {
       .value()
   }
 
+  isPackageCacheEnabled() {
+    const { options } = this
+
+    const isDisabled = !!(
+      String(this.tryGet('disablePackageCache')) === 'true' ||
+      String(this.tryGet('enablePackageCache')) === 'false' ||
+      process.env.DISABLE_PACKAGE_CACHE ||
+      options.noPackageCache ||
+      options.disablePackageCache ||
+      String(options.packageCache) === 'false'
+    )
+
+    return !isDisabled
+  }
+
+  findPackageCachePath() {
+    const { options } = this
+    const { runtime } = this
+    const { isEmpty } = this.lodash
+
+    const packageCachePath = this.tryGet('packageCachePath', options.packageCachePath)
+
+    if (packageCachePath && packageCachePath.length) {
+      return runtime.resolve(packageCachePath)
+    }
+
+    if (process.env.SKYPAGER_PACKAGE_CACHE_ROOT) {
+      return runtime.resolve(process.env.SKYPAGER_PACKAGE_CACHE_ROOT)
+    } else if (process.env.PORTFOLIO_CACHE_ROOT) {
+      return runtime.resolve(process.env.PORTFOLIO_CACHE_ROOT, 'skypager-package-manager')
+    } else if (!isEmpty(runtime.gitInfo.root)) {
+      return runtime.resolve(
+        runtime.gitInfo.root,
+        'node_modules',
+        '.cache',
+        'skypager-package-manager'
+      )
+    }
+
+    return runtime.resolve('node_modules', '.cache', 'skypager-package-manager')
+  }
+
   /**
    * Finds a package by its id, or name
    *
@@ -568,7 +618,9 @@ export default class PackageManager extends Feature {
   get pacote() {
     const { extract, packument, manifest, tarball } = pacote
     const { npmToken = this.options.npmToken } = this.currentState
-    const { enablePackageCache, packageCachePath } = this
+
+    const enablePackageCache = this.isPackageCacheEnabled()
+    const packageCachePath = this.findPackageCachePath()
 
     const twoArgs = fn => (spec, options = {}) =>
       fn(spec, {
@@ -612,45 +664,6 @@ export default class PackageManager extends Feature {
     })
 
     return (this._npmClient = client)
-  }
-
-  get enablePackageCache() {
-    const isDisabled = !(
-      String(this.tryGet('disablePackageCache')) === 'true' ||
-      String(this.tryGet('enablePackageCache')) === 'false' ||
-      process.env.DISABLE_PACKAGE_CACHE ||
-      this.runtime.argv.noPackageCache ||
-      this.runtime.argv.disablePackageCache ||
-      String(this.runtime.argv.packageCache) === 'false'
-    )
-
-    return isDisabled
-  }
-
-  get packageCachePath() {
-    const { runtime } = this
-    const { isEmpty } = this.lodash
-
-    const packageCachePath = this.tryGet('packageCachePath', this.runtime.argv.packageCachePath)
-
-    if (packageCachePath && packageCachePath.length) {
-      return runtime.resolve(packageCachePath)
-    }
-
-    if (process.env.SKYPAGER_PACKAGE_CACHE_ROOT) {
-      return runtime.resolve(process.env.SKYPAGER_PACKAGE_CACHE_ROOT)
-    } else if (process.env.PORTFOLIO_CACHE_ROOT) {
-      return runtime.resolve(process.env.PORTFOLIO_CACHE_ROOT, 'skypager-package-manager')
-    } else if (!isEmpty(runtime.gitInfo.root)) {
-      return runtime.resolve(
-        runtime.gitInfo.root,
-        'node_modules',
-        '.cache',
-        'skypager-package-manager'
-      )
-    }
-
-    return runtime.resolve('node_modules', '.cache', 'skypager-package-manager')
   }
 
   async findAuthToken(options = {}) {
@@ -1258,6 +1271,8 @@ export default class PackageManager extends Feature {
   }
 
   async downloadTarball(spec, destination, options = {}) {
+    const { mkdirpAsync: mkdir } = this.runtime.fsx
+
     if (!spec) {
       throw new Error('Please provide a valid package spec, e.g. @skypager/node@latest')
     }
@@ -1280,6 +1295,7 @@ export default class PackageManager extends Feature {
     const isDirectory = await this.runtime.fsx
       .statAsync(destination)
       .then(stat => stat.isDirectory())
+      .catch(error => false)
 
     if (isDirectory) {
       const fileName = `package-${name.replace('/', '-')}-${version}.tgz`
@@ -1287,6 +1303,8 @@ export default class PackageManager extends Feature {
     }
 
     destination = this.runtime.resolve(destination)
+
+    await mkdir(this.runtime.pathUtils.dirname(destination))
 
     await this.pacote.tarball.toFile(spec, destination, options)
 
