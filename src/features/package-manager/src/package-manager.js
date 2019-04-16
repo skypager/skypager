@@ -474,6 +474,12 @@ export default class PackageManager extends Feature {
       .value()
   }
 
+  get cache() {
+    return this.fileManager.createCache({
+      skypagerCachePath: this.findPackageCachePath(),
+    })
+  }
+
   isPackageCacheEnabled() {
     const { options } = this
 

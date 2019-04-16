@@ -184,12 +184,17 @@ export function lazyCache(options) {
 }
 
 export function createCache(options = {}) {
+  if (typeof options === 'string') {
+    options = { fileManagerCachePath: options }
+  }
+
   const { isEmpty, partial } = this.lodash
   const { runtime } = this
   const { gitInfo } = runtime
 
   const defaultCachePath =
     process.env.SKYPAGER_CACHE_PATH ||
+    process.env.FILE_MANAGER_CACHE_PATH ||
     runtime.resolve(
       isEmpty(gitInfo.root) ? gitInfo.root : runtime.cwd,
       'node_modules',
@@ -197,7 +202,10 @@ export function createCache(options = {}) {
       'skypager-cache'
     )
 
-  const { skypagerCachePath = defaultCachePath } = options
+  const {
+    fileManagerCachePath,
+    skypagerCachePath = fileManagerCachePath || defaultCachePath,
+  } = options
 
   const arg = fn => partial(fn, this.runtime.resolve(skypagerCachePath))
 
