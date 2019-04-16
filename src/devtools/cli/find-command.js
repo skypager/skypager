@@ -3,6 +3,7 @@ const { existsAsync: exists } = runtime.fsx
 const { resolve } = runtime.pathUtils
 const { colors, print } = runtime.cli
 const { spawn } = runtime.proc.async
+const { get } = runtime.lodash
 
 async function findCommand(scriptFilename, checkPaths, runtimeArgs = [], commandArgs = []) {
   const skypagerPackagePaths = await runtime.packageFinder.find(/@skypager\/.*/)
@@ -16,14 +17,50 @@ async function findCommand(scriptFilename, checkPaths, runtimeArgs = [], command
   const scriptPaths = await Promise.all(
     skypagerPackagePaths.map(folder => {
       const check = resolve(folder, 'scripts')
-      return exists(check).then(yes => yes && check)
+
+      let scripts
+
+      try {
+        const skypagerPackageManifest = require(`${folder}/package.json`)
+        scripts = get(skypagerPackageManifest, 'skypager.providesScripts', [])
+      } catch (error) {}
+
+      return exists(check).then(
+        yes =>
+          yes &&
+          check &&
+          String(scripts).toLowerCase() !== 'false' &&
+          (!scripts.length || scripts.indexOf(scriptFilename.replace(/\.js$/, '')) > -1) &&
+          check
+      )
     })
   ).then(matches => matches.filter(Boolean))
 
   const withScripts = await Promise.all(
-    skypagerPackagePaths.map(folder => {
-      const check = resolve(folder, 'scripts', scriptFilename)
-      return exists(check).then(yes => yes && check)
+    scriptPaths.map(folder => {
+      const check = resolve(folder, scriptFilename)
+
+      let scripts
+
+      try {
+        const skypagerPackageManifest = require(runtime.pathUtils.resolve(
+          folder,
+          '..',
+          'package.json'
+        ))
+        scripts = get(skypagerPackageManifest, 'skypager.providesScripts', [])
+      } catch (error) {
+        console.error(error.message)
+      }
+
+      return exists(check).then(
+        yes =>
+          yes &&
+          check &&
+          String(scripts).toLowerCase() !== 'false' &&
+          (!scripts.length || scripts.indexOf(scriptFilename.replace(/\.js$/, '')) > -1) &&
+          check
+      )
     })
   ).then(matches => matches.filter(Boolean))
 

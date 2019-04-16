@@ -20,7 +20,10 @@
     "webpack": {
       "build": "webpack.config.js"
     },
-    "category": "features"
+    "category": "features",
+    "providesScripts": [
+      "download-from-npm"
+    ]
   },
   "dependencies": {
     "@skypager/clients-npm": "^0.4.0",
