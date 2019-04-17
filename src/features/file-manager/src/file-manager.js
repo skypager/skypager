@@ -124,6 +124,12 @@ export const featureMethods = [
   'lazyCache',
 
   'createCache',
+
+  'getHasYarnLock',
+
+  'getHasPackageJsonLock',
+
+  'getHasLockFile',
 ]
 
 export const hostMethods = ['requireContext']
@@ -164,13 +170,30 @@ export function requireContext(rule, options = {}) {
     .value()
 }
 
-export async function hashTree() {
+export async function hashTree(options = {}) {
   await this.hashFiles({ include: [/.*/] })
+
+  const { files = [] } = options
+
   const sortedHashTable = this.chain
     .get('fileObjects')
     .sortBy('relative')
     .map(file => ({ id: file.relative, hash: file.hash }))
     .value()
+
+  if (files.length) {
+    await Promise.all(
+      files.map(
+        file =>
+          new Promise((resolve, reject) =>
+            md5File(file, (err, hash) =>
+              err ? reject(err) : resolve({ id: this.runtime.relative(file), hash })
+            )
+          )
+      )
+    ).then(hashedFiles => sortedHashTable.push(...hashedFiles))
+  }
+
   return this.runtime.hashObject(sortedHashTable)
 }
 
@@ -1134,7 +1157,10 @@ export async function hashBuildTree(options = {}) {
   const { runtime } = this
   const { exclude = [], buildFolder, baseFolder = buildFolder || runtime.resolve('lib') } = options
 
-  const sourceHash = await this.hashTree()
+  const sourceHash = await this.hashTree({
+    ...(options.files && { files: options.files }),
+  })
+
   const buildFolderExists = await runtime.fsx.existsAsync(baseFolder)
 
   if (!buildFolderExists) {
@@ -1206,4 +1232,16 @@ export async function hashBuildTree(options = {}) {
     sha: runtime.gitInfo.sha,
     outputFiles,
   }
+}
+
+export function getHasLockFile() {
+  return this.hasYarnLock || this.hasPackageJsonLock
+}
+
+export function getHasYarnLock() {
+  return this.files.has('yarn.lock')
+}
+
+export function getHasPackageJsonLock() {
+  return this.files.has('package-lock.json')
 }

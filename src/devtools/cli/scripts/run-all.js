@@ -1,7 +1,7 @@
 const runtime = require('@skypager/node')
 const MultiSpinner = require('multispinner')
 
-const { colors, print } = runtime.cli
+const { icon, colors, print } = runtime.cli
 
 const { red, green } = colors
 
@@ -9,12 +9,16 @@ const { spawn } = runtime.proc.async
 const { fileManager, packageManager } = runtime
 const { flatten, padEnd, padStart, max, uniq } = runtime.lodash
 
+runtime.feature('profiler').enable()
+
 const colorNames = ['green', 'yellow', 'blue', 'magenta', 'cyan', 'red', 'white'].map(name => str =>
   colors[name](str)
 )
 
 let usedIndex = Math.ceil(Math.random() * colorNames.length)
 let colorMap = {}
+
+const changedPackages = []
 
 const randomColor = string => {
   if (usedIndex >= colorNames.length) {
@@ -27,6 +31,7 @@ const randomColor = string => {
 
   return result
 }
+
 /**
  * @usage
  *
@@ -130,9 +135,39 @@ const parseItem = command => {
 }
 
 async function main() {
+  const { profiler } = runtime
+
+  profiler.profileStart('runAll')
   await fileManager.startAsync({ startPackageManager: true })
 
-  await handleAssignments(buildAssignments())
+  if (onlyChanged) {
+    const { normalOutput = [] } = await runtime.proc.spawnAndCapture({
+      cmd: 'lerna',
+      args: ['updated', '--json'],
+      cwd: runtime.gitInfo.root,
+    })
+
+    const json = normalOutput.join('')
+
+    const changed = JSON.parse(json)
+    changedPackages.push(...changed.map(c => c.name).filter(v => v && v.length))
+  }
+
+  const { assignments = [], failures = [] } = await handleAssignments(buildAssignments()).then(
+    r => r || {}
+  )
+
+  profiler.profileEnd('runAll')
+
+  print(`Finished ${assignments.length} tasks in ${profiler.report.runAll.duration} ms`)
+
+  if (failures.length) {
+    print(
+      `${icon('boom')} ${colors.red(failures.length.toString())} projects ${colors.red('FAILED')}`
+    )
+    print(failures.map(({ label, error }) => `${label}| ${error.message}`))
+    process.exit(1)
+  }
 }
 
 // eslint-disable-next-line
@@ -169,11 +204,16 @@ function buildAssignments() {
       }
     })
     .filter(Boolean)
-    .filter(({ name, cwd }) => {
+    .filter(({ name, label, cwd }) => {
       // if we only want to touch changed packages, and this package hasn't changed, we will just not run anything
       if (onlyChanged) {
-        // TODO
-        return true
+        const isChanged = changedPackages.indexOf(name) > -1
+
+        if (!isChanged) {
+          print(`${label}| ${colors.yellow('SKIPPING')}. Project has not changed.`)
+        }
+
+        return isChanged
       } else {
         return true
       }
@@ -195,40 +235,51 @@ function buildAssignments() {
     label: multipleProjects ? multiLabel(assignment) : singleLabel(assignment),
   }))
 }
+
 async function handleAssignments(assignments) {
+  const failures = []
+
   if (sequential) {
     for (let assignment of assignments) {
       banner(assignment)
-      await run(assignment)
+      await run(assignment).catch(error => failures.push({ ...assignment, error }))
     }
 
-    return
+    return {
+      assignments,
+      failures,
+    }
   }
 
-  const spinner = createSpinner(assignments.map(p => p.label || p.name))
+  const spinner = createSpinner(uniq(assignments.map(p => p.label || p.name)))
 
   progress && spinner.start()
-
-  const failures = []
 
   await Promise.all(
     assignments.map(item => {
       return run(item)
         .then(() => {
-          progress && spinner.success(item.label || item.name)
+          if (progress) {
+            spinner.success(item.label || item.name)
+          }
         })
         .catch(error => {
-          progress && spinner.error(item.label || item.name)
+          if (progress) {
+            spinner.error(item.label || item.name)
+          }
+          failures.push({
+            ...item,
+            error,
+          })
         })
     })
   )
 
   await sleep(300)
 
-  if (failures.length) {
-    process.exit(1)
-  } else {
-    process.exit(0)
+  return {
+    failures,
+    assignments,
   }
 }
 
@@ -236,7 +287,8 @@ async function run(
   { cwd, task, name, runner, label = name, labelLength = label.length },
   options = {}
 ) {
-  const job = spawn(runner, [task], {
+  const ARGS = runtime.argv.args || process.env.RUNTIME_ARGS || ''
+  const job = spawn(runner, [task].concat(ARGS.split(' ')), {
     cwd,
     ...options,
   })
