@@ -170,10 +170,21 @@ export function requireContext(rule, options = {}) {
     .value()
 }
 
+/**
+ * @typedef {String|RegExp|Function} PathMatcherRule
+ */
+/**
+ * @param {Object} options
+ * @param {Array<PathMatcherRule>} [options.include] an array of webpack loader style rules for matching paths
+ * @param {Array<String>} options.files additional files to include in the source hash, e.g yarn.lock from a monorepo
+ * @param {Function|String} options.configHash a string, or function which returns an additional value to be included in the sourceHash
+ */
 export async function hashTree(options = {}) {
-  await this.hashFiles({ include: [/.*/] })
+  const { include = [/.*/] } = options
 
-  const { files = [] } = options
+  await this.hashFiles({ include })
+
+  const { configHash, files = [] } = options
 
   const sortedHashTable = this.chain
     .get('fileObjects')
@@ -192,6 +203,13 @@ export async function hashTree(options = {}) {
           )
       )
     ).then(hashedFiles => sortedHashTable.push(...hashedFiles))
+  }
+
+  if (typeof configHash === 'function') {
+    const result = await configHash.call(this, options)
+    sortedHashTable.push(JSON.stringify(result))
+  } else if (typeof configHash === 'string') {
+    sortedHashTable.push(configHash)
   }
 
   return this.runtime.hashObject(sortedHashTable)
@@ -366,8 +384,7 @@ export function getChains() {
       const fileIds = fileManager.matchPatterns(...args)
       return fileManager.chain
         .plant(fileIds)
-        .keyBy(v => v)
-        .mapValues(v => fileManager.file(v))
+        .reduce((memo, fileId) => ({ ...memo, [fileId]: fileManager.file(fileId) }), {})
     },
 
     route(route, options = {}) {
@@ -1153,12 +1170,23 @@ export async function downloadBuildArtifacts(options = {}) {
   }
 }
 
+/**
+ * Generates a report about the build artifacts produced by this project, including the sourceHash which produced them
+ *
+ * @param {Object} options
+ * @param {String|Function} options.configHash a function or a string which returns an additional value to be included in the sourceHash
+ * @param {Array<String>} [options.files=[]] an array of additional files to include in the sourceHash
+ * @param {Array<String>} [options.exclude=[]] an array of files to exclude
+ * @param {String} [options.buildFolder='lib'] the name of the folder which includes the build artifacts
+ * @param {String} [options.baseFolder='$CWD/lib'] the absolute path to the build folder
+ */
 export async function hashBuildTree(options = {}) {
   const { runtime } = this
   const { exclude = [], buildFolder, baseFolder = buildFolder || runtime.resolve('lib') } = options
 
   const sourceHash = await this.hashTree({
     ...(options.files && { files: options.files }),
+    ...(options.configHash && { configHash: options.configHash }),
   })
 
   const buildFolderExists = await runtime.fsx.existsAsync(baseFolder)
