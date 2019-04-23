@@ -180,10 +180,6 @@ export class Helper {
     helperClass = helperClass || this
     const shortcut = helperClass.shortcut || helperClass.prototype.shortcut
 
-    if (runtime.has(shortcut)) {
-      runtime.warn(`Shortcut is being reused ${shortcut}`)
-    }
-
     const helperInstance = new helperClass(
       {
         ...options,

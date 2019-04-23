@@ -186,6 +186,9 @@ export function enabledHook(options = {}) {
         return e
       }
     })
+
+    runtime.lazy('packageManager', () => runtime.fileManager && runtime.feature('package-manager'))
+    runtime.lazy('moduleManager', () => runtime.fileManager && runtime.feature('module-manager'))
   }
 
   runtime.selectors.register('helpers/discover', () => require('./selectors/helpers/discover'))
@@ -287,8 +290,10 @@ export function enabledHook(options = {}) {
       })
       .catch(err => {
         runtime.error(`Error running mainScript`, { error: err.message })
-        runtime.setState({ mainScriptError: err })
+        runtime.setState({ mainScriptError: err.message })
         runtime.invoke('profiler.profileEnd', 'mainScriptRunner')
+
+        console.log(Array.from(runtime.state.keys()))
 
         if (runtime.argv.safeMode) {
           console.error(`Error while running skypager main script. ${err.message}`)

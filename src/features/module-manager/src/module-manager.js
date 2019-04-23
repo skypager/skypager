@@ -448,6 +448,43 @@ export default class ModuleManager extends Feature {
     }
   }
 
+  async findVersionsInYarnCache(name, cacheDir) {
+    cacheDir =
+      cacheDir ||
+      this.runtime.proc
+        .execSync(`yarn cache dir`)
+        .toString()
+        .trim()
+
+    const { fsx } = this.runtime
+
+    const cacheFolders = await fsx.readdirAsync(cacheDir)
+    const searchName = name.replace(/\//g, '-')
+    const searchFolders = cacheFolders.reduce((memo, name) => {
+      if (name.indexOf(searchName) === -1) {
+        return memo
+      }
+
+      const versionParts = name
+        .replace(/^npm-/, '')
+        .replace(`${searchName}-`, '')
+        .split('-')
+
+      versionParts.pop()
+
+      const version = versionParts.join('-')
+
+      return {
+        ...memo,
+        [version]: name,
+      }
+    }, {})
+
+    const versions = this.runtime.packageFinder.semver.sort(Object.keys(searchFolders)).reverse()
+
+    return versions
+  }
+
   async findInYarnCache(name, version, cacheDir) {
     cacheDir =
       cacheDir ||
@@ -457,6 +494,10 @@ export default class ModuleManager extends Feature {
         .trim()
 
     const { fsx } = this.runtime
+
+    if (cacheDir.endsWith('v4')) {
+      return findInYarnCacheV4.call(this, name, version, cacheDir)
+    }
 
     let packageName = name
     const isScoped = name.startsWith('@')
@@ -512,4 +553,60 @@ export const LIFECYCLE_HOOKS = {
   DID_FAIL,
   WAS_ACTIVATED,
   WILL_START,
+}
+
+async function findInYarnCacheV4(name, version, cacheDir, returnBase = false) {
+  cacheDir =
+    cacheDir ||
+    this.runtime.proc
+      .execSync(`yarn cache dir`)
+      .toString()
+      .trim()
+
+  const { fsx } = this.runtime
+
+  const cacheFolders = await fsx.readdirAsync(cacheDir)
+
+  let cacheFolder
+
+  if (version && version.length && version !== 'latest') {
+    const searchName = name.startsWith('@')
+      ? [name.replace(/\//g, '-'), version].join('-')
+      : [name, version].join('-')
+
+    cacheFolder = cacheFolders.find(folder => folder.indexOf(searchName) > -1)
+  } else if (version === 'latest' || !version) {
+    const searchName = name.replace(/\//g, '-')
+    const searchFolders = cacheFolders.reduce((memo, name) => {
+      if (name.indexOf(searchName) === -1) {
+        return memo
+      }
+
+      const versionParts = name
+        .replace(/^npm-/, '')
+        .replace(`${searchName}-`, '')
+        .split('-')
+
+      versionParts.pop()
+
+      const version = versionParts.join('-')
+
+      return {
+        ...memo,
+        [version]: name,
+      }
+    }, {})
+
+    const versions = this.runtime.packageFinder.semver.sort(Object.keys(searchFolders)).reverse()
+
+    const latest = versions[0]
+
+    cacheFolder = searchFolders[latest]
+  }
+
+  if (cacheFolder) {
+    return returnBase
+      ? this.runtime.resolve(cacheDir, cacheFolder)
+      : this.runtime.resolve(cacheDir, cacheFolder, 'node_modules', ...name.split('/'))
+  }
 }

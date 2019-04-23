@@ -11,7 +11,11 @@ run(async runtime => {
   const apps = await runtime
     .selectChain('development/applications')
     .then(chain => chain.filter(app => app.name.startsWith('@skypager')))
-    .then(chain => chain.keyBy(app => app.name.replace(/^@skypager\//, '').replace(/^apps-/, '')))
+    .then(chain =>
+      chain.keyBy(app =>
+        app.name.replace(/^@skypager\//, '').replace(/^(apps|features|helpers)-/, '')
+      )
+    )
 
   const appNames = apps.keys().value()
 

@@ -1,8 +1,11 @@
 const runtime = require('@skypager/node')
 
-const { currentPackage, fileManager, packageManager, argv } = runtime
+const { currentPackage, fileManager, packageManager, moduleManager, argv } = runtime
 const { colors, print } = runtime.cli
 const { castArray, uniq } = runtime.lodash
+
+const noYarnCache =
+  argv.noCache || argv.cache === false || argv.noYarnCache || argv.yarnCache === false
 
 const buildFolders = uniq(['dist', 'lib', 'build'].concat(argv._))
   .concat(castArray(argv.buildFolder))
@@ -44,6 +47,33 @@ async function main() {
 
   try {
     const destination = argv.destination || runtime.cwd
+
+    if (!noYarnCache) {
+      const foundInCache = await moduleManager.findInYarnCache(
+        currentPackage.name,
+        currentPackage.version
+      )
+
+      if (foundInCache) {
+        const existingBuildFolders = await runtime.fsx.existingAsync(
+          ...buildFolders.map(f => runtime.resolve(foundInCache, f))
+        )
+
+        if (existingBuildFolders.length) {
+          await Promise.all(
+            existingBuildFolders.map(sourceDir =>
+              runtime.fsx.copyAsync(
+                sourceDir,
+                runtime.resolve(destination, runtime.pathUtils.basename(sourceDir))
+              )
+            )
+          )
+          print(`Restored ${currentPackage.name} ${currentPackage.version} from yarn cache`)
+          process.exit(0)
+        }
+      }
+    }
+
     await download({ name: currentPackage.name, destination })
     process.exit(0)
   } catch (error) {

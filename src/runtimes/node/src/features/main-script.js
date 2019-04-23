@@ -143,6 +143,7 @@ export default class MainScriptFeature extends Feature {
 
       return exp
     } catch (error) {
+      console.error(`Error in main script`, error.message, error.stack)
       this.runtime.state.set('mainScriptError', { message: error.message, stack: error.stack })
       this.runtime.emit('mainScriptDidFail', error)
     }
