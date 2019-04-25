@@ -74,6 +74,10 @@ async function main() {
       }
     }
 
+    setInterval(() => {
+      print(`Still downloading ${currentPackage.name}`)
+    }, 5000)
+
     await download({ name: currentPackage.name, destination })
     process.exit(0)
   } catch (error) {

@@ -468,7 +468,8 @@ export default class PortfolioManager extends Feature {
     await Promise.all(projects.map(projectName => this.hashProjectTree(projectName, options)))
     await Promise.all(projects.map(projectName => this.hashBuildTree(projectName, options)))
     await Promise.all(projects.map(projectName => this.findLastModifiedSha(projectName, options)))
-    return this.projectTable
+
+    return this.lodash.pick(this.projectTable, projects)
   }
 
   async dumpFileTree(projectName, options = {}) {
