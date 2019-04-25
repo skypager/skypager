@@ -9,6 +9,7 @@ export default class Socket extends Feature {
 
   initialState = {
     listening: false,
+    connected: false,
   }
 
   get status() {
@@ -70,6 +71,9 @@ export default class Socket extends Feature {
 
     return new Promise((resolve, reject) => {
       this.ipc.connect({ path }, err => (err ? reject(err) : resolve(this)))
+    }).then(ipc => {
+      this.state.set('connected', true)
+      return ipc
     })
   }
 
@@ -96,6 +100,19 @@ export default class Socket extends Feature {
     this.state.set('statusChecksEnabled', true)
 
     return () => this.unsubscribe('/check-status', statusHandler)
+  }
+
+  trackErrors(options = {}) {
+    const { max = 5 } = options
+    this.ipc.on('error', error => {
+      const errors = this.state.get('errors') || []
+      const errorCount = this.state.get('errorCount') || 0
+
+      errors.push(error)
+
+      this.state.set('errors', errors.reverse().slice(0, max))
+      this.state.set('errorCount', errorCount + 1)
+    })
   }
 
   async runSetupScript(scriptPath, handler) {
