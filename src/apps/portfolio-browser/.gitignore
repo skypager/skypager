@@ -5,3 +5,5 @@ node_modules/
 *.log
 secrets/
 .vscode
+public/module-graph.json
+public/package-graph.json

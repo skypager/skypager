@@ -21,12 +21,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@skypager/cli": "^0.4.9",
     "@skypager/helpers-server": "^0.4.2",
     "@skypager/helpers-sheet": "^0.4.2",
-    "@skypager/node": "^0.4.9",
-    "@skypager/web": "^0.4.7",
-    "@skypager/webpack": "^0.4.0",
     "prop-types": "^15.6.2",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",

@@ -745,6 +745,45 @@ export default class PackageManager extends Feature {
   }
 
   /**
+   * Returns an index of all of the package names and their last modified timestamps
+   *
+   * @param {Object} options
+   * @param {Boolean} [options.listFiles=false] include the files and their times
+   */
+  async showLastModified(options = {}) {
+    const { listFiles = false } = options
+    const { fileManager } = this
+    const { sortBy } = this.lodash
+
+    const getMtime = file => (file.stats ? Math.ceil(file.stats.mtime / 1000) : 0)
+
+    return this.chain
+      .get('packageData', [])
+      .map(({ name, _file }) => {
+        const files = fileManager.fileObjects.filter(
+          ({ path }) => _file && _file.dir && path.startsWith(_file.dir)
+        )
+
+        return [name, files]
+      })
+      .fromPairs()
+      .mapValues(files =>
+        listFiles
+          ? sortBy(files, getMtime)
+              .reverse()
+              .map(file => ({
+                id: file.relative,
+                lastModified: getMtime(file),
+              }))
+          : files.reduce((memo, file) => {
+              const mtime = getMtime(file)
+              return mtime > memo ? mtime : memo
+            }, 0)
+      )
+      .value()
+  }
+
+  /**
    * Selects all of the files in the FileManager that live underneath a given package folder
    *
    * @param {*} [options={}]
