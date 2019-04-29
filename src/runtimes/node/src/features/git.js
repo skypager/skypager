@@ -99,8 +99,67 @@ export default class GitFeature extends Feature {
     return this.statusMap.keys()
   }
 
+  findLatestTag() {
+    const ref = this.runtime.proc
+      .execSync(`git describe --always --long --dirty --first-parent`)
+      .toString()
+
+    const tag = ref.match(/(^.*)-\d-\w+(-dirty)?/)
+
+    return tag && tag[1]
+  }
+  /**
+   * Returns the files that have changed since the last commit sha.
+   * @param {String} tagOrCommitSha tag or commit sha, pass true to use latest tag
+   * @param {String} cwd subdirectory, defaults to .
+   */
+  modifiedSince(tagOrCommitSha, cwd) {
+    if (!tagOrCommitSha || tagOrCommitSha === true) {
+      const ref = this.runtime.proc
+        .execSync(`git describe --always --long --dirty --first-parent`)
+        .toString()
+
+      const tag = ref.match(/(^.*)-\d-\w+(-dirty)?/)
+
+      tagOrCommitSha = tag[1]
+    }
+
+    if (!tagOrCommitSha || !tagOrCommitSha.length) {
+      throw new Error(`Invalid git SHA. Provide a tag or valid commit reference.`)
+    }
+
+    cwd = cwd || this.runtime.cwd
+
+    const changedFiles = this.runtime.proc
+      .execSync(`git diff --name-only ${tagOrCommitSha} -- ${cwd}`)
+      .toString()
+      .trim()
+
+    return changedFiles.split('\n')
+  }
+
   get meta() {
     const { runtime } = this
+
+    // This allows us to simulate git metadata in docker
+    if (process.env.SKYPAGER_GIT_INFO) {
+      let envGitInfo
+
+      try {
+        envGitInfo = JSON.parse(process.env.SKYPAGER_GIT_INFO)
+      } catch (error) {
+        envGitInfo = {}
+      }
+
+      return {
+        sha: process.env.SKYPAGER_GIT_INFO_SHA || envGitInfo.sha,
+        branch: process.env.SKYPAGER_GIT_INFO_BRANCH || envGitInfo.branch,
+        tag: process.env.SKYPAGER_GIT_INFO_TAG || envGitInfo.tag,
+        abbreviatedSha: (process.env.SKYPAGER_GIT_INFO_SHA || envGitInfo.branch || '').slice(0, 10),
+        root: process.env.SKYPAGER_GIT_INFO_ROOT || envGitInfo.root || runtime.cwd,
+      }
+    }
+
     const path = runtime.pathUtils
     const fs = runtime.fs
     const { isNull } = this.lodash

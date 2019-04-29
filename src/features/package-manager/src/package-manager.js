@@ -1,7 +1,7 @@
 import { Feature } from '@skypager/node'
 import pacote from 'pacote'
 import { tmpdir } from 'os'
-import { extract as extractTar } from 'tar'
+import { create as createTar, extract as extractTar } from 'tar'
 
 /**
  * @class PackageManager
@@ -573,10 +573,30 @@ export default class PackageManager extends Feature {
    * Find all dependents of a given package
    *
    * @param {String} packageName
-   * @returns {Object<String, PackageManifest>}
+   * @param {Object} options
+   * @param {Boolean} [options.names=false] return the package names
+   * @param {String|Boolean} [options.type='all'] which type of dependencies matter (one of: all,production,development)
+   * @returns {Object<String, PackageManifest>|Array<String>}
    */
-  findDependentsOf(packageName) {
-    return this.lodash.pickBy(this.dependenciesMap, v => v[packageName])
+  findDependentsOf(packageName, options = {}) {
+    const { pickBy } = this.lodash
+    const { names = false, type = 'any' } = options
+
+    let results
+
+    if (type === 'all' || type === 'any' || type === true) {
+      results = pickBy(this.dependenciesMap, v => v[packageName])
+    } else if (type === 'production') {
+      results = pickBy(this.buildDependenciesMap({ type: 'production' }), v => v[packageName])
+    } else if (type === 'development') {
+      results = pickBy(this.buildDependenciesMap({ type: 'development' }), v => v[packageName])
+    } else if (type === 'both') {
+      results = pickBy(this.buildDependenciesMap({ type: 'both' }), v => v[packageName])
+    } else {
+      results = {}
+    }
+
+    return names ? Object.keys(results) : results
   }
 
   /**
@@ -967,12 +987,32 @@ export default class PackageManager extends Feature {
    * Returns all of the packages who have modifications in their tree
    *
    * @param {Object} [options={}]
+   * @param {Boolean} [dependents='true|false|production|development] include the dependents of the changed packages as well
    * @returns {Promise<Array>}
    * @memberof PackageManager
    */
   async selectModifiedPackages(options = {}) {
+    const { uniq, flatten } = this.lodash
+    const { dependents = true } = options
     const packageIds = await this.runtime.select('package/changed', options)
-    return packageIds.map(id => this.manifests.get(id)).filter(f => f)
+    const withChanges = packageIds.map(id => this.manifests.get(id)).filter(Boolean)
+
+    if (!dependents) {
+      return withChanges
+    }
+
+    const modifiedNames = withChanges.map(({ name }) => name)
+
+    const getAll = checkNames =>
+      uniq(
+        flatten(
+          checkNames.map(name => this.findDependentsOf(name, { names: true, type: dependents }))
+        ).concat(checkNames)
+      )
+
+    const finalList = uniq([1, 2, 3, 4].reduce(list => getAll(list).concat(list), modifiedNames))
+
+    return finalList.map(name => (options.names ? name : this.findByName(name)))
   }
 
   /**
@@ -1007,17 +1047,30 @@ export default class PackageManager extends Feature {
    * @memberof PackageManager
    */
   get dependenciesMap() {
+    return this.buildDependenciesMap({ type: 'all' })
+  }
+
+  buildDependenciesMap(options = {}) {
+    const { type = 'all' } = options
     const { at, defaults } = this.lodash
 
     return this.chain
       .invoke('manifests.values')
       .keyBy('name')
-      .mapValues(v =>
-        defaults(
-          {},
-          ...at(v, 'dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies')
-        )
-      )
+      .mapValues(v => {
+        if (type === 'production') {
+          return defaults({}, ...at(v, 'dependencies'))
+        } else if (type === 'development') {
+          return defaults({}, ...at(v, 'devDependencies'))
+        } else if (type === 'both') {
+          return defaults({}, ...at(v, 'dependencies', 'devDependencies'))
+        } else {
+          return defaults(
+            {},
+            ...at(v, 'dependencies', 'devDependencies', 'optionalDependencies', 'peerDependencies')
+          )
+        }
+      })
       .value()
   }
 
@@ -1356,6 +1409,10 @@ export default class PackageManager extends Feature {
     return destination
   }
 
+  packageProject(packageName, options = {}) {
+    return this.createTarball(packageName, options)
+  }
+
   async createTarball(packageName, options = {}) {
     const pkg = this.findByName(packageName)
 
@@ -1364,8 +1421,6 @@ export default class PackageManager extends Feature {
     }
 
     const dir = pkg._file.dir
-
-    const tar = require('tar')
 
     const files = await this.listPackageContents(packageName, {
       relative: false,
@@ -1379,7 +1434,7 @@ export default class PackageManager extends Feature {
 
     await this.runtime.fsx.mkdirpAsync(outputDir)
 
-    await tar.create(
+    await createTar(
       {
         gzip: true,
         portable: true,
@@ -1474,25 +1529,8 @@ export default class PackageManager extends Feature {
 
     return compress ? hashObject(sortBy(hashes, entry => entry[0])) : hashes
   }
-
-  async packageProject(packageName, options = {}) {
-    await tar.create(
-      {
-        cwd: dir,
-        prefix: 'package/',
-        portable: true,
-        // Provide a specific date in the 1980s for the benefit of zip,
-        // which is confounded by files dated at the Unix epoch 0.
-        mtime: new Date('1985-10-26T08:15:00.000Z'),
-        gzip: true,
-      },
-      // NOTE: node-tar does some Magic Stuff depending on prefixes for files
-      //       specifically with @ signs, so we just neutralize that one
-      //       and any such future "features" by prepending `./`
-      files.map(f => `./${f}`)
-    )
-  }
 }
+
 export const CREATED = 'CREATED'
 export const STARTING = 'STARTING'
 export const FAILED = 'FAILED'

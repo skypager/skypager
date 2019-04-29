@@ -84,6 +84,9 @@ export const featureMethods = [
   // Access to all of the observable directory paths with modified files in them
   'getModifiedDirectories',
 
+  // all of the locations that have package.json in them
+  'getPackageLocations',
+
   // Access to chained wrappers of our observables
   'getChains',
 
@@ -554,6 +557,13 @@ export function getPackageManager() {
   return this.runtime.feature('package-manager')
 }
 
+export function getPackageLocations() {
+  return this.chains
+    .patterns('**/package.json')
+    .map('relativeDirname')
+    .value()
+}
+
 /**
  * Updates the md5 hash record for a particular file.
  *
@@ -682,11 +692,11 @@ export function getFileObjects(options = {}) {
   })
 }
 
-export function getModifiedFiles(options = {}) {
-  const { markers = ['M', '??', 'D'] } = options
+export function getModifiedFiles() {
+  const markers = ['M', '??', 'D']
 
   return this.chain
-    .get('statusMap', {})
+    .invoke('statusMap.toJSON', {})
     .omitBy(marker => markers.indexOf(marker) === -1)
     .keys()
     .value()
