@@ -87,6 +87,7 @@ export default class BabelCompiler extends Feature {
     const compiled = this.compile(code)
     const script = vm.createScript(compiled)
 
+    const me = this
     return codeRunner
 
     /**
@@ -105,7 +106,7 @@ export default class BabelCompiler extends Feature {
 
       const result = script.runInContext(sandbox)
 
-      this.lastSandbox = sandbox
+      me.lastSandbox = sandbox
 
       return options.sandbox ? { vars, result, sandbox, compiled } : result
     }
