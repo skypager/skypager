@@ -50,9 +50,13 @@ export class ContextRegistry extends Directory {
   add(webpackContext, options = {}) {
     if (!this.isValidContext(webpackContext) && webpackContext.convertToRequireContext) {
       webpackContext = webpackContext.convertToRequireContext()
+    } else if (typeof webpackContext === 'object' && !webpackContext.prototype) {
+      Object.keys(webpackContext).map(id => this.register(id, () => webpackContext[id]))
+      return this
     }
 
     this.registerContextModules(this.wrapContext(webpackContext, { ...this.options, ...options }))
+    return this
   }
 
   registerContextModules(requireContext = this.context) {

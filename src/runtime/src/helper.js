@@ -1,8 +1,8 @@
 import lodash from 'lodash'
 import { hashObject, hideProperty, lazy, enhanceObject, propertyUtils } from './utils/properties'
+import { attach as attachEmitter } from './utils/emitter'
 import { camelCase, snakeCase, singularize, pluralize } from './utils/string'
 import ContextRegistry from './registries/context'
-import { attach as attachEmitter } from './utils/emitter'
 import uuid from 'uuid'
 
 /**
@@ -279,9 +279,17 @@ export class Helper {
    * @memberof Helper
    */
   static attach(host, helperClass, options) {
+    const { isPlainObject } = lodash
+
+    if (isPlainObject(helperClass)) {
+      options = helperClass
+      helperClass = this
+    }
+
     Helper.events.emit('attach', host, helperClass, options)
-    const result = attach(host, helperClass, options)
+    const result = _attach(host, helperClass, options)
     Helper.events.emit('attached', host, helperClass, options)
+
     return result
   }
 
@@ -868,9 +876,11 @@ export const registry = Helper.registry
 export const registerHelper = Helper.registerHelper
 export const createContextRegistry = (name, ...args) => new ContextRegistry(name, ...args)
 
-export { ContextRegistry }
+const attach = Helper.attach
 
-export function attach(host, helperClass, options = {}) {
+export { attach, ContextRegistry }
+
+export function _attach(host, helperClass, options = {}) {
   const { registryProp, lookupProp, configKey = 'options' } = {
     ...Helper.propNames(helperClass.name),
     ...options,
