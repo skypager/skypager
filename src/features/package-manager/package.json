@@ -22,7 +22,8 @@
     },
     "category": "features",
     "providesScripts": [
-      "download-from-npm"
+      "download-from-npm",
+      "restore-build"
     ]
   },
   "dependencies": {
