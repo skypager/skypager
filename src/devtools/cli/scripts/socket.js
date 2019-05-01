@@ -1,8 +1,10 @@
 const runtime = require('@skypager/node')
 const { randomBanner, print } = runtime.cli
 
+const MAX_MESSAGE_LENGTH = 4 * 1000
+
 async function main() {
-  const { handler, script, socketName = runtime.argv.name } = runtime.argv
+  const { enableVm, handler, script, socketName = runtime.argv.name } = runtime.argv
 
   runtime
     .feature('socket', {
@@ -54,6 +56,74 @@ async function main() {
       print(`Script path: ${script}`, 4)
       await socket.runSetupScript(script)
     }
+
+    if (enableVm) {
+      socket.subscribe(
+        '/vm/run-code',
+        ({ code, messageId, taskId = messageId || runtime.hashObject({ code }), ...options }) => {
+          const replyChannel =
+            options.replyChannel || `/vm/run-code/response/${taskId.replace(/\W/g, '')}`
+
+          runCode({ ...options, messageId: messageId || taskId, socket, code })
+            .then(({ cacheKey, integrity }) => {
+              return socket.publish(replyChannel, { cacheKey, integrity, error: false })
+            })
+            .catch(error => {
+              socket.publish(replyChannel, { result: error, error: true })
+            })
+        }
+      )
+    }
+  } else if (command === 'run') {
+    const script = runtime.argv._[1] || runtime.argv.script
+
+    if (!script) {
+      print(`Error must provide a script`)
+      process.exit(1)
+    }
+
+    const scriptPath = runtime.resolve(script)
+    const scriptContent = await runtime.fsx.readFileAsync(scriptPath).then(buf => buf.toString())
+
+    await socket.connect()
+
+    const messageId = runtime.hashObject({ cwd: runtime.cwd, scriptPath, scriptContent })
+
+    if (runtime.argv.term) {
+      socket.subscribe(`/socket-run/console/:messageId`, (messageId, e) => {
+        const { fn, args = [] } = e
+        console[fn](...args)
+      })
+    }
+
+    socket.subscribe(`/vm/run-code/response/${messageId}`, res => {
+      const { integrity } = res
+      runtime.fileManager.cache.get
+        .byDigest(integrity)
+        .then(buf => {
+          if (runtime.argv.pretty) {
+            try {
+              console.log(JSON.stringify(JSON.parse(buf.toString()), null, 2))
+            } catch (error) {
+              console.log(buf.toString())
+            }
+          } else {
+            console.log(buf.toString())
+          }
+        })
+        .then(() => {
+          socket.close()
+          process.exit(0)
+        })
+        .catch(e => process.exit(0))
+    })
+
+    socket.publish(`/vm/run-code`, {
+      messageId,
+      scriptPath,
+      ...runtime.argv,
+      ...(scriptContent.length < MAX_MESSAGE_LENGTH && { code: scriptContent }),
+    })
   }
 }
 
@@ -80,3 +150,70 @@ function displayHelp() {
 }
 
 main()
+
+async function runCode(options = {}) {
+  let { code = '' } = options
+  const { socket, refresh = false, scriptPath, term, messageId } = options
+
+  const cacheKey = runtime.hashObject({
+    code,
+    ...(refresh && { cacheBuster: Math.random() }),
+    scriptPath,
+    term,
+  })
+
+  if (scriptPath && (!code || !code.length)) {
+    const scriptExists = await runtime.fsx.existsAsync(scriptPath)
+
+    if (!scriptExists) {
+      throw new Error(`Could not find script at ${scriptPath}`)
+    }
+
+    code = await runtime.fsx.readFileAsync(scriptPath).then(buf => buf.toString())
+  }
+
+  const inCache = await runtime.fileManager.cache.get(cacheKey).catch(e => false)
+
+  if (inCache) {
+    runtime.debug('portfolio socket vm cache hit', {
+      cacheKey,
+      integrity: inCache.integrity,
+      code,
+    })
+
+    return {
+      cacheKey,
+      integrity: inCache.integrity,
+    }
+  } else {
+    runtime.debug('portfolio socket vm cache miss', {
+      cacheKey,
+      code,
+    })
+
+    let response
+
+    const context = options.context || {}
+
+    if (term) {
+      context.console = runtime.scriptRunner.mockConsole({}, (...args) => {
+        const fn = args.shift()
+        socket.publish(`/socket-run/console/${messageId}`, {
+          fn,
+          args,
+        })
+      })
+    }
+
+    response = await runtime.scriptRunner.runCode({
+      ...options,
+      messageId,
+      code,
+      context,
+    })
+
+    const result = runtime.lodash.cloneDeep(response.result)
+    const integrity = await runtime.fileManager.cache.put(cacheKey, JSON.stringify(result))
+    return { cacheKey, integrity }
+  }
+}
