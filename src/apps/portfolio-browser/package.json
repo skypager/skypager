@@ -1,6 +1,6 @@
 {
   "name": "@skypager/apps-portfolio-browser",
-  "version": "0.4.9",
+  "version": "0.4.10",
   "description": "an api and application for browsing a portfolio",
   "author": "Jon Soeder <jon@chicago.com>",
   "skypager": {
