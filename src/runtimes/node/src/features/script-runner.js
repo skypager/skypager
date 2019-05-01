@@ -6,6 +6,7 @@ export const featureMethods = [
   'findMatchingScripts',
   'runScriptById',
   'lazyCurrentModule',
+  'mockConsole',
 ]
 
 export const hostMethods = ['getCurrentModule']
@@ -71,7 +72,7 @@ export async function findMatchingScripts(options = {}) {
 
   const scriptMatcher = val => {
     const res = normalize(val).indexOf(scriptTag) >= 0
-    //console.log('testing ' + normalize(val) + ' against ' + scriptTag, res)
+    // console.log('testing ' + normalize(val) + ' against ' + scriptTag, res)
     return res
   }
 
@@ -102,7 +103,6 @@ export async function findScriptById(options = {}) {
   if (possibleMatches.length > 1) {
     return possibleMatches.sort(m => m.length)[0]
   } else if (possibleMatches.length === 0) {
-    return
   } else if (possibleMatches.length === 1) {
     const match = possibleMatches[0]
     return match
@@ -116,7 +116,9 @@ export async function runCode(options = {}) {
 
   const { scriptPath = 'code.js', code = '' } = options
 
-  return await doRun.call(this, createRunner.call(this, { code, scriptPath }))
+  const result = await doRun.call(this, createRunner.call(this, { code, scriptPath, ...options }))
+
+  return result
 }
 
 export async function runScriptAtPath(options = {}) {
@@ -185,59 +187,62 @@ export async function runPackageScript(options = {}) {
 }
 
 function createRunner(options = {}) {
-  const { runtime = this.runtime, scriptPath, code } = options
+  const { context = {}, runtime = this.runtime, scriptPath, code } = options
 
-  return runtime.createCodeRunner(code, runtime.argv, {
-    ...runtime.sandbox,
-    skypager: runtime,
-    ARGV: skypager.argv,
-    __filename: scriptPath,
-    __dirname: skypager.pathUtils.dirname(scriptPath),
+  return runtime.createCodeRunner(
+    code,
+    { ...runtime.argv, ...options },
+    {
+      ...runtime.sandbox,
+      skypager: runtime,
+      ARGV: skypager.argv,
+      __filename: scriptPath,
+      __dirname: skypager.pathUtils.dirname(scriptPath),
 
-    colors: skypager.cli.colors,
+      colors: skypager.cli.colors,
 
-    require: this.get('currentModule.require', process.mainModule.require),
+      require: this.get('currentModule.require', process.mainModule.require),
 
-    require: this.get('currentModule.require', process.mainModule.require),
+      process,
 
-    process,
-
-    print: (...args) => skypager.cli.print(...args),
-    clear: (...args) => skypager.cli.clear(...args),
-    randomBanner: (...args) => skypager.cli.randomBanner(...args),
-    banner: (...args) => skypager.cli.randomBanner(...args),
-    icon: (...args) => skypager.cli.icon(...args),
-    log: (...args) => console.log(...args),
-    select: (...args) => skypager.select(...args),
-    selectChain: (...args) => skypager.selectChain(...args),
-    get chain() {
-      return skypager.chain
-    },
-    get state() {
-      return skypager.currentState
-    },
-    get framework() {
-      return skypager.framework
-    },
-    get fs() {
-      return skypager.fsx
-    },
-    get fsm() {
-      return skypager.fsm
-    },
-    ...runtime.slice(
-      'pathUtils',
-      'lodash',
-      'stringUtils',
-      'urlUtils',
-      'proc',
-      'mobx',
-      'Helper',
-      'Runtime',
-      'selectors'
-    ),
-    console,
-  })
+      print: (...args) => skypager.cli.print(...args),
+      clear: (...args) => skypager.cli.clear(...args),
+      randomBanner: (...args) => skypager.cli.randomBanner(...args),
+      banner: (...args) => skypager.cli.randomBanner(...args),
+      icon: (...args) => skypager.cli.icon(...args),
+      log: (...args) => console.log(...args),
+      select: (...args) => skypager.select(...args),
+      selectChain: (...args) => skypager.selectChain(...args),
+      get chain() {
+        return skypager.chain
+      },
+      get state() {
+        return skypager.currentState
+      },
+      get framework() {
+        return skypager.framework
+      },
+      get fs() {
+        return skypager.fsx
+      },
+      get fsm() {
+        return skypager.fsm
+      },
+      ...runtime.slice(
+        'pathUtils',
+        'lodash',
+        'stringUtils',
+        'urlUtils',
+        'proc',
+        'mobx',
+        'Helper',
+        'Runtime',
+        'selectors'
+      ),
+      console,
+      ...context,
+    }
+  )
 }
 
 async function doRun(codeRunner) {
@@ -256,3 +261,48 @@ async function doRun(codeRunner) {
 
   return results
 }
+
+const consoleFunctions = [
+  'debug',
+  'error',
+  'info',
+  'log',
+  'warn',
+  'dir',
+  'dirxml',
+  'table',
+  'trace',
+  'group',
+  'groupCollapsed',
+  'groupEnd',
+  'clear',
+  'count',
+  'countReset',
+  'assert',
+  'markTimeline',
+  'profile',
+  'profileEnd',
+  'timeline',
+  'timelineEnd',
+  'time',
+  'timeEnd',
+  'timeStamp',
+  'context',
+  'memory',
+]
+
+export const mockConsole = (fns = {}, fn) =>
+  consoleFunctions.reduce(
+    (memo, name) => ({
+      ...memo,
+      [name]: (...args) => {
+        const relay = [name].concat(args)
+        if (typeof fn === 'function') {
+          Promise.resolve(fn(...relay))
+        } else {
+          return relay
+        }
+      },
+    }),
+    {}
+  )
