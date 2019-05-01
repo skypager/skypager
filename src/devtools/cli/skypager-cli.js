@@ -34,13 +34,13 @@ const scriptIsMissing = !existsSync(scriptPath)
 
 const runtimeArgs = []
 
-if (args.indexOf('--esm') !== -1) {
+if (args.indexOf('--esm') !== -1 || process.env.SKYPAGER_ESM) {
   runtimeArgs.push('--require')
   runtimeArgs.push('esm')
   args = args.filter(arg => arg !== '--esm')
 }
 
-if (args.indexOf('--babel') !== -1) {
+if (args.indexOf('--babel') !== -1 || process.env.SKYPAGER_BABEL) {
   runtimeArgs.push('--require')
   runtimeArgs.push('@babel/register')
   args = args.filter(arg => arg !== '--babel')
@@ -54,6 +54,11 @@ if (args.indexOf('--debug') !== -1) {
 if (args.indexOf('--inspect') !== -1) {
   runtimeArgs.push('--inspect')
   args = args.filter(arg => arg !== '--inspect')
+}
+
+if (args.indexOf('--global-sandbox') !== -1) {
+  runtimeArgs.push('--require')
+  runtimeArgs.push('@skypager/node/context.js')
 }
 
 if (scriptIsMissing) {

@@ -30,3 +30,4 @@ stats.json
 public/latest/*
 *.tgz
 meta/
+*.tmp.js
