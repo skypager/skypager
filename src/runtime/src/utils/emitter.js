@@ -1,4 +1,4 @@
-import Qbus from 'qbus'
+import Qbus from './qbus'
 
 function hide(target, property, value, configurable = true) {
   Object.defineProperty(target, property, {
