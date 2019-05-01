@@ -1,5 +1,6 @@
 import { Feature } from '@skypager/runtime'
 import IPC from 'crocket'
+import Qbus from '@skypager/runtime/lib/utils/qbus'
 
 const servers = new Map()
 
@@ -34,20 +35,26 @@ export default class Socket extends Feature {
   }
 
   unsubscribe(channel, fn) {
-    return this.ipc.off(channel, fn)
+    this.ipc.off(channel, fn)
+    return this
   }
 
   subscribe(channel, fn) {
-    return this.ipc.on(channel, fn)
+    this.ipc.on(channel, fn)
+    return this
   }
 
   subscribeOnce(channel, fn) {
-    const onceFn = (...args) => {
-      fn(...args)
-      this.ipc.off(channel, onceFn)
+    this.once(`/message/${channel}`, fn)
+
+    function temp(...args) {
+      this.emit(`/message/${channel}`, ...args)
+      this.ipc.off(channel, temp)
     }
 
-    return this.ipc.on(channel, onceFn)
+    this.ipc.on(channel, temp)
+
+    return this
   }
 
   ask(channel, payload, replyChannel = channel) {
@@ -61,20 +68,28 @@ export default class Socket extends Feature {
   }
 
   publish(channel, payload) {
-    return this.ipc.emit(channel, payload)
+    this.ipc.emit(channel, payload)
+    return this
   }
 
   async connect({ path = this.socketPath } = {}) {
     if (!this.runtime.fsx.existsSync(path)) {
-      throw new Error(`No socket exists at: ${path}`)
+      const error = new Error(`No socket exists at: ${path}`)
+      this.emit('error', error)
+      throw error
     }
 
     return new Promise((resolve, reject) => {
       this.ipc.connect({ path }, err => (err ? reject(err) : resolve(this)))
     }).then(ipc => {
+      this.emit('connected', this.ipc)
       this.state.set('connected', true)
-      return ipc
+      return this
     })
+  }
+
+  close() {
+    return this.stop()
   }
 
   async stop() {
@@ -183,6 +198,7 @@ export default class Socket extends Feature {
       this.ipc.listen({ path }, err => (err ? reject(err) : resolve(this)))
     }).then(me => {
       this.state.merge({ listening: true })
+      this.emit('listening', path)
       return me
     })
   }
@@ -207,7 +223,7 @@ export default class Socket extends Feature {
 
     const ipcServer = new IPC()
 
-    ipcServer.use(require('qbus'))
+    ipcServer.use(Qbus)
 
     servers.set(this.serverId, ipcServer)
 

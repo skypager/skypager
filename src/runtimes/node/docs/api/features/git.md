@@ -1,3 +1,21 @@
+## Classes
+
+<dl>
+<dt><a href="#GitFeature">GitFeature</a></dt>
+<dd><p>The Git Feature provides an interface for real time status about the git tree,
+including all of the files and their current status, as well as information about the current branch,
+sha, tag, etc.</p>
+</dd>
+</dl>
+
+## Functions
+
+<dl>
+<dt><a href="#modifiedSince">modifiedSince(tagOrCommitSha, cwd)</a></dt>
+<dd><p>Returns the files that have changed since the last commit sha.</p>
+</dd>
+</dl>
+
 <a name="GitFeature"></a>
 
 ## GitFeature
@@ -167,4 +185,15 @@ Run git ls-files to get a list of files in the tree
 ### GitFeature.findRepo() ⇒ <code>String</code>
 Find the nearest git repo by walking up the tree from cwd
 
-**Kind**: static method of [<code>GitFeature</code>](#GitFeature)
+**Kind**: static method of [<code>GitFeature</code>](#GitFeature)  
+<a name="modifiedSince"></a>
+
+## modifiedSince(tagOrCommitSha, cwd)
+Returns the files that have changed since the last commit sha.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| tagOrCommitSha | <code>String</code> | tag or commit sha, pass true to use latest tag |
+| cwd | <code>String</code> | subdirectory, defaults to . |
