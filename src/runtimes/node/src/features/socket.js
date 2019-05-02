@@ -13,6 +13,32 @@ export default class Socket extends Feature {
     connected: false,
   }
 
+  get isClient() {
+    return !this.ipc.isServer
+  }
+
+  get isServer() {
+    return this.ipc.isServer
+  }
+
+  get isConnected() {
+    return this.isClient && this.currentState.connected
+  }
+
+  get isListening() {
+    return this.isServer && this.currentState.listening
+  }
+
+  async featureWasEnabled(options = {}) {
+    const { autoConnect, connect = autoConnect, listen } = options
+
+    if (connect) {
+      await this.connect(options)
+    } else if (listen) {
+      await this.listen(options)
+    }
+  }
+
   get status() {
     const { isFunction } = this.lodash
     const { status } = this.featureSettings || this.options
@@ -45,11 +71,20 @@ export default class Socket extends Feature {
   }
 
   subscribeOnce(channel, fn) {
-    this.once(`/message/${channel}`, fn)
+    this.askId = this.askId || 0
+    this.askId = this.askId + 1
+
+    const id = this.askId
+
+    this.once(`message:${channel}-${id}`, (...args) => {
+      fn(...args)
+    })
+
+    const socket = this
 
     function temp(...args) {
-      this.emit(`/message/${channel}`, ...args)
-      this.ipc.off(channel, temp)
+      socket.emit(`message:${channel}-${id}`, ...args)
+      socket.ipc.off(channel, temp)
     }
 
     this.ipc.on(channel, temp)
@@ -59,9 +94,32 @@ export default class Socket extends Feature {
 
   ask(channel, payload, replyChannel = channel) {
     return new Promise((resolve, reject) => {
-      this.subscribeOnce(replyChannel, resp => {
-        resolve(resp)
+      const res = resp => {
+        try {
+          console.log('resolving', resp)
+          resolve(resp)
+        } catch (error) {
+          return
+        }
+
+        console.log('resolver')
+
+        if (resp.error) {
+          if (typeof resp.error === 'string') {
+            reject(new Error(resp.error))
+          } else if (resp.error.message || resp.errorMessage) {
+            reject(new Error(resp.error))
+          }
+        }
+
+        this.unsubscribe(res)
+      }
+
+      this.subscribe(replyChannel, () => {
+        console.log('got a reply')
       })
+
+      this.subscribeOnce(replyChannel, res)
 
       this.publish(channel, payload)
     })
@@ -70,6 +128,14 @@ export default class Socket extends Feature {
   publish(channel, payload) {
     this.ipc.emit(channel, payload)
     return this
+  }
+
+  checkStatus() {
+    if (this.ipc.isServer) {
+      return this.ping()
+    } else {
+      return this.ask('/check-status', {}, '/ping')
+    }
   }
 
   async connect({ path = this.socketPath } = {}) {
@@ -108,7 +174,10 @@ export default class Socket extends Feature {
       return this
     }
 
-    const statusHandler = payload => this.ping({ ...payload, ...metadata })
+    const statusHandler = payload => {
+      console.log('received status request', payload)
+      this.ping({ ...payload, ...metadata })
+    }
 
     this.subscribe('/check-status', statusHandler)
 
@@ -161,14 +230,15 @@ export default class Socket extends Feature {
     return response
   }
 
-  async ping(metadata = {}) {
+  ping(metadata = {}, replyChannel = '/ping') {
     const update = {
       ...metadata,
+      argv: this.runtime.argv,
       ...this.status,
     }
 
     this.emit('ping', update)
-    this.publish('/ping', update)
+    this.publish(replyChannel, update)
   }
 
   async listen({

@@ -18,6 +18,8 @@ $ yarn add @skypager/cli --save
 - **console** starts an interactive console using the [Skypager REPL Helper](../../helpers/repl)
 - **start-and-test** starts a server and runs a test command
 - **serve** starts a skypager server in the project
+- **run-all** runs multiple package.json scripts, supports monorepos
+- **socket** starts a skypager/node process with an ipc socket listener, once started can run scripts
 
 If you have [Skypager Webpack Utilities](../webpack) installed, you will get the following commands:
 

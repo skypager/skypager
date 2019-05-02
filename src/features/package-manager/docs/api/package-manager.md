@@ -26,7 +26,7 @@
 <dt><a href="#findByName">findByName(name)</a></dt>
 <dd><p>Finds a package by its name</p>
 </dd>
-<dt><a href="#findDependentsOf">findDependentsOf(packageName)</a> ⇒ <code>Object.&lt;String, PackageManifest&gt;</code></dt>
+<dt><a href="#findDependentsOf">findDependentsOf(packageName, options)</a> ⇒ <code>Object.&lt;String, PackageManifest&gt;</code> | <code>Array.&lt;String&gt;</code></dt>
 <dd><p>Find all dependents of a given package</p>
 </dd>
 <dt><a href="#pickAllBy">pickAllBy(pickBy)</a> ⇒ <code>Array.&lt;Object&gt;</code></dt>
@@ -40,6 +40,9 @@
 </dd>
 <dt><a href="#pickAllRemotes">pickAllRemotes(...attributes)</a> ⇒ <code>Array.&lt;Object&gt;</code></dt>
 <dd><p>For every package in the project, run the lodash pick function to get arbitrary attributes</p>
+</dd>
+<dt><a href="#showLastModified">showLastModified(options)</a></dt>
+<dd><p>Returns an index of all of the package names and their last modified timestamps</p>
 </dd>
 <dt><a href="#listPackageContents">listPackageContents(packageName, options)</a></dt>
 <dd><p>Uses npm-packlist to tell us everything in a project that will be published to npm</p>
@@ -90,7 +93,7 @@ The PackageManager is a database that contains all of the package.json files fou
     * [.findNodeModules([options])](#PackageManager.findNodeModules) ⇒ <code>Promise.&lt;Array.&lt;PackageManifest&gt;&gt;</code>
     * [.selectPackageTree([options])](#PackageManager.selectPackageTree) ⇒ <code>Array.&lt;{name: string, tree: array, manifest: PackageManifest}&gt;</code>
     * [.exportGraph([options])](#PackageManager.exportGraph) ⇒ [<code>PackageGraph</code>](#PackageGraph)
-    * [.selectModifiedPackages([options])](#PackageManager.selectModifiedPackages) ⇒ <code>Promise.&lt;Array&gt;</code>
+    * [.selectModifiedPackages([options], [dependents])](#PackageManager.selectModifiedPackages) ⇒ <code>Promise.&lt;Array&gt;</code>
     * [.createSnapshot([options])](#PackageManager.createSnapshot) ⇒ [<code>PackageManagerSnapshot</code>](#PackageManagerSnapshot)
     * [.calculatePackageHash(packageName, options)](#PackageManager.calculatePackageHash) ⇒ <code>String</code> \| <code>Object</code>
 
@@ -175,9 +178,4 @@ Returns an object of every remote package manifest keyed by name
 ### PackageManager.packagesAhead
 Returns the packages where the version in the local tree isn't published to npm
 
-**Kind**: static property of [<code>PackageManager</code>](#PackageManager)  
-**Read only**: true  
-<a name="PackageManager.unpublished"></a>
-
-### PackageManager.unpublished
-Returns the packages who have a version number that doesn't exist in the npm
+**Kind**: static property o
