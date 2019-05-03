@@ -96,27 +96,45 @@ async function main() {
       })
     }
 
-    socket.subscribe(`/vm/run-code/response/${messageId}`, res => {
-      const { integrity } = res
-      runtime.fileManager.cache.get
-        .byDigest(integrity)
-        .then(buf => {
-          if (runtime.argv.pretty) {
-            try {
-              console.log(JSON.stringify(JSON.parse(buf.toString()), null, 2))
-            } catch (error) {
+    // since the socket has a max message length of 4kb
+    // by default we use a file based cache to store the responses
+    // and the socket just passes an integrity key we can use to look that value up
+    if (runtime.argv.vmCache === false || runtime.argv.noVmCache) {
+      socket.subscribe(`/vm/run-code/response/${messageId}`, res => {
+        const { error, result } = res
+
+        if (error) {
+          console.error(`Error running code`)
+          console.error(result)
+          process.exit(1)
+        } else {
+          !runtime.argv.term && console.log(result)
+          process.exit(0)
+        }
+      })
+    } else {
+      socket.subscribe(`/vm/run-code/response/${messageId}`, res => {
+        const { integrity } = res
+        runtime.fileManager.cache.get
+          .byDigest(integrity)
+          .then(buf => {
+            if (runtime.argv.pretty) {
+              try {
+                console.log(JSON.stringify(JSON.parse(buf.toString()), null, 2))
+              } catch (error) {
+                console.log(buf.toString())
+              }
+            } else {
               console.log(buf.toString())
             }
-          } else {
-            console.log(buf.toString())
-          }
-        })
-        .then(() => {
-          socket.close()
-          process.exit(0)
-        })
-        .catch(e => process.exit(0))
-    })
+          })
+          .then(() => {
+            socket.close()
+            process.exit(0)
+          })
+          .catch(e => process.exit(0))
+      })
+    }
 
     socket.publish(`/vm/run-code`, {
       messageId,
