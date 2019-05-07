@@ -36,13 +36,13 @@ const runtimeArgs = []
 
 if (args.indexOf('--esm') !== -1 || process.env.SKYPAGER_ESM) {
   runtimeArgs.push('--require')
-  runtimeArgs.push('esm')
+  runtimeArgs.push(require.resolve('esm'))
   args = args.filter(arg => arg !== '--esm')
 }
 
 if (args.indexOf('--babel') !== -1 || process.env.SKYPAGER_BABEL) {
   runtimeArgs.push('--require')
-  runtimeArgs.push('@babel/register')
+  runtimeArgs.push(require.resolve('@babel/register'))
   args = args.filter(arg => arg !== '--babel')
 }
 

@@ -23,6 +23,8 @@
   "dependencies": {
     "@skypager/helpers-server": "^0.4.2",
     "@skypager/helpers-sheet": "^0.4.2",
+    "get-ip-range": "^1.1.7",
+    "node-nmap": "^4.0.0",
     "prop-types": "^15.6.2",
     "react": "^16.5.2",
     "react-dom": "^16.5.2",

@@ -3807,6 +3807,11 @@ ci-info@^2.0.0:
   resolved "https://registry.yarnpkg.com/ci-info/-/ci-info-2.0.0.tgz#67a9e964be31a51e15e5010d58e6f12834002f46"
   integrity sha512-5tK7EtrZ0N+OLFMthtqOj4fI2Jeb88C4CAZPu25LDVUgXJ0A3Js4PMGqrn0JU1W0Mh1/Z8wZzYPxqUrXeBboCQ==
 
+cidr-regex@^1.0.7:
+  version "1.0.7"
+  resolved "https://registry.yarnpkg.com/cidr-regex/-/cidr-regex-1.0.7.tgz#3782fefb79c81d7d330690cde31a0fe3445fd39b"
+  integrity sha1-N4L++3nIHX0zBpDN4xoP40Rf05s=
+
 cipher-base@^1.0.0, cipher-base@^1.0.1, cipher-base@^1.0.3:
   version "1.0.4"
   resolved "https://registry.yarnpkg.com/cipher-base/-/cipher-base-1.0.4.tgz#8760e4ecc272f4c363532f926d874aae2c1397de"
@@ -6648,6 +6653,14 @@ get-func-name@^2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/get-func-name/-/get-func-name-2.0.0.tgz#ead774abee72e20409433a066366023dd6887a41"
   integrity sha1-6td0q+5y4gQJQzoGY2YCPdaIekE=
+
+get-ip-range@^1.1.7:
+  version "1.1.7"
+  resolved "https://registry.yarnpkg.com/get-ip-range/-/get-ip-range-1.1.7.tgz#ae745117375ea4bbf1f19eb7b5767e2482468879"
+  integrity sha512-cKtc+s5yaxja1kEPS+pa/jM9JKV6tjzKdRv0vH2E3x1YNoqFdvL6fnFjiKH0o3DWBTwP5/7z8GQUGFQ1hES6bQ==
+  dependencies:
+    cidr-regex "^1.0.7"
+    ip "^1.1.5"
 
 get-own-enumerable-property-symbols@^3.0.0:
   version "3.0.0"
@@ -10218,6 +10231,14 @@ node-modules-regexp@^1.0.0:
   resolved "https://registry.yarnpkg.com/node-modules-regexp/-/node-modules-regexp-1.0.0.tgz#8d9dbe28964a4ac5712e9131642107c71e90ec40"
   integrity sha1-jZ2+KJZKSsVxLpExZCEHxx6Q7EA=
 
+node-nmap@^4.0.0:
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/node-nmap/-/node-nmap-4.0.0.tgz#4ba4a202016946c33cd20d5727d7b93d3d219b4f"
+  integrity sha512-VJGebpYsfqmUm46+Fq0qp1Y9VXGXZ7/WL03tHGy1oJHHxaJ2DvYLMjuYWYHDV0pgUL+e5/9rCN/QEsx3+fU9TA==
+  dependencies:
+    queued-up "^2.0.2"
+    xml2js "^0.4.15"
+
 node-pre-gyp@^0.10.0:
   version "0.10.3"
   resolved "https://registry.yarnpkg.com/node-pre-gyp/-/node-pre-gyp-0.10.3.tgz#3070040716afdc778747b61b6887bf78880b80fc"
@@ -11749,10 +11770,10 @@ punycode@^2.1.0, punycode@^2.1.1:
   resolved "https://registry.yarnpkg.com/punycode/-/punycode-2.1.1.tgz#b58b010ac40c22c5657616c8d2c2c02c7bf479ec"
   integrity sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==
 
-puppeteer@^1.9.0:
-  version "1.13.0"
-  resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-1.13.0.tgz#187ccf5ed5caf08ed1291b262d033cc364bf88ab"
-  integrity sha512-LUXgvhjfB/P6IOUDAKxOcbCz9ISwBLL9UpKghYrcBDwrOGx1m60y0iN2M64mdAUbT4+7oZM5DTxOW7equa2fxQ==
+puppeteer@^1.15.0:
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/puppeteer/-/puppeteer-1.15.0.tgz#1680fac13e51f609143149a5b7fa99eec392b34f"
+  integrity sha512-D2y5kwA9SsYkNUmcBzu9WZ4V1SGHiQTmgvDZSx6sRYFsgV25IebL4V6FaHjF6MbwLK9C6f3G3pmck9qmwM8H3w==
   dependencies:
     debug "^4.1.0"
     extract-zip "^1.6.6"
@@ -11810,6 +11831,11 @@ querystringify@^2.0.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/querystringify/-/querystringify-2.1.0.tgz#7ded8dfbf7879dcc60d0a644ac6754b283ad17ef"
   integrity sha512-sluvZZ1YiTLD5jsqZcDmFyV2EwToyXZBfpoVOmktMmW+VEnhgakFHnasVph65fOjGPTWN0Nw3+XQaSeMayr0kg==
+
+queued-up@^2.0.2:
+  version "2.0.2"
+  resolved "https://registry.yarnpkg.com/queued-up/-/queued-up-2.0.2.tgz#1229dda95a96848fc432eca6b10ed86f55cd1686"
+  integrity sha1-EindqVqWhI/EMuymsQ7Yb1XNFoY=
 
 quick-lru@^1.0.0:
   version "1.1.0"
@@ -15331,7 +15357,7 @@ xml-name-validator@^3.0.0:
   resolved "https://registry.yarnpkg.com/xml-name-validator/-/xml-name-validator-3.0.0.tgz#6ae73e06de4d8c6e47f9fb181f78d648ad457c6a"
   integrity sha512-A5CUptxDsvxKJEU3yO6DuWBSJz/qizqzJKOMIfUJHETbBw/sFaDxgd6fxm1ewUaM0jZ444Fc5vC5ROYurg/4Pw==
 
-xml2js@~0.4.0:
+xml2js@^0.4.15, xml2js@~0.4.0:
   version "0.4.19"
   resolved "https://registry.yarnpkg.com/xml2js/-/xml2js-0.4.19.tgz#686c20f213209e94abf0d1bcf1efaa291c7827a7"
   integrity sha512-esZnJZJOiJR9wWKMyuvSE1y6Dq5LCuJanqhxslH2bxM6duahNZ+HMpCLhBQGZkbX6xRf8x1Y2eJlgt2q3qo49Q==

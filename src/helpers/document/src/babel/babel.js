@@ -18,6 +18,8 @@ export class Babel extends Helper {
   // each instance of a page has observable state
   static isObservable = true
 
+  static allowAnonymousProviders = true
+
   initialize() {
     this.lazy('lines', () => this.content.split('\n'))
   }
@@ -26,10 +28,11 @@ export class Babel extends Helper {
    * using the babel config
    */
   async parse(options = {}) {
-    if (this.transpiled && !options.refresh && !options.fresh) {
-      return this.transpiled
+    if (this.parsedAst && !options.refresh && !options.fresh) {
+      return this.parsedAst
     }
 
+    const parserFn = this.tryGet('parser', this.context.reg.parser || core.parse)
     const { content = this.content, cache = true } = options
 
     options = {
@@ -42,9 +45,11 @@ export class Babel extends Helper {
     const babelOptions =
       typeof options.babel === 'object' ? options.babel : { presetEnv: { modules: 'auto' } }
 
-    const babelConfig = options.babelConfig || require('./babel-config')(babelOptions)
-    const transpiled = await new Promise((resolve, reject) => {
-      core.parse(content, omit(babelConfig, 'ignore', 'env'), (err, result) => {
+    const babelConfig =
+      options.babelConfig || this.context.reg.babelConfig || require('./babel-config')(babelOptions)
+
+    const parsedAst = await new Promise((resolve, reject) => {
+      parserFn(content, omit(babelConfig, 'ignore', 'env'), (err, result) => {
         err ? reject(err) : resolve(result)
       })
     }).catch(error => {
@@ -54,14 +59,14 @@ export class Babel extends Helper {
     })
 
     if (cache !== false) {
-      this.hide('transpiled', transpiled)
+      this.hide('parsedAst', parsedAst)
     }
 
-    return transpiled
+    return parsedAst
   }
 
   /**
-   * Given an ast and optional code snippet for a source map, produce transpiled babel code
+   * Given an ast and optional code snippet for a source map, produce parsedAst babel code
    *
    * @param {Object} options - the options
    * @param {Object} options.babel - options to be passed to the babel config generator (presetEnv)
@@ -160,6 +165,56 @@ export class Babel extends Helper {
     })
 
     return matches
+  }
+
+  /**
+   * Given two location objects { start: { line, column }, end: { line, column } }
+   * or a single node with a loc.property that has start and end Position objects,
+   * returns an object with a toString() method that will return the source for that node
+   */
+  extractSourceFromLocations(begin, end) {
+    const { clone, isUndefined, get } = this.lodash
+
+    if (begin && begin.loc && begin.loc.start && begin.loc.end && !end) {
+      end = begin.loc
+      begin = begin.loc
+    }
+
+    const isValid = node =>
+      !isUndefined(get(node, 'start.line')) && !isUndefined(get(node, 'end.line'))
+
+    if (!isValid(begin) || !isValid(end)) {
+      throw new Error(
+        'Must pass two valid location objects. start.line start.column end.line end.column'
+      )
+    }
+
+    const beginLine = begin.start.line
+    const beginColumn = begin.start.column
+    const endLine = end.end.line
+    const endColumn = end.end.column
+
+    let extractedLines = clone(this.lines.slice(beginLine - 1, endLine))
+
+    if (extractedLines.length > 1) {
+      extractedLines[0] = String(extractedLines[0]).slice(beginColumn)
+      extractedLines[extractedLines.length - 1] = String(
+        extractedLines[extractedLines.length - 1]
+      ).slice(0, endColumn)
+    } else {
+      extractedLines[0] = String(extractedLines[0]).slice(beginColumn, endColumn)
+    }
+
+    return {
+      begin,
+      end,
+      extractedLines,
+      beginLine,
+      endLine,
+      beginColumn,
+      endColumn,
+      toString: () => extractedLines.join('\n'),
+    }
   }
 
   /**
@@ -266,14 +321,14 @@ export class Babel extends Helper {
    */
   get ast() {
     this.ensureState()
-    return this.transpiled
+    return this.parsedAst
   }
 
   /**
    * Replaces the current AST with a new one
    */
   set ast(value) {
-    this.hide('transpiled', value)
+    this.hide('parsedAst', value)
   }
 
   /**
@@ -293,9 +348,14 @@ export class Babel extends Helper {
   }
 
   /**
-   * The file content of the script
+   * The file content of the script.  May include wrapper content if the script helper instance or the scripts registry has a wrapContent function
    */
   get content() {
+    const wrapper = this.tryGet('wrapper', this.context.reg.wrapContent) || this.lodash.identity
+    return wrapper(this.unwrappedContent, this)
+  }
+
+  get unwrappedContent() {
     return String(this.tryGet('content', ''))
   }
 
@@ -446,7 +506,7 @@ export class Babel extends Helper {
   }
 
   ensureState() {
-    if (!this.transpiled) {
+    if (!this.parsedAst) {
       throw new Error('Must call parse() first')
     }
 
