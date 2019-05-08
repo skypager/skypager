@@ -362,7 +362,7 @@ export class Babel extends Helper {
   }
 
   get unwrappedContent() {
-    return String(this.tryGet('content', ''))
+    return this.options.content || this.provider.content
   }
 
   /**

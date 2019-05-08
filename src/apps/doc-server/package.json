@@ -7,7 +7,7 @@
   "browser": "lib/skypager-helpers-document.min.js",
   "react-native": "lib/index.js",
   "scripts": {
-    "start": "node ./start.js --log-level debug --cors"
+    "start": "NODE_ENV=production NO_CLEAR=true node ./start.js --log-level debug --cors"
   },
   "publishConfig": {
     "access": "public"
