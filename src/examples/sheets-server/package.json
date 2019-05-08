@@ -1,6 +1,6 @@
 {
   "name": "@skypager/sheets-server",
-  "version": "0.4.11",
+  "version": "0.4.12",
   "description": "a google sheets api server",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
@@ -20,11 +20,11 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@skypager/cli": "^0.4.11",
+    "@skypager/cli": "^0.4.12",
     "@skypager/helpers-server": "^0.4.2",
     "@skypager/helpers-sheet": "^0.4.2",
-    "@skypager/node": "^0.4.11",
-    "@skypager/web": "^0.4.11",
+    "@skypager/node": "^0.4.12",
+    "@skypager/web": "^0.4.12",
     "@skypager/webpack": "^0.4.0",
     "prop-types": "^15.6.2",
     "react": "^16.5.2",
