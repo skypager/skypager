@@ -1,0 +1,34 @@
+{
+  "name": "@skypager/doc-server",
+  "version": "0.4.2",
+  "description": "skypager document helper",
+  "author": "Jon Soeder <jon@chicago.com>",
+  "main": "lib/index.js",
+  "browser": "lib/skypager-helpers-document.min.js",
+  "react-native": "lib/index.js",
+  "scripts": {
+    "start": "node ./start.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "dependencies": {
+      "@skypager/node": "^0.4.11",
+      "@skypager/helpers-document": "^0.4.11"
+  },
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/skypager/skypager"
+  },
+  "homepage": "https://skypager.io",
+  "gitHead": "ae542b32070401f678270edbfc9ee6f44811c282",
+  "keywords": [],
+  "contributors": [],
+  "skypager": {
+    "category": "helpers",
+    "providesScripts": [
+      "generate-api-docs"
+    ]
+  }
+}
