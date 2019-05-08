@@ -26,7 +26,6 @@
     "@babel/template": "^7.1.2",
     "@babel/traverse": "^7.1.5",
     "@babel/types": "^7.1.5",
-    "@mdx-js/loader": "^0.14.0",
     "@mdx-js/mdx": "^0.14.0",
     "@mdx-js/mdxast": "^0.10.0",
     "@mdx-js/tag": "^0.14.0",

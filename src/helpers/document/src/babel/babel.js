@@ -347,6 +347,10 @@ export class Babel extends Helper {
     return get(this, 'ast.program.body', [])
   }
 
+  get bodyNodeTypes() {
+    return this.body.map(node => node.type)
+  }
+
   /**
    * The file content of the script.  May include wrapper content if the script helper instance or the scripts registry has a wrapContent function
    */
@@ -461,6 +465,96 @@ export class Babel extends Helper {
     })
 
     return flatten(names).filter(Boolean)
+  }
+
+  async createVMRunner(options = {}) {
+    const { runtime } = this
+    const { filename = runtime.resolve(`${this.name}.js`.replace('.js.js', '.js')) } = options
+
+    const instructions = await this.createVMInstructions({
+      transpile: true,
+      ...options,
+      filename,
+    })
+
+    return runtime.feature('vm-runner', {
+      ...options,
+      filename,
+      ...instructions,
+    })
+  }
+
+  async createVMInstructions(options = {}) {
+    this.ensureState()
+
+    const { runnableTypes = ['VariableDeclaration', 'ExpressionStatement'] } = options
+
+    const script = this
+    const { content } = this
+    const { get, flatten, uniq } = this.lodash
+
+    const decl = node =>
+      node.type === 'ImportDeclaration'
+        ? get(node, 'specifiers', [])
+            .map(spec => get(spec, 'local.name'))
+            .filter(v => v && v.length)
+        : get(node, 'declarations', [])
+            .map(dec => get(dec, 'id.name'))
+            .concat([get(node, 'id.type') === 'Identifier' && get(node, 'id.name')])
+            .filter(id => id && id.length)
+
+    const isInspectable = ({ type }) => runnableTypes.indexOf(type) > -1
+
+    const identifiers = uniq(flatten(this.body.map(decl))).filter(v => v && v.length)
+
+    const accessors = importNode =>
+      importNode.specifiers.map(spec =>
+        spec.type === 'ImportDefaultSpecifier' ? ['default'] : [spec.local.name]
+      )
+
+    const instructions = {
+      content,
+      identifiers,
+      parsed: this.body.map((node, i) => ({
+        type: node.type,
+        index: i,
+        identifiers: decl(node),
+        ...(node.type === 'ImportDeclaration' && { accessors: accessors(node) }),
+        inspectable: isInspectable(node),
+        statement: script.extractSourceFromLocations(node).toString(),
+        position: node.loc,
+        id: `${i}:${node.loc.start.line}:${node.loc.start.column}:${node.loc.end.line}:${
+          node.loc.end.column
+        }`,
+      })),
+    }
+
+    if (options.transpile) {
+      const babelConfig = this.getBabelConfig(options)
+
+      await Promise.all(
+        instructions.parsed.map(p =>
+          core
+            .transformAsync(p.statement, babelConfig)
+            .then(result => (p.transpiled = String(result.code).replace('"use strict";\n\n', '')))
+        )
+      )
+    }
+
+    return {
+      ...instructions,
+      parsed: instructions.parsed.map(i => ({
+        ...i,
+        ...(options.transpile !== false &&
+          i.type === 'ImportDeclaration' && {
+            varName: String(i.transpiled || i.statement)
+              .split('=')[0]
+              .replace(/^var\s/, '')
+              .trim(),
+          }),
+        transpiled: i.transpiled || i.statement,
+      })),
+    }
   }
 
   /**
