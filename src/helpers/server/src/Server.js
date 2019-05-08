@@ -241,6 +241,7 @@ export class Server extends Helper {
     }
 
     if (cors) {
+      this.runtime.debug('Enabling CORS', { cors })
       setupCors.call(this, app, cors)
     }
 

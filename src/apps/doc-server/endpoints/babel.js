@@ -1,0 +1,38 @@
+module.exports = function(app) {
+  const { runtime } = this
+
+  app.post('/vm', async (req, res) => {
+    const { content, name } = req.body
+    const script = runtime.script(name, {
+      name: String(name),
+      content: String(content),
+    })
+
+    try {
+      await script.parse()
+    } catch (error) {
+      runtime.error('Error parsing script', error)
+      res
+        .status(500)
+        .json({ error: 'Error parsing script', message: error.message, stack: error.stack })
+      return
+    }
+
+    try {
+      const instructions = await script.createVMInstructions({ transpile: !!req.body.transpile })
+
+      res.status(200).json({
+        instructions,
+        content: script.content,
+        provider: script.provider,
+        options: script.options,
+        name,
+      })
+    } catch (error) {
+      runtime.error('Error generating VM Instructions', error)
+      res.status(500).json({ error: 'Error generating VM Instructions', message: error.message })
+    }
+  })
+
+  return app
+}
