@@ -2,6 +2,7 @@
   "name": "@skypager/helpers-document",
   "version": "0.4.13",
   "description": "skypager document helper",
+  "keywords": ["babel","ast","mdx"],
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
   "browser": "lib/skypager-helpers-document.min.js",
