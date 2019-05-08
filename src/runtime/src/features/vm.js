@@ -137,11 +137,12 @@ export function createModule(code, options = {}, sandbox) {
   const dirname = options.dirname || this.cwd || '/'
 
   const req = options.require || this.get('currentModule.require')
+  const parent = options.parent || this.get('currentModule')
 
   const newModule = {
     id,
     children: [],
-    parent: this.get('currentModule'),
+    parent,
     require: req,
     exports: {},
     loaded: false,
@@ -153,11 +154,16 @@ export function createModule(code, options = {}, sandbox) {
     script.runInContext(context)(newModule.exports, newModule.require, newModule, filename, dirname)
 
   if (options.lazy) {
-    return moduleLoader
+    return () => {
+      const mod = moduleLoader()
+      mod.loaded = true
+      mod.parent = parent
+      return mod
+    }
   } else {
     moduleLoader()
     newModule.loaded = true
-    newModule.parent = this.get('currentModule') || {}
+    newModule.parent = parent
     return newModule
   }
 }
