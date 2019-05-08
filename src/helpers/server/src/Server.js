@@ -223,8 +223,8 @@ export class Server extends Helper {
     } = options
 
     let {
-      cors = this.result('cors'),
-      pretty = this.result('pretty') ||
+      cors = this.tryResult('cors'),
+      pretty = this.tryResult('pretty') ||
         this.tryResult('pretty', () => process.env.NODE_ENV !== 'production'),
     } = options
 

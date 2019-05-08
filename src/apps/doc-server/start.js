@@ -1,7 +1,8 @@
-const runtime = require('@skypager/node').use(require('..'))
+const runtime = require('@skypager/node').use(require('@skypager/helpers-document'))
 const bodyParser = require('body-parser')
 
 const AppServer = {
+  cors: true,
   appWillMount(app) {
     app.use(bodyParser.json())
     app.post('/vm', async (req, res) => {
@@ -30,6 +31,7 @@ runtime.servers.add({
 async function main() {
   const server = runtime.server('app', {
     port: 3000,
+    cors: true,
   })
 
   await server.start()

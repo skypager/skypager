@@ -355,8 +355,10 @@ export class Babel extends Helper {
    * The file content of the script.  May include wrapper content if the script helper instance or the scripts registry has a wrapContent function
    */
   get content() {
-    const wrapper = this.tryGet('wrapper', this.context.reg.wrapContent) || this.lodash.identity
-    return wrapper(this.unwrappedContent, this)
+    const wrapper = this.tryGet('wrapper', this.context.reg.wrapContent)
+    return typeof wrapper === 'function'
+      ? wrapper(this.unwrappedContent, this)
+      : this.unwrappedContent
   }
 
   get unwrappedContent() {
