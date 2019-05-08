@@ -1,8 +1,8 @@
 {
   "name": "@skypager/helpers-document",
-  "version": "0.4.13",
+  "version": "0.4.14",
   "description": "skypager document helper",
-  "keywords": ["babel","ast","mdx"],
+  "keywords": [],
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
   "browser": "lib/skypager-helpers-document.min.js",
@@ -50,7 +50,6 @@
   },
   "homepage": "https://skypager.io",
   "gitHead": "ae542b32070401f678270edbfc9ee6f44811c282",
-  "keywords": [],
   "contributors": [],
   "skypager": {
     "category": "helpers",

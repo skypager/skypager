@@ -1,6 +1,6 @@
 {
   "name": "@skypager/doc-server",
-  "version": "0.4.13",
+  "version": "0.4.14",
   "description": "skypager document helper",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
@@ -14,8 +14,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@skypager/helpers-document": "^0.4.13",
-    "@skypager/node": "^0.4.13",
+    "@skypager/helpers-document": "^0.4.14",
+    "@skypager/node": "^0.4.14",
     "@skypager/webpack": "^0.4.0"
   },
   "repository": {

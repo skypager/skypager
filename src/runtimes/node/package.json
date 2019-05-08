@@ -1,6 +1,6 @@
 {
   "name": "@skypager/node",
-  "version": "0.4.13",
+  "version": "0.4.14",
   "description": "the skypager node runtime",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
@@ -21,7 +21,7 @@
     "@skypager/features-package-manager": "^0.4.10",
     "@skypager/helpers-client": "^0.4.0",
     "@skypager/helpers-repl": "^0.4.11",
-    "@skypager/helpers-server": "^0.4.13",
+    "@skypager/helpers-server": "^0.4.14",
     "@skypager/runtime": "^0.4.12",
     "bluebird": "^3.5.0",
     "child-process-promise": "^2.2.1",
@@ -53,6 +53,8 @@
     "category": "runtimes"
   },
   "gitHead": "3afe91f6ff7fd3bff7fe47a351619d5281155cd9",
-  "keywords": ["skypager-runtimes"],
+  "keywords": [
+    "skypager-runtimes"
+  ],
   "contributors": []
 }

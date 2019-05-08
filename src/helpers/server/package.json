@@ -1,6 +1,6 @@
 {
   "name": "@skypager/helpers-server",
-  "version": "0.4.13",
+  "version": "0.4.14",
   "description": "skypager server helper",
   "author": "Jon Soeder <jon@chicago.com>",
   "publishConfig": {
@@ -39,6 +39,9 @@
   },
   "homepage": "https://skypager.io",
   "gitHead": "ae542b32070401f678270edbfc9ee6f44811c282",
-  "keywords": ["skypager-helpers", "skypager-node"],
+  "keywords": [
+    "skypager-helpers",
+    "skypager-node"
+  ],
   "contributors": []
 }
