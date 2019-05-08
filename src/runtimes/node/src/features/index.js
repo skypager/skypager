@@ -16,6 +16,7 @@ import * as packageFinder from './package-finder.js'
 import * as scriptRunner from './script-runner.js'
 import * as skywalker from './skywalker.js'
 import * as socket from './socket.js'
+import * as moduleFactory from './module-factory.js'
 
 export function attach(runtime) {
   // runtime.features.register('auto-discovery', () => autoDiscovery)
@@ -36,4 +37,5 @@ export function attach(runtime) {
   runtime.features.register('script-runner', () => scriptRunner)
   runtime.features.register('skywalker', () => skywalker)
   runtime.features.register('socket', () => socket)
+  runtime.features.register('module-factory', () => moduleFactory)
 }
