@@ -65,7 +65,10 @@ module.exports = function getFlags(currentProject, isEnvProduction) {
   // Some apps do not use client-side routing with pushState.
   // For these, "homepage" can be set to "." to enable relative asset paths.
   const shouldUseRelativeAssetPaths =
-    projectType === 'helper' || projectType === 'library' || projectType === 'feature' || publicPath === './'
+    projectType === 'helper' ||
+    projectType === 'library' ||
+    projectType === 'feature' ||
+    publicPath === './'
 
   const staticOutputPrefix = currentProject.config.staticOutputPrefix || 'static/media/'
 

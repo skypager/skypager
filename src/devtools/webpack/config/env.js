@@ -65,7 +65,7 @@ const EXPOSE_ENV = /^(REACT_APP_|SKYPAGER_APP)/i
 const currentProject = require('../current-project')
 
 const useLocalAssets = process.env.USE_LOCAL_ASSETS || currentProject.argv.useLocalAssets
-const useCDN = !useLocalAssets 
+const useCDN = !useLocalAssets
 const cdnBase = currentProject.argv.cdnBase || process.env.CDN_BASE || 'https://cdn.skypager.io'
 
 function getClientEnvironment(publicUrl) {

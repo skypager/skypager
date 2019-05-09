@@ -215,7 +215,12 @@ module.exports = function(webpackEnv, options = {}) {
       chunkFilename = isEnvProduction
         ? 'static/js/[name].[chunkhash:8].chunk.js'
         : isEnvDevelopment && 'static/js/[id].[name].[chunkhash:8].chunk.js'
-    } else if (projectType === 'library' || projectType === 'helper' || projectType === 'feature' || projectType === 'runtime') {
+    } else if (
+      projectType === 'library' ||
+      projectType === 'helper' ||
+      projectType === 'feature' ||
+      projectType === 'runtime'
+    ) {
       filename = '[name].js'
     }
 

@@ -6,7 +6,6 @@ class BuildCachePlugin {
 
   apply(compiler) {
     compiler.hooks.done.tap('BuildCachePlugin', async stats => {
-
       if (!stats.hasErrors() && !stats.hasWarnings()) {
         await this.currentProject.saveBuildSummary({
           webpackHash: stats.hash,

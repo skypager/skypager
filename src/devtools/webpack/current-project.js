@@ -28,10 +28,15 @@ let buildSummary
  * @property {Array<String>} runtimes the name of the runtimes this project depends on
  * @property {Object<String,String>} versions the versions of the packages that are depended on
  */
-const skypagerDependencies= {
+const skypagerDependencies = {
   features: dependsOnSkypagerPackages.filter(name => name.startsWith('@skypager/features')),
   helpers: dependsOnSkypagerPackages.filter(name => name.startsWith('@skypager/helpers')),
-  runtimes: dependsOnSkypagerPackages.filter(name => name.startsWith('@skypager/runtimes') || name === '@skypager/web' || name === '@skypager/react'),
+  runtimes: dependsOnSkypagerPackages.filter(
+    name =>
+      name.startsWith('@skypager/runtimes') ||
+      name === '@skypager/web' ||
+      name === '@skypager/react'
+  ),
 }
 
 skypagerDependencies.versions = buildVersionsMap(skypagerDependencies)
@@ -115,7 +120,7 @@ const currentProject = Object.assign({}, currentPackage.skypager || {}, {
   isCI,
 
   /** Whatever the current project has in its skypager property */
-  config: Object.assign({}, currentPackage.skypager|| {}, runtime.argv),
+  config: Object.assign({}, currentPackage.skypager || {}, runtime.argv),
 
   argv: runtime.argv,
 
@@ -387,7 +392,7 @@ function buildVersionsMap(dependencies = {}) {
       ...memo,
       [pkg]: checkVersion(pkg),
     }),
-    {} 
+    {}
   )
 
   return omitBy(versions, v => !v)

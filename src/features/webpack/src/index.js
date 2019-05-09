@@ -1,6 +1,6 @@
 import runtime, { Feature } from '@skypager/node'
 import webpack from 'webpack'
-import configMerge from 'webpack-merge' 
+import configMerge from 'webpack-merge'
 
 runtime.features.register('webpack', () => WebpackFeature)
 
@@ -19,14 +19,16 @@ export default class WebpackFeature extends Feature {
 
   initialState = {
     progress: 0,
-    stage: 'Created'
+    stage: 'Created',
   }
 
   createCompiler(config) {
     const compiler = webpack(config)
 
-    compiler.runAsync = (options) =>
-      new Promise((resolve, reject) => compiler.run(options, (err, stats) => err ? reject(err) : resolve(stats)))
+    compiler.runAsync = options =>
+      new Promise((resolve, reject) =>
+        compiler.run(options, (err, stats) => (err ? reject(err) : resolve(stats)))
+      )
 
     return compiler
   }
