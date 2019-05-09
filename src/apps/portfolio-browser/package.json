@@ -5,6 +5,7 @@
   "author": "Jon Soeder <jon@chicago.com>",
   "skypager": {
     "category": "apps",
+    "projectType": "webapp",
     "buildFolder": "build",
     "webpack": {
       "build": "webpack.config.js",

@@ -1,8 +1,5 @@
-import React, { createElement, Component } from 'react'
+import React, { Component } from 'react'
 import types from 'prop-types'
-import { MdxComponents } from 'components/Documentation'
-import Editable from 'components/Documentation/Editable'
-import Code from 'components/Documentation/Code'
 
 export default class Skypage extends Component {
   static contextTypes = {
@@ -33,26 +30,9 @@ export default class Skypage extends Component {
   }
 
   render() {
-    const { runtime } = this.context
-    const { doc, containerProps } = this.props
-    const { meta } = doc
+    const { doc, components } = this.props
+    const { Component: Doc } = doc
 
-    const editable = this.props.editable
-      ? this.props.editable
-      : meta && meta.editable && this.props.editable !== false
-
-    const components = {
-      ...MdxComponents,
-      pre: props => <div {...props} />,
-      inlineCode: props => (
-        <code style={{ color: '#f40fac' }}>
-          <em {...props} />
-        </code>
-      ),
-      code: props =>
-        editable ? <Editable {...props} editable /> : <Code {...props} runtime={runtime} />,
-    }
-
-    return createElement(doc.Component, { components })
+    return <Doc components={components} />
   }
 }

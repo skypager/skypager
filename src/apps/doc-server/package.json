@@ -28,9 +28,17 @@
   "keywords": [],
   "contributors": [],
   "skypager": {
-    "category": "helpers",
-    "providesScripts": [
-      "generate-api-docs"
-    ]
-  }
+    "category": "apps",
+    "projectType": "webapp",
+    "projectType": "webapp",
+    "webpack": {
+      "build": "webpack.config.js"
+    }
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie < 11",
+    "not op_mini all"
+  ]
 }

@@ -1,0 +1,29 @@
+{
+  "name": "@skypager/features-webpack",
+  "version": "0.4.0",
+  "description": "programatically manage webpack compilations",
+  "author": "Jon Soeder <jon@chicago.com>",
+  "main": "lib/index.js",
+  "publishConfig": {
+    "registryAccess": "public"
+  },
+  "scripts": {
+    "build": "rimraf lib && babel --comments --source-maps -d lib src",
+    "postbuild": "skypager hash-build",
+    "docs:api": "skypager generate-api-docs",
+    "watch": "babel --watch --comments --source-maps -d lib src",
+    "prepare": "yarn docs:api && yarn build",
+    "test": "mocha --require @babel/register --file test/test.js --timeout 10000 test/**/*.spec.js",
+    "test:watch": "skypager test --webpack-config webpack.config.test.js --watch"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "jsdom": "^13.2.0"
+  },
+  "gitHead": "3afe91f6ff7fd3bff7fe47a351619d5281155cd9",
+  "keywords": [],
+  "contributors": [],
+  "skypager": {
+    "category": "features"
+  }
+}

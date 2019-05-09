@@ -31,6 +31,7 @@
   "contributors": [],
   "skypager": {
     "category": "helpers",
+"projectType": "helper",
     "providesScripts": false
   }
 }

@@ -1,14 +1,8 @@
 const merge = require('webpack-merge')
-const nodeExternals = require('webpack-node-externals')
 const cwd = __dirname
 const path = require('path')
-const SourceMapSupport = require('webpack-source-map-support')
 
-const orig = process.env.MINIFY
-process.env.MINIFY = true
-const baseProductionConfig = require('@skypager/webpack/config/webpack.config.prod')
-const baseCommonConfig = require('@skypager/webpack/config/webpack.config.common')
-process.env.MINIFY = orig || false
+const baseProductionConfig = require('@skypager/webpack/config/webpack.config')('production')
 
 const minifiedWebConfig = merge.strategy({ node: 'replace', entry: 'replace' })(
   baseProductionConfig,

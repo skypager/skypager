@@ -9,78 +9,107 @@ process.on('unhandledRejection', err => {
   throw err
 })
 
-// Ensure environment variables are read.
-require('@skypager/webpack/config/env')
+const runtime = require('@skypager/node')
 
-const path = require('path')
-const argv = require('minimist')(process.argv.slice(0, 2))
-const fs = require('fs-extra')
-const webpack = require('webpack')
-const config = require('@skypager/webpack/config/webpack.config.prod')
-const paths = require('@skypager/webpack/config/paths')
-const checkRequiredFiles = require('react-dev-utils/checkRequiredFiles')
-const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages')
-const get = require('lodash/get')
-const isArray = require('lodash/isArray')
-const configMerge = require('webpack-merge')
+function displayHelp() {
+  const { colors, clear, randomBanner } = require('@skypager/node').cli
+  clear()
+  randomBanner('Skypager')
 
-// Warn and crash if required files are missing
-if (!checkRequiredFiles([paths.frameworkIndexJs])) {
-  process.exit(1)
+  const message = `
+  ${colors.bold.underline('@skypager/webpack watch script')}
+
+  This script is the same as build, but in long running process form.  It will watch your project folder for changes
+  and rerun the build.  This is similar to webpack --watch
+
+  The webpack config templates can be found in @skypager/webpack/config.
+
+  For a full list of options, run:
+
+  $ skypager build --help
+  `
+
+  console.log(message)
 }
 
-const manifest = require(paths.appPackageJson)
-console.log(`Building ${manifest.name} v${manifest.version}`)
+if (process.argv.indexOf('--help') !== -1 || process.argv.indexOf('help') !== -1) {
+  displayHelp()
+  process.exit(0)
+} else if (require.main === module) {
+  main()
+}
 
-fs.emptyDirSync(paths.appBuild)
-copyPublicFolder()
-watch()
+function main() {
+  // Ensure environment variables are read.
+  require('../config/env')
 
-// Create the production build and print the deployment instructions.
-async function watch() {
-  let webpackConfig = config
+  const fs = require('fs-extra')
+  const webpack = require('webpack')
+  const config = require('../config/webpack.config')('production')
+  const paths = require('../config/paths')
+  const checkRequiredFiles = require('react-dev-utils/checkRequiredFiles')
+  const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages')
 
-  if (get(manifest, 'skypager.webpack.build')) {
-    let configToMerge = require(path.resolve(
-      path.dirname(paths.appPackageJson),
-      get(manifest, 'skypager.webpack.build')
-    ))
-
-    if (typeof configToMerge === 'function') {
-      configToMerge = await Promise.resolve(configToMerge(argv.env || 'production', argv, config))
-    }
-
-    if (!isArray(configToMerge)) {
-      // we won't try and merge webpack config if it is an array
-      webpackConfig = configMerge(webpackConfig, configToMerge)
-    }
+  // Warn and crash if required files are missing
+  if (!checkRequiredFiles([paths.appHtml, paths.appIndexJs])) {
+    process.exit(1)
   }
 
-  const compiler = webpack(webpackConfig)
+  const manifest = require(paths.appPackageJson)
+  console.log(`Building ${manifest.name} v${manifest.version}`)
 
-  compiler.watch({ aggregateTimeout: 1000 }, (err, stats) => {
-    if (err) {
-      console.error(err)
-      return
+  if (!runtime.argv.noClean && runtime.argv.clean !== false) {
+    fs.emptyDirSync(paths.appBuild)
+  }
+
+  copyPublicFolder()
+  watch()
+
+  // Create the production build and print the deployment instructions.
+  function watch() {
+    let webpackConfig = config
+
+    webpackConfig.plugins.push({
+      apply(compiler) {
+        compiler.plugin('invalid', () => {
+          runtime.cli.clear()
+          runtime.cli.print('Change Detected. Recompiling...')
+        })
+      },
+    })
+
+    if (!String(webpackConfig.target).match(/(node|electron)/)) {
+      webpackConfig.plugins.unshift(new webpack.IgnorePlugin(/@skypager\/node/))
     }
-    const messages = formatWebpackMessages(stats.toJson({}, true))
 
-    if (messages.errors.length) {
-      // Only keep the first error. Others are often indicative
-      // of the same problem, but confuse the reader with noise.
-      if (messages.errors.length > 1) {
-        messages.errors.length = 1
+    const compiler = webpack(webpackConfig)
+
+    compiler.watch({ aggregateTimeout: 400 }, (err, stats) => {
+      if (err) {
+        console.error(err)
+        return
       }
+      const messages = formatWebpackMessages(stats.toJson({}, true))
 
-      throw new Error(messages.errors.join('\n\n'))
-    }
-  })
-}
+      if (messages.errors.length) {
+        // Only keep the first error. Others are often indicative
+        // of the same problem, but confuse the reader with noise.
+        if (messages.errors.length > 1) {
+          messages.errors.length = 1
+        }
 
-function copyPublicFolder() {
-  fs.existsSync(paths.appPublic) &&
+        console.log(messages.errors.join('\n\n'))
+      } else {
+        runtime.cli.clear()
+        console.log(stats.toString({ colors: true }))
+      }
+    })
+  }
+
+  function copyPublicFolder() {
     fs.copySync(paths.appPublic, paths.appBuild, {
       dereference: true,
       filter: file => file !== paths.appHtml,
     })
+  }
 }

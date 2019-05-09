@@ -1,9 +1,0 @@
-*
-!src/**
-!lib/**
-!config/**
-!README.md
-!LICENSE.md
-!markdown-loader.js
-!scripts/**
-!mdx-parser.js

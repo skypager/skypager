@@ -21,6 +21,7 @@
       "build": "webpack.config.js"
     },
     "category": "helpers",
+"projectType": "helper",
     "providesScripts": false
   },
   "license": "MIT",

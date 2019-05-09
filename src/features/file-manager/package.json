@@ -21,6 +21,7 @@
       "build": "webpack.config.js"
     },
     "category": "features",
+"projectType": "feature",
     "providesScripts": false,
     "apiDocs": [
       "src/features/file-manager",

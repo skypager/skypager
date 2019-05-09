@@ -16,8 +16,8 @@
     "skypager": "./skypager-cli.js"
   },
   "dependencies": {
-    "@babel/register": "^7.0.0",
-    "@babel/runtime": "^7.0.0",
+    "@babel/register": "^7.2.0",
+    "@babel/runtime": "^7.3.1",
     "@skypager/helpers-repl": "^0.4.11",
     "@skypager/helpers-server": "^0.4.14",
     "@skypager/node": "^0.4.14",
@@ -37,6 +37,7 @@
   "contributors": [],
   "skypager": {
     "category": "tools",
+    "projectType": "cli",
     "buildFolder": "lib"
   }
 }

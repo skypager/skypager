@@ -6,6 +6,8 @@ const babel = require('./endpoints/babel')
 const AppServer = {
   cors: true,
   pretty: true,
+  serveStatic: 'lib',
+  history: true,
   appWillMount(app) {
     app.use(bodyParser.json())
   },

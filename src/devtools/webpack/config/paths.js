@@ -1,23 +1,28 @@
 const path = require('path')
 const fs = require('fs')
 const url = require('url')
-const findUp = require('find-up')
+const { isEmpty, isArray } = require('lodash')
+const runtime = require('@skypager/node')
 
 // Make sure any symlinks in the project folder are resolved:
-// https://github.com/facebookincubator/create-react-app/issues/637
+// https://github.com/facebook/create-react-app/issues/637
 const appDirectory = fs.realpathSync(process.cwd())
 const resolveApp = relativePath => path.resolve(appDirectory, relativePath)
 
+const manifest = require(resolveApp('package.json'))
+const projectConfig = Object.assign({}, manifest.skypager || {}, runtime.argv)
+
 const envPublicUrl = process.env.PUBLIC_URL
 
-function ensureSlash(needlePath, needsSlash) {
-  const hasSlash = needlePath.endsWith('/')
+function ensureSlash(inputPath, needsSlash) {
+  const hasSlash = inputPath.endsWith('/')
   if (hasSlash && !needsSlash) {
-    return needlePath.substr(needlePath, needlePath.length - 1)
+    return inputPath.substr(0, inputPath.length - 1)
   } else if (!hasSlash && needsSlash) {
-    return `${needlePath}/`
+    return `${inputPath}/`
+  } else {
+    return inputPath
   }
-  return needlePath
 }
 
 const getPublicUrl = appPackageJson => envPublicUrl || require(appPackageJson).homepage
@@ -31,29 +36,68 @@ const getPublicUrl = appPackageJson => envPublicUrl || require(appPackageJson).h
 function getServedPath(appPackageJson) {
   const publicUrl = getPublicUrl(appPackageJson)
   const servedUrl = envPublicUrl || (publicUrl ? url.parse(publicUrl).pathname : '/')
-  return ensureSlash(servedUrl, true)
+
+  return ensureSlash(servedUrl.replace(/\/index.html$/i, ''), true)
 }
 
-const portfolioRoot = path.dirname(findUp.sync('package.json', { cwd: resolveApp('.') }))
-const manifest = require(resolveApp('package.json'))
+const moduleFileExtensions = [
+  'web.mjs',
+  'mjs',
+  'web.js',
+  'js',
+  'web.ts',
+  'ts',
+  'web.tsx',
+  'tsx',
+  'json',
+  'web.jsx',
+  'jsx',
+]
 
-const { skypager = {} } = manifest
-const { buildFolder = 'lib' } = skypager
+let lessModulePaths = projectConfig.lessModulePaths || []
+
+const appEntry = projectConfig.appEntry || 'src/launch'
+const frameworkEntry = projectConfig.frameworkEntry || 'src/index'
+
+if (!isEmpty(lessModulePaths)) {
+  if (isArray(lessModulePaths)) {
+    lessModulePaths = lessModulePaths.map(p => resolveApp(...p.split('/')))
+  } else {
+    lessModulePaths = resolveApp(...lessModulePaths.split('/'))
+  }
+}
+
+// Resolve file paths in the same order as webpack
+const resolveModule = (resolveFn, filePath) => {
+  const extension = moduleFileExtensions.find(extension =>
+    fs.existsSync(resolveFn(`${filePath}.${extension}`))
+  )
+
+  if (extension) {
+    return resolveFn(`${filePath}.${extension}`)
+  }
+
+  return resolveFn(`${filePath}.js`)
+}
 
 module.exports = {
-  appRoot: resolveApp('.'),
-  appBuild: resolveApp(buildFolder),
-  appNodeModules: resolveApp('node_modules'),
-  appHtml: resolveApp('public/index.html'),
-  appIndexJs: resolveApp('src/launch.js'),
-  frameworkIndexJs: resolveApp('src/index.js'),
-  appPackageJson: resolveApp('package.json'),
+  dotenv: resolveApp('.env'),
+  appPath: resolveApp('.'),
+  appBuild: resolveApp('build'),
   appPublic: resolveApp('public'),
+  appHtml: resolveApp('public/index.html'),
+  appIndexJs: resolveModule(resolveApp, appEntry),
+  frameworkIndexJs: resolveModule(resolveApp, frameworkEntry),
+  appPackageJson: resolveApp('package.json'),
   appSrc: resolveApp('src'),
+  appTsConfig: resolveApp('tsconfig.json'),
+  yarnLockFile: resolveApp('yarn.lock'),
+  testsSetup: resolveModule(resolveApp, 'src/setupTests'),
+  proxySetup: resolveApp('src/setupProxy.js'),
+  appNodeModules: resolveApp('node_modules'),
   publicUrl: getPublicUrl(resolveApp('package.json')),
   servedPath: getServedPath(resolveApp('package.json')),
-  yarnLockFile: resolveApp('yarn.lock'),
-  portfolioRoot,
-  portfolioNodeModules: path.resolve(portfolioRoot, 'node_modules'),
-  sourcePaths: [resolveApp('src'), resolveApp('test')],
+  lessModulePaths,
 }
+
+module.exports.moduleFileExtensions = moduleFileExtensions

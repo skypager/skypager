@@ -78,6 +78,15 @@ export class Mdx extends Helper {
       },
     })
   }
+
+  get body() {
+    return this.ast.children || []
+  }
+
+  get codeBlocks() {
+    return this.body.filter(({ type }) => type === 'code')
+  }
+
   /**
    * Returns the React component that was produced by the mdx webpack loader
    *
@@ -87,14 +96,6 @@ export class Mdx extends Helper {
   get Component() {
     const { componentExport = 'default' } = this.options
     return this.tryGet(componentExport)
-  }
-
-  renderToString(...args) {
-    return this.runtime.react.renderer({ type: 'string' })(this.Component, ...args)
-  }
-
-  renderToMarkup(...args) {
-    return this.runtime.react.renderer({ type: 'markup' })(this.Component, ...args)
   }
 
   static attach(runtime, options = {}) {

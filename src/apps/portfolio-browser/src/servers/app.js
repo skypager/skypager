@@ -111,7 +111,7 @@ function setupDevelopment(app) {
   const merge = require('webpack-merge')
   const devMiddleware = require('webpack-dev-middleware')
   const hotMiddleware = require('webpack-hot-middleware')
-  const config = merge(require('@skypager/webpack/config/webpack.config.dev'), {
+  const config = merge(require('@skypager/webpack/config/webpack.config')('development'), {
     node: {
       process: 'mock',
     },

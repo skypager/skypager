@@ -30,6 +30,28 @@ const webConfig = merge.strategy({ entry: 'replace' })(
     entry: {
       'skypager-helpers-document': path.resolve(cwd, 'src', 'index.web.js'),
     },
+    externals: [
+      {
+        react: {
+          commonjs2: 'react',
+          commonjs: 'react',
+          umd: 'react',
+          var: 'global React',
+        },
+        'prop-types': {
+          commonjs2: 'prop-types',
+          commonjs: 'prop-types',
+          umd: 'prop-types',
+          var: 'global PropTypes',
+        },
+        '@skypager/runtime': {
+          commonjs2: '@skypager/runtime',
+          commonjs: '@skypager/runtime',
+          umd: '@skypager/runtime',
+          var: 'global skypager',
+        },
+      },
+    ],
   }
 )
 
@@ -43,6 +65,18 @@ const minifiedWebConfig = merge.strategy({ entry: 'replace' })(
     },
     externals: [
       {
+        react: {
+          commonjs2: 'react',
+          commonjs: 'react',
+          umd: 'react',
+          var: 'global React',
+        },
+        'prop-types': {
+          commonjs2: 'prop-types',
+          commonjs: 'prop-types',
+          umd: 'prop-types',
+          var: 'global PropTypes',
+        },
         '@skypager/runtime': {
           commonjs2: '@skypager/runtime',
           commonjs: '@skypager/runtime',
@@ -61,4 +95,4 @@ webConfig.plugins = webConfig.plugins.filter(
   p => !p.constructor || (p.constructor && p.constructor.name !== 'UglifyJsPlugin')
 )
 
-module.exports = [webConfig, minifiedWebConfig]
+module.exports = webConfig

@@ -28,6 +28,7 @@
   "keywords": [],
   "contributors": [],
   "skypager": {
-    "category": "helpers"
+    "category": "helpers",
+    "projectType": "helper"
   }
 }

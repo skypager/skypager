@@ -17,11 +17,10 @@
     "test": "skypager test"
   },
   "dependencies": {
-    "@babel/polyfill": "^7.0.0",
-    "@babel/runtime": "^7.0.0",
+    "@babel/polyfill": "^7.2.2",
+    "@babel/runtime": "^7.2.2",
     "lodash": "^4.17.4",
     "mobx": "3.3.1",
-    "qbus": "^0.9.7",
     "uuid": "^3.0.1",
     "vm-browserify": "^1.1.0"
   },
@@ -44,7 +43,8 @@
         "lodash": false
       }
     },
-    "category": "runtimes"
+    "category": "runtimes",
+    "projectType": "runtime"
   },
   "gitHead": "3afe91f6ff7fd3bff7fe47a351619d5281155cd9",
   "keywords": [],

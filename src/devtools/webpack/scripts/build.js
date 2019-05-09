@@ -10,25 +10,22 @@ process.on('unhandledRejection', err => {
 })
 
 // Ensure environment variables are read.
-require('@skypager/webpack/config/env')
+require('../config/env')
 
-const argv = require('minimist')(process.argv.slice(0, 2))
 const path = require('path')
-const chalk = require('chalk')
+const chalk = require('react-dev-utils/chalk')
 const fs = require('fs-extra')
 const webpack = require('webpack')
-const { execSync } = require('child_process')
-const config = require('@skypager/webpack/config/webpack.config.prod')
-const paths = require('@skypager/webpack/config/paths')
+const bfj = require('bfj')
+const configFactory = require('../config/webpack.config')
+const paths = require('../config/paths')
 const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages')
-const printHostingInstructions = require('react-dev-utils/printHostingInstructions')
 const FileSizeReporter = require('react-dev-utils/FileSizeReporter')
 const printBuildError = require('react-dev-utils/printBuildError')
-const get = require('lodash/get')
-const isArray = require('lodash/isArray')
-const configMerge = require('webpack-merge')
+const BuildCachePlugin = require('../plugins/build-cache-plugin')
+const merge = require('webpack-merge')
+const { isArray } = require('lodash')
 
-const manifest = require(paths.appPackageJson)
 const measureFileSizesBeforeBuild = FileSizeReporter.measureFileSizesBeforeBuild
 const printFileSizesAfterBuild = FileSizeReporter.printFileSizesAfterBuild
 const useYarn = fs.existsSync(paths.yarnLockFile)
@@ -37,160 +34,283 @@ const useYarn = fs.existsSync(paths.yarnLockFile)
 const WARN_AFTER_BUNDLE_GZIP_SIZE = 512 * 1024
 const WARN_AFTER_CHUNK_GZIP_SIZE = 1024 * 1024
 
-let latestHash = (
-  execSync(`git log --format='%T' .`, { cwd: path.resolve(paths.appBuild, '..') })
-    .toString()
-    .trim()
-    .split('\n')[0] || ''
-).trim()
-const projectRoot = path.dirname(paths.appPackageJson)
-const modifiedFiles = execSync(`git status . --porcelain`, {
-  cwd: projectRoot,
-})
-  .toString()
-  .split('\n')
-  .join(' ')
+const isInteractive = process.stdout.isTTY
 
-latestHash = `${latestHash}:${modifiedFiles}`
+const currentProject = require('../current-project')
+const { argv, config: projectConfig } = currentProject
 
-const checkPreviousBuild = async buildRoot => {
-  if (fs.existsSync(path.resolve(buildRoot, 'latest-hash.json'))) {
-    const previousHash = require(path.resolve(buildRoot, 'latest-hash.json')).git
+// Process CLI arguments
+const writeStatsJson = argv.stats
+const debugConfig = argv.debugConfig
+const shouldCleanPreviousBuild =
+  process.env.NO_CLEAN !== 'false' && argv.clean !== false && argv.noClean !== true
 
-    if (previousHash === latestHash && !process.argv.find(i => i === '--force')) {
-      console.log(`Build output for ${latestHash} already exists. Pass --force to rebuild.`)
-      process.exit(0)
-    } else {
-      console.log(
-        `Previous Build Hash ${previousHash} does not match ${latestHash}. Doing a fresh build`
-      )
+const shouldCopyPublic = String(argv.copyPublic) !== 'false' && argv.noCopyPublic !== true
+
+async function loadConfig() {
+  // Generate configuration
+  let config = configFactory('production')
+
+  if (projectConfig.webpacks) {
+    const { merge: shouldMerge = true, build } = projectConfig.webpacks
+
+    if (build && String(shouldMerge) !== 'false') {
+      const mergeConfig = require(currentProject.resolve(build))
+      config = merge(config, mergeConfig)
     }
   }
 
-  const result = await measureFileSizesBeforeBuild(buildRoot)
-
-  if (!process.argv.find(i => i === '--no-clean')) {
-    fs.emptyDirSync(paths.appBuild)
+  // Generates an info file in the build folder.  This info file will have the sourceHash
+  // of the project source at the time the project was built.  If they're the same, then there
+  // is probably no reason to build the whole project again.
+  if (!isArray(config)) {
+    config.plugins.push(new BuildCachePlugin({ currentProject }))
   }
 
-  return result
+  const { entry: entryConfig, output, externals } = config
+
+  if (debugConfig) {
+    console.log('Project Config')
+    console.log(JSON.stringify(currentProject.config, null, 2))
+    console.log('Flags', require('../config/flags')(currentProject, 'production'))
+    console.log('Entry Config:')
+    console.log(JSON.stringify(entryConfig, null, 2))
+    console.log('Output Config:')
+    console.log(JSON.stringify(output, null, 2))
+    console.log('Externals:')
+    console.log(JSON.stringify(externals, null, 2))
+
+    process.exit(0)
+  }
+
+  return config
 }
 
-// First, read the current file sizes in build directory.
-// This lets us display how much they changed later.
-checkPreviousBuild(paths.appBuild)
-  .then(previousFileSizes => {
-    // Remove all content but keep the directory so that
-    // if you're in it, you don't end up in Trash
+// We require that you explicitly set browsers and do not fall back to
+// browserslist defaults.
+const { checkBrowsers } = require('react-dev-utils/browsersHelper')
 
-    // Merge with the public folder
-    if (fs.existsSync(paths.appPublic)) {
-      copyPublicFolder()
-    }
+function displayHelp() {
+  const { colors, clear, randomBanner } = require('@skypager/node').cli
+  clear()
+  randomBanner('Skypager')
 
-    // Start the webpack build
-    return build(previousFileSizes)
-  })
-  .then(
-    ({ stats, previousFileSizes, warnings }) => {
-      if (warnings.length) {
-        console.log(chalk.yellow('Compiled with warnings.\n'))
-        console.log(warnings.join('\n\n'))
-        console.log(
-          `\nSearch for the ${chalk.underline(
-            chalk.yellow('keywords')
-          )} to learn more about each warning.`
-        )
-        console.log(
-          `To ignore, add ${chalk.cyan('// eslint-disable-next-line')} to the line before.\n`
-        )
-      } else {
-        console.log(chalk.green('Compiled successfully.\n'))
-      }
+  const message = `
+  ${colors.bold.underline('@skypager/webpack build script')}
 
-      console.log('File sizes after gzip:\n')
-      printFileSizesAfterBuild(
-        stats,
-        previousFileSizes,
-        paths.appBuild,
-        WARN_AFTER_BUNDLE_GZIP_SIZE,
-        WARN_AFTER_CHUNK_GZIP_SIZE
-      )
-      console.log()
+  This script will generate a webpack build.
+  
+  The following options are for advanced use cases, and generally will be taken care of automatically for you
+  based on the type of project you're building.  
+ 
+  ${colors.bold.underline('Available Options')}
 
-      const appPackage = manifest
-      const publicUrl = paths.publicUrl
-      const publicPath = config.output.publicPath
-      const buildFolder = path.relative(process.cwd(), paths.appBuild)
+  --force                       build the project even if the sourceHash from the last build still matches.
+  --no-clean                    don't remove the previous build folder, just overwrite it.
+  --stats                       generate a webpack stats.json in the build folder
+  --debug-config                view the webpack config and exit.
+  --no-html                     disable the html-webpack-plugin completely.
+  --no-local-only               disable the restriction only importing modules from the project's src
+  --no-minify-js                disable js minification 
+  --no-minify-html              disable html minification in the html-webpack plugin
 
-      if (manifest.skypager && manifest.skypager.projectType === 'web-application') {
-        printHostingInstructions(appPackage, publicUrl, publicPath, buildFolder, useYarn)
-      }
+  ${colors.bold.underline('Entry / Output Options')}
 
-      if (!process.argv.find(i => i === '--no-stats')) {
-        fs.writeFileSync(
-          path.resolve(paths.appBuild, 'stats.json'),
-          JSON.stringify(stats.toJson({ source: true }))
-        )
-      }
+  --app-name                    the name of the output file for the app entry point. (src/launch.js)
+  --framework-name              the name of the output file for the framework entry point. (src/index.js)
+  --app-only, --no-framework    only build the application entry point
+  --framework-only, --no-app    only build the framework entry point  
 
-      fs.writeFileSync(
-        path.resolve(paths.appBuild, 'latest-hash.json'),
-        JSON.stringify({ git: latestHash, build: stats.hash })
-      )
+  --library-target              which libraryTarget to use in webpack output config
+  --library-name                for umd builds, which global variable to put this module in. 
 
-      process.exit(0)
-    },
-    err => {
-      console.log(`Build Failed in ${manifest.name}`)
-      console.log(chalk.red('Failed to compile.\n'))
-      printBuildError(err)
-      process.exit(1)
-    }
-  )
+  --css-filename                output file name for the extracted css bundle.
+  --include-uncompressed        build separate minified and unminified files for each entry point.
+  --no-source-maps              disable source maps
 
-// Create the production build and print the deployment instructions.
-async function build(previousFileSizes) {
-  console.log(`${manifest.name}: Creating an optimized production build...`)
+  ${colors.bold.underline('Caching Options')}
 
-  // a project can opt to start
-  let webpackConfig = get(manifest, 'skypager.webpack.merge') === false ? {} : config
+  --no-cache                    disable any type of caching (babel, terser, hard-source webpack)
+  --no-babel-cache              disable babel-loader cache
+  --no-terser-cache             disable terser js minification cache
+  --no-webpack-cache            disable hard-source-webpack-plugin caching
+  --reset-cache                 delete the hard-source-webpack plugin cache
+  --cache-buster='string'       specify a random string to invalidate the webpack cache                 
+  
+  ${colors.bold.underline('Asset Caching Options')}
 
-  if (get(manifest, 'skypager.webpack.build')) {
-    console.log(`Using custom wepack config`)
-    let configToMerge = require(path.resolve(
-      path.dirname(paths.appPackageJson),
-      get(manifest, 'skypager.webpack.build')
-    ))
+  --use-service-worker          on by default for webapp project types, uses the workbox service worker plugin
+  --use-cdn                     instead of copying assets into the build folder, use their cdn hosted location.
 
-    if (typeof configToMerge === 'function') {
-      configToMerge = await Promise.resolve(configToMerge(argv.env || 'production', argv, config))
-    }
+  ${colors.bold.underline('Project Configuration Options')}
 
-    if (!isArray(configToMerge)) {
-      // we won't try and merge webpack config if it is an array
-      webpackConfig = configMerge(webpackConfig, configToMerge)
-    } else {
-      console.log('Using multiple webpack configs')
-    }
+  Every skypager project can have a skypager config property in their package.json.  The webpack config behavior will
+  look for the following keys:
+
+  libraryTarget
+  libraryName
+  frameworkName
+  appName
+  cssFilename
+  cssChunkFilename
+  projectType
+
+  Generally these match up with some of the process.argv --flags with different casing.  When supplied via process.argv,
+  those values will take precedence over the package.json config
+
+  ${colors.bold.underline('Project Types')}
+
+  Based on the project type different options may be turned on by default.  For example, we want to use the service worker 
+  plugin by default for all webapp project types.
+
+  ${colors.bold.underline('Custom Webpack Config Files')}
+
+  In the skypager package config, you can supply something like:
+
+  "webpack": {
+    "build": "webpack.config.js",
+    "start": "webpack.config.js",
+    "merge": false 
   }
 
-  const compiler = webpack(webpackConfig)
+  merge is true by default, if you pass false you will be 100% responsible for webpack config.
+
+  when merge is on, the webpack.config you export will be merged into the one we generate by default using webpack-merge from npm.
+
+  ${colors.bold.underline('Environment Variables')}
+
+  CI                            set to true to be in ci mode 
+  PORTFOLIO_CACHE_DIRECTORY     setting this path to outside of the git repo will give you a persistent cache
+  BABEL_CACHE_DIRECTORY         set this to use a different path than $PORTFOLIO_CACHE_DIRECTORY/babel
+  TERSER_CACHE_DIRECTORY        set this to use a different path than $PORTFOLIO_CACHE_DIRECTORY/terser 
+  WEBPACK_CACHE_DIRECTORY       set this to use a different path than $PORTFOLIO_CACHE_DIRECTORY/webpack 
+  DISABLE_WEBPACK_CACHING       set to true to disable webpack caching 
+  MINIFY_HTML                   set to false to disable
+  MINIFY_JS                     set to false to disable
+  GENERATE_SOURCEMAP            set to false to disable
+  DISABLE_HTML_PLUGIN           set to true to disable
+  DISABLE_MODULE_SCOPE_PLUGIN   set to true to disable local source requirement
+  REQUIRE_LOCAL_SOURCE          same as setting above to true
+  USE_SERVICE_WORKER            set to true to enable service worker, or false to disable it for webapps
+  NO_CLEAN                      set to true to prevent cleaning previous build
+  INLINE_RUNTIME_CHUNK          set to false to disable inline of webpack runtime in html for webapps
+  `
+
+  console.log(message)
+}
+
+if (process.argv.indexOf('--help') !== -1 || process.argv.indexOf('help') !== -1) {
+  displayHelp()
+  process.exit(0)
+} else if (require.main === module) {
+  main()
+}
+
+async function main() {
+  checkBrowsers(paths.appPath, isInteractive)
+    .then(() => (currentProject.argv.force ? true : currentProject.checkForExistingBuild()))
+    .then(buildRequired => {
+      if (!buildRequired) {
+        console.log('This project has already been built.  Pass --force to build anyway.')
+        process.exit(0)
+      }
+      return true
+    })
+    .then(() => currentProject.checkCache())
+    .then(() => {
+      // First, read the current file sizes in build directory.
+      // This lets us display how much they changed later.
+      return measureFileSizesBeforeBuild(paths.appBuild)
+    })
+    .then(previousFileSizes => {
+      // Remove all content but keep the directory so that
+      // if you're in it, you don't end up in Trash
+      shouldCleanPreviousBuild && fs.emptyDirSync(paths.appBuild)
+      // Merge with the public folder
+
+      try {
+        shouldCopyPublic && copyPublicFolder()
+      } catch (error) {}
+
+      // Start the webpack build
+      return loadConfig().then(config => build(previousFileSizes, config))
+    })
+    .then(
+      ({ stats, previousFileSizes, warnings, config }) => {
+        if (warnings.length) {
+          console.log(chalk.yellow('Compiled with warnings.\n'))
+          console.log(warnings.join('\n\n'))
+          console.log(
+            '\nSearch for the ' +
+              chalk.underline(chalk.yellow('keywords')) +
+              ' to learn more about each warning.'
+          )
+          console.log(
+            'To ignore, add ' + chalk.cyan('// eslint-disable-next-line') + ' to the line before.\n'
+          )
+        }
+        const appPackage = require(paths.appPackageJson)
+        const publicUrl = paths.publicUrl
+        const publicPath = config.output.publicPath
+        const buildFolder = path.relative(process.cwd(), paths.appBuild)
+        currentProject.printHostingInstructions(
+          appPackage,
+          publicUrl,
+          publicPath,
+          buildFolder,
+          useYarn
+        )
+        console.log('File sizes after gzip:\n')
+        printFileSizesAfterBuild(
+          stats,
+          previousFileSizes,
+          paths.appBuild,
+          WARN_AFTER_BUNDLE_GZIP_SIZE,
+          WARN_AFTER_CHUNK_GZIP_SIZE
+        )
+        console.log()
+      },
+      err => {
+        console.log(chalk.red('Failed to compile.\n'))
+        console.log(err.stack)
+        printBuildError(err)
+        process.exit(1)
+      }
+    )
+    .catch(err => {
+      if (err && err.message) {
+        console.log(err.message)
+      }
+      process.exit(1)
+    })
+}
+
+// Create the production build and print the deployment instructions.
+async function build(previousFileSizes, config) {
+  await currentProject.projectTypeHooks.beforeBuild(config)
+
+  let compiler = webpack(config)
 
   return new Promise((resolve, reject) => {
     compiler.run((err, stats) => {
+      let messages
       if (err) {
-        return reject(err)
+        if (!err.message) {
+          return reject(err)
+        }
+        messages = formatWebpackMessages({
+          errors: [err.message],
+          warnings: [],
+        })
+      } else {
+        messages = formatWebpackMessages(stats.toJson({ all: false, warnings: true, errors: true }))
       }
-
-      const messages = formatWebpackMessages(stats.toJson({}, true))
       if (messages.errors.length) {
         // Only keep the first error. Others are often indicative
         // of the same problem, but confuse the reader with noise.
         if (messages.errors.length > 1) {
           messages.errors.length = 1
         }
-        console.log(`Build failed in ${manifest.name}`)
         return reject(new Error(messages.errors.join('\n\n')))
       }
       if (
@@ -206,18 +326,54 @@ async function build(previousFileSizes) {
         )
         return reject(new Error(messages.warnings.join('\n\n')))
       }
-      return resolve({
+
+      const resolveArgs = {
         stats,
         previousFileSizes,
         warnings: messages.warnings,
-      })
+        config,
+      }
+
+      if (writeStatsJson) {
+        return bfj
+          .write(paths.appBuild + '/bundle-stats.json', stats.toJson())
+          .then(() => resolve(resolveArgs))
+          .catch(error => reject(new Error(error)))
+      }
+
+      return resolve(resolveArgs)
     })
   })
 }
 
+/**
+ * Copies everything from the public folder to the build folder,
+ * with the exception of the index.html, index.dev.html, etc
+ */
 function copyPublicFolder() {
+  if (!fs.existsSync(paths.appPublic)) {
+    return
+  }
+
+  const { basename } = require('path')
   fs.copySync(paths.appPublic, paths.appBuild, {
     dereference: true,
-    filter: file => file !== paths.appHtml,
+    filter: file => {
+      const filename = basename(file)
+      return !(filename.startsWith('index') && filename.endsWith('.html'))
+    },
   })
+}
+
+async function resetCache(
+  { babelCacheDirectory, terserCacheDirectory, hardSourceCacheDirectory },
+  runtime
+) {
+  await Promise.all([
+    runtime.fsx.removeAsync(babelCacheDirectory).catch(() => false),
+    runtime.fsx.removeAsync(terserCacheDirectory).catch(() => false),
+    runtime.fsx.removeAsync(hardSourceCacheDirectory).catch(() => false),
+  ])
+
+  process.exit(0)
 }
