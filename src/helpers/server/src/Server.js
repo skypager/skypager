@@ -357,7 +357,10 @@ export class Server extends Helper {
   }
 
   setupDevelopmentMiddlewares(options = {}) {
-    return setupDevelopmentMiddlewares.call(this, this.app, options)
+    return setupDevelopmentMiddlewares.call(this, this.app, {
+      ...this.options,
+      ...options,
+    })
   }
 
   startServer(...args) {
@@ -444,17 +447,53 @@ function injectWebpackDependencies(base = {}) {
   return base
 }
 
+function createWebpackCompiler(options) {
+  const { isArray } = this.lodash
+  const {
+    hot = this.options.hot || this.runtime.argv.hot,
+    hmrEntry = 'webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000',
+    entryName,
+    appEntryName = entryName || 'app',
+  } = options
+
+  const { config, webpack } = injectWebpackDependencies.call(this, options)
+
+  this.runtime.debug(`Setting up Webpack Middlewares`, { hot, hmrEntry, appEntryName })
+
+  this.runtime.debug('Webpack Config', {
+    target: config.target,
+    output: config.output,
+    entry: config.entry,
+    externals: config.externals,
+  })
+
+  if (hot && hmrEntry !== false) {
+    if (isArray(config.entry)) {
+      config.entry.unshift(hmrEntry)
+    } else if (isArray(config.entry[appEntryName])) {
+      config.entry[appEntryName].unshift(hmrEntry)
+    } else {
+      console.error(`Error injecting HMR Entry into entry config`, config.entry)
+      throw new Error('HMR Requested but could not inject hot-middleware client')
+    }
+
+    this.runtime.debug('Modified Webpack Entry for HMR', {
+      entry: config.entry,
+    })
+  }
+
+  const compiler = options.compiler || webpack(config)
+
+  return { compiler, config }
+}
+
 function setupDevelopmentMiddlewares(app, options = {}) {
   const { runtime } = this
   const { hot } = options
-  const { config, webpack, devMiddleware, hotMiddleware } = injectWebpackDependencies.call(
-    this,
-    options
-  )
+  const { devMiddleware, hotMiddleware } = injectWebpackDependencies.call(this, options)
 
-  config.entry[1] = 'webpack-hot-middleware/client?path=/__webpack_hmr&timeout=20000'
+  const { compiler, config } = createWebpackCompiler.call(this, options)
 
-  const compiler = webpack(config)
   const middleware = devMiddleware(compiler, {
     noInfo: true,
     publicPath: config.output.publicPath,
@@ -472,19 +511,24 @@ function setupDevelopmentMiddlewares(app, options = {}) {
 
   app.use((req, res, next) => {
     const { pathname } = runtime.urlUtils.parseUrl(req.url)
-    const { base, ext, dir } = runtime.pathUtils.parse(pathname)
+    const { ext } = runtime.pathUtils.parse(pathname)
 
     // it must be index.html
     if (ext === '') {
       res.end(
-        middleware.fileSystem.readFileSync(runtime.pathUtils.join(config.output.path, 'index.html'))
-      )
-    } else {
-      res.end(
         middleware.fileSystem.readFileSync(
-          runtime.pathUtils.join(config.output.path, pathname.replace(/^\//, ''))
+          runtime.pathUtils.join(compiler.outputPath, 'index.html')
         )
       )
+    } else {
+      console.log('Checking if File Exists', pathname, compiler.outputPath)
+      const file = runtime.pathUtils.join(compiler.outputPath, pathname.replace(/^\//, ''))
+
+      if (middleware.fileSystem.existsSync(file)) {
+        res.end(middleware.fileSystem.readFileSync(file))
+      } else {
+        next()
+      }
     }
   })
 
