@@ -1,0 +1,35 @@
+{
+  "name": "@skypager/graph-explorer",
+  "version": "0.4.15",
+  "description": "skypager graph explorer",
+  "author": "Jon Soeder <jon@chicago.com>",
+  "main": "lib/index.js",
+  "scripts": {
+    "deploy": "yarn export:graphs && cp now.json build && cd build && now --static && now alias",
+    "export:graphs": "skypager export-graphs",
+    "start": "NODE_ENV=production NO_CLEAR=true node ./start.js --log-level debug --cors",
+    "test": "node ./test.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@skypager/cli": "^0.4.14",
+    "@skypager/node": "^0.4.14",
+    "@skypager/runtime": "^0.4.12",
+    "@skypager/web": "^0.4.12",
+    "@skypager/portfolio-manager": "^0.4.11"
+  },
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/skypager/skypager"
+  },
+  "homepage": "https://skypager.io",
+  "keywords": [],
+  "contributors": [],
+  "skypager": {
+    "category": "apps",
+    "projectType": "webapp"
+  }
+}
