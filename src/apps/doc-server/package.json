@@ -30,9 +30,16 @@
   "skypager": {
     "category": "apps",
     "projectType": "webapp",
-    "projectType": "webapp",
     "webpack": {
       "build": "webpack.config.js"
+    },
+    "externals": {
+      "react": "React",
+      "react-dom": "ReactDOM",
+      "react-router-dom": "ReactRouterDOM",
+      "@skypager/runtime": "skypager",
+      "@skypager/web": "skypager",
+      "prop-types": "PropTypes"
     }
   },
   "browserslist": [

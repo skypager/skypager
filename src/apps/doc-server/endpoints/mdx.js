@@ -1,6 +1,6 @@
 module.exports = function(app) {
   const { runtime } = this
-  const mdxParser = require('@skypager/webpack/mdx-parser')
+  const mdxParser = require('@skypager/helpers-mdx/parser')
 
   app.post('/mdx', async (req, res) => {
     const { content } = req.body
