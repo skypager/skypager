@@ -67,6 +67,14 @@ async function loadConfig() {
     config.plugins.push(new BuildCachePlugin({ currentProject }))
   }
 
+  if (currentProject.argv.progress) {
+    config.plugins.push(
+      new webpack.ProgressPlugin((percent, msg) => {
+        console.log(`${msg} ${percent}`)
+      })
+    )
+  }
+
   const { entry: entryConfig, output, externals } = config
 
   if (debugConfig) {

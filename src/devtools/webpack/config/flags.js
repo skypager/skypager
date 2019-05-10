@@ -43,7 +43,8 @@ module.exports = function getFlags(currentProject, isEnvProduction) {
   const shouldRequireLocalFolder =
     String(process.env.DISABLE_MODULE_SCOPE_PLUGIN) !== 'false' &&
     String(process.env.REQUIRE_LOCAL_SOURCE) !== 'false' &&
-    String(argv.localOnly) !== 'false'
+    String(argv.localOnly) !== 'false' &&
+    String(currentProject.config.localOnly) !== 'false'
 
   // For certain types of projects, it helps to distribute minified and unminified versions of the source
   // we'll automatically do this for libraries.

@@ -27,6 +27,7 @@ const pick = require('lodash/pick')
 const isEmpty = require('lodash/isEmpty')
 const runtime = require('@skypager/node')
 const hashObject = require('node-object-hash')
+const SkypagerSocketPlugin = require('../plugins/skypager-socket-plugin')
 
 const { WEBPACK_CACHE_MAX_MB = '75', WEBPACK_CACHE_MAX_DAYS = '3' } = process.env
 
@@ -59,6 +60,10 @@ module.exports = function(webpackEnv, options = {}) {
   const isEnvDevelopment = webpackEnv === 'development'
   const isEnvProduction = webpackEnv === 'production'
 
+  /**
+   * See config/flags.js or scripts/build.js for information about
+   * setting these flags through --command-line-flags or process.ENV_VARIABLES
+   */
   const {
     includeUnminified,
     useServiceWorker,
@@ -86,6 +91,8 @@ module.exports = function(webpackEnv, options = {}) {
 
     // experimental
     useWebpackDashboard = argv.dashboard,
+
+    useSocketPlugin = !!(argv.socketPlugin || process.env.SKYPAGER_SOCKET_PLUGIN),
   } = require('./flags')(currentProject, webpackEnv, options)
 
   // We automatically include html-webpack-plugin for every index.html found in the root of the public folder
@@ -230,25 +237,12 @@ module.exports = function(webpackEnv, options = {}) {
     }
   }
 
-  function toExternal(moduleName, varName) {
-    if (projectConfig.libraryTarget === 'umd') {
-      return {
-        [moduleName]: {
-          commonjs: moduleName,
-          commonjs2: moduleName,
-          amd: moduleName,
-          root: varName,
-        },
-      }
-    } else {
-      return { [moduleName]: `global ${varName}` }
-    }
-  }
-
   const entryConfig =
     projectType === 'webapp' && isEnvDevelopment
       ? pick(entry(currentProject), 'app')
       : entry(currentProject)
+
+  const externals = currentProject.externals()
 
   const finalConfig = {
     mode: isEnvProduction ? 'production' : isEnvDevelopment && 'development',
@@ -262,22 +256,7 @@ module.exports = function(webpackEnv, options = {}) {
         : false
       : isEnvDevelopment && 'eval-source-map',
 
-    /*
-    externals: [
-      ...(useExternals && [
-        {
-          ...toExternal('@skypager/runtime', 'skypager'),
-          ...toExternal('@skypager/web', 'skypager'),
-          ...toExternal('moment', 'moment'),
-          ...toExternal('axios', 'axios'),
-          ...toExternal('react', 'React'),
-          ...toExternal('prop-types', 'PropTypes'),
-          ...toExternal('react-router-dom', 'ReactRouterDOM'),
-          ...toExternal('semantic-ui-react', 'semanticUIReact'),
-        },
-      ]),
-    ].filter(Boolean),
-    */
+    externals: [].concat(externals).filter(Boolean),
 
     // let the function we declared above return the value
     entry: entryConfig,
@@ -852,6 +831,13 @@ module.exports = function(webpackEnv, options = {}) {
         ]),
 
       useWebpackDashboard && new DashboardPlugin(),
+
+      // This is a fork of DashboardPlugin that uses the skypager ipc socket
+      // instead of websockets.
+      useSocketPlugin &&
+        new SkypagerSocketPlugin({
+          runtime: currentProject.runtime,
+        }),
     ].filter(Boolean),
     // Some libraries import Node modules but don't use them in the browser.
     // Tell Webpack to provide empty mocks for them so importing them works.

@@ -8,7 +8,7 @@ const runtime = require('@skypager/node')
 
 const projectTypes = {}
 
-const { keys, uniq, isArray, isString } = runtime.lodash
+const { mapValues, keys, uniq, isArray, isString } = runtime.lodash
 const { gitInfo, currentPackage, fileManager } = runtime
 const { devDependencies = {}, dependencies = {}, peerDependencies = {} } = currentPackage
 
@@ -101,6 +101,12 @@ if (isCI && !process.env.CI) {
   process.env.CI = 'TRUE'
 }
 
+const config = Object.assign(
+  {},
+  currentPackage.skypager || {},
+  (currentPackage.skypager && currentPackage.skypager.webpack) || {},
+  runtime.argv
+)
 /**
  * @type {CurrentProject}
  */
@@ -120,7 +126,7 @@ const currentProject = Object.assign({}, currentPackage.skypager || {}, {
   isCI,
 
   /** Whatever the current project has in its skypager property */
-  config: Object.assign({}, currentPackage.skypager || {}, runtime.argv),
+  config,
 
   argv: runtime.argv,
 
@@ -378,6 +384,18 @@ const currentProject = Object.assign({}, currentPackage.skypager || {}, {
     console.log('\n\n')
   },
 
+  externals: target => {
+    const ext = config[target] ? config[target].externals || config.externals : config.externals
+
+    return (
+      ext &&
+      Object.values(
+        mapValues(ext || {}, (varName, modName) =>
+          toExternal(modName, varName, currentProject.libraryTarget)
+        )
+      ).reduce((memo, h) => ({ ...memo, ...h }), {})
+    )
+  },
   /**
    * @type {SkypagerDependencies}
    */
@@ -422,4 +440,19 @@ async function resetCache() {
   ])
 
   return true
+}
+
+function toExternal(moduleName, varName, libraryTarget) {
+  if (libraryTarget === 'umd') {
+    return {
+      [moduleName]: {
+        commonjs: moduleName,
+        commonjs2: moduleName,
+        amd: moduleName,
+        root: varName,
+      },
+    }
+  } else {
+    return { [moduleName]: `global ${varName}` }
+  }
 }
