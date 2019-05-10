@@ -9,7 +9,16 @@
     "buildFolder": "build",
     "webpack": {
       "build": "webpack.config.js",
-      "scopeModules": false
+      "localOnly": false
+    },
+    "externals": {
+      "react": "React",
+      "react-dom": "ReactDOM",
+      "react-router-dom": "ReactRouterDOM",
+      "@skypager/web": "skypager",
+      "@skypager/runtime": "skypager",
+      "semantic-ui-react": "semanticUIReact",
+      "prop-types": "PropTypes"
     }
   },
   "main": "lib/index.js",
@@ -52,5 +61,11 @@
   },
   "gitHead": "3afe91f6ff7fd3bff7fe47a351619d5281155cd9",
   "keywords": [],
-  "contributors": []
+  "contributors": [],
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }
