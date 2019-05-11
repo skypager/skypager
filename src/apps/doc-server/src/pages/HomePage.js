@@ -8,7 +8,25 @@ export default class HomePage extends Component {
     runtime: types.object,
   }
 
+  state = {
+    docIds: []
+  }
+
+  componentDidMount() {
+    const { runtime } = this.context
+
+    const docIds = runtime.mdxDocs.available
+
+    this.setState({ docIds })
+  }
+
   render() {
-    return <Container style={{ padding: '48px' }}>Hi</Container>
+    const { docIds } = this.state
+
+    return (
+      <Container style={{ padding: '48px' }}>
+        {docIds.map((docId) => <Container key={docId}><Link to={`/docs/${docId}`}>{docId}</Link></Container>)}
+      </Container>
+    )
   }
 }

@@ -1,7 +1,7 @@
-import runtime from '@skypager/web'
 import React, { Component } from 'react'
 import types from 'prop-types'
 import { Link, Switch, Route, BrowserRouter } from 'react-router-dom'
+import runtime from '@skypager/web'
 import HomePage from './pages/HomePage'
 import DocPage from './pages/DocPage'
 
