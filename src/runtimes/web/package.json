@@ -10,7 +10,7 @@
     "build": "yarn build:lib && yarn build:web",
     "docs:api": "skypager generate-api-docs",
     "build:lib": "cross-env NODE_ENV=production babel --comments --source-maps --config-file ./babelrc -d lib src",
-    "build:web": "skypager build",
+    "build:web": "skypager build --app-only --include-unminified",
     "prepare": "yarn docs:api && yarn build",
     "postbuild": "skypager hash-build"
   },
@@ -27,12 +27,21 @@
   "contributors": [],
   "skypager": {
     "category": "runtimes",
-    "projectType": "runtime"
+    "projectType": "runtime",
+    "buildFolder": "lib",
+    "webpack": {
+      "build": "webpack.config.js",
+      "libraryName": "skypager",
+      "appName": "skypager-runtimes-web"
+    }
+  },
+  "babelRc": {
+    "presets": ["react-app"]
   },
   "browserslist": [
     ">0.2%",
     "not dead",
-    "not ie <= 11",
+    "not ie < 11",
     "not op_mini all"
   ]
 }
