@@ -3,10 +3,9 @@ const nodeExternals = require('webpack-node-externals')
 const cwd = __dirname
 const path = require('path')
 const SourceMapSupport = require('webpack-source-map-support')
-const paths = require('@skypager/webpack/config/paths')
 
 const nodeConfig = merge(
-  require('@skypager/webpack/config/webpack.config.builder')({ paths, babel: { lodash: false } }),
+  require('@skypager/webpack/config/webpack.config')('production'),
   {
     context: cwd,
     target: 'node',

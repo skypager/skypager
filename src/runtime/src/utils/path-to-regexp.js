@@ -1,15 +1,11 @@
-/* eslint-disable */
-/* copyright github/pillarjs */
-const { isArray } = require('lodash')
+export default pathToRegexp
 
-/**
- * Expose `pathToRegexp`.
- */
-module.exports = pathToRegexp
-module.exports.parse = parse
-module.exports.compile = compile
-module.exports.tokensToFunction = tokensToFunction
-module.exports.tokensToRegExp = tokensToRegExp
+export {
+  parse,
+  compile,
+  tokensToFunction,
+  tokensToRegExp  
+}
 
 /**
  * The main path matching regexp utility.
@@ -201,7 +197,7 @@ function tokensToFunction(tokens) {
         }
       }
 
-      if (isArray(value)) {
+      if (Array.isArray(value)) {
         if (!token.repeat) {
           throw new TypeError(
             'Expected "' +

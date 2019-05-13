@@ -1,9 +1,9 @@
-if (typeof global === 'undefined' && typeof window !== 'undefined') {
+if (typeof window !== 'undefined') {
   window.global = window
-}
 
-if (typeof process === 'undefined') {
-  global.process = { env: {} }
+  if (typeof process === 'undefined') {
+    window.process = { env: {} }
+  }
 }
 
 const { createSingleton } = require('./runtime')

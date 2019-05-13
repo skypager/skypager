@@ -92,7 +92,7 @@ export function pathMatcher(options = {}) {
 
   return function(route) {
     var keys = [],
-      reg = path.apply(this, [route, keys, options])
+      reg = path.call(this, [route, keys, options])
 
     return function(route, params) {
       var res = reg.exec(route),
