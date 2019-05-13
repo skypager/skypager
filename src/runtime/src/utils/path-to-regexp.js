@@ -1,11 +1,6 @@
 export default pathToRegexp
 
-export {
-  parse,
-  compile,
-  tokensToFunction,
-  tokensToRegExp  
-}
+export { parse, compile, tokensToFunction, tokensToRegExp }
 
 /**
  * The main path matching regexp utility.
