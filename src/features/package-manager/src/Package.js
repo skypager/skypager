@@ -18,26 +18,19 @@ export default class Package {
       get: () => context,
     })
 
+    const pkg = this
+
     const define = attr =>
       Object.defineProperty(this, attr, {
         enumerable: true,
-        get: () => _get(this._manifest, attr),
-        set: val => this.set(attr, val),
+        get: () => _get(pkg._manifest, attr),
+        set: val => pkg.set(attr, val),
         configurable: true,
       })
 
     Object.keys(this._manifest).forEach(attr => {
       define(attr)
     })
-
-    const set = this.set
-
-    this.set = (attribute, value) => {
-      if (Object.keys(this._manifest).indexOf(attribute) === -1) {
-        define(attribute)
-      }
-      set(attribute, value)
-    }
   }
 
   get taskRunner() {
@@ -91,7 +84,20 @@ export default class Package {
   }
 
   set(attribute, value) {
+    const pkg = this
+    
+    const define = attr =>
+      Object.defineProperty(this, attr, {
+        enumerable: true,
+        get: () => _get(pkg._manifest, attr),
+        set: val => pkg.set(attr, val),
+        configurable: true,
+      })
+      
     _set(this._manifest, attribute, value)
+    
+    define(attribute)
+ 
     this.packageManager.entities.set(this.name, this._manifest)
     this.save()
     return value
