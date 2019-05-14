@@ -47,22 +47,19 @@ function main() {
   const webpack = require('webpack')
   const config = require('../config/webpack.config')('production')
   const paths = require('../config/paths')
-  const checkRequiredFiles = require('react-dev-utils/checkRequiredFiles')
   const formatWebpackMessages = require('react-dev-utils/formatWebpackMessages')
 
-  // Warn and crash if required files are missing
-  if (!checkRequiredFiles([paths.appHtml, paths.appIndexJs])) {
-    process.exit(1)
-  }
-
   const manifest = require(paths.appPackageJson)
-  console.log(`Building ${manifest.name} v${manifest.version}`)
+  console.log(`Watching ${manifest.name} v${manifest.version}`)
 
   if (!runtime.argv.noClean && runtime.argv.clean !== false) {
     fs.emptyDirSync(paths.appBuild)
   }
 
-  copyPublicFolder()
+  try {
+    copyPublicFolder()
+  } catch (error) {}
+
   watch()
 
   // Create the production build and print the deployment instructions.
@@ -71,7 +68,7 @@ function main() {
 
     webpackConfig.plugins.push({
       apply(compiler) {
-        compiler.plugin('invalid', () => {
+        compiler.hooks.invalid.tap('ClearPlugin', () => {
           runtime.cli.clear()
           runtime.cli.print('Change Detected. Recompiling...')
         })

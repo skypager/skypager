@@ -38,6 +38,11 @@ module.exports = function getFlags(currentProject, isEnvProduction) {
     String(process.env.MINIFY_JS) !== 'false' &&
     String(argv.minifyJs) !== 'false'
 
+  const shouldMinifyCSS =
+    isEnvProduction &&
+    String(process.env.MINIFY_CSS) !== 'false' &&
+    String(argv.minifyCss) !== 'false'
+
   // Projects which attempt to import modules outside their own src folder
   // will receive an error, unless this is disabled in the script environment
   const shouldRequireLocalFolder =
@@ -96,6 +101,13 @@ module.exports = function getFlags(currentProject, isEnvProduction) {
   // Check if TypeScript is setup
   const useTypeScript = fs.existsSync(paths.appTsConfig)
 
+  const hmrEntry = argv.hmrEntry
+  let hmrEntryPath = argv.hmrEntryPath || 'react-dev-utils/webpackHotDevClient'
+
+  if (hmrEntry && hmrEntry.length && String(hmrEntry) !== 'false') {
+    hmrEntryPath = hmrEntry
+  }
+
   return {
     publicPath,
     publicUrl,
@@ -111,10 +123,13 @@ module.exports = function getFlags(currentProject, isEnvProduction) {
     shouldRequireLocalFolder,
     shouldMinifyJS,
     shouldMinifyHtml,
+    shouldMinifyCSS,
     babelCacheDirectory,
     terserCacheDirectory,
     hardSourceCacheDirectory,
     useWebpackCache,
     shouldCopyPublic,
+    hmrEntry,
+    hmrEntryPath,
   }
 }

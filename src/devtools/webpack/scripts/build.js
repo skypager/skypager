@@ -2,6 +2,9 @@
 process.env.BABEL_ENV = 'production'
 process.env.NODE_ENV = 'production'
 
+// Do this for our js based babelrc to tell which config to use based on the build task being run
+process.env.BUILD_ENV = process.env.BUILD_ENV || 'build-umd'
+
 // Makes the script crash on unhandled rejections instead of silently
 // ignoring them. In the future, promise rejections that are not handled will
 // terminate the Node.js process with a non-zero exit code.
@@ -257,10 +260,30 @@ async function main() {
             'To ignore, add ' + chalk.cyan('// eslint-disable-next-line') + ' to the line before.\n'
           )
         }
+
+        if (currentProject.argv.printStats) {
+          console.log(
+            stats.toString({
+              colors: true,
+            })
+          )
+          return
+        }
+
+        const buildFolder = path.relative(process.cwd(), paths.appBuild)
+
+        if (currentProject.argv.saveStats) {
+          currentProject.runtime.fsx.writeJsonSync(
+            path.resolve(buildFolder, 'stats.json'),
+            stats.toJson({
+              source: false,
+            })
+          )
+        }
+
         const appPackage = require(paths.appPackageJson)
         const publicUrl = paths.publicUrl
         const publicPath = config.output.publicPath
-        const buildFolder = path.relative(process.cwd(), paths.appBuild)
         currentProject.printHostingInstructions(
           appPackage,
           publicUrl,

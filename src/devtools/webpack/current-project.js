@@ -449,7 +449,7 @@ function toExternal(moduleName, varName, libraryTarget) {
         commonjs: moduleName,
         commonjs2: moduleName,
         amd: moduleName,
-        root: varName,
+        root: `${varName}`,
       },
     }
   } else {

@@ -9,6 +9,7 @@ const HardSourceWebpackPlugin = require('hard-source-webpack-plugin')
 const InlineChunkHtmlPlugin = require('react-dev-utils/InlineChunkHtmlPlugin')
 const TerserPlugin = require('terser-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const UnminifiedPlugin = require('unminified-webpack-plugin')
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin')
 const safePostCssParser = require('postcss-safe-parser')
 const ManifestPlugin = require('webpack-manifest-plugin')
@@ -23,8 +24,10 @@ const DashboardPlugin = require('webpack-dashboard/plugin')
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin-alt')
 const typescriptFormatter = require('react-dev-utils/typescriptFormatter')
 const mapValues = require('lodash/mapValues')
+const mapKeys = require('lodash/mapKeys')
 const pick = require('lodash/pick')
 const isEmpty = require('lodash/isEmpty')
+const isArray = require('lodash/isArray')
 const runtime = require('@skypager/node')
 const hashObject = require('node-object-hash')
 const SkypagerSocketPlugin = require('../plugins/skypager-socket-plugin')
@@ -70,6 +73,7 @@ module.exports = function(webpackEnv, options = {}) {
     shouldRequireLocalFolder,
     shouldMinifyJS,
     shouldMinifyHtml,
+    shouldMinifyCSS,
     shouldUseRelativeAssetPaths,
     publicUrl,
     publicPath,
@@ -85,6 +89,8 @@ module.exports = function(webpackEnv, options = {}) {
     useWebpackCache,
     maxAge = parseInt(WEBPACK_CACHE_MAX_DAYS, 10) * 24 * 60 * 60 * 1000,
     sizeThreshold = parseInt(WEBPACK_CACHE_MAX_MB, 10) * 1024 * 1024,
+    hmrEntry,
+    hmrEntryPath,
 
     // move these to flags if we end up keeping them
     useExternals = argv.externals !== false && !argv.noExternals,
@@ -97,7 +103,7 @@ module.exports = function(webpackEnv, options = {}) {
 
   // We automatically include html-webpack-plugin for every index.html found in the root of the public folder
   const htmlPlugins = currentProject.htmlTemplates.map(templatePath =>
-    createHtmlPlugin(templatePath, shouldMinifyHtml, currentProject)
+    createHtmlPlugin(templatePath, shouldMinifyHtml, currentProject, shouldMinifyJS)
   )
 
   // Get environment variables to inject into our app.
@@ -167,13 +173,14 @@ module.exports = function(webpackEnv, options = {}) {
         `Missing a valid entry point.  Looked for ${path.relative(
           paths.appPath,
           paths.appIndexJs
-        )} or ${path.relative(paths.appPath, paths.frameworkIndexJs)}`
+        )} or ${path.relative(paths.appPath, paths.frameworkIndexJs)}`,
+        paths
       )
       process.exit(1)
     }
 
     const appEntry = [
-      isEnvDevelopment && require.resolve('react-dev-utils/webpackHotDevClient'),
+      isEnvDevelopment && hmrEntry && require.resolve(hmrEntryPath),
       paths.appIndexJs,
       // We include the app code last so that if there is a runtime error during
       // initialization, it doesn't blow up the WebpackDevServer client, and
@@ -190,7 +197,7 @@ module.exports = function(webpackEnv, options = {}) {
       argv.appOnly
     )
 
-    const base = {
+    let base = {
       ...(appIndexExists && !excludeApp && { [appName]: appEntry }),
       ...(frameworkIndexExists && !excludeFramework && { [frameworkName]: frameworkEntry }),
       ...mapValues(config.entry || {}, value =>
@@ -198,10 +205,18 @@ module.exports = function(webpackEnv, options = {}) {
       ),
     }
 
-    if (includeUnminified) {
-      Object.keys(base).forEach(chunkName => {
-        base[`${chunkName}.min`] = base[chunkName]
+    if (isEnvProduction && (argv.babelPolyfill || config.babelPolyfill)) {
+      base = mapValues(base, (value, entryName) => {
+        if (isArray(value)) {
+          return ['@babel/polyfill/noConflict'].concat(value)
+        } else {
+          return ['@babel/polyfill/noConflict', value]
+        }
       })
+    }
+
+    if (shouldMinifyJS) {
+      base = mapKeys(base, (v, k) => (k.endsWith('.min') ? k : `${k}.min`))
     }
 
     return base
@@ -242,9 +257,10 @@ module.exports = function(webpackEnv, options = {}) {
       ? pick(entry(currentProject), 'app')
       : entry(currentProject)
 
-  const externals = currentProject.externals()
+  const externals = useExternals ? currentProject.externals() || [] : []
 
   const finalConfig = {
+    ...(currentProject.config.target && { target: currentProject.config.target }),
     mode: isEnvProduction ? 'production' : isEnvDevelopment && 'development',
 
     // Stop compilation early in production
@@ -288,9 +304,6 @@ module.exports = function(webpackEnv, options = {}) {
         // This is only used in production mode
         shouldMinifyJS &&
           new TerserPlugin({
-            ...(includeUnminified && {
-              chunkFilter: chunk => String(chunk.name).match(/\.min/) && entryConfig[chunk.name],
-            }),
             terserOptions: {
               parse: {
                 // we want terser to parse ecma 8 code. However, we don't want it
@@ -332,22 +345,26 @@ module.exports = function(webpackEnv, options = {}) {
             cache: terserCacheDirectory,
             sourceMap: shouldUseSourceMap,
           }),
+
+        includeUnminified && shouldMinifyJS && new UnminifiedPlugin(),
+
         // This is only used in production mode
-        new OptimizeCSSAssetsPlugin({
-          cssProcessorOptions: {
-            parser: safePostCssParser,
-            map: shouldUseSourceMap
-              ? {
-                  // `inline: false` forces the sourcemap to be output into a
-                  // separate file
-                  inline: false,
-                  // `annotation: true` appends the sourceMappingURL to the end of
-                  // the css file, helping the browser find the sourcemap
-                  annotation: true,
-                }
-              : false,
-          },
-        }),
+        shouldMinifyCSS &&
+          new OptimizeCSSAssetsPlugin({
+            cssProcessorOptions: {
+              parser: safePostCssParser,
+              map: shouldUseSourceMap
+                ? {
+                    // `inline: false` forces the sourcemap to be output into a
+                    // separate file
+                    inline: false,
+                    // `annotation: true` appends the sourceMappingURL to the end of
+                    // the css file, helping the browser find the sourcemap
+                    annotation: true,
+                  }
+                : false,
+            },
+          }),
       ].filter(Boolean),
 
       // Automatically split vendor and commons
@@ -364,7 +381,7 @@ module.exports = function(webpackEnv, options = {}) {
           : false,
     },
     resolve: {
-      aliasFields: ['browser'],
+      // aliasFields: ['browser'],
 
       // This allows you to set a fallback for where Webpack should look for modules.
       // We placed these paths second because we want `node_modules` to "win"
@@ -388,6 +405,7 @@ module.exports = function(webpackEnv, options = {}) {
         // Support React Native Web
         // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
         'react-native': 'react-native-web',
+        '@skypager/helpers-document': '@skypager/helpers-document/lib/skypager-helpers-document.js',
         // a project can alias their own modules by defining a moduleAliases property in package.json skypager.moduleAliases
         ...(currentProject.moduleAliases || {}),
       },
@@ -673,7 +691,6 @@ module.exports = function(webpackEnv, options = {}) {
     },
     plugins: [
       ...htmlPlugins,
-
       // Inlines the webpack runtime script. This script is too small to warrant
       // a network request.
       isEnvProduction &&
@@ -695,6 +712,7 @@ module.exports = function(webpackEnv, options = {}) {
       // during a production build.
       // Otherwise React will be compiled in the very slow development mode.
       new webpack.DefinePlugin(env.stringified),
+
       // This is necessary to emit hot updates (currently CSS only):
       isEnvDevelopment && new webpack.HotModuleReplacementPlugin(),
       // Watcher doesn't work well if you mistype casing in a path so we use
@@ -858,7 +876,12 @@ module.exports = function(webpackEnv, options = {}) {
   return finalConfig
 }
 
-function createHtmlPlugin(template, minify = true, currentProject = require('../current-project')) {
+function createHtmlPlugin(
+  template,
+  minify = true,
+  currentProject = require('../current-project'),
+  shouldMinifyJS
+) {
   const filename = require('path').basename(template)
 
   return new HtmlWebpackPlugin(
@@ -868,7 +891,7 @@ function createHtmlPlugin(template, minify = true, currentProject = require('../
         inject: true,
         filename,
         template,
-        chunks: [currentProject.config.appName || 'app'],
+        chunks: [`${currentProject.config.appName || 'app'}${shouldMinifyJS ? '.min' : ''}`],
       },
       minify
         ? {

@@ -10,7 +10,12 @@ const appDirectory = fs.realpathSync(process.cwd())
 const resolveApp = relativePath => path.resolve(appDirectory, relativePath)
 
 const manifest = require(resolveApp('package.json'))
-const projectConfig = Object.assign({}, manifest.skypager || {}, runtime.argv)
+const projectConfig = Object.assign(
+  {},
+  manifest.skypager || {},
+  (manifest.skypager && manifest.skypager.webpack && manifest.skypager.webpack) || {},
+  runtime.argv
+)
 
 const envPublicUrl = process.env.PUBLIC_URL
 
@@ -83,11 +88,11 @@ const resolveModule = (resolveFn, filePath) => {
 module.exports = {
   dotenv: resolveApp('.env'),
   appPath: resolveApp('.'),
-  appBuild: resolveApp('build'),
+  appBuild: resolveApp(projectConfig.buildFolder || 'lib'),
   appPublic: resolveApp('public'),
   appHtml: resolveApp('public/index.html'),
-  appIndexJs: resolveModule(resolveApp, appEntry),
-  frameworkIndexJs: resolveModule(resolveApp, frameworkEntry),
+  appIndexJs: resolveModule(resolveApp, appEntry).replace(/\.js\.js$/, '.js'),
+  frameworkIndexJs: resolveModule(resolveApp, frameworkEntry).replace(/\.js\.js$/, '.js'),
   appPackageJson: resolveApp('package.json'),
   appSrc: resolveApp('src'),
   appTsConfig: resolveApp('tsconfig.json'),

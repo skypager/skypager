@@ -70,8 +70,6 @@ checkBrowsers(paths.appPath, isInteractive)
     }
     const config = configFactory('development')
 
-    debugger
-
     const protocol = process.env.HTTPS === 'true' ? 'https' : 'http'
     const appName = require(paths.appPackageJson).name
     const urls = prepareUrls(protocol, HOST, port)
