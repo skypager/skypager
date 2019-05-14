@@ -4,13 +4,15 @@
   "description": "universal javascript application runtime",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
+  "module": "lib/es/index.js",
   "browser": "lib/skypager-runtime.min.js",
   "react-native": "lib/skypager-runtime.js",
   "license": "MIT",
   "scripts": {
     "build": "yarn build:lib && yarn build:web",
     "postbuild": "skypager hash-build",
-    "build:lib": "cross-env NODE_ENV=production babel --comments --source-maps --config-file ./babelrc -d lib src",
+    "build:lib": "cross-env BUILD_ENV=build NODE_ENV=production babel --comments --source-maps -d lib src",
+    "build:es": "cross-env BUILD_ENV=build-es NODE_ENV=production babel --comments --source-maps -d lib/es src",
     "build:web": "skypager build --app-only --no-clean --include-unminified",
     "prepare": "yarn docs:api && yarn build",
     "docs:api": "skypager generate-api-docs",
@@ -56,7 +58,7 @@
   "browserslist": [
     ">0.2%",
     "not dead",
-    "not ie <= 11",
+    "not ie < 11",
     "not op_mini all"
   ]
 }

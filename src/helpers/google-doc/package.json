@@ -4,14 +4,17 @@
   "description": "skypager google docs helper",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
-  "browser": "lib/skypager-helpers-google-doc.min.js",
+  "module": "lib/es/index.js",
   "react-native": "lib/index.js",
   "scripts": {
-    "prepare": "yarn build",
-    "build": "cross-env NODE_ENV=production webpack --config webpack.config.js",
-    "postbuild": "skypager hash-build",
     "smoke-test": "skypager smoke-test",
-    "test": "skypager test --timeout 10000"
+    "test": "skypager test --timeout 10000",
+    "prepare": "yarn build",
+    "prebuild": "rimraf lib",
+    "build": "yarn build:node && yarn build:es",
+    "postbuild": "skypager hash-build",
+    "build:node": "cross-env BUILD_ENV=build babel --comments --source-maps -d lib src",
+    "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src"
   },
   "publishConfig": {
     "access": "public"
@@ -31,7 +34,14 @@
   "contributors": [],
   "skypager": {
     "category": "helpers",
-"projectType": "helper",
-    "providesScripts": false
-  }
+    "projectType": "helper",
+    "providesScripts": false,
+    "appName": "skypager-helpers-google-doc"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }

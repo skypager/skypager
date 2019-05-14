@@ -8,9 +8,11 @@
     "access": "public"
   },
   "scripts": {
-    "prebuild": "yarn docs:api",
-    "build": "rimraf lib && babel --comments --source-maps -d lib src",
-    "postbuild": "skypager hash-build",
+    "prebuild": "rimraf lib && yarn docs:api",
+    "build": "yarn build:lib && yarn build:es",
+    "build:lib": "cross-env BUILD_ENV=build babel -d lib src --source-maps --comments",
+    "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src",    
+    "postbuild": "skypager hash-build",   
     "docs:api": "skypager generate-api-docs",
     "watch": "babel --watch --comments --source-maps -d lib src",
     "console": "skypager console",

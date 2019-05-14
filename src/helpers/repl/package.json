@@ -4,15 +4,19 @@
   "description": "an awesome repl",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
+  "module": "lib/es/index.js",
   "license": "MIT",
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "build": "skypager build",
-    "postbuild": "skypager hash-build",
+    "test": "exit 0",
+    "prepare": "yarn build",
     "prebuild": "rimraf lib",
-    "test": "exit 0"
+    "build": "yarn build:node && yarn build:es && yarn build:web",
+    "postbuild": "skypager hash-build",
+    "build:node": "cross-env BUILD_ENV=build babel --comments --source-maps -d lib src",
+    "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src"   
   },
   "dependencies": {
     "bluebird": "^3.5.0",

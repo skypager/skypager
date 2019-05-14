@@ -9,11 +9,14 @@
     "access": "public"
   },
   "scripts": {
+    "prepare": "yarn build",
     "prebuild": "rimraf lib",
-    "build": "babel -d lib src --source-maps --comments",
-    "postbuild": "skypager hash-build",
-    "docs:api": "skypager generate-api-docs",
-    "prepare": "yarn docs:api && yarn build",
+    "build": "yarn build:lib && yarn build:es",
+    "build:lib": "cross-env BUILD_ENV=build babel -d lib src --source-maps --comments",
+    "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src",    
+    "postbuild:lib": "yarn docs:api",
+    "postbuild": "skypager hash-build",   
+    "docs:api": "skypager generate-api-docs",         
     "test": "mocha --require @babel/register --file test/test.js --timeout 10000 test/**/*.spec.js"
   },
   "skypager": {

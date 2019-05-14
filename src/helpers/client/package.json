@@ -5,12 +5,18 @@
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
   "browser": "lib/skypager-helpers-client.min.js",
+  "module": "lib/es/index.js",
   "react-native": "lib/index.js",
   "scripts": {
-    "build": "cross-env NODE_ENV=production webpack --config webpack.config.js",
+    "build:web": "skypager build --app-only --include-unminified --no-clean",
     "test": "skypager test",
     "prepare": "yarn build",
-    "postbuild": "skypager hash-build"
+    "postbuild": "skypager hash-build",
+    "prebuild:es": "yarn docs:api",
+    "build": "yarn build:lib && yarn build:es && yarn build:web",
+    "build:lib": "cross-env BUILD_ENV=build babel -d lib src --source-maps --comments",
+    "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src",
+    "docs:api": "skypager generate-api-docs"
   },
   "publishConfig": {
     "access": "public"
@@ -29,6 +35,13 @@
   "contributors": [],
   "skypager": {
     "category": "helpers",
-    "projectType": "helper"
-  }
+    "projectType": "helper",
+    "appName": "skypager-helpers-client"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie = 11",
+    "not op_mini all"
+  ]
 }

@@ -6,8 +6,12 @@
   "homepage": "https://skypager-cli.skypager.io",
   "license": "SEE LICENSE IN LICENSE.md",
   "main": "./lib/index.js",
+  "module": "./lib/es/index.js",
   "scripts": {
-    "build": "babel -d lib src",
+    "prebuild": "rimraf lib",
+    "build": "yarn build:lib && yarn build:es",
+    "build:lib": "cross-env BUILD_ENV=build babel -d lib src --source-maps --comments",
+    "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src",    
     "postbuild": "skypager hash-build",
     "prepare": "yarn build",
     "test": "exit 0"

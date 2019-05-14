@@ -4,15 +4,18 @@
   "description": "programatically manage webpack compilations",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
+  "module": "lib/es/index.js",
   "publishConfig": {
     "registryAccess": "public"
   },
   "scripts": {
-    "build": "rimraf lib && babel --comments --source-maps -d lib src",
-    "postbuild": "skypager hash-build",
-    "docs:api": "skypager generate-api-docs",
-    "watch": "babel --watch --comments --source-maps -d lib src",
-    "prepare": "yarn docs:api && yarn build",
+    "prepare": "yarn build",
+    "prebuild": "rimraf lib && yarn docs:api",
+    "build": "yarn build:lib && yarn build:es",
+    "build:lib": "cross-env BUILD_ENV=build babel -d lib src --source-maps --comments",
+    "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src",    
+    "postbuild": "skypager hash-build",   
+    "docs:api": "skypager generate-api-docs",               
     "test": "mocha --require @babel/register --file test/test.js --timeout 10000 test/**/*.spec.js",
     "test:watch": "skypager test --webpack-config webpack.config.test.js --watch"
   },
