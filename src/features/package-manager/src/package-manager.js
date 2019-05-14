@@ -542,7 +542,7 @@ export default class PackageManager extends Feature {
 
     const p = new Package(pkg, {
       ...this.context,
-      packageManager: this
+      packageManager: this,
     })
 
     this.entities.set(packageName, p)
