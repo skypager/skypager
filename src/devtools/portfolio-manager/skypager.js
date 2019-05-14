@@ -1,5 +1,7 @@
 module.exports = {
   attach(runtime) {
-    runtime.use(require('.'))
+    try {
+      runtime.use(require('.'))
+    } catch (error) {}
   },
 }

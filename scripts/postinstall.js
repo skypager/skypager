@@ -30,7 +30,9 @@ try {
   console.log('Node Modules Version: ' + require('@skypager/runtime/package.json').version)
 } catch (error) {}
 
-process.env.DISABLE_SKYPAGER_FILE_MANAGER = true
+//process.env.DISABLE_SKYPAGER_FILE_MANAGER = true
+process.env.POSTINSTALL = 'true'
+process.env.USE_WEBPACK_CACHE = 'true'
 
 const stageOne = [
   ['@skypager/helpers-client', 'src/helpers/client', 'lib'],
@@ -85,6 +87,7 @@ async function main() {
 
   await spawn('yarn', ['build'], {
     cwd: resolve(__dirname, '..', 'src', 'runtime'),
+    stdio,
   })
 
   if (!first.length && !rest.length) {

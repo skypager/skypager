@@ -1,10 +1,16 @@
-const runtime = require('@skypager/node').use(require('@skypager/helpers-document'))
+const runtime = require('@skypager/node')
 
 const { baseFolder = 'src', _: sourceFiles = [] } = runtime.argv
 
 const { intersection } = runtime.lodash
 
 async function main() {
+  if (process.env.POSTINSTALL) {
+    process.exit(0)
+  }
+
+  runtime.use(require('..'))
+
   await runtime.scripts.discover({
     defaults: {
       babelConfig: require('@skypager/helpers-document/src/babel/babel-config')(),

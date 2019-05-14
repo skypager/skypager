@@ -85,7 +85,7 @@ export default class Package {
 
   set(attribute, value) {
     const pkg = this
-    
+
     const define = attr =>
       Object.defineProperty(this, attr, {
         enumerable: true,
@@ -93,11 +93,11 @@ export default class Package {
         set: val => pkg.set(attr, val),
         configurable: true,
       })
-      
+
     _set(this._manifest, attribute, value)
-    
+
     define(attribute)
- 
+
     this.packageManager.entities.set(this.name, this._manifest)
     this.save()
     return value

@@ -12,7 +12,7 @@ module.exports = function getFlags(currentProject, isEnvProduction) {
     !noCache &&
     String(process.env.USE_HARD_SOURCE_PLUGIN) !== 'false' &&
     String(argv.webpackCache) !== 'false' &&
-    argv.webpackCache
+    (argv.webpackCache || process.env.USE_WEBPACK_CACHE)
 
   const babelCacheDirectory =
     noCache || argv.babelCache === false

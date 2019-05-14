@@ -268,9 +268,9 @@ const currentProject = Object.assign({}, currentPackage.skypager || {}, {
       return buildSummary
     }
 
-    await fileManager.startAsync(options)
+    await runtime.fileManager.startAsync(options)
 
-    buildSummary = await fileManager.hashBuildTree({
+    buildSummary = await runtime.fileManager.hashBuildTree({
       baseFolder: this.paths.appBuild,
       files: [this.resolvePortfolioPath('yarn.lock')],
     })
