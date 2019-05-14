@@ -537,16 +537,20 @@ function setupDevelopmentMiddlewares(app, options = {}) {
 
 function setupHistoryFallback(app, historyOptions) {
   const { runtime } = this
+  const { buildFolder = historyOptions.buildFolder } = this.options
   const history = require('express-history-api-fallback')
 
   if (historyOptions === true) {
     app.use(
       history('index.html', {
-        root: runtime.resolve('build'),
+        root: runtime.resolve(buildFolder),
       })
     )
   } else if (typeof historyOptions === 'object') {
-    let { htmlFile = 'index.html', root: historyRoot = runtime.resolve('build') } = historyOptions
+    let {
+      htmlFile = 'index.html',
+      root: historyRoot = runtime.resolve(buildFolder),
+    } = historyOptions
     app.use(history(runtime.pathUtils.basename(htmlFile), { root: runtime.resolve(historyRoot) }))
   }
 
