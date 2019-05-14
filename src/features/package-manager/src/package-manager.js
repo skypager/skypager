@@ -2,6 +2,7 @@ import { Feature } from '@skypager/node'
 import pacote from 'pacote'
 import { tmpdir } from 'os'
 import { create as createTar, extract as extractTar } from 'tar'
+import Package from './package'
 
 /**
  * @class PackageManager
@@ -39,6 +40,8 @@ export default class PackageManager extends Feature {
       status: CREATED,
 
       manifests: ['shallowMap', {}],
+
+      entities: ['shallowMap', {}],
 
       nodeModules: ['shallowMap', {}],
 
@@ -522,6 +525,30 @@ export default class PackageManager extends Feature {
     return runtime.resolve('node_modules', '.cache', 'skypager-package-manager')
   }
 
+  get allEntities() {
+    return this.packageNames.map(e => this.entity(e))
+  }
+
+  entity(packageName) {
+    if (this.entities.has(packageName)) {
+      return this.entities.get(packageName)
+    }
+
+    const pkg = this.findByName(packageName)
+
+    if (!pkg) {
+      throw new Error(`Package ${packageName} not found`)
+    }
+
+    const p = new Package(pkg, {
+      ...this.context,
+      packageManager: this
+    })
+
+    this.entities.set(packageName, p)
+
+    return p
+  }
   /**
    * Finds a package by its id, or name
    *

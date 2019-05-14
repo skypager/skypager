@@ -67,7 +67,7 @@ module.exports = () => ({
       {
         modules: isESBuild || isUMDBuild ? false : 'commonjs',
         targets: {
-          ...isLibBuild && { node: '8.0.0' },
+          ...(isLibBuild && { node: '8.0.0' }),
           browsers,
         },
       },
