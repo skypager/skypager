@@ -23,6 +23,8 @@ export default class Editor extends Feature {
   async loadEditorDependencies() {
     const { assetLoader } = this
 
+    await assetLoader.script(`https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.4/ace.js`)
+
     await this.loadBraceExtension('language_tools')
 
     await Promise.all([

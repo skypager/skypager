@@ -33,6 +33,7 @@ export default class Skypage extends Component {
     const { doc, components } = this.props
     const { Component: Doc } = doc
 
+    console.log('DOC', Doc, components)
     return <Doc components={components} />
   }
 }

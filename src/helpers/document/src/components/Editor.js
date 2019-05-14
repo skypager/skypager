@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import types from 'prop-types'
+import { findDOMNode } from 'react-dom'
 
 export default class Editor extends Component {
   static contextTypes = {
@@ -35,6 +36,43 @@ export default class Editor extends Component {
     this.ReactAce = this.AceEditor = ReactAce
 
     this.setState({ loading: false })
+
+    const containerNode = findDOMNode(this).closest('pre[data-line-number]')
+
+    if (containerNode) {
+      const lineNumber = containerNode.dataset.lineNumber
+      console.log('Setting Editor CodeBlockID', `codeBlock${lineNumber}`)
+      this.setState({
+        codeBlockId: `codeBlock${lineNumber}`,
+      })
+    }
+  }
+
+  handleRunResult = async (result = {}) => {
+    const { handleResult } = this.props
+    const { results = [], errors = [], hasErrors = !!errors.length, identifiers = [] } = result
+    this.setState(
+      {
+        results,
+        errors,
+        hasErrors,
+        identifiers,
+      },
+      () => handleResult && handleResult(this)
+    )
+  }
+
+  handleCommand = async (command, options = {}) => {
+    const { value } = this.state
+
+    switch (command) {
+      case 'run':
+        const { handler } = options
+        await handler(value).then(this.handleRunResult)
+        break
+      default:
+        break
+    }
   }
 
   handleChange = (newValue, ...args) => {
@@ -46,7 +84,7 @@ export default class Editor extends Component {
   }
 
   render() {
-    const { header, footer } = this.props
+    const { header, footer, results } = this.props
     const { loading, value } = this.state
 
     if (loading) {
@@ -80,7 +118,7 @@ function CodeEditor(props) {
       theme="tomorrow"
       width="100%"
       height="100px"
-      value={value}
+      {...value && { value: String(value).trim() }}
       highlightActiveLine={false}
       maxLines={Infinity}
       showGutter={false}

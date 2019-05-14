@@ -14,7 +14,10 @@ export default class VmRunner extends Feature {
   beforeInitialize() {
     const { runtime } = this
 
-    if (!runtime.isFeatureEnabled('module-factory')) {
+    if (
+      !runtime.isFeatureEnabled('module-factory') &&
+      runtime.features.checkKey('module-factory')
+    ) {
       runtime.feature('module-factory').enable()
     }
 
@@ -27,7 +30,10 @@ export default class VmRunner extends Feature {
 
     const vmContext = this.runtime.vm.createContext({
       ...sandbox,
-      require: this.runtime.moduleFactory.createRequireFunction(filename),
+      require: this.tryGet(
+        'requireFunction',
+        this.runtime.moduleFactory.createRequireFunction(filename)
+      ),
       console,
     })
 
@@ -77,8 +83,9 @@ export default class VmRunner extends Feature {
 
     Object.keys(options).forEach(key => (context[key] = options[key]))
 
-    if (global.regeneratorRuntime) {
-      context.regeneratorRuntime = global.regeneratorRuntime
+    if (global.regeneratorRuntime || (runtime.isBrowser && window.regeneratorRuntime)) {
+      context.regeneratorRuntime =
+        global.regeneratorRuntime || (runtime.isBrowser && window.regeneratorRuntime)
     }
 
     if (options.global !== false) {
