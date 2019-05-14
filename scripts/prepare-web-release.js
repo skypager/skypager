@@ -9,10 +9,12 @@ async function main() {
     runtime.resolve('src', 'runtime', 'lib', 'skypager-runtime.js'),
     runtime.resolve('public', 'latest', 'skypager-runtime.js')
   )
-  await runtime.fsx.copyAsync(
-    runtime.resolve('src', 'runtime', 'lib', 'skypager-runtime.js.map'),
-    runtime.resolve('public', 'latest', 'skypager-runtime.js.map')
-  )
+  await runtime.fsx
+    .copyAsync(
+      runtime.resolve('src', 'runtime', 'lib', 'skypager-runtime.js.map'),
+      runtime.resolve('public', 'latest', 'skypager-runtime.js.map')
+    )
+    .catch(e => e)
   await runtime.fsx.copyAsync(
     runtime.resolve('src', 'runtime', 'lib', 'skypager-runtime.min.js'),
     runtime.resolve('public', 'latest', 'skypager-runtime.min.js')
@@ -25,10 +27,12 @@ async function main() {
     runtime.resolve('src', 'runtimes', 'web', 'lib', 'skypager-runtimes-web.js'),
     runtime.resolve('public', 'latest', 'skypager-runtimes-web.js')
   )
-  await runtime.fsx.copyAsync(
-    runtime.resolve('src', 'runtimes', 'web', 'lib', 'skypager-runtimes-web.js.map'),
-    runtime.resolve('public', 'latest', 'skypager-runtimes-web.js.map')
-  )
+  await runtime.fsx
+    .copyAsync(
+      runtime.resolve('src', 'runtimes', 'web', 'lib', 'skypager-runtimes-web.js.map'),
+      runtime.resolve('public', 'latest', 'skypager-runtimes-web.js.map')
+    )
+    .catch(e => e)
   await runtime.fsx.copyAsync(
     runtime.resolve('src', 'runtimes', 'web', 'lib', 'skypager-runtimes-web.min.js'),
     runtime.resolve('public', 'latest', 'skypager-runtimes-web.min.js')
