@@ -1,7 +1,6 @@
 process.env.NODE_ENV = 'production'
 
-const runtime = require('@skypager/node')
-  .use(require('@skypager/helpers-document'))
+const runtime = require('@skypager/node').use(require('@skypager/helpers-document'))
 
 const webpack = require('webpack')
 
@@ -41,20 +40,20 @@ function createCompiler() {
   const config = require('../config/webpack.config')('production', {
     minifyJs: false,
     webpackCache: false,
-    htmlPlugin: true, 
+    htmlPlugin: false,
     localOnly: false,
     minify: false,
     projectType: 'mdxBundle',
-    libraryTarget: 'umd'
+    libraryTarget: 'umd',
   })
 
-  config.target = 'node'  
-  config.output.filename = 'mdx.bundle.js' 
-  config.output.chunkFilename = 'mdx.bundle.chunk-[chunkhash:8].js' 
-  config.output.library = `${upperFirst(camelCase(
-    kebabCase(runtime.currentPackage.name.replace('/', '-').replace('@',''))
-  ))}MdxDocs`
-  
+  config.target = 'node'
+  config.output.filename = 'mdx.bundle.js'
+  config.output.chunkFilename = 'mdx.bundle.chunk-[chunkhash:8].js'
+  config.output.library = `${upperFirst(
+    camelCase(kebabCase(runtime.currentPackage.name.replace('/', '-').replace('@', '')))
+  )}MdxDocs`
+
   config.externals.push({
     '@skypager/helpers-document': {
       commonjs: '@skypager/helpers-document',
@@ -64,14 +63,13 @@ function createCompiler() {
   })
   config.module.rules.unshift({
     test: /index.js$/,
-    include: [
-      paths.frameworkIndexJs
-    ],
-    use: [{
-      loader: require.resolve('skeleton-loader'), 
-      options: {
-        procedure: () => {
-          const mod = `
+    include: [paths.frameworkIndexJs],
+    use: [
+      {
+        loader: require.resolve('skeleton-loader'),
+        options: {
+          procedure: () => {
+            const mod = `
           import runtime from '@skypager/runtime'
           import * as DocumentHelper from '@skypager/helpers-document'
           runtime.use(DocumentHelper)
@@ -79,33 +77,42 @@ function createCompiler() {
 
           const ctx = {}
 
-          ${runtime.mdxDocs.available.map((doc,i) => `import * as doc${i} from '${runtime.pathUtils.relative(paths.appSrc, `${doc}.md`)}'`).join("\n")}
-          ${runtime.mdxDocs.available.map((doc,i) => `ctx["${prefix}${doc}"] = doc${i};`).join("\n")} 
+          ${runtime.mdxDocs.available
+            .map(
+              (doc, i) =>
+                `import * as doc${i} from '${runtime.pathUtils.relative(
+                  paths.appSrc,
+                  `${doc}.md`
+                )}'`
+            )
+            .join('\n')}
+          ${runtime.mdxDocs.available
+            .map((doc, i) => `ctx["${prefix}${doc}"] = doc${i};`)
+            .join('\n')} 
 
           export default runtime.Helper.createMockContext(ctx) 
           `.trim()
-          
-          return mod
-        }
-      }
-    }]
+
+            return mod
+          },
+        },
+      },
+    ],
   })
-  
+
   config.entry = {
-    mdxDocs: [
-      '@babel/polyfill/noConflict',
-      paths.frameworkIndexJs
-    ] 
+    mdxDocs: ['@babel/polyfill/noConflict', paths.frameworkIndexJs],
   }
 
   const compiler = webpack(config)
 
   return {
     ...compiler,
-    runAsync: () => new Promise((resolve, reject) => {
-      compiler.run((err, stats) => {
-        err ? reject(err) : resolve(stats)
-      })
-    })
+    runAsync: () =>
+      new Promise((resolve, reject) => {
+        compiler.run((err, stats) => {
+          err ? reject(err) : resolve(stats)
+        })
+      }),
   }
 }

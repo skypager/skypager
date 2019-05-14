@@ -29,6 +29,33 @@ export default class DocPage extends Component {
   }
 
   componentDidMount() {
+    const { runtime } = this.context
+
+    if (runtime.currentState.docsLoaded) {
+      this.loadDocument()
+    }
+
+    this.disposer = runtime.state.observe(({ name, oldValue, newValue }) => {
+      if(name === 'docsLoaded' && newValue && !oldValue) {
+        !this.state.doc && this.loadDocument()
+      } 
+    })
+  }
+
+  componentDidUpdate(previousProps) {
+    const { params } = this.props.match
+    const { docId } = params   
+
+    if (docId !== previousProps.match.params.docId) {
+      this.loadDocument()
+    }
+  }
+
+  componentWillUnmount() {
+    this.disposer && this.disposer()
+  }
+
+  loadDocument() {
     const { params } = this.props.match
     const { docId } = params
     const { runtime } = this.context

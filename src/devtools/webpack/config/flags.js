@@ -3,7 +3,7 @@ const fs = require('fs-extra')
 module.exports = function getFlags(currentProject, isEnvProduction, options = {}) {
   const { paths } = currentProject
   const { projectType } = currentProject.config
-  
+
   let argv = currentProject.config
 
   argv = Object.assign({}, argv, options)
@@ -112,28 +112,32 @@ module.exports = function getFlags(currentProject, isEnvProduction, options = {}
     hmrEntryPath = hmrEntry
   }
 
-  return Object.assign({}, {
-    publicPath,
-    publicUrl,
-    shouldUseSourceMap,
-    shouldInlineRuntimeChunk,
-    useTypeScript,
-    shouldUseRelativeAssetPaths,
-    staticOutputPrefix,
-    cssFilename,
-    cssChunkFilename,
-    includeUnminified,
-    useServiceWorker,
-    shouldRequireLocalFolder,
-    shouldMinifyJS,
-    shouldMinifyHtml,
-    shouldMinifyCSS,
-    babelCacheDirectory,
-    terserCacheDirectory,
-    hardSourceCacheDirectory,
-    useWebpackCache,
-    shouldCopyPublic,
-    hmrEntry,
-    hmrEntryPath,
-  }, options)
+  return Object.assign(
+    {},
+    {
+      publicPath,
+      publicUrl,
+      shouldUseSourceMap,
+      shouldInlineRuntimeChunk,
+      useTypeScript,
+      shouldUseRelativeAssetPaths,
+      staticOutputPrefix,
+      cssFilename,
+      cssChunkFilename,
+      includeUnminified,
+      useServiceWorker,
+      shouldRequireLocalFolder,
+      shouldMinifyJS,
+      shouldMinifyHtml,
+      shouldMinifyCSS,
+      babelCacheDirectory,
+      terserCacheDirectory,
+      hardSourceCacheDirectory,
+      useWebpackCache,
+      shouldCopyPublic,
+      hmrEntry,
+      hmrEntryPath,
+    },
+    options
+  )
 }

@@ -29,7 +29,7 @@ export default class App extends Component {
       <BrowserRouter>
         <Switch>
           <Route path="/" exact component={HomePage} />
-          <Route path="/docs/:docId" component={DocPage} />
+          <Route path="/docs/:docId*" component={DocPage} />
         </Switch>
       </BrowserRouter>
     )

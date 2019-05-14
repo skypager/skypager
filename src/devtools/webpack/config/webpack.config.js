@@ -102,20 +102,21 @@ module.exports = function(webpackEnv, options = {}) {
 
     useHtml = argv.htmlPlugin !== false,
 
-    watchPaths = argv.watchPaths || [ paths.appSrc ] ,
+    watchPaths = argv.watchPaths || [paths.appSrc],
 
     sourcePaths = argv.sourcePaths || [paths.appSrc],
 
     mdxPaths = argv.mdxPaths || [paths.appSrc, paths.docsFolder].filter(Boolean),
 
-    disableMinification = argv.disableMinification || argv.minify === false
-
+    disableMinification = argv.disableMinification || argv.minify === false,
   } = require('./flags')(currentProject, webpackEnv, options)
 
   // We automatically include html-webpack-plugin for every index.html found in the root of the public folder
-  const htmlPlugins = !useHtml ? [] : currentProject.htmlTemplates.map(templatePath =>
-    createHtmlPlugin(templatePath, shouldMinifyHtml, currentProject, shouldMinifyJS)
-  )
+  const htmlPlugins = !useHtml
+    ? []
+    : currentProject.htmlTemplates.map(templatePath =>
+        createHtmlPlugin(templatePath, shouldMinifyHtml, currentProject, shouldMinifyJS)
+      )
 
   // Get environment variables to inject into our app.
   const env = getClientEnvironment(publicUrl)
@@ -398,10 +399,13 @@ module.exports = function(webpackEnv, options = {}) {
       // We placed these paths second because we want `node_modules` to "win"
       // if there are any conflicts. This matches Node resolution mechanism.
       // https://github.com/facebook/create-react-app/issues/253
-      modules: sourcePaths.concat(mdxPaths).concat(['node_modules']).concat(
-        // It is guaranteed to exist because we tweak it in `env.js`
-        process.env.NODE_PATH.split(path.delimiter).filter(Boolean)
-      ),
+      modules: sourcePaths
+        .concat(mdxPaths)
+        .concat(['node_modules'])
+        .concat(
+          // It is guaranteed to exist because we tweak it in `env.js`
+          process.env.NODE_PATH.split(path.delimiter).filter(Boolean)
+        ),
       // These are the reasonable defaults supported by the Node ecosystem.
       // We also include JSX as a common component filename extension to support
       // some tools, although we do not recommend using it, see:
@@ -416,7 +420,8 @@ module.exports = function(webpackEnv, options = {}) {
         // Support React Native Web
         // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
         'react-native': 'react-native-web',
-        '@skypager/helpers-document': '@skypager/helpers-document/lib/skypager-helpers-document.min.js',
+        '@skypager/helpers-document':
+          '@skypager/helpers-document/lib/skypager-helpers-document.min.js',
         // a project can alias their own modules by defining a moduleAliases property in package.json skypager.moduleAliases
         ...(currentProject.moduleAliases || {}),
       },

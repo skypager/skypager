@@ -1,2 +1,0 @@
-- [Wow](/)
-- [Tutorials](/docs/tutorials)
