@@ -9,7 +9,7 @@ export default class HomePage extends Component {
   }
 
   state = {
-    docIds: []
+    docIds: [],
   }
 
   componentDidMount() {
@@ -25,7 +25,11 @@ export default class HomePage extends Component {
 
     return (
       <Container style={{ padding: '48px' }}>
-        {docIds.map((docId) => <Container key={docId}><Link to={`/docs/${docId}`}>{docId}</Link></Container>)}
+        {docIds.map(docId => (
+          <Container key={docId}>
+            <Link to={`/docs/${docId}`}>{docId}</Link>
+          </Container>
+        ))}
       </Container>
     )
   }

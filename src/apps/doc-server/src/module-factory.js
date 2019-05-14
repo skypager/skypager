@@ -1,8 +1,7 @@
-
-/** 
+/**
  * This makes certain modules available for requiring / importing
- * from the code blocks 
-*/
+ * from the code blocks
+ */
 export function attach(runtime) {
   runtime.feature('bundle').enable()
 
@@ -14,9 +13,9 @@ export function attach(runtime) {
 
   const moduleFactory = {
     createRequireFunction: filename => {
-      return (request) => runtime.bundle.require(request)
+      return request => runtime.bundle.require(request)
     },
-  }  
+  }
 
   runtime.getter('moduleFactory', () => moduleFactory)
 
@@ -30,6 +29,7 @@ export function attach(runtime) {
     'react-dom': require.resolveWeak('react-dom'),
     'react-router-dom': require.resolveWeak('react-router-dom'),
     'semantic-ui-react': window.semanticUIReact,
+    '@babel/polyfill': {},
     lodash: runtime.lodash,
     mobx: runtime.mobx,
     ...Object.keys(runtime.lodash)

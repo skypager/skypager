@@ -26,22 +26,22 @@ async function main() {
   if (runtime.argv.buildDocHelper) {
     await runtime.proc.async.spawn('yarn', ['build:web', '--include-unminified'], {
       cwd: runtime.resolve('..', '..', 'helpers', 'document'),
-      stdio: 'inherit'
+      stdio: 'inherit',
     })
     await runtime.proc.async.spawn('skypager', ['hash-build'], {
       cwd: runtime.resolve('..', '..', 'helpers', 'document'),
-      stdio: 'inherit'
-    })   
+      stdio: 'inherit',
+    })
   }
 
   if (runtime.argv.buildDocHelper) {
     await runtime.proc.async.spawn('yarn', ['build:app'], {
-      stdio: 'inherit'
+      stdio: 'inherit',
     })
     await runtime.proc.async.spawn('skypager', ['hash-build'], {
-      stdio: 'inherit'
-    })      
-  } 
+      stdio: 'inherit',
+    })
+  }
 
   const port = await runtime.networking.findOpenPort(3000)
 

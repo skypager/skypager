@@ -1,13 +1,22 @@
-import React, { Component } from 'react'
+import React, { forwardRef, createRef, Component } from 'react'
 import types from 'prop-types'
 import { Editor, Skypage } from '@skypager/helpers-document'
 import { Button } from 'semantic-ui-react'
 import { findDOMNode } from 'react-dom'
 
-const mdxComponents = (baseProps = {}) => ({
-  code: props => (
-    <Editor {...props} {...baseProps.code || {}} value={props.children} mode={props.lang} />
-  ),
+const TrackableEditor = forwardRef((props, ref) => <Editor ref={ref} {...props} />)
+
+const mdxComponents = (baseProps = {}, parent) => ({
+  code: props => {
+    return (
+      <TrackableEditor
+        {...props}
+        {...baseProps.code || {}}
+        value={props.children}
+        mode={props.lang}
+      />
+    )
+  },
 })
 
 export default class DocPage extends Component {
@@ -15,79 +24,95 @@ export default class DocPage extends Component {
     runtime: types.object,
   }
 
+  state = {
+    doc: null,
+  }
+
+  componentDidMount() {
+    const { params } = this.props.match
+    const { docId } = params
+    const { runtime } = this.context
+    const doc = runtime.mdxDoc(docId)
+
+    const codeBlocks = doc.body.filter(node => node.type === 'code' && node.lang)
+
+    this.setState({ doc })
+
+    codeBlocks.forEach(codeBlock => {
+      const { start } = codeBlock.position
+      codeBlock.lineNumber = start
+      this[`codeBlock${start}`] = createRef()
+    })
+  }
+
   render() {
     const { params } = this.props.match
     const { docId } = params
-
     const { runtime } = this.context
-    const doc = this.context.runtime.mdxDoc(docId)
-    const page = this
+    const { doc } = this.state
 
-    const components = mdxComponents({
-      code: {
-        theme: 'vibrant_ink',
-        showGutter: true,
-        header: editorComponent => {
-          return (
-            <Button
-              content="Run"
-              onClick={() => {
-                editorComponent.handleCommand("run", {
-                  handler: async (code) => {
-                    const containerNode = findDOMNode(editorComponent).closest('pre[data-line-number]')
-                    const lineNumber = containerNode.dataset.lineNumber
-                    
-                    const result = await runtime.appClient.processSnippet({
-                      content: code,
-                      transpile: true,
-                      name: `${docId}-block-${lineNumber}.js` 
-                    })
+    if (!doc) {
+      return <div />
+    }
 
-                    const runner = runtime.feature('vm-runner', {
-                      ...result.instructions,
-                      requireFunction: (request) => {
-                        console.log('Requiring', request)
-                        switch(request) {
-                          case '@skypager/runtime':
-                          case '@skypager/web':
-                          case 'skypager':
-                            return {
-                              __esModule: true,
-                              get default() {
-                                return runtime
-                              }
-                            }
-                          case '@babel/polyfill':
-                            return {}
-                          default: 
-                            throw new Error(`Could not resolve ${request} in sandbox require function`)
-                        }
-                      } 
-                    })
+    const components = mdxComponents(
+      {
+        code: {
+          theme: 'vibrant_ink',
+          showGutter: true,
+          handleResult: editorComponent => {
+            const { codeBlockId, results = [], errors = [] } = editorComponent.state
+            console.log('Got Results', codeBlockId, results, errors)
+          },
+          header: editorComponent => {
+            return (
+              <Button
+                content="Run"
+                onClick={() => {
+                  editorComponent.handleCommand('run', {
+                    handler: async code => {
+                      const containerNode = findDOMNode(editorComponent).closest(
+                        'pre[data-line-number]'
+                      )
+                      const lineNumber = containerNode.dataset.lineNumber
 
-                    await runner.run()
-                    
-                    window.lastRunner = runner
+                      const result = await runtime.appClient.processSnippet({
+                        content: code,
+                        transpile: true,
+                        name: `${docId}-block-${lineNumber}.js`,
+                      })
 
-                    return {
-                      results: runner.results,
-                      errors: runner.errors,
-                      hasErrors: !!runner.errors.length,
-                      runner,
-                      lineNumber,
-                      code
-                    }
-                  }
-                })
-              }}
-            />
-          )
-        },
-        onChange: newValue => {
-          console.log('Code Changed', newValue)
+                      const runner = runtime.feature('vm-runner', {
+                        ...result.instructions,
+                      })
+
+                      await runner.run()
+
+                      window.lastRunner = runner
+
+                      return {
+                        results: runner.results,
+                        errors: runner.errors,
+                        hasErrors: !!runner.errors.length,
+                        parsed: runner.parsed,
+                        identifiers: runner.identifiers,
+                        runner,
+                        lineNumber,
+                        code,
+                      }
+                    },
+                  })
+                }}
+              />
+            )
+          },
+          onChange: newValue => {
+            console.log('Code Changed', newValue)
+          },
         },
       },
-    })
+      this
+    )
 
     return <Skypage doc={doc} components={components} />
   }
