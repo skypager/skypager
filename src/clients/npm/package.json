@@ -11,7 +11,7 @@
   "scripts": {
     "prebuild": "rimraf lib",
     "build:lib": "cross-env BUILD_ENV=build babel -d lib src --source-maps --comments",
-    "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src",    
+    "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src",
     "postbuild": "skypager hash-build",
     "docs:api": "skypager generate-api-docs",
     "prepare": "yarn docs:api && yarn build",
@@ -28,5 +28,6 @@
   },
   "gitHead": "ae542b32070401f678270edbfc9ee6f44811c282",
   "keywords": [],
-  "contributors": []
+  "contributors": [],
+  "module": "lib/es/index.js"
 }

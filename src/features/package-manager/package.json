@@ -13,10 +13,10 @@
     "prebuild": "rimraf lib",
     "build": "yarn build:lib && yarn build:es",
     "build:lib": "cross-env BUILD_ENV=build babel -d lib src --source-maps --comments",
-    "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src",    
+    "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src",
     "postbuild:lib": "yarn docs:api",
-    "postbuild": "skypager hash-build",   
-    "docs:api": "skypager generate-api-docs",            
+    "postbuild": "skypager hash-build",
+    "docs:api": "skypager generate-api-docs",
     "test": "mocha --require @babel/register --file test/test.js --timeout 10000 test/**/*.spec.js"
   },
   "skypager": {
@@ -24,7 +24,7 @@
       "build": "webpack.config.js"
     },
     "category": "features",
-"projectType": "feature",
+    "projectType": "feature",
     "providesScripts": [
       "download-from-npm",
       "restore-build"
@@ -40,5 +40,6 @@
   },
   "gitHead": "ae542b32070401f678270edbfc9ee6f44811c282",
   "keywords": [],
-  "contributors": []
+  "contributors": [],
+  "module": "lib/es/index.js"
 }
