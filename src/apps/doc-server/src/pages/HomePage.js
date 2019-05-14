@@ -20,10 +20,10 @@ export default class HomePage extends Component {
     this.setState({ docIds })
 
     this.disposer = runtime.state.observe(({ name, newValue }) => {
-      if(name === 'docsLoaded' && newValue) {
+      if (name === 'docsLoaded' && newValue) {
         console.log('Got new Doc Ids', runtime.mdxDocs.available)
-        this.setState({ docIds: runtime.mdxDocs.available })  
-      } 
+        this.setState({ docIds: runtime.mdxDocs.available })
+      }
     })
   }
 

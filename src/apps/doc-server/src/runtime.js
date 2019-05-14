@@ -12,14 +12,17 @@ skypager.clients.register('app', () => AppClient)
 
 skypager.appClient = skypager.client('app')
 
-skypager.assetLoader.script(`/mdx.bundle.js`).then(() => {
-  console.log('loaded mdx bundle')
-  skypager.mdxDocs.add(global.SkypagerDocServerMdxDocs.default)
-}).then(() => {
-  skypager.setState({
-    docsLoaded: true
+skypager.assetLoader
+  .script(`/mdx.bundle.js`)
+  .then(() => {
+    console.log('loaded mdx bundle')
+    skypager.mdxDocs.add(global.SkypagerDocServerMdxDocs.default)
   })
-})
+  .then(() => {
+    skypager.setState({
+      docsLoaded: true,
+    })
+  })
 
 global.runtime = skypager
 

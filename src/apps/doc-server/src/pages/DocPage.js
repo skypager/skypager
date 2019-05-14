@@ -36,15 +36,15 @@ export default class DocPage extends Component {
     }
 
     this.disposer = runtime.state.observe(({ name, oldValue, newValue }) => {
-      if(name === 'docsLoaded' && newValue && !oldValue) {
+      if (name === 'docsLoaded' && newValue && !oldValue) {
         !this.state.doc && this.loadDocument()
-      } 
+      }
     })
   }
 
   componentDidUpdate(previousProps) {
     const { params } = this.props.match
-    const { docId } = params   
+    const { docId } = params
 
     if (docId !== previousProps.match.params.docId) {
       this.loadDocument()
