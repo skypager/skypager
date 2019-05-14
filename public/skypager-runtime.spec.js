@@ -54,10 +54,7 @@ describe('Skypager Runtime', function() {
   })
 
   it('should provide string utils', function() {
-    skypager.stringUtils.should.be
-      .an('object')
-      .with.property('kebabCase')
-      .that.is.a('function')
+    skypager.stringUtils.kebabCase.should.be.a('function')
   })
 })
 

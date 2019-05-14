@@ -19,7 +19,7 @@ describe('The Skypager Web Runtime Build', function() {
     const failures = await page.$eval('li.failures em', el => {
       return el.innerHTML
     })
-
+    
     failures.toString().should.equal('0')
   })
 

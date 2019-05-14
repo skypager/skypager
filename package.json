@@ -25,7 +25,7 @@
     "test": "yarn build:runtime && yarn test:unit && yarn test:portfolio && yarn test:web",
     "test:unit": "mocha",
     "pretest:web": "node scripts/prepare-web-release.js",
-    "test:web": "skypager start-and-test --start start:test:webserver --test test:web:build",
+    "test:web": "CI=true skypager start-and-test --start start:test:webserver --test test:web:build",
     "test:portfolio": "lerna run test --stream",
     "test:web:build": "mocha --file test/test.js test/web/**/*.spec.js",
     "start:test:webserver": "skypager serve public --hostname localhost",
@@ -57,6 +57,7 @@
     "jsdoc-to-markdown": "^4.0.1",
     "lerna": "^3.4.0",
     "lint-staged": "^7.3.0",
+    "mocha": "^6.1.4",
     "patch-package": "^6.0.2",
     "puppeteer": "^1.15.0"
   },
