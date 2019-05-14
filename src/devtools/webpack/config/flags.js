@@ -1,8 +1,12 @@
 const fs = require('fs-extra')
 
-module.exports = function getFlags(currentProject, isEnvProduction) {
-  const { paths, argv } = currentProject
+module.exports = function getFlags(currentProject, isEnvProduction, options = {}) {
+  const { paths } = currentProject
   const { projectType } = currentProject.config
+  
+  let argv = currentProject.config
+
+  argv = Object.assign({}, argv, options)
 
   const noCache =
     argv.cache === false || argv.noCache || String(process.env.DISABLE_WEBPACK_CACHING) === 'true'
@@ -108,7 +112,7 @@ module.exports = function getFlags(currentProject, isEnvProduction) {
     hmrEntryPath = hmrEntry
   }
 
-  return {
+  return Object.assign({}, {
     publicPath,
     publicUrl,
     shouldUseSourceMap,
@@ -131,5 +135,5 @@ module.exports = function getFlags(currentProject, isEnvProduction) {
     shouldCopyPublic,
     hmrEntry,
     hmrEntryPath,
-  }
+  }, options)
 }

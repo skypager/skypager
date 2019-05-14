@@ -99,10 +99,21 @@ module.exports = function(webpackEnv, options = {}) {
     useWebpackDashboard = argv.dashboard,
 
     useSocketPlugin = !!(argv.socketPlugin || process.env.SKYPAGER_SOCKET_PLUGIN),
+
+    useHtml = argv.htmlPlugin !== false,
+
+    watchPaths = argv.watchPaths || [ paths.appSrc ] ,
+
+    sourcePaths = argv.sourcePaths || [paths.appSrc],
+
+    mdxPaths = argv.mdxPaths || [paths.appSrc, paths.docsFolder].filter(Boolean),
+
+    disableMinification = argv.disableMinification || argv.minify === false
+
   } = require('./flags')(currentProject, webpackEnv, options)
 
   // We automatically include html-webpack-plugin for every index.html found in the root of the public folder
-  const htmlPlugins = currentProject.htmlTemplates.map(templatePath =>
+  const htmlPlugins = !useHtml ? [] : currentProject.htmlTemplates.map(templatePath =>
     createHtmlPlugin(templatePath, shouldMinifyHtml, currentProject, shouldMinifyJS)
   )
 
@@ -299,7 +310,7 @@ module.exports = function(webpackEnv, options = {}) {
         : isEnvDevelopment && (info => path.resolve(info.absoluteResourcePath).replace(/\\/g, '/')),
     },
     optimization: {
-      minimize: isEnvProduction,
+      minimize: !disableMinification && isEnvProduction,
       minimizer: [
         // This is only used in production mode
         shouldMinifyJS &&
@@ -387,7 +398,7 @@ module.exports = function(webpackEnv, options = {}) {
       // We placed these paths second because we want `node_modules` to "win"
       // if there are any conflicts. This matches Node resolution mechanism.
       // https://github.com/facebook/create-react-app/issues/253
-      modules: [paths.appSrc, 'node_modules'].concat(
+      modules: sourcePaths.concat(mdxPaths).concat(['node_modules']).concat(
         // It is guaranteed to exist because we tweak it in `env.js`
         process.env.NODE_PATH.split(path.delimiter).filter(Boolean)
       ),
@@ -405,7 +416,7 @@ module.exports = function(webpackEnv, options = {}) {
         // Support React Native Web
         // https://www.smashingmagazine.com/2016/08/a-glimpse-into-the-future-with-react-native-for-web/
         'react-native': 'react-native-web',
-        '@skypager/helpers-document': '@skypager/helpers-document/lib/skypager-helpers-document.js',
+        '@skypager/helpers-document': '@skypager/helpers-document/lib/skypager-helpers-document.min.js',
         // a project can alias their own modules by defining a moduleAliases property in package.json skypager.moduleAliases
         ...(currentProject.moduleAliases || {}),
       },
@@ -472,7 +483,7 @@ module.exports = function(webpackEnv, options = {}) {
             // The preset includes JSX, Flow, TypeScript, and some ESnext features.
             {
               test: /\.(js|mjs|jsx|ts|tsx)$/,
-              include: paths.appSrc,
+              include: sourcePaths,
               loader: require.resolve('babel-loader'),
               options: {
                 customize: require.resolve('babel-preset-react-app/webpack-overrides'),
@@ -619,7 +630,7 @@ module.exports = function(webpackEnv, options = {}) {
 
             {
               test: mdxRegex,
-              include: [paths.appSrc],
+              include: mdxPaths,
               exclude: [/node_modules/],
               use: [
                 {
@@ -786,7 +797,7 @@ module.exports = function(webpackEnv, options = {}) {
             '!**/src/setupProxy.*',
             '!**/src/setupTests.*',
           ],
-          watch: paths.appSrc,
+          watch: watchPaths,
           silent: true,
           formatter: typescriptFormatter,
         }),

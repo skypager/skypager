@@ -13,7 +13,7 @@
     "build": "yarn build:node && yarn build:es && yarn build:web",
     "build:node": "cross-env BUILD_ENV=build babel --comments --source-maps -d lib src",
     "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src",
-    "build:web": "skypager build --app-only --no-clean",
+    "build:web": "skypager build --app-only --no-clean --include-unminified",
     "watch:web": "skypager watch --app-only --no-clean",
     "test": "skypager test",
     "console": "skypager console",

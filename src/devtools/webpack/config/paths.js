@@ -105,4 +105,8 @@ module.exports = {
   lessModulePaths,
 }
 
+if (fs.existsSync(resolveApp('docs'))) {
+  module.exports.docsFolder = resolveApp('docs')
+}
+
 module.exports.moduleFileExtensions = moduleFileExtensions

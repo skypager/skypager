@@ -31,7 +31,7 @@ if (!ARGV['webpack-config']) {
   args = args.concat(['--webpack-config', webpackConfigPath])
 }
 
-if (existsSync(resolve(paths.appRoot, 'test', 'test.js'))) {
+if (existsSync(resolve(paths.appPath, 'test', 'test.js'))) {
   args = args.concat(['--require', 'test/test.js'])
 } else {
   args = args.concat(['--require', resolve(__dirname, '..', 'testing', 'mocha-test-setup.js')])

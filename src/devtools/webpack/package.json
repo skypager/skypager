@@ -6,7 +6,8 @@
     "providesScripts": [
       "build",
       "start",
-      "watch"
+      "watch",
+      "bundle-mdx"
     ]
   },
   "dependencies": {
