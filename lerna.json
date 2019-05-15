@@ -16,7 +16,8 @@
     "publish": {
       "allowBranch": [
         "develop",
-        "master"
+        "master",
+        "next"
       ],
       "ignoreChanges": [
         "**/*.md",
@@ -27,5 +28,5 @@
       "npmClient": "yarn"
     }
   },
-  "version": "0.4.15"
+  "version": "1.0.0"
 }
