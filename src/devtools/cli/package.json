@@ -1,6 +1,6 @@
 {
   "name": "@skypager/cli",
-  "version": "0.4.14",
+  "version": "1.0.1-alpha.0",
   "description": "the skypager CLI",
   "author": "Jon Soeder <jon@chicago.com>",
   "homepage": "https://skypager-cli.skypager.io",
@@ -11,7 +11,7 @@
     "prebuild": "rimraf lib",
     "build": "yarn build:lib && yarn build:es",
     "build:lib": "cross-env BUILD_ENV=build babel -d lib src --source-maps --comments",
-    "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src",    
+    "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src",
     "postbuild": "skypager hash-build",
     "prepare": "yarn build",
     "test": "exit 0"
@@ -22,9 +22,9 @@
   "dependencies": {
     "@babel/register": "^7.2.0",
     "@babel/runtime": "^7.3.1",
-    "@skypager/helpers-repl": "^0.4.11",
-    "@skypager/helpers-server": "^0.4.14",
-    "@skypager/node": "^0.4.14",
+    "@skypager/helpers-repl": "^1.0.1-alpha.0",
+    "@skypager/helpers-server": "^1.0.1-alpha.0",
+    "@skypager/node": "^1.0.1-alpha.0",
     "chalk": "^2.4.2",
     "esm": "^3.0.84",
     "ink": "^2.0.0-17",

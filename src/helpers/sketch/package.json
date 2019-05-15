@@ -1,6 +1,6 @@
 {
   "name": "@skypager/helpers-sketch",
-  "version": "0.4.2",
+  "version": "1.0.1-alpha.0",
   "description": "skypager sketch design document helper",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
@@ -10,7 +10,7 @@
     "prebuild": "rimraf lib",
     "build": "yarn build:node && yarn build:es",
     "build:node": "cross-env BUILD_ENV=build babel --comments --source-maps -d lib src",
-    "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src",   
+    "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src",
     "build:web": "cross-env NODE_ENV=production webpack --config webpack.config.js",
     "postbuild": "skypager hash-build",
     "smoke-test": "skypager smoke-test",
@@ -35,7 +35,7 @@
   "contributors": [],
   "skypager": {
     "category": "helpers",
-"projectType": "helper",
+    "projectType": "helper",
     "providesScripts": false
   }
 }

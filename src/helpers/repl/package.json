@@ -1,6 +1,6 @@
 {
   "name": "@skypager/helpers-repl",
-  "version": "0.4.11",
+  "version": "1.0.1-alpha.0",
   "description": "an awesome repl",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
@@ -16,7 +16,7 @@
     "build": "yarn build:node && yarn build:es",
     "postbuild": "skypager hash-build",
     "build:node": "cross-env BUILD_ENV=build babel --comments --source-maps -d lib src",
-    "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src"   
+    "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src"
   },
   "dependencies": {
     "bluebird": "^3.5.0",

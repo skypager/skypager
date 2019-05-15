@@ -1,6 +1,6 @@
 {
   "name": "@skypager/lambda",
-  "version": "0.4.12",
+  "version": "1.0.1-alpha.0",
   "description": "the skypager lambda runtime, offers a slimmed down node runtime for use in lambda like environments",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
@@ -19,8 +19,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@skypager/helpers-client": "^0.4.0",
-    "@skypager/runtime": "^0.4.12",
+    "@skypager/helpers-client": "^1.0.1-alpha.0",
+    "@skypager/runtime": "^1.0.1-alpha.0",
     "bluebird": "^3.5.0",
     "child-process-promise": "^2.2.1",
     "find-up": "^2.1.0",
