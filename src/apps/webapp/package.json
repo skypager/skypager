@@ -1,6 +1,6 @@
 {
   "name": "@skypager/apps-webapp",
-  "version": "1.0.1-alpha.0",
+  "version": "1.0.1-alpha.1",
   "description": "skypager.io webapp",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
@@ -21,8 +21,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@skypager/helpers-server": "^1.0.1-alpha.0",
-    "@skypager/helpers-sheet": "^1.0.1-alpha.0",
+    "@skypager/helpers-server": "^1.0.1-alpha.1",
+    "@skypager/helpers-sheet": "^1.0.1-alpha.1",
     "get-ip-range": "^1.1.7",
     "node-nmap": "^4.0.0",
     "prop-types": "^15.6.2",

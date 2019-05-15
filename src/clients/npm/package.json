@@ -1,6 +1,6 @@
 {
   "name": "@skypager/clients-npm",
-  "version": "1.0.1-alpha.0",
+  "version": "1.0.1-alpha.1",
   "description": "a REST client for repository.npmjs.org",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
