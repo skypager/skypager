@@ -29,5 +29,6 @@
     "projectType": "feature",
     "providesScripts": false
   },
-  "module": "lib/es/index.js"
+  "module": "lib/es/index.js",
+  "gitHead": "e812dc16977aff62426166399c6cde7deadbcbf5"
 }
