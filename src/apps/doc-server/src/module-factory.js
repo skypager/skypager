@@ -11,7 +11,6 @@ export function attach(runtime) {
     // resolveFn: request => require.resolveWeak(request),
   })
 
-
   const moduleFactory = {
     createRequireFunction: filename => {
       return request => runtime.bundle.requireModule(request)

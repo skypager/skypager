@@ -7,15 +7,15 @@ const AppServer = {
   cors: true,
   pretty: true,
   serveStatic: 'lib',
-  history: !runtime.isDevelopment, 
+  history: !runtime.isDevelopment,
   appWillMount(app) {
     app.use(bodyParser.json())
   },
   async appDidMount(app) {
     if (runtime.isDevelopment) {
-      setupDevelopment.call(this, app, this.options)  
+      setupDevelopment.call(this, app, this.options)
     }
-  }
+  },
 }
 
 runtime.servers.add({
@@ -57,10 +57,12 @@ async function main() {
 
   const server = runtime.server('app', {
     port,
-    ...!runtime.isDevelopment && { history: {
-      htmlFile: 'index.html',
-      root: runtime.resolve('lib'),
-    } },
+    ...(!runtime.isDevelopment && {
+      history: {
+        htmlFile: 'index.html',
+        root: runtime.resolve('lib'),
+      },
+    }),
     endpoints: ['babel', 'mdx'],
     showBanner: false,
   })
@@ -78,14 +80,14 @@ main()
 
 function generateMdxBundle() {
   runtime.proc.spawnSync('yarn', ['bundle:mdx'], {
-    stdio: 'inherit'
-  })  
+    stdio: 'inherit',
+  })
 }
 
 function copyPublicFolder(from, to) {
   runtime.fsx.copySync(from, to, {
     dereference: true,
-    filter: file => !String(file).match(/index.html$/) ,
+    filter: file => !String(file).match(/index.html$/),
   })
 }
 
@@ -96,9 +98,7 @@ function setupDevelopment(app, options) {
   const config = require('@skypager/webpack/config/webpack.config')('development')
 
   config.entry = {
-    app: [
-      runtime.resolve('src', 'launch.js')
-    ]
+    app: [runtime.resolve('src', 'launch.js')],
   }
 
   debugger
@@ -109,9 +109,8 @@ function setupDevelopment(app, options) {
     config,
     devMiddleware,
     hotMiddleware,
-    hot: !!(options.hot || this.options.hot)
+    hot: !!(options.hot || this.options.hot),
   })
 
   return app
 }
-

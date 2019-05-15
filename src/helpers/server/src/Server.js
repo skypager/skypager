@@ -512,19 +512,17 @@ function setupDevelopmentMiddlewares(app, options = {}) {
   app.use((req, res, next) => {
     const { pathname } = runtime.urlUtils.parseUrl(req.url)
     const { ext } = runtime.pathUtils.parse(pathname)
-  
+
     this.runtime.debug('Webpack History Fallback', {
       pathname,
-      ext
+      ext,
     })
-    
+
     // it must be index.html
     if (ext === '') {
       const filePath = runtime.pathUtils.join(compiler.outputPath, 'index.html')
       this.runtime.debug('Serving HTML History', { filePath })
-      res.end(
-        middleware.fileSystem.readFileSync(filePath)
-      )
+      res.end(middleware.fileSystem.readFileSync(filePath))
     } else {
       const file = runtime.pathUtils.join(compiler.outputPath, pathname.replace(/^\//, ''))
 
@@ -532,7 +530,7 @@ function setupDevelopmentMiddlewares(app, options = {}) {
         res.end(middleware.fileSystem.readFileSync(file))
       } else {
         this.runtime.debug('Webpack Middleware Next', {
-          file
+          file,
         })
         next()
       }
