@@ -115,7 +115,7 @@ module.exports = function(webpackEnv, options = {}) {
   const htmlPlugins = !useHtml
     ? []
     : currentProject.htmlTemplates.map(templatePath =>
-        createHtmlPlugin(templatePath, shouldMinifyHtml, currentProject, shouldMinifyJS)
+        createHtmlPlugin(templatePath, shouldMinifyHtml, currentProject, shouldMinifyJS, isEnvProduction)
       )
 
   // Get environment variables to inject into our app.
@@ -896,7 +896,8 @@ function createHtmlPlugin(
   template,
   minify = true,
   currentProject = require('../current-project'),
-  shouldMinifyJS
+  shouldMinifyJS,
+  isEnvProduction
 ) {
   const filename = require('path').basename(template)
 
@@ -907,7 +908,7 @@ function createHtmlPlugin(
         inject: true,
         filename,
         template,
-        chunks: [`${currentProject.config.appName || 'app'}${shouldMinifyJS ? '.min' : ''}`],
+        chunks: [`${currentProject.config.appName || 'app'}${isEnvProduction && shouldMinifyJS ? '.min' : ''}`],
       },
       minify
         ? {

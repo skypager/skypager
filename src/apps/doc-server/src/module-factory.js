@@ -8,12 +8,13 @@ export function attach(runtime) {
   runtime.bundle.loadWebpack({
     requireFn: __webpack_require__,
     cache: require.cache,
-    resolveFn: request => require.resolveWeak(request),
+    // resolveFn: request => require.resolveWeak(request),
   })
+
 
   const moduleFactory = {
     createRequireFunction: filename => {
-      return request => runtime.bundle.require(request)
+      return request => runtime.bundle.requireModule(request)
     },
   }
 

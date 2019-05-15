@@ -489,7 +489,7 @@ function createWebpackCompiler(options) {
 
 function setupDevelopmentMiddlewares(app, options = {}) {
   const { runtime } = this
-  const { hot } = options
+  const { hot = this.options.hot } = options
   const { devMiddleware, hotMiddleware } = injectWebpackDependencies.call(this, options)
 
   const { compiler, config } = createWebpackCompiler.call(this, options)
@@ -512,21 +512,28 @@ function setupDevelopmentMiddlewares(app, options = {}) {
   app.use((req, res, next) => {
     const { pathname } = runtime.urlUtils.parseUrl(req.url)
     const { ext } = runtime.pathUtils.parse(pathname)
-
+  
+    this.runtime.debug('Webpack History Fallback', {
+      pathname,
+      ext
+    })
+    
     // it must be index.html
     if (ext === '') {
+      const filePath = runtime.pathUtils.join(compiler.outputPath, 'index.html')
+      this.runtime.debug('Serving HTML History', { filePath })
       res.end(
-        middleware.fileSystem.readFileSync(
-          runtime.pathUtils.join(compiler.outputPath, 'index.html')
-        )
+        middleware.fileSystem.readFileSync(filePath)
       )
     } else {
-      console.log('Checking if File Exists', pathname, compiler.outputPath)
       const file = runtime.pathUtils.join(compiler.outputPath, pathname.replace(/^\//, ''))
 
       if (middleware.fileSystem.existsSync(file)) {
         res.end(middleware.fileSystem.readFileSync(file))
       } else {
+        this.runtime.debug('Webpack Middleware Next', {
+          file
+        })
         next()
       }
     }

@@ -7,10 +7,15 @@ const AppServer = {
   cors: true,
   pretty: true,
   serveStatic: 'lib',
-  history: true,
+  history: !runtime.isDevelopment, 
   appWillMount(app) {
     app.use(bodyParser.json())
   },
+  async appDidMount(app) {
+    if (runtime.isDevelopment) {
+      setupDevelopment.call(this, app, this.options)  
+    }
+  }
 }
 
 runtime.servers.add({
@@ -45,12 +50,17 @@ async function main() {
 
   const port = await runtime.networking.findOpenPort(3000)
 
+  if (runtime.isDevelopment) {
+    copyPublicFolder(runtime.resolve('public'), runtime.resolve('lib'))
+    generateMdxBundle()
+  }
+
   const server = runtime.server('app', {
     port,
-    history: {
+    ...!runtime.isDevelopment && { history: {
       htmlFile: 'index.html',
       root: runtime.resolve('lib'),
-    },
+    } },
     endpoints: ['babel', 'mdx'],
     showBanner: false,
   })
@@ -65,3 +75,43 @@ async function main() {
 }
 
 main()
+
+function generateMdxBundle() {
+  runtime.proc.spawnSync('yarn', ['bundle:mdx'], {
+    stdio: 'inherit'
+  })  
+}
+
+function copyPublicFolder(from, to) {
+  runtime.fsx.copySync(from, to, {
+    dereference: true,
+    filter: file => !String(file).match(/index.html$/) ,
+  })
+}
+
+function setupDevelopment(app, options) {
+  const webpack = require('webpack')
+  const devMiddleware = require('webpack-dev-middleware')
+  const hotMiddleware = require('webpack-hot-middleware')
+  const config = require('@skypager/webpack/config/webpack.config')('development')
+
+  config.entry = {
+    app: [
+      runtime.resolve('src', 'launch.js')
+    ]
+  }
+
+  debugger
+
+  this.setupDevelopmentMiddlewares({
+    ...options,
+    webpack,
+    config,
+    devMiddleware,
+    hotMiddleware,
+    hot: !!(options.hot || this.options.hot)
+  })
+
+  return app
+}
+
