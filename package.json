@@ -70,5 +70,7 @@
     "hooks": {
       "pre-commit": "lint-staged"
     }
-  }
+  },
+  "contributors": [],
+  "homepage": "https://skypager.io"
 }

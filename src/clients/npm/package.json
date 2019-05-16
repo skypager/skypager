@@ -21,7 +21,8 @@
     "webpack": {
       "build": "webpack.config.js"
     },
-    "category": "features"
+    "category": "features",
+    "projectType": "client"
   },
   "dependencies": {
     "@skypager/helpers-client": "^0.2.7"
@@ -29,5 +30,6 @@
   "gitHead": "f84aceb4d9e2d8c8d63f321faf705ff2c644dc1b",
   "keywords": [],
   "contributors": [],
-  "module": "lib/es/index.js"
+  "module": "lib/es/index.js",
+  "homepage": "https://skypager.io"
 }

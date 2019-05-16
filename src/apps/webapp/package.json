@@ -38,7 +38,8 @@
       "build": "webpack.config.js",
       "scopeModules": false
     },
-    "category": "apps"
+    "category": "apps",
+    "projectType": "webapp"
   },
   "gitHead": "f84aceb4d9e2d8c8d63f321faf705ff2c644dc1b",
   "keywords": [],

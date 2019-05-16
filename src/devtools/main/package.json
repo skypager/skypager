@@ -4,7 +4,7 @@
   "description": "skypager framework developer tools",
   "author": "Jon Soeder <jon@chicago.com>",
   "homepage": "https://devtools.skypager.io",
-  "license": "SEE LICENSE IN LICENSE.md",
+  "license": "MIT",
   "main": "index.js",
   "dependencies": {
     "@skypager/node": "^1.0.1-alpha.1",
