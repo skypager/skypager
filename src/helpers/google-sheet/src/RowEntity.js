@@ -27,9 +27,10 @@ export default class RowEntity {
     })
 
     Object.defineProperty(this, '__autoSave', {
-      value: context.parent.autoSaveEnabled,
+      value: !!context.parent.autoSaveEnabled,
       enumerable: false,
       configurable: true,
+      writable: true,
     })
 
     this.lodash
@@ -57,8 +58,21 @@ export default class RowEntity {
       },
       set: newValue => {
         const cell = entity.attributesToCellsMap[attributeName]
-        cell.value = newValue
-        this.__autoSave && cell.save()
+        if (cell) {
+          cell.value = newValue
+          if (this.__autoSave) {
+            this.parent.runtime.debug(`Autosaving sheet entity`, {
+              newValue,
+              attributeName,
+              cell: cell.id,
+            })
+          }
+        } else {
+          this.parent.runtime.warn(
+            `Attempt to set ${attributeName} failed. not found in attributesToCellsMap`,
+            Object.keys(entity.attributesToCellsMap)
+          )
+        }
         return newValue
       },
     })

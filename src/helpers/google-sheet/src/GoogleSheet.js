@@ -13,6 +13,13 @@ export class GoogleSheet extends Helper {
 
   static RowEntity = RowEntity
 
+  initialState = {
+    ready: false,
+    autoSave: false,
+    data: {},
+    info: {},
+  }
+
   get RowEntity() {
     return this.tryGet('RowEntity', RowEntity)
   }
@@ -29,10 +36,6 @@ export class GoogleSheet extends Helper {
     return this.get('info.worksheets', [])
   }
 
-  get state() {
-    return this._state
-  }
-
   get spreadsheet() {
     return this._spreadsheet
   }
@@ -46,13 +49,6 @@ export class GoogleSheet extends Helper {
   }
 
   async initialize() {
-    this.hide(
-      '_state',
-      (this._state = this.runtime.mobx.observable.shallowMap([
-        ['autoSave', this.tryGet('autoSave', true)],
-      ]))
-    )
-
     this.hide('_spreadsheet', (this._spreadsheet = this.createSpreadsheet()))
     this.hide('_worksheetsIndex', (this._worksheetsIndex = new Map()))
     this.hide('_entityHandlers', (this._entityHandlers = new Map()))
@@ -95,10 +91,18 @@ export class GoogleSheet extends Helper {
    * @memberof Sheet
    */
   registerEntity(sheetName, fn) {
-    const sheetId = this.findSheetId(sheetName)
-    const EntityClass = fn(this.RowEntity)
-    this.entityHandlers.set(sheetId, EntityClass)
-    return EntityClass
+    const reg = () => {
+      const sheetId = this.findSheetId(sheetName)
+      const EntityClass = fn && fn.isRowEntity ? fn : fn(this.RowEntity)
+      this.entityHandlers.set(sheetId, EntityClass)
+      return EntityClass
+    }
+
+    if (!this.isReady) {
+      return this.whenReady().then(() => reg())
+    }
+
+    return reg()
   }
 
   getEntityClass(sheetName) {
@@ -239,7 +243,7 @@ export class GoogleSheet extends Helper {
     }
 
     const { receiveData = this.options.receiveData || this.provider.receiveData } = options
-    let rawData = await loadAll.call(this, options)
+    let rawData = await loadRawDataFromSheet.call(this, options)
 
     rawData = mapKeys(rawData, (v, k) => camelCase(kebabCase(k)))
 
@@ -247,7 +251,10 @@ export class GoogleSheet extends Helper {
       rawData = receiveData.call(this, rawData)
     }
 
+    this.state.set('ready', true)
     this.state.set('data', rawData)
+
+    this.emit('ready')
 
     return rawData
   }
@@ -303,7 +310,7 @@ export class GoogleSheet extends Helper {
     })
   }
 
-  findSheetId(alias) {
+  findSheetId(alias, errorOnMissing = false) {
     const ws = this.worksheets
       .filter(Boolean)
       .find(
@@ -312,7 +319,7 @@ export class GoogleSheet extends Helper {
           String(ws.id).toLowerCase() === String(alias).toLowerCase()
       )
 
-    if (!ws) {
+    if (!ws && errorOnMissing === true) {
       throw new Error(
         `Could not find worksheet using ${alias}. Worksheet IDs: ${this.worksheetIds.join(
           ','
@@ -323,41 +330,59 @@ export class GoogleSheet extends Helper {
     return ws.id
   }
 
-  /*
-  async addWorksheet(...args) {
+  async addRow(worksheetId, rowData) {
+    worksheetId = this.findSheetId(String(worksheetId))
+
     return new Promise((resolve, reject) => {
-      this.spreadsheet.addWorksheet(
-        ...args.push((err, ...resp) => (err ? reject(err) : resolve(...resp)))
+      this.spreadsheet.addRow(worksheetId, rowData, (err, row) =>
+        err ? reject(err) : resolve(row)
       )
     })
   }
 
-  async removeWorksheet(...args) {
+  async addWorksheet({
+    title = 'mySheet',
+    rowCount = 50,
+    headers = [],
+    colCount = headers.length,
+  } = {}) {
     return new Promise((resolve, reject) => {
-      this.spreadsheet.removeWorksheet(
-        ...args.push((err, ...resp) => (err ? reject(err) : resolve(...resp)))
+      this.spreadsheet.addWorksheet({ title, headers, rowCount, colCount }, (err, worksheet) =>
+        err ? reject(err) : resolve(worksheet)
       )
     })
   }
 
-  async addRow(...args) {
+  async removeWorksheet(sheetOrSheetIdOrIndex) {
     return new Promise((resolve, reject) => {
-      this.spreadsheet.addRow(
-        ...args.push((err, ...resp) => (err ? reject(err) : resolve(...resp)))
+      this.spreadsheet.removeWorksheet(sheetOrSheetIdOrIndex, err =>
+        err ? reject(err) : resolve(true)
       )
     })
   }
-
-  */
 
   get authorized() {
     return !!this.state.get('authorized')
   }
 
+  get isReady() {
+    return this.authorized && !!this.state.get('ready')
+  }
+
   async whenReady() {
+    if (this.isReady) {
+      return this
+    }
+
     if (!this.authorized) {
       await this.authorize()
     }
+
+    this.loadAll()
+
+    await new Promise((resolve, reject) => {
+      this.once('ready', () => resolve())
+    })
 
     return this
   }
@@ -406,7 +431,7 @@ export async function discover(host = runtime, options = {}) {
   const { kebabCase, camelCase } = host.stringUtils
 
   return records.map(record => {
-    const id = camelCase(kebabCase(record.title.replace(/\W/g, '')))
+    const id = camelCase(kebabCase(record.title.replace(/\s+/, '-').replace(/\W/g, '')))
     host.sheets.register(id, () => record)
     return id
   })
@@ -424,7 +449,7 @@ export function attach(host = runtime) {
   return host
 }
 
-async function loadAll(options = {}) {
+async function loadRawDataFromSheet(options = {}) {
   const { omit, fromPairs, mapKeys } = this.lodash
 
   const sanitize = rows =>

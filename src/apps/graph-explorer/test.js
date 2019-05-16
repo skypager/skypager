@@ -11,7 +11,7 @@ async function main() {
   if (process.env.CI) {
     process.exit(0)
   }
-  
+
   const proc = runtime.proc.async
     .spawn('yarn', ['start'], {
       stdio: 'ignore',

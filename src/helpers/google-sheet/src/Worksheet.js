@@ -187,7 +187,12 @@ export default class Worksheet {
    * @param {*} [entityData={}]
    * @memberof Worksheet
    */
-  addRow(entityData = {}) {}
+  async addRow(entityData = {}) {
+    const { parent } = this
+    const worksheetId = this.googleWorksheet.id
+
+    const row = await this.parent.addRow(worksheetId, entityData)
+  }
   /**
    * Get the SpreadsheetCells for a row in this worksheet
    *
