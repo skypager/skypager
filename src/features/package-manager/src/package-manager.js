@@ -2,7 +2,7 @@ import { Feature } from '@skypager/node'
 import pacote from 'pacote'
 import { tmpdir } from 'os'
 import { create as createTar, extract as extractTar } from 'tar'
-import Package from './package'
+import Package from './Package'
 
 /**
  * @class PackageManager
