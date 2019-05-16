@@ -26,6 +26,10 @@ describe('Servers', function() {
     result.should.not.equal(openPort)
   })
 
+  after(function() {
+    server.stop()
+  })
+
   const get = url => {
     const { port, hostname } = server
     return axios.get(`http://${hostname}:${port}/${url.replace(/^\//, '')}`).then(r => r.data)

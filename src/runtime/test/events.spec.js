@@ -1,4 +1,4 @@
-import { Runtime, events } from 'runtime'
+import { Runtime, events } from '../src/runtime'
 
 const sinon = global.sinon
 

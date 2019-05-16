@@ -2,7 +2,7 @@ const { NODE_ENV, BUILD_ENV = NODE_ENV } = process.env
 
 const isESBuild = BUILD_ENV === 'build-es'
 const isUMDBuild = BUILD_ENV === 'build-umd'
-const isLibBuild = BUILD_ENV === 'build' || isESBuild || isUMDBuild
+const isLibBuild = BUILD_ENV === 'build' || isESBuild || isUMDBuild || NODE_ENV === 'test'
 const isDocsBuild = NODE_ENV === 'development' || NODE_ENV === 'production'
 
 const browsers = [

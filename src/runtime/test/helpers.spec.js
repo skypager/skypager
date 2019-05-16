@@ -1,4 +1,4 @@
-import { Helper, Runtime } from 'runtime'
+import { Helper, Runtime } from '../src/runtime'
 
 describe('The Helpers System', function() {
   const runtime = new Runtime()

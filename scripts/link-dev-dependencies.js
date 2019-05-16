@@ -40,5 +40,7 @@ run(async runtime => {
   await linkDep('webpack-dev-server')
   await linkDep('skypager')
   await linkDep('mocha-webpack')
+  await linkDep('mocha')
   await linkDep('babel')
+  //await linkDep('babel-node')
 })

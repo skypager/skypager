@@ -17,6 +17,8 @@ if (!runtime.sheet) {
   })
 }
 
+process.on('SIGINT', () => process.exit(0))
+
 async function main() {
   clear()
   randomBanner('Skypager')

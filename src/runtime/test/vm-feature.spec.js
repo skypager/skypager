@@ -1,4 +1,4 @@
-import { Runtime } from 'runtime'
+import { Runtime } from '../src/runtime'
 const { sinon } = global
 
 describe('The VM Feature', function() {

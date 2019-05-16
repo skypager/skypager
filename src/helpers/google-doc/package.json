@@ -8,7 +8,7 @@
   "react-native": "lib/index.js",
   "scripts": {
     "smoke-test": "skypager smoke-test",
-    "test": "skypager test --timeout 10000",
+    "test": "skypager test --mocha --timeout 10000",
     "prepare": "yarn build",
     "prebuild": "rimraf lib",
     "build": "yarn build:node && yarn build:es",
@@ -29,7 +29,7 @@
     "url": "https://github.com/skypager/skypager"
   },
   "homepage": "https://skypager.io",
-  "gitHead": "e812dc16977aff62426166399c6cde7deadbcbf5",
+  "gitHead": "f84aceb4d9e2d8c8d63f321faf705ff2c644dc1b",
   "keywords": [],
   "contributors": [],
   "skypager": {

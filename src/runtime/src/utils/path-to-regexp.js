@@ -365,7 +365,7 @@ function stringToRegexp(path, keys, options) {
  * @return {!RegExp}
  */
 function tokensToRegExp(tokens, keys, options) {
-  if (!isArray(keys)) {
+  if (!Array.isArray(keys)) {
     options /** @type {!Object} */ = keys || options
     keys = []
   }
@@ -445,7 +445,7 @@ function tokensToRegExp(tokens, keys, options) {
  * @return {!RegExp}
  */
 function pathToRegexp(path, keys, options) {
-  if (!isArray(keys)) {
+  if (!Array.isArray(keys)) {
     options /** @type {!Object} */ = keys || options
     keys = []
   }
@@ -456,7 +456,7 @@ function pathToRegexp(path, keys, options) {
     return regexpToRegexp(path /** @type {!Array} */, keys)
   }
 
-  if (isArray(path)) {
+  if (Array.isArray(path)) {
     return arrayToRegexp(/** @type {!Array} */ path /** @type {!Array} */, keys, options)
   }
 

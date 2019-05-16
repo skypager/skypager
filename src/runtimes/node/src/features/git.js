@@ -700,6 +700,8 @@ export default class GitFeature extends Feature {
    */
   findRepo() {
     const { runtime } = this
-    return runtime.fsx.findUpSync('.git')
+    return runtime.fsx.findUpSync('.git', {
+      cwd: runtime.cwd,
+    })
   }
 }

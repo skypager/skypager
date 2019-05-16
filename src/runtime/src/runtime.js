@@ -1166,7 +1166,11 @@ export class Runtime {
    * @memberof Runtime#
    */
   get isReactNative() {
-    return !isUndefined(global) && !isUndefined(navigator) && navigator.product === 'ReactNative'
+    try {
+      return !isUndefined(global) && typeof navigator !== 'undefined' && navigator.product === 'ReactNative'
+    } catch(error) {
+      return false
+    }
   }
 
   /**
@@ -1177,7 +1181,7 @@ export class Runtime {
    */
   get isDebug() {
     const { argv = {} } = this
-    return !!argv.debug
+    return !!argv.debug || argv.debugBrk || argv.inspect || argv.inspectBrk
   }
 
   /**

@@ -35,7 +35,7 @@ describe('The Sheets Server', function() {
 
   after(function() {
     try {
-      process.kill(pid)
+      process.kill(pid, 'SIGINT')
     } catch (error) {}
   })
 

@@ -11,13 +11,13 @@
   "scripts": {
     "start": "cross-env NODE_ENV=production skypager serve --esm",
     "dev": "cross-env NODE_ENV=development skypager serve --esm --hot",
-    "build": "cross-env NODE_ENV=production webpack --config webpack.config.js",
+    "build": "skypager build --app-only",
     "postbuild": "skypager hash-build",
     "deploy": "node scripts/deploy.js --verbose",
     "watch": "skypager watch",
     "console": "skypager console",
     "pretest": "yarn build",
-    "test": "cross-env NODE_ENV=test skypager test --webpack-config webpack.config.test.js --timeout 30000"
+    "test": "skypager test --mocha --timeout 10000"
   },
   "license": "MIT",
   "dependencies": {
@@ -40,7 +40,13 @@
     },
     "category": "apps"
   },
-  "gitHead": "e812dc16977aff62426166399c6cde7deadbcbf5",
+  "gitHead": "f84aceb4d9e2d8c8d63f321faf705ff2c644dc1b",
   "keywords": [],
-  "contributors": []
+  "contributors": [],
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
 }

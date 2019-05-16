@@ -1,4 +1,4 @@
-import { Runtime } from 'runtime'
+import { Runtime } from '../src/runtime'
 
 describe('@skypager/runtime', function() {
   it('can create runtime instances using a Runtime class', function() {

@@ -9,7 +9,7 @@
   "react-native": "lib/index.js",
   "scripts": {
     "build:web": "skypager build --app-only --include-unminified --no-clean",
-    "test": "skypager test",
+    "test": "skypager test --mocha test/**/*.spec.js",
     "prepare": "yarn build",
     "postbuild": "skypager hash-build",
     "prebuild:es": "yarn docs:api",
@@ -30,7 +30,7 @@
     "url": "https://github.com/skypager/skypager"
   },
   "homepage": "https://skypager.io",
-  "gitHead": "e812dc16977aff62426166399c6cde7deadbcbf5",
+  "gitHead": "f84aceb4d9e2d8c8d63f321faf705ff2c644dc1b",
   "keywords": [],
   "contributors": [],
   "skypager": {

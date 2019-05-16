@@ -15,7 +15,7 @@
     "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src",
     "build:web": "skypager build --app-only --no-clean --include-unminified",
     "watch:web": "skypager watch --app-only --no-clean",
-    "test": "skypager test",
+    "test": "skypager test --mocha test/**/*.spec.js",
     "console": "skypager console",
     "postbuild": "skypager hash-build",
     "prepare": "yarn build"
@@ -53,7 +53,7 @@
     "url": "https://github.com/skypager/skypager"
   },
   "homepage": "https://skypager.io",
-  "gitHead": "e812dc16977aff62426166399c6cde7deadbcbf5",
+  "gitHead": "f84aceb4d9e2d8c8d63f321faf705ff2c644dc1b",
   "contributors": [],
   "skypager": {
     "category": "helpers",

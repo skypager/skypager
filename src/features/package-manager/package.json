@@ -17,7 +17,7 @@
     "postbuild:lib": "yarn docs:api",
     "postbuild": "skypager hash-build",
     "docs:api": "skypager generate-api-docs",
-    "test": "mocha --require @babel/register --file test/test.js --timeout 10000 test/**/*.spec.js"
+    "test": "skypager test --mocha --timeout 10000 test/**/*.spec.js"
   },
   "skypager": {
     "webpack": {
@@ -38,7 +38,7 @@
     "pacote": "^9.5.0",
     "tar": "^4.4.8"
   },
-  "gitHead": "e812dc16977aff62426166399c6cde7deadbcbf5",
+  "gitHead": "f84aceb4d9e2d8c8d63f321faf705ff2c644dc1b",
   "keywords": [],
   "contributors": [],
   "module": "lib/es/index.js"

@@ -16,7 +16,7 @@
     "build:web": "skypager build --app-only --no-clean --include-unminified",
     "prepare": "yarn docs:api && yarn build",
     "docs:api": "skypager generate-api-docs",
-    "test": "skypager test"
+    "test": "skypager test --mocha"
   },
   "dependencies": {
     "@babel/polyfill": "^7.2.2",
@@ -52,7 +52,7 @@
     "category": "runtimes",
     "projectType": "runtime"
   },
-  "gitHead": "e812dc16977aff62426166399c6cde7deadbcbf5",
+  "gitHead": "f84aceb4d9e2d8c8d63f321faf705ff2c644dc1b",
   "keywords": [],
   "contributors": [],
   "browserslist": [

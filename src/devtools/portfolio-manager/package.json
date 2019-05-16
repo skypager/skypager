@@ -17,7 +17,7 @@
     "watch": "babel --watch --comments --source-maps -d lib src",
     "console": "skypager console",
     "prepare": "yarn build",
-    "test": "mocha --require @babel/register --file test/test.js --timeout 10000 test/**/*.spec.js",
+    "test": "skypager test --mocha --timeout 10000 test/**/*.spec.js",
     "test:watch": "skypager test --webpack-config webpack.config.test.js --watch"
   },
   "license": "MIT",
@@ -37,7 +37,7 @@
     "category": "tools",
     "projectType": "feature"
   },
-  "gitHead": "e812dc16977aff62426166399c6cde7deadbcbf5",
+  "gitHead": "f84aceb4d9e2d8c8d63f321faf705ff2c644dc1b",
   "keywords": [],
   "contributors": [],
   "module": "lib/es/index.js"

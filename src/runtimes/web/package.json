@@ -12,7 +12,7 @@
     "docs:api": "skypager generate-api-docs",
     "build:lib": "cross-env BUILD_ENV=build NODE_ENV=production babel --comments --source-maps -d lib src",
     "build:es": "cross-env BUILD_ENV=build-es NODE_ENV=production babel --comments --source-maps -d lib/es src",
-    "build:web": "skypager build --app-only --include-unminified",
+    "build:web": "skypager build --app-only --include-unminified --no-clean",
     "postbuild:web": "yarn docs:api",
     "prepare": "yarn build",
     "postbuild": "skypager hash-build"
@@ -25,7 +25,7 @@
     "url": "https://github.com/skypager/skypager"
   },
   "homepage": "https://skypager.io",
-  "gitHead": "e812dc16977aff62426166399c6cde7deadbcbf5",
+  "gitHead": "f84aceb4d9e2d8c8d63f321faf705ff2c644dc1b",
   "keywords": [],
   "contributors": [],
   "skypager": {

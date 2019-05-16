@@ -17,7 +17,7 @@
     "postbuild:lib": "yarn docs:api",
     "postbuild": "skypager hash-build",
     "docs:api": "skypager generate-api-docs",
-    "test": "cross-env DISABLE_SKYPAGER_FILE_MANAGER=true skypager test --timeout 30000"
+    "test": "skypager test --mocha --timeout 30000"
   },
   "skypager": {
     "webpack": {
@@ -42,7 +42,7 @@
     "memory-fs": "^0.4.1",
     "skywalker": "^0.3.2"
   },
-  "gitHead": "e812dc16977aff62426166399c6cde7deadbcbf5",
+  "gitHead": "f84aceb4d9e2d8c8d63f321faf705ff2c644dc1b",
   "keywords": [],
   "contributors": [],
   "module": "lib/es/index.js"

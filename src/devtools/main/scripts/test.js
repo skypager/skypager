@@ -1,68 +1,53 @@
 const { spawnSync } = require('child_process')
 const { existsSync } = require('fs')
 const { resolve } = require('path')
-const { flatten } = require('lodash')
-const mochaWebpackBin = require('mocha-webpack/package.json').bin['mocha-webpack']
-const mochaWebpackBinPath = require.resolve(`mocha-webpack/${mochaWebpackBin}`)
 const spawnEnv = Object.assign({}, process.env, {
   NODE_ENV: 'test',
+  BUILD_ENV: 'build',
 })
 
 const ARGV = require('minimist')(process.argv.slice(2))
-const paths = require('@skypager/webpack/config/paths')
-const baseConfigPath = require.resolve('@skypager/webpack/config/webpack.config.test')
-const webpackConfigPath = ARGV['webpack-config']
-  ? resolve(paths.appPackageJson, ARGV['webpack-config'])
-  : baseConfigPath
-const manifest = require(paths.appPackageJson)
 
-const rest = ARGV._ || []
-const { skypager: config = {} } = manifest
-const { test = {} } = config
-const { pattern = 'test/**/*.spec.js' } = Object.assign({}, test, ARGV)
+let testFramework = 'mocha-webpack'
 
-if (!rest.length) {
-  rest.push(pattern)
-}
+let args = process.argv.slice(2)
 
-let args = [mochaWebpackBinPath]
-
-if (!ARGV['webpack-config']) {
-  args = args.concat(['--webpack-config', webpackConfigPath])
-}
-
-if (existsSync(resolve(paths.appPath, 'test', 'test.js'))) {
-  args = args.concat(['--require', 'test/test.js'])
+if (ARGV.mocha) {
+  args = args.filter(a => a !== '--mocha')
+  testFramework = 'mocha'
+} else if (ARGV.jest) {
+  args = args.filter(a => a !== '--jest')
+  testFramework = 'jest'
 } else {
-  args = args.concat(['--require', resolve(__dirname, '..', 'testing', 'mocha-test-setup.js')])
+  testFramework = 'mocha-webpack'
 }
 
-args = args
-  .concat(
-    flatten(
-      Object.keys(ARGV)
-        .filter(k => k !== '_' && k !== 'debug')
-        .map(k => [`--${k}`, ARGV[k]])
-    )
-  )
-  .concat(rest)
+if (testFramework === 'mocha-webpack') {
+  require('./test-with-mocha-webpack')
+} else if (testFramework === 'mocha') {
+  if (ARGV.debugger) {
+    args.unshift('--inspect')
+  }
 
-if (ARGV.debug) {
-  args.unshift('--inspect')
+  if (ARGV.babel !== false) {
+    args.push(...['--require', require.resolve('@babel/register')])
+  }
+
+  if (existsSync(resolve(process.cwd(), 'test', 'test.js'))) {
+    args = args.concat(['--file', 'test/test.js'])
+  } else {
+    args = args.concat(['--file', resolve(__dirname, '..', 'testing', 'mocha-test-setup.js')])
+  }
+
+  args = args.concat(ARGV._)
+} else if (testFramework === 'jest') {
 }
 
-if (ARGV.debugBrk) {
-  args.unshift('--inspect-brk')
-}
+console.log(`$ ${testFramework} ${args.join(' ')}`)
+const result = spawnSync(testFramework, args, {
+  cwd: process.cwd(),
+  env: spawnEnv,
+  stdio: 'inherit',
+})
 
-try {
-  const result = spawnSync('node', args, {
-    cwd: paths.appRoot,
-    env: spawnEnv,
-    stdio: 'inherit',
-  })
-
-  process.exit(result.status)
-} catch (error) {
-  process.exit(1)
-}
+process.exit(result.status)

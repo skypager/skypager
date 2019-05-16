@@ -6,7 +6,6 @@ import HomePage from './pages/HomePage'
 import DocPage from './pages/DocPage'
 import GraphExplorer from './components/GraphExplorer'
 import MainLayout from './layouts/MainLayout'
-import SideMenu from '../docs/_sideMenu.md'
 
 import './App.css'
 
@@ -31,7 +30,8 @@ export default class App extends Component {
     const c = {
       a: props => <Link to={props.href}>{props.children}</Link>,
     }
-    return <SideMenu components={c} />
+
+    return null
   }
 
   render() {

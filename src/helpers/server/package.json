@@ -16,7 +16,7 @@
     "build:node": "cross-env BUILD_ENV=build babel --comments --source-maps -d lib src",
     "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src",
     "watch": "babel --watch --comments --source-maps -d lib src",
-    "test": "skypager test",
+    "test": "skypager test --mocha test/**/*.spec.js",
     "prepublish": "skypager smoke-test",
     "docs:api": "skypager generate-api-docs"
   },
@@ -43,7 +43,7 @@
     "url": "https://github.com/skypager/skypager"
   },
   "homepage": "https://skypager.io",
-  "gitHead": "e812dc16977aff62426166399c6cde7deadbcbf5",
+  "gitHead": "f84aceb4d9e2d8c8d63f321faf705ff2c644dc1b",
   "keywords": [
     "skypager-helpers",
     "skypager-node"

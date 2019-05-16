@@ -2,9 +2,13 @@ import { Helper } from '@skypager/runtime'
 import { start } from 'repl'
 import Promise from 'bluebird'
 
-const { createContextRegistry } = Helper
+const { createMockContext, createContextRegistry } = Helper
 
 const priv = new WeakMap()
+
+const toContext = (members = {}) => {
+  return createMockContext(members)
+}
 
 export class Repl extends Helper {
   initialize() {
@@ -501,19 +505,30 @@ export class Repl extends Helper {
   }
 
   static extensions = createContextRegistry('extensions', {
-    context: require.context('./extensions', true, /\.js$/),
+    context: toContext({
+      history: () => require('./extensions/history'),
+      promise: () => require('./extensions/promise'),
+    }),
   })
 
   static commands = createContextRegistry('commands', {
-    context: require.context('./commands', true, /\.js$/),
+    context: toContext({
+      runner: () => require('./commands/runner'),
+      'clear-screen': () => require('./commands/clear-screen'),
+    }),
   })
 
   static runners = createContextRegistry('runners', {
-    context: require.context('./runners', true, /\.js$/),
+    context: toContext({
+      socket: () => require('./runners/socket'),
+      vm: () => require('./runners/vm'),
+    }),
   })
 
   static displays = createContextRegistry('displays', {
-    context: require.context('./displays', true, /\.js$/),
+    context: toContext({
+      help: () => require('./displays/help'),
+    }),
   })
 
   static isCacheable = true
@@ -523,7 +538,9 @@ export class Repl extends Helper {
       registryProp = 'repls',
       lookupProp = 'repl',
       registry = createContextRegistry('repls', {
-        context: require.context('./repls', false, /\.js$/),
+        context: toContext({
+          interactive: () => require('./repls/interactive'),
+        }),
       }),
     } = options
 

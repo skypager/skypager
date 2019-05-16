@@ -1,6 +1,12 @@
-import runtime from '@skypager/node'
+import host from '@skypager/node'
 import * as FileManagerFeature from '../src'
 import * as ServerHelper from '@skypager/helpers-server'
+
+const runtime = host
+  .spawn({
+    cwd: host.cwd,
+  })
+  .use('runtimes/node')
 
 runtime.use(ServerHelper).use(FileManagerFeature)
 

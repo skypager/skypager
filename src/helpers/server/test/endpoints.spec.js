@@ -28,6 +28,10 @@ describe('Server Endpoints', function() {
     await server.start()
   })
 
+  after(async function() {
+    server.stop()
+  })
+
   it('creates a registry for endpoints', function() {
     runtime.should.have
       .property('endpoints')

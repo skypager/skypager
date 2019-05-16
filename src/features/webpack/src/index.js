@@ -16,6 +16,7 @@ runtime.features.register('webpack', () => WebpackFeature)
 export default class WebpackFeature extends Feature {
   static isCacheable = false
   static isObservable = true
+  static allowAnonymousProviders = true
 
   initialState = {
     progress: 0,

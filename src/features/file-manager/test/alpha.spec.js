@@ -6,6 +6,7 @@ describe('The File Manager Feature', function() {
   })
 
   it('gets enabled automatically once used', function() {
+    runtime.isFeatureEnabled('file-manager').should.equal(true)
     runtime.has('fileManager').should.equal(true)
   })
 
@@ -41,6 +42,8 @@ describe('The File Manager Feature', function() {
   })
 
   it('has functions for accessing files', function() {
-    runtime.fileManager.should.have.property('file').that.is.a('function')
+    runtime.fileManager.featureMethods.should.include('file')
+    runtime.fileManager.provider.should.have.property('file').that.is.a('function')
+    // runtime.feature('file-manager').should.have.property('file').that.is.a('function')
   })
 })
