@@ -11,9 +11,9 @@
   "scripts": {
     "prepare": "yarn build",
     "prebuild": "rimraf lib",
-    "build": "yarn build:node && yarn build:es",
+    "build": "yarn build:lib && yarn build:es",
     "postbuild": "skypager hash-build",
-    "build:node": "cross-env BUILD_ENV=build babel --comments --source-maps -d lib src",
+    "build:lib": "cross-env BUILD_ENV=build babel --comments --source-maps -d lib src",
     "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src",
     "watch": "babel --watch --comments --source-maps -d lib src",
     "test": "skypager test --mocha test/**/*.spec.js",

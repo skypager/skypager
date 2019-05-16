@@ -83,10 +83,8 @@ class CISpinner {
 const print = message => console.log(message)
 
 async function main() {
-  print(`Building @skypager/runtime ${require('../src/runtime/package.json').version}`)
-
-  await spawn('yarn', ['build'], {
-    cwd: resolve(__dirname, '..', 'src', 'runtime'),
+  await spawn('node', ['scripts/build-libs.js'], {
+    cwd: resolve(__dirname, '..'),
     stdio,
   })
 
