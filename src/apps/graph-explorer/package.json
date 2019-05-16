@@ -3,12 +3,12 @@
   "version": "1.0.1-alpha.1",
   "description": "skypager graph explorer",
   "author": "Jon Soeder <jon@chicago.com>",
-  "main": "lib/index.js",
   "scripts": {
-    "deploy": "yarn export:graphs && cp now.json build && cd build && now --static && now alias",
+    "build": "yarn export:graphs && cp now.json build",
+    "deploy": "cd build && now --static && now alias",
     "export:graphs": "skypager export-graphs",
     "start": "NODE_ENV=production NO_CLEAR=true node ./start.js --log-level debug --cors",
-    "test": "node ./test.js"
+    "test": "exit 0"
   },
   "publishConfig": {
     "access": "public"
@@ -29,6 +29,7 @@
   "keywords": [],
   "contributors": [],
   "skypager": {
+    "buildFolder": "build",
     "category": "apps",
     "projectType": "webapp"
   },
