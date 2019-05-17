@@ -2,23 +2,21 @@ require('./install-secrets')
 
 const host = require('@skypager/node')
 
-// spawn a runtime instance in the root of the repo, instead of the current directory 
-const runtime = host.gitInfo.root === host.cwd
-  ? host
-  : host.spawn({ cwd: host.gitInfo.root }).use('runtimes/node')
+// spawn a runtime instance in the root of the repo, instead of the current directory
+const runtime =
+  host.gitInfo.root === host.cwd
+    ? host
+    : host.spawn({ cwd: host.gitInfo.root }).use('runtimes/node')
 
 const serviceAccountPath = runtime.resolve('secrets', 'serviceAccount.json')
 const serviceAccount = runtime.fsx.readJsonSync(serviceAccountPath)
 
 runtime.use(require('@skypager/helpers-sheet'), {
   serviceAccount: serviceAccountPath,
-  googleProject:  serviceAccount.project_id,
+  googleProject: serviceAccount.project_id,
 })
 
-const {
-  sheetId = 'skypagermonorepo',
-  sheetName = 'projects'
-} = host.argv 
+const { sheetId = 'skypagermonorepo', sheetName = 'projects' } = host.argv
 
 // Currently the sheets-helper entities have a bug where empty cells don't get indexed.
 // When creating the sheet this converts each empty value into the string $EMPTY so that we can change it
@@ -32,10 +30,10 @@ async function main() {
   // finds all of the sheets shared with the client_email address in the service account JSON
   await runtime.sheets.discover()
 
-  const { 
+  const {
     // the projects worksheet in our
-    worksheet, 
-    projects 
+    worksheet,
+    projects,
   } = await loadProjects()
 
   // Get the package entities for all of the packages in our monorepo's scope
@@ -195,17 +193,19 @@ async function loadProjects() {
 async function entities(sheet) {
   class Project extends sheet.RowEntity {
     set keywords(list) {
-      const keywordsCell = this.attributesToCellsMap['keywords']     
+      const keywordsCell = this.attributesToCellsMap['keywords']
 
       if (keywordsCell) {
-        keywordsCell.value = list.join("\n")
+        keywordsCell.value = list.join('\n')
       }
     }
 
     get keywords() {
-      const keywordsCell = this.attributesToCellsMap['keywords']     
+      const keywordsCell = this.attributesToCellsMap['keywords']
       if (keywordsCell) {
-        return String(keywordsCell.value).split("\n").map(k => String(k).trim())
+        return String(keywordsCell.value)
+          .split('\n')
+          .map(k => String(k).trim())
       } else {
         return []
       }

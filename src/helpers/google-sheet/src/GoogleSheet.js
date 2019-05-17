@@ -310,6 +310,18 @@ export class GoogleSheet extends Helper {
     })
   }
 
+  async bulkUpdateCells(worksheet, cells = []) {
+    if (typeof worksheet === 'string') {
+      worksheet = { id: worksheet }
+    }
+
+    worksheet.id = this.findSheetId(worksheet.id)
+
+    return new Promise((resolve, reject) => {
+      this.spreadsheet.bulkUpdateCells(worksheet.id, cells, err => (err ? reject(err) : resolve()))
+    })
+  }
+
   findSheetId(alias, errorOnMissing = false) {
     const ws = this.worksheets
       .filter(Boolean)
@@ -327,7 +339,7 @@ export class GoogleSheet extends Helper {
       )
     }
 
-    return ws.id
+    return ws && ws.id
   }
 
   async addRow(worksheetId, rowData) {

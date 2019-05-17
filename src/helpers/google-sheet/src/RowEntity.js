@@ -69,8 +69,7 @@ export default class RowEntity {
           }
         } else {
           this.parent.runtime.warn(
-            `Attempt to set ${attributeName} failed. not found in attributesToCellsMap`,
-            Object.keys(entity.attributesToCellsMap)
+            `Attempt to set ${attributeName} failed. not found in attributesToCellsMap. This`
           )
         }
         return newValue

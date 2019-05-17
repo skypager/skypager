@@ -5,6 +5,7 @@
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
   "scripts": {
+    "console": "skypager sync --console",
     "update:sheet": "skypager sync",
     "update:local": "skypager sync --inbound",
     "build": "exit 0",

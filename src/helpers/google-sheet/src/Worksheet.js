@@ -234,6 +234,25 @@ export default class Worksheet {
   }
 
   /**
+   * @typedef {Object} Cell
+   * @property {Number} col
+   * @property {Number} row
+   * @property {*} value
+   */
+
+  /**
+   * Loads all of the cells from the worksheet
+   *
+   * @param {Array<Cell>} cells - an array of cels to update
+   * @returns
+   * @memberof Worksheet
+   */
+  async bulkUpdateCells(cells = []) {
+    await this.parent.bulkUpdateCells(this.googleWorksheet.id, cells)
+    return cells
+  }
+
+  /**
    * Loads all of the cells from the worksheet
    *
    * @param {*} options
@@ -243,6 +262,37 @@ export default class Worksheet {
   async getCells(options) {
     const cells = await this.parent.getCells(this.googleWorksheet.id, options)
     return cells
+  }
+
+  /**
+   * @param {Cell} cell
+   *
+   * Create an object that will act as a proxy for a cell at an arbitrary coordinate.
+   * This is a workaround since getCells doesn't return a cell with an empty value even though the
+   * sheet may have one.
+   */
+  createCell(cell, worksheet) {
+    const { col, row } = cell
+
+    let val
+
+    const update = cell => {
+      Promise.resolve(worksheet.bulkUpdateCells([cell]))
+    }
+
+    return {
+      col,
+      row,
+      set value(v) {
+        if (worksheet.autoSaveEnabled) {
+          update({ col, row, value: v })
+        }
+        val = v
+      },
+      get value() {
+        return val
+      },
+    }
   }
 
   /**
