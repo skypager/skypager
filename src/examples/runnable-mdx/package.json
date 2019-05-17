@@ -1,6 +1,6 @@
 {
   "name": "@skypager/runnable-mdx-example",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "skypager runnable mdx example",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
@@ -19,9 +19,9 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@skypager/helpers-document": "^1.0.0",
-    "@skypager/node": "^1.0.0",
-    "@skypager/webpack": "^1.0.0"
+    "@skypager/helpers-document": "^1.0.1",
+    "@skypager/node": "^1.0.1",
+    "@skypager/webpack": "^1.0.1"
   },
   "repository": {
     "type": "github",

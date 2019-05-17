@@ -2,7 +2,7 @@
   "name": "@skypager/helpers-mdx",
   "homepage": "https://mdx-helper.skypager.io",
   "license": "MIT",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "markdown parsing and webpack loader",
   "skypager": {
     "projectType": "helper"

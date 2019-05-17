@@ -1,6 +1,6 @@
 {
   "name": "@skypager/portfolio-manager",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "the skypager portfolio manager",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
@@ -22,11 +22,11 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@skypager/clients-npm": "^1.0.0",
-    "@skypager/features-file-manager": "^1.0.0",
-    "@skypager/features-module-manager": "^1.0.0",
-    "@skypager/features-package-manager": "^1.0.0",
-    "@skypager/node": "^1.0.0"
+    "@skypager/clients-npm": "^1.0.1",
+    "@skypager/features-file-manager": "^1.0.1",
+    "@skypager/features-module-manager": "^1.0.1",
+    "@skypager/features-package-manager": "^1.0.1",
+    "@skypager/node": "^1.0.1"
   },
   "skypager": {
     "buildFolder": "lib",
