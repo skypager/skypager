@@ -2,6 +2,23 @@
 
 ## Releases
 
+### 1.0.0
+
+- All modules ship umd, commonjs, and es module formats
+- [@skypager/webpack] uses webpack 4
+- [@skypagers/helpers-sheet] full support for adding rows / updating cells
+- [Monorepo -> Google Sheet Sync](src/examples/monorepo-sheets) added example for syncing package.json content in the monorepo w/ a google sheet
+- [Runnable MDX Example](src/examples/runnable-mdx) added an example for runnable mdx documents
+
+### 0.4.12
+
+- [@skypager/node] - adds socket feature for cross platorm ipc between in node
+- [@skypager/runtime] - fixed bug with qbus event emitter once not working properly
+- [@skypager/features/package-manager] add scripts and methods for downloading from npm, implement `pacote` for fetching manifests and tarballs
+- [@skypager/features-file-manager] add `cacache` wrapper for interity based file system caching 
+- [@skypager/helpers-mdx] - utilities for parsing mdx file with ast and structure maps
+- [@skypager/helpers-google-doc] - utility for parsing google documents and working with their tree 
+
 ### 0.3.5
 
 - [@skypager/helpers-sheet] add support for writing to a google sheet
