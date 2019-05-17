@@ -16,8 +16,10 @@ const packages = [
 
 const scopes = packages.reduce((memo, pkg) => memo.concat(['--scope', pkg]), [])
 
+const buildCommand = process.env.BUILD_COMMAND || 'build:lib'
+
 async function main() {
-  await spawn('lerna', ['run', 'build:lib', '--stream'].concat(scopes), {
+  await spawn('lerna', ['run', buildCommand, '--stream'].concat(scopes), {
     stdio: 'inherit',
   }).catch(error => {
     process.exit(1)
