@@ -28,7 +28,7 @@ babelFile.parse().then(() => {
 
 These are pretty low level capabilities, on top of which higher level abstractions can be built.
 
-The [Docserver Example App](../../apps/doc-server) is one example, where we use this to make runnable and live-editable code blocks.
+The [Runnable MDX Example App](../../examples/runnable-mdx) is one example, where we use this to make runnable and live-editable code blocks.
 
 In the future, imagine something like this:
 

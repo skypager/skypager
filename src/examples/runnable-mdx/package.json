@@ -1,7 +1,7 @@
 {
-  "name": "@skypager/doc-server",
+  "name": "@skypager/runnable-mdx-example",
   "version": "1.0.1-alpha.1",
-  "description": "skypager document helper",
+  "description": "skypager runnable mdx example",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
   "browser": "lib/skypager-helpers-document.min.js",
