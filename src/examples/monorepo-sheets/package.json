@@ -6,7 +6,9 @@
   "main": "lib/index.js",
   "scripts": {
     "update:sheet": "skypager sync",
-    "update:local": "skypager sync --inbound"
+    "update:local": "skypager sync --inbound",
+    "build": "exit 0",
+    "test": "exit 0"
   },
   "license": "MIT",
   "dependencies": {

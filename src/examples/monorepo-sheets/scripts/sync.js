@@ -1,29 +1,49 @@
 require('./install-secrets')
 
 const host = require('@skypager/node')
-const runtime = host.spawn({ cwd: host.gitInfo.root }).use('runtimes/node')
+
+// spawn a runtime instance in the root of the repo, instead of the current directory 
+const runtime = host.gitInfo.root === host.cwd
+  ? host
+  : host.spawn({ cwd: host.gitInfo.root }).use('runtimes/node')
+
+const serviceAccountPath = runtime.resolve('secrets', 'serviceAccount.json')
+const serviceAccount = runtime.fsx.readJsonSync(serviceAccountPath)
 
 runtime.use(require('@skypager/helpers-sheet'), {
-  serviceAccount: runtime.resolve('secrets', 'serviceAccount.json'),
-  googleProject: 'skypager-4dab8',
+  serviceAccount: serviceAccountPath,
+  googleProject:  serviceAccount.project_id,
 })
 
+const {
+  sheetId = 'skypagermonorepo',
+  sheetName = 'projects'
+} = host.argv 
+
+// Currently the sheets-helper entities have a bug where empty cells don't get indexed.
+// When creating the sheet this converts each empty value into the string $EMPTY so that we can change it
 const EMPTY = '$EMPTY'
 
 async function main() {
+  // start the file and package manager features, so we can get access to all of the package entities
   await runtime.fileManager.startAsync()
   await runtime.packageManager.startAsync()
-  await runtime.sheets.discover()
-  const { worksheet, projects } = await loadProjects()
 
+  // finds all of the sheets shared with the client_email address in the service account JSON
+  await runtime.sheets.discover()
+
+  const { 
+    // the projects worksheet in our
+    worksheet, 
+    projects 
+  } = await loadProjects()
+
+  // Get the package entities for all of the packages in our monorepo's scope
   let packages = runtime.packageManager.allEntities.filter(
-    ({ name }) => name && name.startsWith('@skypager/')
+    ({ name }) => name && name.startsWith(runtime.currentPackage.name.split('/')[0])
   )
 
-  if (runtime.argv.only) {
-    packages = packages.filter(p => p.name === runtime.argv.only)
-  }
-
+  // run the script with --console to start REPL to be able to inspect the data
   if (runtime.argv.console) {
     await runtime.repl('interactive').launch({ runtime, packages, projects, worksheet })
     return
@@ -38,7 +58,7 @@ async function main() {
   }
 }
 
-async function updateLocalPackages({ packages, worksheet, projects }) {
+async function updateLocalPackages({ packages, projects }) {
   for (let pkg of packages) {
     await syncPackage(pkg, projects.find(p => p.name === pkg.name))
   }
@@ -142,7 +162,7 @@ async function syncProject(packageMeta, { projectIndex: index = {}, worksheet = 
   }
 
   console.log(`Adding ${name}`)
-  const row = await worksheet.addRow({
+  await worksheet.addRow({
     name,
     version,
     description: description && description.length ? description : EMPTY,
@@ -155,13 +175,13 @@ async function syncProject(packageMeta, { projectIndex: index = {}, worksheet = 
 }
 
 async function loadProjects() {
-  const monorepo = runtime.sheet('skypagermonorepo')
+  const monorepo = runtime.sheet(sheetId)
 
   monorepo.enableAutoSave()
 
   await entities(monorepo)
 
-  const worksheet = await monorepo.ws('projects')
+  const worksheet = await monorepo.ws(sheetName)
 
   const projects = worksheet.entities
 
@@ -172,11 +192,30 @@ async function loadProjects() {
   }
 }
 
-function entities(sheet) {
-  class Project extends sheet.RowEntity {}
+async function entities(sheet) {
+  class Project extends sheet.RowEntity {
+    set keywords(list) {
+      const keywordsCell = this.attributesToCellsMap['keywords']     
+
+      if (keywordsCell) {
+        keywordsCell.value = list.join("\n")
+      }
+    }
+
+    get keywords() {
+      const keywordsCell = this.attributesToCellsMap['keywords']     
+      if (keywordsCell) {
+        return String(keywordsCell.value).split("\n").map(k => String(k).trim())
+      } else {
+        return []
+      }
+    }
+  }
+
+  await sheet.whenReady()
 
   try {
-    return sheet.registerEntity('projects', () => Project)
+    return sheet.registerEntity(sheetName, () => Project)
   } catch (error) {
     console.log(sheet.worksheetIds, sheet.worksheetTitles)
   }
