@@ -11,6 +11,7 @@ secrets/
 *.iml
 .vscode
 .env
+.env.*
 test-results-*.xml
 out/
 tmp/
@@ -31,3 +32,4 @@ public/latest/*
 *.tgz
 meta/
 *.tmp.js
+.npmrc
