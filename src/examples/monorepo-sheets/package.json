@@ -1,6 +1,6 @@
 {
   "name": "@skypager/sheets-monorepo",
-  "version": "1.0.1-alpha.1",
+  "version": "1.0.0",
   "description": "script to sync a monorepo's package.json collection with a google sheet",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
@@ -13,7 +13,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@skypager/helpers-sheet": "^1.0.1-alpha.1"
+    "@skypager/helpers-sheet": "^1.0.0"
   },
   "skypager": {
     "category": "cli",

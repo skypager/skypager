@@ -1,6 +1,6 @@
 {
   "name": "@skypager/graph-explorer",
-  "version": "1.0.1-alpha.1",
+  "version": "1.0.0",
   "description": "skypager graph explorer",
   "author": "Jon Soeder <jon@chicago.com>",
   "scripts": {
@@ -15,11 +15,11 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@skypager/cli": "^1.0.1-alpha.1",
-    "@skypager/node": "^1.0.1-alpha.1",
-    "@skypager/portfolio-manager": "^1.0.1-alpha.1",
-    "@skypager/runtime": "^1.0.1-alpha.1",
-    "@skypager/web": "^1.0.1-alpha.1"
+    "@skypager/cli": "^1.0.0",
+    "@skypager/node": "^1.0.0",
+    "@skypager/portfolio-manager": "^1.0.0",
+    "@skypager/runtime": "^1.0.0",
+    "@skypager/web": "^1.0.0"
   },
   "repository": {
     "type": "github",

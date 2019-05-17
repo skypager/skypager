@@ -1,6 +1,6 @@
 {
   "name": "@skypager/helpers-document",
-  "version": "1.0.1-alpha.1",
+  "version": "1.0.0",
   "description": "skypager document helper",
   "keywords": [],
   "author": "Jon Soeder <jon@chicago.com>",
