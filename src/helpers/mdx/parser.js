@@ -9,7 +9,15 @@ const toString = require('mdast-util-to-string')
 const kebabCase = require('lodash/kebabCase')
 const omit = require('lodash/omit')
 
-module.exports = async function(raw, options = {}) {
+/** 
+ * @param {String} raw raw mdx content
+ * @param {Object} options options
+ * @param {String} options.filePath the path to the file
+ * @param {Boolean|Object} [options.babel=false] whether to transpile otherwise es6 / jsx output returned from mdx
+ * @param {Array} [options.mdPlugins=[]] md
+ * @param {Array} [options.hastPlugins=[]] hastPlugins 
+*/
+module.exports = async function(raw, options) {
   const tree = unified()
     .use(parse)
     .use(stringify)
@@ -19,10 +27,10 @@ module.exports = async function(raw, options = {}) {
 
   const ast = tree.parse(content)
 
-  const compile = (src, o = {}) =>
+  const compile = (src, { filePath = options.filePath }= {}) =>
     mdx(src, {
       mdPlugins: options.mdPlugins || [],
-      hastPlugins: [...(options.hastPlugins || []), syncAstNodes(ast, options.filePath)],
+      hastPlugins: [...(options.hastPlugins || []), syncAstNodes(ast, filePath)],
     })
 
   const toMdx = (a, o) => toMDXAST(o)(a)
@@ -67,16 +75,17 @@ module.exports = async function(raw, options = {}) {
     `typeof meta !== 'undefined' && Object.assign(meta, ${JSON.stringify(meta)}, meta)`,
     `export const ast = ${JSON.stringify(mdxast, null, 2)}`,
     `export const headingsMap = ${JSON.stringify(headingsMap, null, 2)}`,
+    options.injectCode,
     result,
   ].filter(Boolean)
 
-  const response = typeof code === 'string' ? code : code.join('\n')
+  let response = code.join("\n") 
 
   if (options.babel) {
     const babel = require('@babel/core')
-    const babelConfig = require('./config/babel')(
-      typeof options.babel === 'object' ? options.babel : {}
-    )
+    const babelConfig = typeof options.babelConfig === 'object' 
+      ? options.babelConfig 
+      : require('./babel-config')(typeof options.babel === 'object' ? options.babel : {})
 
     const transpiled = await new Promise((resolve, reject) => {
       babel.transform(response, omit(babelConfig, 'ignore', 'env'), (err, result) => {
@@ -84,10 +93,10 @@ module.exports = async function(raw, options = {}) {
       })
     })
 
-    return transpiled
+    response = transpiled
   }
 
-  return response
+  return { code: response, meta }
 }
 
 function stringifier() {

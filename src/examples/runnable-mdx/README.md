@@ -1,10 +1,90 @@
 # Runnable MDX Example
 
-The [SITE-TEMPLATE.md](SITE-TEMPLATE.md) example file produces the following AST
+## Runnable MDX Code Blocks
+
+## Runnable Markdown Documents
+
+Runnable MDX Documents can 
+
+We can use the MDX AST to extract the language nouns and attributes are used in the writing.
+
+When we're writing about software, we can take advantage of the importance of nouns and names as they usually refer to the things we're working on in our code.
+
+We assume things about each noun based on the heading it belongs to.  For example, the list items under the `## Sitemap` heading contain links.  
+
+We assume the text of the link is the name of the page, and the href of the link is the URL that page is served on.
+
+We assume links to certain types of files can be parsed and followed, and even understood by other Skypager Helpers.  (Google Sheets, Google Docs, Sketch Files, can all be turned into objects with APIs.) 
+
+The [SITE-TEMPLATE.md](SITE-TEMPLATE.md) file is a Markdown document with YAML frontmatter. 
+
+```markdown
+---
+projectType: react-web-application
+customer: Soederpop, Inc
+deployTo: zeit
+accounts:
+  google: soederpops-google
+---
+
+# [My Website](https://soederpop.com)
+
+[Sketchfile Link](https://link.to/designer/)
+[Mock Data](https://google-sheets.com/my/spreadsheets/my-website/mock-data)
+[Page Copy](https://google-docs/my/documents/my-website/content)
+
+## Sitemap 
+
+- [Home](/)
+- [About](/about) 
+- [Contact US](/contact-us) 
+- [Products](/products)
+- [Product Details](/products/:id)
+```
+
+The [Document Helper](../../helpers/document) uses [MDX](../../helpers/mdx) to turn this content it into the following:
+
+```javascript
+async function main() {
+  await runtime.mdxDocs.discover()
+  const siteTemplate = runtime.mdxDoc('SITE-TEMPLATE') 
+
+  const { meta, ast, headingsMap, Component } = siteTemplate
+}
+```
+
+**headingsMap**
 
 ```json
+{
+  "headings": {
+    "My Website": 1,
+    "Sitemap": 7
+  },
+  "lines": {
+    "1": "My Website",
+    "7": "Sitemap"
+  }
+}
+```
 
- {
+**Metadata**
+
+```json
+{
+  projectType: "react-web-application",
+  "customer": "Soederpop, Inc",
+  "deplyTo": "zeit",
+  "accounts": {
+    "google": "soederpops-google"
+  }
+}
+```
+
+**AST**
+
+```json
+{
   "type": "root",
   "children": [
     {
@@ -18,35 +98,9 @@ The [SITE-TEMPLATE.md](SITE-TEMPLATE.md) example file produces the following AST
           "children": [
             {
               "type": "text",
-              "value": "My Website",
-              "position": {
-                "start": {
-                  "line": 2,
-                  "column": 4,
-                  "offset": 4
-                },
-                "end": {
-                  "line": 2,
-                  "column": 14,
-                  "offset": 14
-                },
-                "indent": []
-              }
+              "value": "My Website"
             }
-          ],
-          "position": {
-            "start": {
-              "line": 2,
-              "column": 3,
-              "offset": 3
-            },
-            "end": {
-              "line": 2,
-              "column": 38,
-              "offset": 38
-            },
-            "indent": []
-          }
+          ]
         }
       ],
       "position": {
@@ -59,8 +113,7 @@ The [SITE-TEMPLATE.md](SITE-TEMPLATE.md) example file produces the following AST
           "line": 2,
           "column": 38,
           "offset": 38
-        },
-        "indent": []
+        }
       }
     },
     {
@@ -73,54 +126,13 @@ The [SITE-TEMPLATE.md](SITE-TEMPLATE.md) example file produces the following AST
           "children": [
             {
               "type": "text",
-              "value": "Sketchfile Link",
-              "position": {
-                "start": {
-                  "line": 4,
-                  "column": 2,
-                  "offset": 41
-                },
-                "end": {
-                  "line": 4,
-                  "column": 17,
-                  "offset": 56
-                },
-                "indent": []
-              }
+              "value": "Sketchfile Link"
             }
-          ],
-          "position": {
-            "start": {
-              "line": 4,
-              "column": 1,
-              "offset": 40
-            },
-            "end": {
-              "line": 4,
-              "column": 45,
-              "offset": 84
-            },
-            "indent": []
-          }
+          ]
         },
         {
           "type": "text",
-          "value": "\n",
-          "position": {
-            "start": {
-              "line": 4,
-              "column": 45,
-              "offset": 84
-            },
-            "end": {
-              "line": 5,
-              "column": 1,
-              "offset": 85
-            },
-            "indent": [
-              1
-            ]
-          }
+          "value": "\n"
         },
         {
           "type": "link",
@@ -129,54 +141,13 @@ The [SITE-TEMPLATE.md](SITE-TEMPLATE.md) example file produces the following AST
           "children": [
             {
               "type": "text",
-              "value": "Mock Data",
-              "position": {
-                "start": {
-                  "line": 5,
-                  "column": 2,
-                  "offset": 86
-                },
-                "end": {
-                  "line": 5,
-                  "column": 11,
-                  "offset": 95
-                },
-                "indent": []
-              }
+              "value": "Mock Data"
             }
-          ],
-          "position": {
-            "start": {
-              "line": 5,
-              "column": 1,
-              "offset": 85
-            },
-            "end": {
-              "line": 5,
-              "column": 76,
-              "offset": 160
-            },
-            "indent": []
-          }
+          ]
         },
         {
           "type": "text",
-          "value": "\n",
-          "position": {
-            "start": {
-              "line": 5,
-              "column": 76,
-              "offset": 160
-            },
-            "end": {
-              "line": 6,
-              "column": 1,
-              "offset": 161
-            },
-            "indent": [
-              1
-            ]
-          }
+          "value": "\n"
         },
         {
           "type": "link",
@@ -185,35 +156,9 @@ The [SITE-TEMPLATE.md](SITE-TEMPLATE.md) example file produces the following AST
           "children": [
             {
               "type": "text",
-              "value": "Page Copy",
-              "position": {
-                "start": {
-                  "line": 6,
-                  "column": 2,
-                  "offset": 162
-                },
-                "end": {
-                  "line": 6,
-                  "column": 11,
-                  "offset": 171
-                },
-                "indent": []
-              }
+              "value": "Page Copy"
             }
-          ],
-          "position": {
-            "start": {
-              "line": 6,
-              "column": 1,
-              "offset": 161
-            },
-            "end": {
-              "line": 6,
-              "column": 65,
-              "offset": 225
-            },
-            "indent": []
-          }
+          ]
         }
       ],
       "position": {
@@ -226,11 +171,7 @@ The [SITE-TEMPLATE.md](SITE-TEMPLATE.md) example file produces the following AST
           "line": 6,
           "column": 65,
           "offset": 225
-        },
-        "indent": [
-          1,
-          1
-        ]
+        }
       }
     },
     {
@@ -239,20 +180,7 @@ The [SITE-TEMPLATE.md](SITE-TEMPLATE.md) example file produces the following AST
       "children": [
         {
           "type": "text",
-          "value": "Sitemap",
-          "position": {
-            "start": {
-              "line": 8,
-              "column": 4,
-              "offset": 230
-            },
-            "end": {
-              "line": 8,
-              "column": 11,
-              "offset": 237
-            },
-            "indent": []
-          }
+          "value": "Sitemap"
         }
       ],
       "position": {
@@ -265,8 +193,7 @@ The [SITE-TEMPLATE.md](SITE-TEMPLATE.md) example file produces the following AST
           "line": 8,
           "column": 12,
           "offset": 238
-        },
-        "indent": []
+        }
       }
     },
     {
@@ -290,65 +217,13 @@ The [SITE-TEMPLATE.md](SITE-TEMPLATE.md) example file produces the following AST
                   "children": [
                     {
                       "type": "text",
-                      "value": "Home",
-                      "position": {
-                        "start": {
-                          "line": 10,
-                          "column": 4,
-                          "offset": 243
-                        },
-                        "end": {
-                          "line": 10,
-                          "column": 8,
-                          "offset": 247
-                        },
-                        "indent": []
-                      }
+                      "value": "Home"
                     }
-                  ],
-                  "position": {
-                    "start": {
-                      "line": 10,
-                      "column": 3,
-                      "offset": 242
-                    },
-                    "end": {
-                      "line": 10,
-                      "column": 12,
-                      "offset": 251
-                    },
-                    "indent": []
-                  }
+                  ]
                 }
-              ],
-              "position": {
-                "start": {
-                  "line": 10,
-                  "column": 3,
-                  "offset": 242
-                },
-                "end": {
-                  "line": 10,
-                  "column": 12,
-                  "offset": 251
-                },
-                "indent": []
-              }
+              ]
             }
-          ],
-          "position": {
-            "start": {
-              "line": 10,
-              "column": 1,
-              "offset": 240
-            },
-            "end": {
-              "line": 10,
-              "column": 12,
-              "offset": 251
-            },
-            "indent": []
-          }
+          ]
         },
         {
           "type": "listItem",
@@ -365,82 +240,17 @@ The [SITE-TEMPLATE.md](SITE-TEMPLATE.md) example file produces the following AST
                   "children": [
                     {
                       "type": "text",
-                      "value": "About",
-                      "position": {
-                        "start": {
-                          "line": 11,
-                          "column": 4,
-                          "offset": 255
-                        },
-                        "end": {
-                          "line": 11,
-                          "column": 9,
-                          "offset": 260
-                        },
-                        "indent": []
-                      }
+                      "value": "About"
                     }
-                  ],
-                  "position": {
-                    "start": {
-                      "line": 11,
-                      "column": 3,
-                      "offset": 254
-                    },
-                    "end": {
-                      "line": 11,
-                      "column": 18,
-                      "offset": 269
-                    },
-                    "indent": []
-                  }
+                  ]
                 },
                 {
                   "type": "text",
-                  "value": " ",
-                  "position": {
-                    "start": {
-                      "line": 11,
-                      "column": 18,
-                      "offset": 269
-                    },
-                    "end": {
-                      "line": 11,
-                      "column": 19,
-                      "offset": 270
-                    },
-                    "indent": []
-                  }
+                  "value": " "
                 }
-              ],
-              "position": {
-                "start": {
-                  "line": 11,
-                  "column": 3,
-                  "offset": 254
-                },
-                "end": {
-                  "line": 11,
-                  "column": 19,
-                  "offset": 270
-                },
-                "indent": []
-              }
+              ]
             }
-          ],
-          "position": {
-            "start": {
-              "line": 11,
-              "column": 1,
-              "offset": 252
-            },
-            "end": {
-              "line": 11,
-              "column": 19,
-              "offset": 270
-            },
-            "indent": []
-          }
+          ]
         },
         {
           "type": "listItem",
@@ -457,82 +267,17 @@ The [SITE-TEMPLATE.md](SITE-TEMPLATE.md) example file produces the following AST
                   "children": [
                     {
                       "type": "text",
-                      "value": "Contact US",
-                      "position": {
-                        "start": {
-                          "line": 12,
-                          "column": 4,
-                          "offset": 274
-                        },
-                        "end": {
-                          "line": 12,
-                          "column": 14,
-                          "offset": 284
-                        },
-                        "indent": []
-                      }
+                      "value": "Contact US"
                     }
-                  ],
-                  "position": {
-                    "start": {
-                      "line": 12,
-                      "column": 3,
-                      "offset": 273
-                    },
-                    "end": {
-                      "line": 12,
-                      "column": 28,
-                      "offset": 298
-                    },
-                    "indent": []
-                  }
+                  ]
                 },
                 {
                   "type": "text",
-                  "value": " ",
-                  "position": {
-                    "start": {
-                      "line": 12,
-                      "column": 28,
-                      "offset": 298
-                    },
-                    "end": {
-                      "line": 12,
-                      "column": 29,
-                      "offset": 299
-                    },
-                    "indent": []
-                  }
+                  "value": " "
                 }
-              ],
-              "position": {
-                "start": {
-                  "line": 12,
-                  "column": 3,
-                  "offset": 273
-                },
-                "end": {
-                  "line": 12,
-                  "column": 29,
-                  "offset": 299
-                },
-                "indent": []
-              }
+              ]
             }
-          ],
-          "position": {
-            "start": {
-              "line": 12,
-              "column": 1,
-              "offset": 271
-            },
-            "end": {
-              "line": 12,
-              "column": 29,
-              "offset": 299
-            },
-            "indent": []
-          }
+          ]
         },
         {
           "type": "listItem",
@@ -549,65 +294,13 @@ The [SITE-TEMPLATE.md](SITE-TEMPLATE.md) example file produces the following AST
                   "children": [
                     {
                       "type": "text",
-                      "value": "Products",
-                      "position": {
-                        "start": {
-                          "line": 13,
-                          "column": 4,
-                          "offset": 303
-                        },
-                        "end": {
-                          "line": 13,
-                          "column": 12,
-                          "offset": 311
-                        },
-                        "indent": []
-                      }
+                      "value": "Products"
                     }
-                  ],
-                  "position": {
-                    "start": {
-                      "line": 13,
-                      "column": 3,
-                      "offset": 302
-                    },
-                    "end": {
-                      "line": 13,
-                      "column": 24,
-                      "offset": 323
-                    },
-                    "indent": []
-                  }
+                  ]
                 }
-              ],
-              "position": {
-                "start": {
-                  "line": 13,
-                  "column": 3,
-                  "offset": 302
-                },
-                "end": {
-                  "line": 13,
-                  "column": 24,
-                  "offset": 323
-                },
-                "indent": []
-              }
+              ]
             }
-          ],
-          "position": {
-            "start": {
-              "line": 13,
-              "column": 1,
-              "offset": 300
-            },
-            "end": {
-              "line": 13,
-              "column": 24,
-              "offset": 323
-            },
-            "indent": []
-          }
+          ]
         },
         {
           "type": "listItem",
@@ -624,65 +317,13 @@ The [SITE-TEMPLATE.md](SITE-TEMPLATE.md) example file produces the following AST
                   "children": [
                     {
                       "type": "text",
-                      "value": "Product Details",
-                      "position": {
-                        "start": {
-                          "line": 14,
-                          "column": 4,
-                          "offset": 327
-                        },
-                        "end": {
-                          "line": 14,
-                          "column": 19,
-                          "offset": 342
-                        },
-                        "indent": []
-                      }
+                      "value": "Product Details"
                     }
-                  ],
-                  "position": {
-                    "start": {
-                      "line": 14,
-                      "column": 3,
-                      "offset": 326
-                    },
-                    "end": {
-                      "line": 14,
-                      "column": 35,
-                      "offset": 358
-                    },
-                    "indent": []
-                  }
+                  ]
                 }
-              ],
-              "position": {
-                "start": {
-                  "line": 14,
-                  "column": 3,
-                  "offset": 326
-                },
-                "end": {
-                  "line": 14,
-                  "column": 35,
-                  "offset": 358
-                },
-                "indent": []
-              }
+              ]
             }
-          ],
-          "position": {
-            "start": {
-              "line": 14,
-              "column": 1,
-              "offset": 324
-            },
-            "end": {
-              "line": 14,
-              "column": 35,
-              "offset": 358
-            },
-            "indent": []
-          }
+          ]
         }
       ],
       "position": {
@@ -695,35 +336,11 @@ The [SITE-TEMPLATE.md](SITE-TEMPLATE.md) example file produces the following AST
           "line": 14,
           "column": 35,
           "offset": 358
-        },
-        "indent": [
-          1,
-          1,
-          1,
-          1
-        ]
+        }
       }
     }
-  ],
-  "position": {
-    "start": {
-      "line": 1,
-      "column": 1,
-      "offset": 0
-    },
-    "end": {
-      "line": 14,
-      "column": 35,
-      "offset": 358
-    }
-  }
+  ]
 }
 ```
 
-We can use this AST to extract the language nouns and attributes that it references.
-
-We assume things about each noun based on the heading it belongs to.
-
-We assume links to certain types of files can be parsed and followed as well through some AST format.
-
-We use these assumptions to build a script which will turn any other SITE-TEMPLATE.md file into a full blown react website and deploy it. 
+You can use all of this information to run scripts which run on behalf of, or in the context of, this document. 

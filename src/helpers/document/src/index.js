@@ -1,10 +1,181 @@
 import Babel from './babel/babel'
-import Mdx from './mdx/mdx'
+import MdxBase from './mdx/mdx'
 import VmRunner from './features/vm-runner'
 import editor from './features/editor'
 import bundle from './features/bundle'
 
-export function attach(runtime) {
+class Mdx extends MdxBase {
+  get file() {
+    return this.tryGet('file', {
+      path: `${this.name}.md`
+    })
+  }
+
+  get content() {
+    return this.tryGet('content', this.tryGet('file.content'))
+  }
+
+  async run(options = {}) {
+    await this.process(options)
+    await this.toRunnable()
+
+    const blocks = typeof options.filter === 'function'
+      ? this.runners.filter(options.filter)
+      : this.runners
+
+    for(let block of blocks) {
+      await block.runner.run()
+    }
+  }
+
+  async toRunnable(options = {}) {
+    const runners = await this.createVMRunners(options)
+    this.state.set('runners', runners)
+    return this
+  }
+
+  get runners() {
+    if (this.currentState.runners) {
+      return this.currentState.runners
+    } else {
+      this.state.set('runners', [])
+    }
+
+    return this.state.get('runners')
+  }
+
+  async toScriptHelper(options = {}) {
+    const {
+      id = this.runtime.relative(this.file.path),
+    } = options
+
+    let {
+      content = this.currentState.parsedContent,
+      metadata = {}
+    } = options
+
+    if (!content || !content.length) {
+      const { meta, code } = await this.parse(options)  
+      content = code
+
+      metadata = Object.assign({}, meta, metadata)
+    }
+
+    return this.runtime.script(id, {
+      ...options,
+      meta: metadata,
+      file: this.file,
+      content,
+    })
+  }
+
+  /** 
+   * 
+  */
+  async process(options) {
+    const scriptHelper = await this.toScriptHelper(options)
+    const { ast, headingsMap, default: defaultExport, meta } = await scriptHelper.parse().then(() => scriptHelper.sliceModule('ast', 'headingsMap', 'default', 'meta'))
+
+    this.state.set('default', defaultExport)
+    this.state.set('meta', {
+      ...meta,
+      ...scriptHelper.tryGet('meta', {})
+    })
+    this.state.set('headingsMap', headingsMap)
+    this.state.set('ast', ast)
+
+    return {
+      ast,
+      meta: this.currentState.meta,
+      headingsMap,
+      default: defaultExport
+    }
+  }
+
+  /** 
+   * Takes the raw markdown mdx content, parses it with mdx, and then transpiles the resulting
+   * code.
+  */
+  async transpile(options = {}) {
+    const { code, meta } = await require('@skypager/helpers-mdx')(this.content, {
+      filePath: this.file.path,
+      babel: true,
+      ...options,
+    })
+
+    this.state.set('transpiledContent', code)
+
+    return { code, meta }
+  }
+
+  /** 
+   * Takes the raw markdown mdx content, and parses it with mdx, returning jsx code
+  */
+  async parse(options = {}) {
+    const { code, meta } = await require('@skypager/helpers-mdx')(this.content, {
+      filePath: this.file.path,
+      ...options,
+      babel: false,
+    })
+
+    this.state.set('parsed', true)
+    this.state.set('parsedContent', code)
+
+    return { code, meta }
+  }
+
+  get headingLineNumbers() {
+    return this.chain
+          .get('headingsMap.lines')
+          .invert()
+          .mapValues(v => parseInt(v, 10))
+          .entries()
+          .sortBy((v) => v[1])
+          .fromPairs()
+          .value()
+  }
+
+  findParentHeading(node, options = {}) {
+    const headingNode = this.findAllNodesBefore(node, ({ type }) => type === 'heading')[0]
+
+    if (!headingNode) {
+      return
+    }
+
+    return options.stringify
+      ? this.stringify(headingNode)
+      : headingNode
+  }
+
+  async createVMRunners(options = {}) {
+    const { codeBlocks } = this   
+
+    return Promise.all(codeBlocks
+      .filter(b => b.lang && b.lang === 'javascript')
+      .map((node, i) => {
+        const {
+          value, position
+        } = node
+        
+        const parent = this.findParentHeading(node, { stringify: true })
+        const script = this.runtime.script(`${this.name}/${i}`, {
+          content: value,
+          meta: { position, parent },
+        })
+
+        return script.parse().then(() => script.createVMRunner(options)).then((runner) => ({ i, script, position, runner, parentHeading: parent }))
+      }))
+  }
+
+  static attach(runtime, options) {
+    MdxBase.attach(runtime, {
+      baseClass: Mdx,
+      ...options
+    })  
+  }
+}
+
+export function attach(runtime, opts) {
   runtime.features.add({
     'vm-runner': VmRunner,
     editor,
@@ -13,6 +184,13 @@ export function attach(runtime) {
 
   runtime.Babel = Babel
   runtime.Mdx = Mdx
+
   Babel.attach(runtime)
   Mdx.attach(runtime)
+  
+  runtime.mdxDocs.babelConfig = (options = {}) => require('@skypager/helpers-mdx/babel-config')({
+    modules: true,
+    ...opts.babelConfig || {},
+    ...options
+  })
 }

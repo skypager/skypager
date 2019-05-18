@@ -1,5 +1,11 @@
 import { Helper } from '@skypager/runtime'
 import { discover } from './discover'
+import visit from 'unist-util-visit'
+import { select, selectAll } from 'unist-util-select'
+import findAfter from 'unist-util-find-after'
+import findAllAfter from 'unist-util-find-all-after'
+import findAllBefore from 'unist-util-find-all-before'
+import nodeToString from 'mdast-util-to-string'
 
 /**
  * The Mdx Helper is a wrapper for working with markdown or mdx documents.
@@ -15,6 +21,11 @@ export class Mdx extends Helper {
   // each instance of a page has observable state
   static isObservable = true
 
+  get initialState() {
+    return {
+      parsed: !!(this.options.ast || this.provider.ast),
+    }
+  }
   /**
    * Returns the document title, which is either specified in the document metadata
    * or by using the first heading encountered.  If no headings are encountered,
@@ -47,7 +58,7 @@ export class Mdx extends Helper {
    * it tells us which headings are found and their line number in the document.
    */
   get headingsMap() {
-    return this.tryGet('headingsMap', {
+    return this.currentState.headingsMap || this.tryGet('headingsMap', {
       lines: {},
       headings: {},
     })
@@ -59,7 +70,7 @@ export class Mdx extends Helper {
    */
   get meta() {
     // checks options.meta, fallsback to provider.meta
-    const providedByDoc = this.tryGet('meta', { id: this.name })
+    const providedByDoc = this.currentState.meta || this.tryGet('meta', { id: this.name })
     const withDefaults = this.lodash.defaults({}, providedByDoc, { id: this.name })
     return withDefaults
   }
@@ -69,7 +80,7 @@ export class Mdx extends Helper {
    * the markdown documents before rendering it as html or mdx
    */
   get ast() {
-    return this.tryGet('ast', {
+    return this.currentState.ast || this.tryGet('ast', {
       type: 'root',
       children: [],
       position: {
@@ -77,6 +88,44 @@ export class Mdx extends Helper {
         end: { line: 1, column: 1, offset: 0 },
       },
     })
+  }
+
+  /** 
+   * 
+   * 
+   *   "unist-util-find-after": "^2.0.2",
+    "unist-util-find-all-after": "^1.0.2",
+    "unist-util-find-all-before": "^2.0.2",
+    "unist-util-find-before": "^2.0.2",
+    "unist-util-select": "^1.5.0",
+    "unist-util-visit": "^1.3.1" 
+  */
+  visit(fn, base = this.ast) {
+    return visit(base, fn)
+  }
+
+  stringify(node) {
+    return nodeToString(node)
+  }
+
+  findAllNodesAfter(indexOrNode, test, base = this.ast) {
+    return findAllAfter(base, indexOrNode, test)
+  }
+
+  findAllNodesBefore(indexOrNode, test, base = this.ast) {
+    return findAllBefore(base, indexOrNode, test)
+  }
+
+  findNodesAfter(indexOrNode, test, base = this.ast) {
+    return findAfter(base, indexOrNode, test)
+  }
+
+  select(selector, base = this.ast) {
+    return selectAll(selector, base)
+  }
+
+  selectNode(selector, base = this.ast) {
+    return select(selector, base)
   }
 
   get body() {
@@ -95,11 +144,11 @@ export class Mdx extends Helper {
    */
   get Component() {
     const { componentExport = 'default' } = this.options
-    return this.tryGet(componentExport)
+    return this.state.get(componentExport) || this.tryGet(componentExport)
   }
 
   static attach(runtime, options = {}) {
-    Helper.attach(runtime, Mdx, {
+    Helper.attach(runtime, options.baseClass || Mdx, {
       registry: Helper.createContextRegistry('mdx', {
         context: Helper.createMockContext(),
         api: { discover, filter, findAllBy },

@@ -11,7 +11,7 @@ export async function discover(options = {}) {
         const file = this.runtime.file(path)
 
         return {
-          ...file,
+          file,
           ...(options.defaults || {}),
         }
       },

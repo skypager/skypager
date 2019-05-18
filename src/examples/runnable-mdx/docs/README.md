@@ -10,7 +10,6 @@ The code block below is runnable.  As you change the code, and click run, you'll
 
 ```javascript
 import runtime from 'skypager'
-const availableFeatures = runtime.features.available
 ```
 
 The code block below is renderable.  As you change the code, the component example will display.

@@ -18,6 +18,12 @@ export class Babel extends Helper {
   // each instance of a page has observable state
   static isObservable = true
 
+  get initialState() {
+    return {
+      content: this.tryGet('content') 
+    }
+  }
+
   static allowAnonymousProviders = true
 
   initialize() {
@@ -107,7 +113,13 @@ export class Babel extends Helper {
 
       const requirePolyfill = identifier => {
         try {
-          return runtime.currentModule.require(identifier)
+          const resolved = runtime.packageFinder.attemptResolve(identifier)
+
+          if (!resolved) {
+            throw new Error(`Could not resolve ${identifier}`)
+          }
+
+          return runtime.currentModule.require(resolved)
         } catch (error) {
           console.error(
             `Error while requiring ${identifier} in the script helper virtual module: ${this.name}`
@@ -362,9 +374,12 @@ export class Babel extends Helper {
   }
 
   get unwrappedContent() {
-    return this.options.content || this.provider.content
+    return this.currentState.content || this.options.content || this.provider.content
   }
 
+  get file() {
+    return this.currentState.file || this.options.file || this.provider.file
+  }
   /**
    * Gives us all of the nodes of type ImportDeclaration
    */
