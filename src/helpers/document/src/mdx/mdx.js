@@ -137,7 +137,9 @@ export class Mdx extends Helper {
   }
 
   get shellBlocks() {
-    return this.body.filter(({ type, lang }) => type === 'code' && (lang === 'shell' || lang === 'sh'))
+    return this.body.filter(
+      ({ type, lang }) => type === 'code' && (lang === 'shell' || lang === 'sh')
+    )
   }
 
   get structure() {
