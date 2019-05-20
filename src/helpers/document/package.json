@@ -60,7 +60,8 @@
     "projectType": "helper",
     "buildFolder": "lib",
     "providesScripts": [
-      "generate-api-docs"
+      "generate-api-docs",
+      "test-code-blocks"
     ],
     "webpack": {
       "appName": "skypager-helpers-document",

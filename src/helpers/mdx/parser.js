@@ -9,14 +9,14 @@ const toString = require('mdast-util-to-string')
 const kebabCase = require('lodash/kebabCase')
 const omit = require('lodash/omit')
 
-/** 
+/**
  * @param {String} raw raw mdx content
  * @param {Object} options options
  * @param {String} options.filePath the path to the file
  * @param {Boolean|Object} [options.babel=false] whether to transpile otherwise es6 / jsx output returned from mdx
  * @param {Array} [options.mdPlugins=[]] md
- * @param {Array} [options.hastPlugins=[]] hastPlugins 
-*/
+ * @param {Array} [options.hastPlugins=[]] hastPlugins
+ */
 module.exports = async function(raw, options) {
   const tree = unified()
     .use(parse)
@@ -27,7 +27,7 @@ module.exports = async function(raw, options) {
 
   const ast = tree.parse(content)
 
-  const compile = (src, { filePath = options.filePath }= {}) =>
+  const compile = (src, { filePath = options.filePath } = {}) =>
     mdx(src, {
       mdPlugins: options.mdPlugins || [],
       hastPlugins: [...(options.hastPlugins || []), syncAstNodes(ast, filePath)],
@@ -79,13 +79,14 @@ module.exports = async function(raw, options) {
     result,
   ].filter(Boolean)
 
-  let response = code.join("\n") 
+  let response = code.join('\n')
 
   if (options.babel) {
     const babel = require('@babel/core')
-    const babelConfig = typeof options.babelConfig === 'object' 
-      ? options.babelConfig 
-      : require('./babel-config')(typeof options.babel === 'object' ? options.babel : {})
+    const babelConfig =
+      typeof options.babelConfig === 'object'
+        ? options.babelConfig
+        : require('./babel-config')(typeof options.babel === 'object' ? options.babel : {})
 
     const transpiled = await new Promise((resolve, reject) => {
       babel.transform(response, omit(babelConfig, 'ignore', 'env'), (err, result) => {

@@ -20,7 +20,7 @@ export class Babel extends Helper {
 
   get initialState() {
     return {
-      content: this.tryGet('content') 
+      content: this.tryGet('content'),
     }
   }
 

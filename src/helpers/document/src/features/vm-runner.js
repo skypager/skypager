@@ -21,7 +21,7 @@ export default class VmRunner extends Feature {
       runtime.feature('module-factory').enable()
     }
 
-    this.lazy('vmContext', () => this.createVmContext())
+    this.lazy('vmContext', () => this.tryGet('vmContext', this.createVmContext()))
   }
 
   createVmContext() {

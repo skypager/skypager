@@ -58,10 +58,13 @@ export class Mdx extends Helper {
    * it tells us which headings are found and their line number in the document.
    */
   get headingsMap() {
-    return this.currentState.headingsMap || this.tryGet('headingsMap', {
-      lines: {},
-      headings: {},
-    })
+    return (
+      this.currentState.headingsMap ||
+      this.tryGet('headingsMap', {
+        lines: {},
+        headings: {},
+      })
+    )
   }
 
   /**
@@ -80,26 +83,19 @@ export class Mdx extends Helper {
    * the markdown documents before rendering it as html or mdx
    */
   get ast() {
-    return this.currentState.ast || this.tryGet('ast', {
-      type: 'root',
-      children: [],
-      position: {
-        start: { line: 1, column: 1, offset: 0 },
-        end: { line: 1, column: 1, offset: 0 },
-      },
-    })
+    return (
+      this.currentState.ast ||
+      this.tryGet('ast', {
+        type: 'root',
+        children: [],
+        position: {
+          start: { line: 1, column: 1, offset: 0 },
+          end: { line: 1, column: 1, offset: 0 },
+        },
+      })
+    )
   }
 
-  /** 
-   * 
-   * 
-   *   "unist-util-find-after": "^2.0.2",
-    "unist-util-find-all-after": "^1.0.2",
-    "unist-util-find-all-before": "^2.0.2",
-    "unist-util-find-before": "^2.0.2",
-    "unist-util-select": "^1.5.0",
-    "unist-util-visit": "^1.3.1" 
-  */
   visit(fn, base = this.ast) {
     return visit(base, fn)
   }
@@ -134,6 +130,25 @@ export class Mdx extends Helper {
 
   get codeBlocks() {
     return this.body.filter(({ type }) => type === 'code')
+  }
+
+  get javascriptBlocks() {
+    return this.body.filter(({ type, lang }) => type === 'code' && lang === 'javascript')
+  }
+
+  get shellBlocks() {
+    return this.body.filter(({ type, lang }) => type === 'code' && (lang === 'shell' || lang === 'sh'))
+  }
+
+  get structure() {
+    const { times, get, sortBy } = this.lodash
+    const headings = sortBy(this.select('heading'), node => get(node, 'position.start.line'))
+
+    return headings.map((node, i) => {
+      const { depth, position } = node
+      const content = this.stringify(node)
+      return [content, depth, get(position, 'start.line')]
+    })
   }
 
   /**
