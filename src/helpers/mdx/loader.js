@@ -15,7 +15,7 @@ module.exports = async function(raw) {
     Object.assign({}, options, { filePath: this.resourcePath, mdPlugins })
   )
 
-  callback(null, response)
+  callback(null, response.code)
 }
 
 function replaceImages(options = {}) {

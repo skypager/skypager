@@ -6,7 +6,10 @@
   "description": "markdown parsing and webpack loader",
   "main": "parser.js",
   "skypager": {
-    "projectType": "helper"
+    "projectType": "helper",
+    "providesScripts": [
+      "mdx"
+    ]
   },
   "scripts": {
     "build": "exit 0",

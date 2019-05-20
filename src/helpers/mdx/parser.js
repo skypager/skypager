@@ -14,8 +14,8 @@ const omit = require('lodash/omit')
  * @param {Object} options options
  * @param {String} options.filePath the path to the file
  * @param {Boolean|Object} [options.babel=false] whether to transpile otherwise es6 / jsx output returned from mdx
- * @param {Array} [options.mdPlugins=[]] md
- * @param {Array} [options.hastPlugins=[]] hastPlugins
+ * @param {Array} [options.remarkPlugins=[]] remark plugins 
+ * @param {Array} [options.rehypePlugins=[]] rehype plugins
  */
 module.exports = async function(raw, options) {
   const tree = unified()
@@ -29,8 +29,8 @@ module.exports = async function(raw, options) {
 
   const compile = (src, { filePath = options.filePath } = {}) =>
     mdx(src, {
-      mdPlugins: options.mdPlugins || [],
-      hastPlugins: [...(options.hastPlugins || []), syncAstNodes(ast, filePath)],
+      remarkPlugins: options.remarkPlugins || [],
+      rehypePlugins: [...(options.rehypePlugins || []), syncAstNodes(ast, filePath)],
     })
 
   const toMdx = (a, o) => toMDXAST(o)(a)
@@ -97,7 +97,7 @@ module.exports = async function(raw, options) {
     response = transpiled
   }
 
-  return { code: response, meta }
+  return { code: response, meta, ast: mdxast, headingsMap }
 }
 
 function stringifier() {
