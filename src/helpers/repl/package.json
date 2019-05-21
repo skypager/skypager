@@ -26,7 +26,7 @@
     "webpack": {
       "build": "webpack.config.js"
     },
-    "category": "helpers",
+    "category": "tools",
     "projectType": "helper"
   },
   "repository": {

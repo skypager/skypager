@@ -41,5 +41,6 @@
   "gitHead": "66f2da16f4d6ebc315f1d244ba314647a8630011",
   "keywords": [],
   "contributors": [],
-  "module": "lib/es/index.js"
+  "module": "lib/es/index.js",
+  "homepage": "https://skypager.io"
 }

@@ -9,14 +9,15 @@
     "projectType": "helper",
     "providesScripts": [
       "mdx"
-    ]
+    ],
+    "category": "documentation"
   },
   "scripts": {
     "build": "exit 0",
     "prepare": "exit 0"
   },
   "dependencies": {
-    "@mdx-js/loader": "^1.0.19" ,
+    "@mdx-js/loader": "^1.0.19",
     "@mdx-js/mdx": "^1.0.19",
     "@mdx-js/mdxast": "^1.0.15",
     "@mdx-js/react": "^1.0.16",
@@ -35,5 +36,8 @@
     "unist-util-select": "^2.0.0",
     "unist-util-visit": "^1.4.0"
   },
-  "gitHead": "66f2da16f4d6ebc315f1d244ba314647a8630011"
+  "gitHead": "66f2da16f4d6ebc315f1d244ba314647a8630011",
+  "keywords": [],
+  "author": "",
+  "contributors": []
 }

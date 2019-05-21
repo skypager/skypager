@@ -30,5 +30,6 @@
     "providesScripts": false
   },
   "module": "lib/es/index.js",
-  "gitHead": "66f2da16f4d6ebc315f1d244ba314647a8630011"
+  "gitHead": "66f2da16f4d6ebc315f1d244ba314647a8630011",
+  "homepage": "https://skypager.io"
 }

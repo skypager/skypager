@@ -1,7 +1,7 @@
 {
   "name": "@skypager/sheets-monorepo",
   "version": "1.0.1",
-  "description": "script to sync a monorepo's package.json collection with a google sheet",
+  "description": "sync your packages with google spreadsheets.",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
   "scripts": {
@@ -20,5 +20,8 @@
     "projectType": "example",
     "sheetTitle": "skypager-monorepo"
   },
-  "gitHead": "66f2da16f4d6ebc315f1d244ba314647a8630011"
+  "gitHead": "66f2da16f4d6ebc315f1d244ba314647a8630011",
+  "keywords": [],
+  "contributors": [],
+  "homepage": "https://skypager.io"
 }

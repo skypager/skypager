@@ -29,5 +29,6 @@
     "category": "features",
     "projectType": "feature"
   },
-  "module": "lib/es/index.js"
+  "module": "lib/es/index.js",
+  "homepage": "https://skypager.io"
 }
