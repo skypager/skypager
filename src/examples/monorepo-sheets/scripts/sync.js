@@ -16,13 +16,40 @@ runtime.use(require('@skypager/helpers-sheet'), {
   googleProject: serviceAccount.project_id,
 })
 
-const { sheetId = 'skypagermonorepo', sheetName = 'projects' } = host.argv
+const {
+  sheetTitle,
+  sheetKey = sheetTitle &&
+    String(sheetTitle)
+      .toLowerCase()
+      .replace(/\W/g, ''),
+  sheetName = 'projects',
+} = host.argv
 
 // Currently the sheets-helper entities have a bug where empty cells don't get indexed.
 // When creating the sheet this converts each empty value into the string $EMPTY so that we can change it
 const EMPTY = '$EMPTY'
 
 async function main() {
+  if (runtime.argv.help || runtime.argv._[0] === 'help') {
+    displayHelp()
+    process.exit(0)
+  }
+
+  if (runtime.argv.open) {
+    await runtime.sheets.discover()
+    const monorepo = runtime.sheet(sheetKey)
+
+    await monorepo.whenReady()
+
+    const driveFile = await monorepo.tryResult('getDriveFile', {})
+
+    if (driveFile && driveFile.alternateLink) {
+      Promise.resolve(runtime.opener.openInBrowser(driveFile.alternateLink))
+    }
+
+    process.exit(0)
+  }
+
   // start the file and package manager features, so we can get access to all of the package entities
   await runtime.fileManager.startAsync()
   await runtime.packageManager.startAsync()
@@ -173,7 +200,7 @@ async function syncProject(packageMeta, { projectIndex: index = {}, worksheet = 
 }
 
 async function loadProjects() {
-  const monorepo = runtime.sheet(sheetId)
+  const monorepo = runtime.sheet(sheetKey)
 
   monorepo.enableAutoSave()
 
@@ -219,6 +246,39 @@ async function entities(sheet) {
   } catch (error) {
     console.log(sheet.worksheetIds, sheet.worksheetTitles)
   }
+}
+
+function displayHelp() {
+  const { print, clear, colors, randomBanner } = runtime.cli
+
+  clear()
+  randomBanner('Sync')
+
+  const message = `
+  ${colors.bold.underline('@skypager/ portfolio google-sheets sync')}
+
+  --sheet-title   the title of the sheet (no spaces, lowercase, no punctuation)
+  --sheet-id      the id from the url (not required if using sheet-key)
+  --inbound       update the local files instead of populating the sheet
+  --open          open the sheet in a browser 
+
+  ${colors.bold('Example')}
+
+  # open the sheet in a browser
+  $ skypager sync --open --sheet-title skypager-monorepo
+
+  # updates the google sheet with the content from the package.json
+  $ skypager sync --sheet-key skypagermonorepo 
+
+  # updates the local files with the content from google sheet
+  $ skypager sync --sheet-title skypagermonorepo
+  
+
+
+  `
+
+  console.log(message.trim())
+  console.log('')
 }
 
 main()

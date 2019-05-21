@@ -17,7 +17,8 @@
   },
   "skypager": {
     "category": "cli",
-    "projectType": "example"
+    "projectType": "example",
+    "sheetTitle": "skypager-monorepo"
   },
   "gitHead": "66f2da16f4d6ebc315f1d244ba314647a8630011"
 }

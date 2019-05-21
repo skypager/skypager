@@ -61,6 +61,12 @@ You can find the email address in `client_id` property of the service account js
 
 ## Usage 
 
+Get Help
+
+```shell
+$ node scripts/sync.js help
+```
+
 Running the following will read all of the package.json manifests in your project, and publish them to google sheets.
 
 ```shell
