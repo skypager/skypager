@@ -44,6 +44,8 @@ sheet.loadAll().then((keyedByWorksheetName) => {
 
 ## Automatically Discovering Spreadsheets via Google Drive API
 
+If you don't need to build a module for your sheet (you just want the data), you can skip registering modules by just remotely discovering sheets available to
+
 ```javascript
 async () => {
   await runtime.sheets.discover({ sharedWithMe: true })
