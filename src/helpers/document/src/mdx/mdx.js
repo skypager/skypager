@@ -96,6 +96,20 @@ export class Mdx extends Helper {
     )
   }
 
+  get rehypeAst() {
+    return (
+      this.currentState.rehypeAst ||
+      this.tryGet('rehypeAst', {
+        type: 'root',
+        children: [],
+        position: {
+          start: { line: 1, column: 1, offset: 0 },
+          end: { line: 1, column: 1, offset: 0 },
+        },
+      })
+    )    
+  }
+
   visit(fn, base = this.ast) {
     return visit(base, fn)
   }
@@ -151,6 +165,16 @@ export class Mdx extends Helper {
       const content = this.stringify(node)
       return [content, depth, get(position, 'start.line')]
     })
+  }
+  
+  findParentHeading(node, options = {}) {
+    const headingNode = this.findAllNodesBefore(node, ({ type }) => type === 'heading')[0]
+
+    if (!headingNode) {
+      return
+    }
+
+    return options.stringify ? this.stringify(headingNode) : headingNode
   }
 
   /**

@@ -54,6 +54,7 @@ function createCompiler() {
     camelCase(kebabCase(runtime.currentPackage.name.replace('/', '-').replace('@', '')))
   )}MdxDocs`
 
+  /*
   config.externals.push({
     '@skypager/helpers-document': {
       commonjs: '@skypager/helpers-document',
@@ -61,6 +62,8 @@ function createCompiler() {
       root: 'SkypagerHelpersDocument',
     },
   })
+  */
+
   config.module.rules.unshift({
     test: /index.js$/,
     include: [paths.frameworkIndexJs],
@@ -90,7 +93,10 @@ function createCompiler() {
             .map((doc, i) => `ctx["${prefix}${doc}"] = doc${i};`)
             .join('\n')} 
 
-          export default runtime.Helper.createMockContext(ctx) 
+          const reg = runtime.Helper.createMockContext(ctx)
+
+          console.log({ reg, keys: reg.keys() })
+          export default reg 
           `.trim()
 
             return mod

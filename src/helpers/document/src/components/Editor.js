@@ -83,6 +83,20 @@ export default class Editor extends Component {
     }
   }
 
+  handleLoad = (editor) => {
+    const { onLoad } = this.props
+
+    this.editor = editor
+
+    if (onLoad) {
+      onLoad(editor, this, this.props)
+    }
+  }
+
+  addDynamicMarker = (marker) => {
+    this.editor.session.addDynamicMarker(marker)  
+  }
+
   render() {
     const { header, footer, results } = this.props
     const { loading, value } = this.state
@@ -93,6 +107,8 @@ export default class Editor extends Component {
 
     const { AceEditor } = this
 
+    console.log('Rendering Editor', this.props)
+
     return (
       <div>
         {typeof header === 'function' && header(this)}
@@ -100,6 +116,7 @@ export default class Editor extends Component {
           {...this.props}
           AceEditor={AceEditor}
           onChange={this.handleChange}
+          onLoad={this.handleLoad}
           value={value}
         />
         {typeof footer === 'function' && footer(this)}

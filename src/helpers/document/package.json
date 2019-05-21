@@ -57,6 +57,10 @@
       "generate-api-docs",
       "test-code-blocks"
     ],
+    "externals": {
+      "react": "React",
+      "react-dom": "ReactDOM"
+    },
     "webpack": {
       "appName": "skypager-helpers-document",
       "libraryName": "SkypagerHelpersDocument"

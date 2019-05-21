@@ -14,9 +14,12 @@ async function main() {
   }
 
   await files.startAsync()
-  await files.readAllContent({ include: castArray(pattern).filter(Boolean) }) 
-  
-  const tasks = files.chains.patterns(pattern).values().value()
+  await files.readAllContent({ include: castArray(pattern).filter(Boolean) })
+
+  const tasks = files.chains
+    .patterns(pattern)
+    .values()
+    .value()
 
   const count = tasks.length
 
@@ -24,17 +27,15 @@ async function main() {
     console.error(`No mdx files found matching ${pattern}`)
   }
 
-  await Promise.all(tasks.map(task => compile(task).then((code) => console.log(code))))
+  await Promise.all(tasks.map(task => compile(task).then(code => console.log(code))))
 }
 
 async function compile({ path, relative, content }) {
   const mdx = await parse(content, {
-    filePath: path
+    filePath: path,
   })
 
   const { code } = mdx
 
   return code
 }
-
-

@@ -8,11 +8,11 @@ module.exports = async function(raw) {
 
   this.cacheable && this.cacheable()
 
-  const mdPlugins = [replaceImages.bind(this)]
+  const remarkPlugins = [replaceImages.bind(this)]
 
   const response = await mdx(
     raw,
-    Object.assign({}, options, { filePath: this.resourcePath, mdPlugins })
+    Object.assign({}, options, { filePath: this.resourcePath, remarkPlugins })
   )
 
   callback(null, response.code)

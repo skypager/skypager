@@ -385,7 +385,9 @@ const currentProject = Object.assign({}, currentPackage.skypager || {}, {
   },
 
   externals: target => {
-    const ext = config[target] ? config[target].externals || config.externals : config.externals
+    const ext = config[target] 
+      ? config[target].externals || config.externals 
+      : config.externals
 
     return (
       ext &&

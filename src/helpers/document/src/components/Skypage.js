@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import types from 'prop-types'
+import { MDXProvider } from '@mdx-js/react'
 
 export default class Skypage extends Component {
   static contextTypes = {
@@ -29,11 +30,22 @@ export default class Skypage extends Component {
     },
   }
 
-  render() {
-    const { doc, components } = this.props
-    const { Component: Doc } = doc
+  state = {
+    components: this.props.components
+  }
 
-    console.log('DOC', Doc, components)
-    return <Doc components={components} />
+  componentDidUpdate() {
+    this.setState({ components: props.components })
+  }
+
+  render() {
+    const { components } = this.state
+    const { doc, Component = doc.Component } = this.props
+
+    return (
+      <MDXProvider components={components}>
+        <Component />
+      </MDXProvider>
+    )
   }
 }

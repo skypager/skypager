@@ -21,10 +21,10 @@ export default class VmRunner extends Feature {
       runtime.feature('module-factory').enable()
     }
 
-    this.lazy('vmContext', () => this.tryGet('vmContext', this.createVmContext()))
+    this.lazy('vmContext', () => this.options.vmContext || this.createVmContext(this.options))
   }
 
-  createVmContext() {
+  createVmContext(options = {}) {
     const sandbox = this.tryGet('sandbox', {})
     const filename = this.tryGet('filename', 'script.js')
 
@@ -35,6 +35,7 @@ export default class VmRunner extends Feature {
         this.runtime.moduleFactory.createRequireFunction(filename)
       ),
       console,
+      ...options.sandbox || {},
     })
 
     return vmContext
@@ -80,15 +81,16 @@ export default class VmRunner extends Feature {
     const { importStatements = [], program = [], vmContext: context } = this
 
     this.state.merge({ running: true, ran: false, success: false, errors: [] })
+    
+    Object.keys(options).forEach(key => (context[key] = context[key] || options[key]))
 
-    Object.keys(options).forEach(key => (context[key] = options[key]))
 
     if (global.regeneratorRuntime || (runtime.isBrowser && window.regeneratorRuntime)) {
       context.regeneratorRuntime =
         global.regeneratorRuntime || (runtime.isBrowser && window.regeneratorRuntime)
     }
 
-    if (options.global !== false) {
+    if (options.global !== false && !context.global) {
       Object.defineProperty(context, 'global', {
         get: () => context,
       })
@@ -115,7 +117,13 @@ export default class VmRunner extends Feature {
       }
     })
 
+    let encounteredError
+
     for (let instruction of program) {
+      if (encounteredError) {
+        break;
+      }
+      
       const script = runtime.vm.createScript(instruction.transpiled)
 
       let result

@@ -52,7 +52,7 @@ async function main() {
 
   if (runtime.isDevelopment) {
     copyPublicFolder(runtime.resolve('public'), runtime.resolve('lib'))
-    generateMdxBundle()
+    runtime.argv.mdxBundle && generateMdxBundle()
   }
 
   const server = runtime.server('app', {
@@ -100,8 +100,6 @@ function setupDevelopment(app, options) {
   config.entry = {
     app: [runtime.resolve('src', 'launch.js')],
   }
-
-  debugger
 
   this.setupDevelopmentMiddlewares({
     ...options,

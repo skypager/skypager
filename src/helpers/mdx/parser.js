@@ -8,13 +8,15 @@ const findBefore = require('unist-util-find-before')
 const toString = require('mdast-util-to-string')
 const kebabCase = require('lodash/kebabCase')
 const omit = require('lodash/omit')
+const castArray = require('lodash/castArray')
+const visit = require('unist-util-visit')
 
 /**
  * @param {String} raw raw mdx content
  * @param {Object} options options
  * @param {String} options.filePath the path to the file
  * @param {Boolean|Object} [options.babel=false] whether to transpile otherwise es6 / jsx output returned from mdx
- * @param {Array} [options.remarkPlugins=[]] remark plugins 
+ * @param {Array} [options.remarkPlugins=[]] remark plugins
  * @param {Array} [options.rehypePlugins=[]] rehype plugins
  */
 module.exports = async function(raw, options) {
@@ -25,16 +27,49 @@ module.exports = async function(raw, options) {
 
   const { content, data: meta } = matter(raw)
 
-  const ast = tree.parse(content)
+  let ast = tree.parse(content)
+  let mdxast
+
+  const captureAst = () => (tree) => {
+    mdxast = tree
+    // console.log('capturing ast', mdxast, tree)
+    return tree
+  } 
+
+  const captureMeta = () => (tree) => {
+    // console.log('capturing meta', tree)
+    visit(tree, (node) => {
+      if (node.type === 'code' && node.lang && node.lang.match(/\w+\s.*/)) {
+        const parts = node.lang.split(' ')[0]
+        node.lang = parts[0]
+        node.meta = parts.slice(1).join(" ")
+      }
+    }) 
+
+    return tree
+  }
+
+  const syncCodeBlocks = () => (tree) => {
+    tree.children.forEach((child) => {
+      if (child.type === 'element' && child.tagName === 'pre' && child.children && child.children[0].tagName === 'code') {
+        const { properties = {} } = child
+        const code = child.children[0]
+        code.properties = Object.assign(code.properties, properties)
+      }
+    })
+  }
+
+  const injectRemarkPlugins = [captureMeta]
+  const injectRehypePlugins = [syncCodeBlocks]
 
   const compile = (src, { filePath = options.filePath } = {}) =>
     mdx(src, {
-      remarkPlugins: options.remarkPlugins || [],
-      rehypePlugins: [...(options.rehypePlugins || []), syncAstNodes(ast, filePath)],
+      remarkPlugins: injectRemarkPlugins.concat(options.remarkPlugins || options.mdPlugins || []).concat([captureAst]),
+      rehypePlugins: [syncAstNodes(ast, filePath)].concat(injectRehypePlugins).concat(options.rehypePlugins || options.hastPlugins || []),
     })
 
   const toMdx = (a, o) => toMDXAST(o)(a)
-  const mdxast = toMdx(ast, options)
+  const getAst = () => mdxast || toMdx(ast, options)
   const result = await compile(content, options)
 
   let headingsMap
@@ -68,14 +103,16 @@ module.exports = async function(raw, options) {
     headingsMap = { message: error.message }
   }
 
+  let injectLines = castArray(options.injectCode).filter(v => v && v.length)
+  
   let code = [
     `import React from 'react'`,
-    `import { MDXTag } from '@mdx-js/tag'`,
+    `import { mdx } from '@mdx-js/react'`,
     !result.match('export const meta') ? 'export const meta = {}' : undefined,
     `typeof meta !== 'undefined' && Object.assign(meta, ${JSON.stringify(meta)}, meta)`,
-    `export const ast = ${JSON.stringify(mdxast, null, 2)}`,
+    `export const ast = ${JSON.stringify(mdxast || getAst(), null, 2)}`,
     `export const headingsMap = ${JSON.stringify(headingsMap, null, 2)}`,
-    options.injectCode,
+    ...injectLines,
     result,
   ].filter(Boolean)
 
