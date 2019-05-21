@@ -18,7 +18,7 @@ export function Renderable(props = {}) {
 
 export function Editor(props = {}) {
   if (props.runnable) {
-    return <Runnable {...props } />
+    return <Runnable {...props} />
   } else if (props.renderable) {
     return <Renderable {...props} />
   } else if (props.editable) {

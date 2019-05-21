@@ -107,7 +107,7 @@ export class Mdx extends Helper {
           end: { line: 1, column: 1, offset: 0 },
         },
       })
-    )    
+    )
   }
 
   visit(fn, base = this.ast) {
@@ -166,7 +166,7 @@ export class Mdx extends Helper {
       return [content, depth, get(position, 'start.line')]
     })
   }
-  
+
   findParentHeading(node, options = {}) {
     const headingNode = this.findAllNodesBefore(node, ({ type }) => type === 'heading')[0]
 

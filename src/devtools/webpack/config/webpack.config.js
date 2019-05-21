@@ -114,7 +114,6 @@ module.exports = function(webpackEnv, options = {}) {
     disableMinification = argv.disableMinification || argv.minify === false,
   } = require('./flags')(currentProject, webpackEnv, options)
 
-
   // We automatically include html-webpack-plugin for every index.html found in the root of the public folder
   const htmlPlugins = !useHtml
     ? []
@@ -883,8 +882,8 @@ module.exports = function(webpackEnv, options = {}) {
         new SkypagerSocketPlugin({
           runtime: currentProject.runtime,
         }),
-      
-      ...createCopyPlugins(currentProject)
+
+      ...createCopyPlugins(currentProject),
     ].filter(Boolean),
     // Some libraries import Node modules but don't use them in the browser.
     // Tell Webpack to provide empty mocks for them so importing them works.
@@ -912,16 +911,18 @@ function createCopyPlugins(currentProject) {
   if (copy) {
     const entries = Object.entries(copy)
 
-    const items = flatten(entries.map(([ modName, sourcePath ]) => 
-      castArray(sourcePath).map((sourcePath) => {
-        const exists = runtime.packageFinder.attemptResolve(`${modName}/${sourcePath}`)
-        return exists && { from: exists }
-      }).filter(Boolean)    
-    ))
+    const items = flatten(
+      entries.map(([modName, sourcePath]) =>
+        castArray(sourcePath)
+          .map(sourcePath => {
+            const exists = runtime.packageFinder.attemptResolve(`${modName}/${sourcePath}`)
+            return exists && { from: exists }
+          })
+          .filter(Boolean)
+      )
+    )
 
-    return [
-      new CopyWebpackPlugin(items)
-    ]
+    return [new CopyWebpackPlugin(items)]
   } else {
     return []
   }

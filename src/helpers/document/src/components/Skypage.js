@@ -31,7 +31,7 @@ export default class Skypage extends Component {
   }
 
   state = {
-    components: this.props.components
+    components: this.props.components,
   }
 
   componentDidUpdate() {

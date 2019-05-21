@@ -35,7 +35,7 @@ export default class VmRunner extends Feature {
         this.runtime.moduleFactory.createRequireFunction(filename)
       ),
       console,
-      ...options.sandbox || {},
+      ...(options.sandbox || {}),
     })
 
     return vmContext
@@ -81,9 +81,8 @@ export default class VmRunner extends Feature {
     const { importStatements = [], program = [], vmContext: context } = this
 
     this.state.merge({ running: true, ran: false, success: false, errors: [] })
-    
-    Object.keys(options).forEach(key => (context[key] = context[key] || options[key]))
 
+    Object.keys(options).forEach(key => (context[key] = context[key] || options[key]))
 
     if (global.regeneratorRuntime || (runtime.isBrowser && window.regeneratorRuntime)) {
       context.regeneratorRuntime =
@@ -121,9 +120,9 @@ export default class VmRunner extends Feature {
 
     for (let instruction of program) {
       if (encounteredError) {
-        break;
+        break
       }
-      
+
       const script = runtime.vm.createScript(instruction.transpiled)
 
       let result

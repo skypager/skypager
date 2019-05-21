@@ -1,24 +1,20 @@
 import React, { forwardRef, createRef, Component } from 'react'
 import types from 'prop-types'
-import { Editor, } from '@skypager/helpers-document'
+import { Editor } from '@skypager/helpers-document'
 import { Header, Button } from 'semantic-ui-react'
 import { render, findDOMNode } from 'react-dom'
 import { MDXProvider } from '@mdx-js/react'
 
-
 const mdxComponents = (baseProps = {}) => ({
-  h1: (props) =>
-    <Header as="h1" dividing content={props.children} />,
-  h2: (props) =>
-    <Header as="h2" content={props.children} />,   
-  h3: (props) => <Header as="h3" content={props.children} />,      
-  h4: (props) => <Header as="h4" content={props.children} />,      
-  h5: (props) => <Header as="h5" content={props.children} />,      
-  h6: (props) => <Header as="h6" content={props.children} />,      
+  h1: props => <Header as="h1" dividing content={props.children} />,
+  h2: props => <Header as="h2" content={props.children} />,
+  h3: props => <Header as="h3" content={props.children} />,
+  h4: props => <Header as="h4" content={props.children} />,
+  h5: props => <Header as="h5" content={props.children} />,
+  h6: props => <Header as="h6" content={props.children} />,
 
-  pre: props => 
-    <div {...props} />,
-  code: (props) => {
+  pre: props => <div {...props} />,
+  code: props => {
     return (
       <Editor
         {...props}
@@ -99,48 +95,49 @@ export default class DocPage extends Component {
     }
 
     const components = mdxComponents({
-      ...this.state.mdxProps || {},
+      ...(this.state.mdxProps || {}),
       code: {
-        ...this.state.mdxProps && this.state.mdxProps.code && {},
+        ...(this.state.mdxProps && this.state.mdxProps.code && {}),
         onLoad: (editor, comp) => {
-          const Range = ace.require('ace/range').Range;
-  
-          setTimeout(() => {
-          comp.addDynamicMarker({
-            id: 'i1',
-            inFront: true,
-            update: (html, markerLayer, session, config) => {
-              const range = new Range(1, 4, 0, 0)
-              range.start = session.doc.createAnchor(range.start)
-              range.end = session.doc.createAnchor(range.end)
-              const markerHTML = getMarkerHTML(markerLayer, config, range, 'error-marker')
-              console.log({ markerHTML, screenRange: range.toScreenRange(session) })
-              const markerElement = document.createElement('div')
-              render(<div style={{ position: 'absolute' }}>WOW</div>, markerElement)
-              markerLayer.element.appendChild(markerElement)
-            },
-          }, true)            
-          }, 500)
+          const Range = ace.require('ace/range').Range
 
-        }
-      }
+          setTimeout(() => {
+            comp.addDynamicMarker(
+              {
+                id: 'i1',
+                inFront: true,
+                update: (html, markerLayer, session, config) => {
+                  const range = new Range(1, 4, 0, 0)
+                  range.start = session.doc.createAnchor(range.start)
+                  range.end = session.doc.createAnchor(range.end)
+                  const markerHTML = getMarkerHTML(markerLayer, config, range, 'error-marker')
+                  console.log({ markerHTML, screenRange: range.toScreenRange(session) })
+                  const markerElement = document.createElement('div')
+                  render(<div style={{ position: 'absolute' }}>WOW</div>, markerElement)
+                  markerLayer.element.appendChild(markerElement)
+                },
+              },
+              true
+            )
+          }, 500)
+        },
+      },
     })
 
     const { Component } = doc
 
     return (
-      <MDXProvider components={components} >
+      <MDXProvider components={components}>
         <Component />
       </MDXProvider>
     )
-
   }
 }
 
 function getMarkerHTML(markerLayer, config, range, markerClass) {
   let stringBuilder = []
 
-  console.log("range", range.isMultiLine())
+  console.log('range', range.isMultiLine())
   window.lastRange = range
   window.markerLayer = markerLayer
   if (range.isMultiLine()) {
@@ -156,7 +153,7 @@ function getMarkerHTML(markerLayer, config, range, markerClass) {
     )
   }
 
-  console.log("string buuilder", stringBuilder)
+  console.log('string buuilder', stringBuilder)
 
   return stringBuilder
-} 
+}

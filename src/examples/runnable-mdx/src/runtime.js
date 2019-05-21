@@ -12,9 +12,7 @@ skypager.clients.register('app', () => AppClient)
 
 skypager.appClient = skypager.client('app')
 
-skypager.mdxDocs.add(
-  require.context('../docs', true, /\.md$/)
-)
+skypager.mdxDocs.add(require.context('../docs', true, /\.md$/))
 
 skypager.setState({ docsLoaded: true })
 

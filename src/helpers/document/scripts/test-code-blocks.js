@@ -25,7 +25,7 @@ async function main() {
     total = total + doc.runners.length
 
     const passed = await testCodeBlocks(doc)
-    
+
     failCount = failCount + doc.runners.reduce((memo, { runner }) => memo + runner.errors.length, 0)
 
     if (passed) {
@@ -39,7 +39,7 @@ async function main() {
     print(`${total}/${total} tests ${green('PASSED')}`)
     process.exit(0)
   } else {
-    (total - failCount) && print(`${total - failCount}/${total} tests ${green('PASSED')}`)
+    total - failCount && print(`${total - failCount}/${total} tests ${green('PASSED')}`)
     print(`${failCount}/${total} tests ${red('FAILED')}`)
     process.exit(1)
   }
@@ -50,8 +50,8 @@ async function testCodeBlocks(doc) {
 
   const seen = {}
 
-  for(let block of doc.runners) {
-    const { script, parentHeading, runner, depth = 0 } = block  
+  for (let block of doc.runners) {
+    const { script, parentHeading, runner, depth = 0 } = block
     await runner.run()
 
     const { startLine = script.tryGet('meta.position.start.line', 0) } = block
@@ -62,15 +62,16 @@ async function testCodeBlocks(doc) {
       const { program = [] } = runner
 
       let gotError
-      
+
       const output = program.map(({ statement, error, position }) => {
-        const resp = !gotError ? [
-          error && `  ${statement} (line #${startLine + position.start.line + 1})`,
-          error && error.message && " \n",
-          error && error.message && `    ${error.message}`,
-          error && error.message && " \n",
-          
-        ].filter(Boolean): []  
+        const resp = !gotError
+          ? [
+              error && `  ${statement} (line #${startLine + position.start.line + 1})`,
+              error && error.message && ' \n',
+              error && error.message && `    ${error.message}`,
+              error && error.message && ' \n',
+            ].filter(Boolean)
+          : []
 
         if (error && error.message) {
           gotError = true
@@ -78,17 +79,15 @@ async function testCodeBlocks(doc) {
 
         return resp
       })
-      
-      print(
-        flatten(output), ((depth * 2)), 1, 0
-      )
+
+      print(flatten(output), depth * 2, 1, 0)
     } else {
       !seen[parentHeading] && print(`${green(parentHeading)}`, depth * 2, 0, 1)
       seen[parentHeading] = true
     }
   }
 
-  return !doc.runners.find(r => r.runner && r.runner.errors && r.runner.errors.length) 
+  return !doc.runners.find(r => r.runner && r.runner.errors && r.runner.errors.length)
 }
 
 async function registerDocHelpers(pattern) {
@@ -99,18 +98,20 @@ async function registerDocHelpers(pattern) {
     .values()
     .value()
 
-  const docs = await Promise.all(matches.map((file) => {
-    const docId = file.relative.replace(/\.mdx?$/, '') 
+  const docs = await Promise.all(
+    matches.map(file => {
+      const docId = file.relative.replace(/\.mdx?$/, '')
 
-    runtime.mdxDocs.register(docId, {
-      content: runtime.fsx.readFileSync(file.path).toString(),
-      file
+      runtime.mdxDocs.register(docId, {
+        content: runtime.fsx.readFileSync(file.path).toString(),
+        file,
+      })
+
+      const doc = runtime.mdxDoc(docId)
+
+      return doc.process().then(() => doc)
     })
-
-    const doc = runtime.mdxDoc(docId)
-
-    return doc.process().then(() => doc)
-  }))
+  )
 
   return docs
 }

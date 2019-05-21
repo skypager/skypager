@@ -83,7 +83,7 @@ export default class Editor extends Component {
     }
   }
 
-  handleLoad = (editor) => {
+  handleLoad = editor => {
     const { onLoad } = this.props
 
     this.editor = editor
@@ -93,8 +93,8 @@ export default class Editor extends Component {
     }
   }
 
-  addDynamicMarker = (marker) => {
-    this.editor.session.addDynamicMarker(marker)  
+  addDynamicMarker = marker => {
+    this.editor.session.addDynamicMarker(marker)
   }
 
   render() {

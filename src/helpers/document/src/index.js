@@ -33,7 +33,7 @@ class Mdx extends MdxBase {
     const runner = await script.createVMRunner(options)
 
     const { vmContext } = runner
-    
+
     options = {
       ...options,
     }
@@ -43,11 +43,19 @@ class Mdx extends MdxBase {
   }
 
   get childScripts() {
-    return this.chain.get('runners').map(r => r.script).keyBy(s => s.name).value()
+    return this.chain
+      .get('runners')
+      .map(r => r.script)
+      .keyBy(s => s.name)
+      .value()
   }
 
   get childRunners() {
-    return this.chain.get('runners').keyBy(r => r.script.name).mapValues(r => r.runner).value()
+    return this.chain
+      .get('runners')
+      .keyBy(r => r.script.name)
+      .mapValues(r => r.runner)
+      .value()
   }
 
   get resultsByExportName() {
@@ -192,11 +200,15 @@ class Mdx extends MdxBase {
       process.exit(1)
     }
 
-    
     const { code, ast, meta } = await require('@skypager/helpers-mdx')(this.content, {
       filePath: this.file.path,
       ...options,
-      rehypePlugins: [() => (tree) => { this.state.set('rehypeAst', tree); return tree }],
+      rehypePlugins: [
+        () => tree => {
+          this.state.set('rehypeAst', tree)
+          return tree
+        },
+      ],
       babel: false,
     })
 
@@ -237,15 +249,27 @@ class Mdx extends MdxBase {
             meta: { position, parent },
           })
 
-          const startLine = script.tryGet('meta.position.start.line', 0) 
-          
+          const startLine = script.tryGet('meta.position.start.line', 0)
+
           return script
             .parse()
-            .then(() => script.createVMRunner({
-              ...options,
-              vmContext
+            .then(() =>
+              script.createVMRunner({
+                ...options,
+                vmContext,
+              })
+            )
+            .then(runner => ({
+              i,
+              index: i,
+              script,
+              position,
+              startLine,
+              runner,
+              run: (...args) => runner.run(...args),
+              parentHeading,
+              depth: parent.depth,
             }))
-            .then(runner => ({ i, index: i, script, position, startLine, runner, run: (...args) => runner.run(...args), parentHeading, depth: parent.depth }))
         })
     )
   }

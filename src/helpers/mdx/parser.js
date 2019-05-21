@@ -30,28 +30,33 @@ module.exports = async function(raw, options) {
   let ast = tree.parse(content)
   let mdxast
 
-  const captureAst = () => (tree) => {
+  const captureAst = () => tree => {
     mdxast = tree
     // console.log('capturing ast', mdxast, tree)
     return tree
-  } 
+  }
 
-  const captureMeta = () => (tree) => {
+  const captureMeta = () => tree => {
     // console.log('capturing meta', tree)
-    visit(tree, (node) => {
+    visit(tree, node => {
       if (node.type === 'code' && node.lang && node.lang.match(/\w+\s.*/)) {
         const parts = node.lang.split(' ')[0]
         node.lang = parts[0]
-        node.meta = parts.slice(1).join(" ")
+        node.meta = parts.slice(1).join(' ')
       }
-    }) 
+    })
 
     return tree
   }
 
-  const syncCodeBlocks = () => (tree) => {
-    tree.children.forEach((child) => {
-      if (child.type === 'element' && child.tagName === 'pre' && child.children && child.children[0].tagName === 'code') {
+  const syncCodeBlocks = () => tree => {
+    tree.children.forEach(child => {
+      if (
+        child.type === 'element' &&
+        child.tagName === 'pre' &&
+        child.children &&
+        child.children[0].tagName === 'code'
+      ) {
         const { properties = {} } = child
         const code = child.children[0]
         code.properties = Object.assign(code.properties, properties)
@@ -64,8 +69,12 @@ module.exports = async function(raw, options) {
 
   const compile = (src, { filePath = options.filePath } = {}) =>
     mdx(src, {
-      remarkPlugins: injectRemarkPlugins.concat(options.remarkPlugins || options.mdPlugins || []).concat([captureAst]),
-      rehypePlugins: [syncAstNodes(ast, filePath)].concat(injectRehypePlugins).concat(options.rehypePlugins || options.hastPlugins || []),
+      remarkPlugins: injectRemarkPlugins
+        .concat(options.remarkPlugins || options.mdPlugins || [])
+        .concat([captureAst]),
+      rehypePlugins: [syncAstNodes(ast, filePath)]
+        .concat(injectRehypePlugins)
+        .concat(options.rehypePlugins || options.hastPlugins || []),
     })
 
   const toMdx = (a, o) => toMDXAST(o)(a)
@@ -104,7 +113,7 @@ module.exports = async function(raw, options) {
   }
 
   let injectLines = castArray(options.injectCode).filter(v => v && v.length)
-  
+
   let code = [
     `import React from 'react'`,
     `import { mdx } from '@mdx-js/react'`,
