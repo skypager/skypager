@@ -1,5 +1,7 @@
 # Monorepo Sheets Sync
 
+![Demo](./monorepo-sheets-sync.gif)
+
 This is an example of a script which uses the following skypager components:
 
 - [Package Manager](../../features/package-manager) - manage all of the package.json files and folders in your portfolio 
