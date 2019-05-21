@@ -1,5 +1,7 @@
 # Monorepo Sheets Sync
 
+Edit all of your portfolio's package.json files in a single google spreadsheet. 
+
 ![Demo](./monorepo-sheets-sync.gif)
 
 This is an example of a script which uses the following skypager components:
@@ -134,3 +136,15 @@ project.keywords = sheetRow.keywords
 await sheetRow.save()
 await project.save()
 ```
+
+## Next Steps
+
+This example shows how the [@skypager/node] runtime can load data from anywhere, combine it with metadata and knowledge that skypager has about
+your file and project structure, and programatically sync with the content of any file in your project.  The `package.json` manifests were the easiest to demo,
+since they're just JSON.  
+
+However, you can use the [Document Helper](../../helpers/document) to do the same thing with your JavaScript or Markdown source code.
+
+You can even use the [Sketch Helper](../../helpers/sketch) to sync sketchfiles with a google spreadsheet AND with your CSS code!
+
+[COMING SOON: Sync UI Copy and Labels in your React Components with a google spreadsheet](../react-sheets-cms)
