@@ -5,7 +5,7 @@ export async function discover(options = {}) {
 
   if (this.runtime.fileManager && this.runtime.fileManager.status !== 'READY') {
     await this.runtime.fileManager.startAsync()
-    await this.runtime.fileManager.readAllContent(/\.md$/i)
+    await this.runtime.fileManager.readAllContent({ include: [/\.md$/] })
   }
 
   this.add(
@@ -16,6 +16,7 @@ export async function discover(options = {}) {
 
         return {
           ...(options.defaults || {}),
+          content: this.runtime.fsx.readFileSync(path).toString(),
           file,
         }
       },

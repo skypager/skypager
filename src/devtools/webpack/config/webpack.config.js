@@ -28,9 +28,12 @@ const mapKeys = require('lodash/mapKeys')
 const pick = require('lodash/pick')
 const isEmpty = require('lodash/isEmpty')
 const isArray = require('lodash/isArray')
+const flatten = require('lodash/flatten')
+const castArray = require('lodash/castArray')
 const runtime = require('@skypager/node')
 const hashObject = require('node-object-hash')
 const SkypagerSocketPlugin = require('../plugins/skypager-socket-plugin')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 const { WEBPACK_CACHE_MAX_MB = '75', WEBPACK_CACHE_MAX_DAYS = '3' } = process.env
 
@@ -641,7 +644,7 @@ module.exports = function(webpackEnv, options = {}) {
 
             {
               test: mdxRegex,
-              include: mdxPaths,
+              include: mdxPaths.concat([paths.appPath]),
               exclude: [/node_modules/],
               use: [
                 {
@@ -694,6 +697,7 @@ module.exports = function(webpackEnv, options = {}) {
               // Also exclude `html` and `json` extensions so they get processed
               // by webpacks internal loaders.
               exclude: [
+                /\.(md|mdx)$/,
                 /\.(js|mjs|jsx|ts|tsx)$/,
                 /\.html$/,
                 /\.json$/,
@@ -878,6 +882,8 @@ module.exports = function(webpackEnv, options = {}) {
         new SkypagerSocketPlugin({
           runtime: currentProject.runtime,
         }),
+
+      ...createCopyPlugins(currentProject),
     ].filter(Boolean),
     // Some libraries import Node modules but don't use them in the browser.
     // Tell Webpack to provide empty mocks for them so importing them works.
@@ -896,6 +902,30 @@ module.exports = function(webpackEnv, options = {}) {
   }
 
   return finalConfig
+}
+
+function createCopyPlugins(currentProject) {
+  const { runtime } = currentProject
+  const { copy } = currentProject.config
+
+  if (copy) {
+    const entries = Object.entries(copy)
+
+    const items = flatten(
+      entries.map(([modName, sourcePath]) =>
+        castArray(sourcePath)
+          .map(sourcePath => {
+            const exists = runtime.packageFinder.attemptResolve(`${modName}/${sourcePath}`)
+            return exists && { from: exists }
+          })
+          .filter(Boolean)
+      )
+    )
+
+    return [new CopyWebpackPlugin(items)]
+  } else {
+    return []
+  }
 }
 
 function createHtmlPlugin(

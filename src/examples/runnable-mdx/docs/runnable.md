@@ -2,7 +2,7 @@
 
 ## Inspect AST
 
-```javascript
+```javascript runnable=true
 const runtime = require('@skypager/node')
 const DocHelper = require('@skypager/helpers-document')
 
@@ -20,11 +20,19 @@ async function main() {
 main()
 ```
 
+multiple codeblocks.  Can reference variables defined in the code blocks aboave above.
+
+```javascript
+if(typeof runtime === 'undefined') {
+  throw new Error('Code blocks are not sharing context. did you run this with shareContext=false?')
+}
+```
+
 ## Finding Blocks 
 
 ### Find Headings By Depth
 
-```javascript
+```javascript runnable=true
 const siteTemplate = runtime.mdxDoc('SITE-TEMPLATE')
 
 const findHeadingsByDepth = (depth) => siteTemplate.selectNode(`heading[depth=${depth}]`)
@@ -38,11 +46,11 @@ const sections = findHeadingsByDepth(3)
 
 The doc helper has a `codeBlocks` property  
 
-```javascript
+```javascript runnable=true
 const siteTemplate = runtime.mdxDoc('SITE-TEMPLATE')
 const { filter } = siteTemplate.lodash
 
-const findCodeBlocksByLanguage = (lang) => filter(codeBlocks, { lang })
+const findCodeBlocksByLanguage = (lang) => filter(siteTemplate.codeBlocks, { lang })
 
 const javscript = findCodeBlocksByLanguage('javascript')
 const shellScripts = findCodeBlocksByLanguage('shell')

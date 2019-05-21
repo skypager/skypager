@@ -42,7 +42,18 @@
         "react-router-dom": "ReactRouterDOM",
         "@skypager/runtime": "skypager",
         "@skypager/web": "skypager",
-        "prop-types": "PropTypes"
+        "prop-types": "PropTypes",
+        "@skypager/helpers-document": "SkypagerHelpersDocument"
+      },
+      "copy": {
+        "@skypager/helpers-document": [
+          "lib/skypager-helpers-document.js",
+          "lib/skypager-helpers-document.min.js"
+        ],
+        "@skypager/web": [
+          "lib/skypager-runtimes-web.min.js",
+          "lib/skypager-runtimes-web.js"
+        ]
       }
     }
   },

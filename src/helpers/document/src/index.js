@@ -28,8 +28,34 @@ class Mdx extends MdxBase {
   }
 
   async toExport(options = {}) {
-    await this.toRunnable(options)
+    const script = await this.toScriptHelper(options)
+
+    const runner = await script.createVMRunner(options)
+
+    const { vmContext } = runner
+
+    options = {
+      ...options,
+    }
+
+    await this.toRunnable({ ...options, vmContext })
     return this.toFunctions({ ...options, merge: true })
+  }
+
+  get childScripts() {
+    return this.chain
+      .get('runners')
+      .map(r => r.script)
+      .keyBy(s => s.name)
+      .value()
+  }
+
+  get childRunners() {
+    return this.chain
+      .get('runners')
+      .keyBy(r => r.script.name)
+      .mapValues(r => r.runner)
+      .value()
   }
 
   get resultsByExportName() {
@@ -154,7 +180,7 @@ class Mdx extends MdxBase {
    * code.
    */
   async transpile(options = {}) {
-    const { code, meta } = await require('@skypager/helpers-mdx')(this.content, {
+    const { code, meta, ast } = await require('@skypager/helpers-mdx')(this.content, {
       filePath: this.file.path,
       babel: true,
       ...options,
@@ -162,23 +188,34 @@ class Mdx extends MdxBase {
 
     this.state.set('transpiledContent', code)
 
-    return { code, meta }
+    return { code, ast, meta }
   }
 
   /**
    * Takes the raw markdown mdx content, and parses it with mdx, returning jsx code
    */
   async parse(options = {}) {
-    const { code, meta } = await require('@skypager/helpers-mdx')(this.content, {
+    if (!this.file.path) {
+      console.log('WTF OVER')
+      process.exit(1)
+    }
+
+    const { code, ast, meta } = await require('@skypager/helpers-mdx')(this.content, {
       filePath: this.file.path,
       ...options,
+      rehypePlugins: [
+        () => tree => {
+          this.state.set('rehypeAst', tree)
+          return tree
+        },
+      ],
       babel: false,
     })
 
     this.state.set('parsed', true)
     this.state.set('parsedContent', code)
 
-    return { code, meta }
+    return { ast, code, meta }
   }
 
   get headingLineNumbers() {
@@ -192,18 +229,12 @@ class Mdx extends MdxBase {
       .value()
   }
 
-  findParentHeading(node, options = {}) {
-    const headingNode = this.findAllNodesBefore(node, ({ type }) => type === 'heading')[0]
-
-    if (!headingNode) {
-      return
-    }
-
-    return options.stringify ? this.stringify(headingNode) : headingNode
-  }
-
   async createVMRunners(options = {}) {
     const { codeBlocks } = this
+
+    const script = await this.toScriptHelper(options)
+    const prefix = script.name
+    const { vmContext } = await script.createVMRunner(options)
 
     return Promise.all(
       codeBlocks
@@ -211,16 +242,34 @@ class Mdx extends MdxBase {
         .map((node, i) => {
           const { value, position } = node
 
-          const parent = this.findParentHeading(node, { stringify: true })
-          const script = this.runtime.script(`${this.name}/${i}`, {
+          const parent = this.findParentHeading(node)
+          const parentHeading = this.findParentHeading(node, { stringify: true })
+          const script = this.runtime.script(`${prefix}/${i}`, {
             content: value,
             meta: { position, parent },
           })
 
+          const startLine = script.tryGet('meta.position.start.line', 0)
+
           return script
             .parse()
-            .then(() => script.createVMRunner(options))
-            .then(runner => ({ i, script, position, runner, parentHeading: parent }))
+            .then(() =>
+              script.createVMRunner({
+                ...options,
+                vmContext,
+              })
+            )
+            .then(runner => ({
+              i,
+              index: i,
+              script,
+              position,
+              startLine,
+              runner,
+              run: (...args) => runner.run(...args),
+              parentHeading,
+              depth: parent.depth,
+            }))
         })
     )
   }

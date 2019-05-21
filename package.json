@@ -30,7 +30,8 @@
     "test:web:build": "mocha --file test/test.js test/web/**/*.spec.js",
     "start:test:webserver": "skypager serve public --hostname localhost",
     "postinstall": "node scripts/postinstall.js",
-    "clean": "lerna exec rimraf lib && lerna exec rimraf build && lerna exec rimraf dist && lerna clean --yes && rimraf node_modules"
+    "clean": "lerna exec rimraf lib && lerna exec rimraf build && lerna exec rimraf dist && lerna clean --yes && rimraf node_modules",
+    "quick": "yarn --ignore-scripts && yarn link:devDependencies"
   },
   "keywords": [
     "Skypager"

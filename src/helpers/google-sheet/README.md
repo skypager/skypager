@@ -1,5 +1,55 @@
 # Google Sheets Helper
 
+## Required Setup
+
+You'll need
+
+1) a Service Account JSON
+2) The Google Drive and Google Sheets APIs
+3) Google Sheets shared with the `client_email` from the service account.
+
+### Server to Server Auth
+
+Using this module requires using interacting with Google APIs using their server to server auth method, which is powered by Service Account credentials.
+
+A Service Account credential looks like:
+
+```json
+{
+  "type": "service_account",
+  "project_id": "your-project-id",
+  "private_key_id": "your-private-key-id",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nYOUR-PRIVATE_KEY\n-----END PRIVATE KEY-----\n",
+  "client_email": "some-random-email@your-project-id.iam.gserviceaccount.com",
+  "client_id": "your-client-id",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/your-project-id.iam.gserviceaccount.com"
+}
+```
+
+You can manage your Service Accounts by going to the [Google Cloud Console](https://console.cloud.google.com/) and creating a project or selecting the one you want to work with.
+
+Once you are there, under the `IAM & admin` section you can click on `Service Accounts`. (e.g. `https://console.cloud.google.com/iam-admin/serviceaccounts?project=your-project-id`)
+
+Create a service account, and download the JSON to `secrets/serviceAccount.json`, or some other path.
+
+You'll use this service account when activating the helper, as you'll see in [USAGE](#usage).
+
+### Enable Google APIs
+
+You'll also need to enable the Google Drive and Google Sheets APIs.  
+
+In the Google Cloud Console, under `APIs and Services` choose `Library` (e.g. `https://console.cloud.google.com/apis/library?project=your-project-id`)
+
+### Share Your Sheets
+
+With the server to server auth set up, the last step is to share the sheets you want to load with the service account client email you'll be using to access them.
+
+You can find the email address in `client_id` property of the service account json
+
+
 ## Usage
 
 Doing the following will create a registry of available sheet helpers at `runtime.sheets`
@@ -16,7 +66,17 @@ runtime.use(SheetHelper, {
 })
 ```
 
-You can register any sheet modules found in your project
+A sheet helper can be created from a module in your project. A valid sheet helper module is any module that
+exports a `sheetId` string which refers to the id found in the URL to the spreadsheet
+
+- https://docs.google.com/spreadsheets/d/`$THIS-IS-THE-ID`/edit#gid=something
+
+```javascript
+// my-users-sheet.js
+export const sheetId = '$your-google-drive-sheet-id'
+```
+
+To be able to turn this module into a `GoogleSheet` instance, we register it: 
 
 ```javascript
 import * as MyUsersSheet from './my-users-sheet'
@@ -24,13 +84,7 @@ import * as MyUsersSheet from './my-users-sheet'
 runtime.sheets.register('users', () => MyUsersSheet)
 ```
 
-a sheet module only requires one export, a string
-
-```
-export const sheetId = '$your-google-drive-sheet-id'
-```
-
-You can then work with the google spreadsheet as if it were an entity
+And activate it when we need it 
 
 ```javascript
 const sheet = runtime.sheet('users')
@@ -38,17 +92,18 @@ const sheet = runtime.sheet('users')
 // will return objects for each row.
 // keys are the header column, value is the cell for that row / column 
 sheet.loadAll().then((keyedByWorksheetName) => {
-
+  const { users = [], companies = [], whatever = [] } = keyedByWorksheetName
+  console.log(users[0]) // { name: "Jon Soeder", job: "player coach captain", email: "jon@jmoney.com" }
 })
 ```
 
 ## Automatically Discovering Spreadsheets via Google Drive API
 
-If you don't need to build a module for your sheet (you just want the data), you can skip registering modules by just remotely discovering sheets available to
+If you don't need to build a module for your sheet (you just want the data), you can skip registering modules by just remotely discovering sheets available to you.
 
 ```javascript
 async () => {
-  await runtime.sheets.discover({ sharedWithMe: true })
+  await runtime.sheets.discover({ sharedWithMe: true, teamDrives: true })
 
   runtime.sheets.available // will be the camelCased title of each spreadsheet
 

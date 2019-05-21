@@ -31,15 +31,9 @@
     "@babel/template": "^7.2.2",
     "@babel/traverse": "^7.2.5",
     "@babel/types": "^7.2.2",
-    "@mdx-js/mdx": "^0.14.0",
-    "@mdx-js/mdxast": "^0.10.0",
-    "@mdx-js/tag": "^0.14.0",
+    "@skypager/helpers-mdx": "^1.0.1",
     "brace": "^0.11.1",
     "react-ace": "^6.3.2",
-    "react-treebeard": "^3.1.0",
-    "remark-frontmatter": "^1.2.0",
-    "remark-parse": "^5.0.0",
-    "remark-stringify": "^5.0.0",
     "unified": "^7.0.0",
     "unist-util-find-after": "^2.0.2",
     "unist-util-find-all-after": "^1.0.2", 
@@ -63,6 +57,10 @@
       "generate-api-docs",
       "test-code-blocks"
     ],
+    "externals": {
+      "react": "React",
+      "react-dom": "ReactDOM"
+    },
     "webpack": {
       "appName": "skypager-helpers-document",
       "libraryName": "SkypagerHelpersDocument"
