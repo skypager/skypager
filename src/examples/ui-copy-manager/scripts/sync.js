@@ -82,7 +82,7 @@ async function main() {
 
 async function updateLocal({ siteCopy, content, worksheet } = {}) {
   const { pickBy, values, keyBy } = runtime.lodash
-  const local = await scanProject() 
+  const local = await scanProject()
 
   const localNodes = keyBy(local, 'nodeId')
   const remoteNodes = keyBy(content, 'nodeId')
@@ -92,31 +92,42 @@ async function updateLocal({ siteCopy, content, worksheet } = {}) {
       const remote = remoteNodes[nodeId]
       return remote && local.value !== remote.value && local.fileHash === remote.fileHash
     })
-  ).map((localNode) => ({ script: runtime.script(localNode.file.replace(/\.js$/, '')), file: localNode.file, nodeId: localNode.nodeId, from: localNode.value, to: remoteNodes[localNode.nodeId].value }))
+  ).map(localNode => ({
+    script: runtime.script(localNode.file.replace(/\.js$/, '')),
+    file: localNode.file,
+    nodeId: localNode.nodeId,
+    from: localNode.value,
+    to: remoteNodes[localNode.nodeId].value,
+  }))
 
-  for(let update of updateQueue) {
-    const { nodeId, script, nodeType, from, to} = update
+  for (let update of updateQueue) {
+    const { nodeId, script, nodeType, from, to } = update
     const [startLine, startCol, endLine, endCol] = nodeId.split(':').map(v => parseInt(v, 10))
     const [updateNode] = script.findNodes(({ node }) => {
       const { start, end } = node.loc
 
-      if (start.line === startLine && end.line === endLine && start.column === startCol && end.column === endCol) {
+      if (
+        start.line === startLine &&
+        end.line === endLine &&
+        start.column === startCol &&
+        end.column === endCol
+      ) {
         return true
       }
-    })   
+    })
 
-    const splice = (str) => 
-      (start, length, replacement) => str.substr(0,start)+replacement+str.substr(start+length);
- 
+    const splice = str => (start, length, replacement) =>
+      str.substr(0, start) + replacement + str.substr(start + length)
+
     if (updateNode) {
-      const isMultiLine = (endLine - startLine) > 0
+      const isMultiLine = endLine - startLine > 0
 
       if (!isMultiLine) {
-      const lines = script.lines
-       const updateLine = lines[startLine - 1] 
-       const newLine = splice(updateLine)(startCol + 1, endCol - startCol - 2, to)
-       lines[startLine - 1] = newLine
-       script.setState({ content: lines.join("\n") })
+        const lines = script.lines
+        const updateLine = lines[startLine - 1]
+        const newLine = splice(updateLine)(startCol + 1, endCol - startCol - 2, to)
+        lines[startLine - 1] = newLine
+        script.state.set('content', lines.join("\n"))
       }
 
       // How do i now edit the node and update the source code?
@@ -124,7 +135,7 @@ async function updateLocal({ siteCopy, content, worksheet } = {}) {
     }
   }
 
-  for(let update of updateQueue) {
+  for (let update of updateQueue) {
     const { script } = update
     await runtime.fsx.writeFileAsync(script.file.path, script.state.get('content'), 'utf8')
   }
@@ -144,11 +155,11 @@ async function updateRemote({ siteCopy, worksheet }) {
   const processed = await Promise.all(components.map(component => processFile(component)))
   const records = flatten(processed)
 
-  for(let record of records) {
-    const transformed = mapKeys(record, (v,k) => runtime.stringUtils.underscore(k))
-    
-    await worksheet.addRow(transformed).catch((error) => {
-      console.error(`Error adding`, error.message, record)  
+  for (let record of records) {
+    const transformed = mapKeys(record, (v, k) => runtime.stringUtils.underscore(k))
+
+    await worksheet.addRow(transformed).catch(error => {
+      console.error(`Error adding`, error.message, record)
     })
   }
 }
@@ -168,7 +179,7 @@ function processAstPath(path, options = {}) {
     parent: path.parent,
     parentType,
     nodeType: path.node.type,
-    ...parentName && { parentName },
+    ...(parentName && { parentName }),
     value: path.node.value,
     path() {
       return path
@@ -176,41 +187,50 @@ function processAstPath(path, options = {}) {
   }
 }
 
-
 async function processFile(script, options = {}) {
   const { attributeNames = ['content'] } = options
   const { get, pick } = runtime.lodash
 
   const stringLiterals = script.findNodes(node => node.type === 'StringLiteral')
 
-  const jsxAttributes = stringLiterals.filter((path) => {
-    const parentType = get(path, 'parent.type')
-    const parentName = get(path, 'parent.name.name') 
+  const jsxAttributes = stringLiterals
+    .filter(path => {
+      const parentType = get(path, 'parent.type')
+      const parentName = get(path, 'parent.name.name')
 
-    return parentType === 'JSXAttribute' && attributeNames.indexOf(parentName) > -1
-  }).map((result) => ({
-    ...processAstPath(result, options),
-    fileHash: script.file.hash,
-    file: script.file.relative,
-    projectName: runtime.currentPackage.name
-  }))
+      return parentType === 'JSXAttribute' && attributeNames.indexOf(parentName) > -1
+    })
+    .map(result => ({
+      ...processAstPath(result, options),
+      fileHash: script.file.hash,
+      file: script.file.relative,
+      projectName: runtime.currentPackage.name,
+    }))
 
-  const jsxText = script.findNodes(node => node.type === 'JSXText').filter((path) => {
-    const parentType = get(path, 'parent.type')
-    const value = get(path, 'node.value')
+  const jsxText = script
+    .findNodes(node => node.type === 'JSXText')
+    .filter(path => {
+      const parentType = get(path, 'parent.type')
+      const value = get(path, 'node.value')
 
-    return value && parentType === 'JSXElement' && String(value).replace(/\s*/g, '').trim().length
-  }).map((result) => ({
-    ...processAstPath(result, options),
-    fileHash: script.file.hash,
-    file: script.file.relative,   
-    projectName: runtime.currentPackage.name
-  }))
+      return (
+        value &&
+        parentType === 'JSXElement' &&
+        String(value)
+          .replace(/\s*/g, '')
+          .trim().length
+      )
+    })
+    .map(result => ({
+      ...processAstPath(result, options),
+      fileHash: script.file.hash,
+      file: script.file.relative,
+      projectName: runtime.currentPackage.name,
+    }))
 
-  const results = [
-    ...jsxAttributes,
-    ...jsxText
-  ].map((result) => pick(result, 'projectName', 'file', 'fileHash', 'nodeId', 'value', 'lineNumber', 'nodeType'))
+  const results = [...jsxAttributes, ...jsxText].map(result =>
+    pick(result, 'projectName', 'file', 'fileHash', 'nodeId', 'value', 'lineNumber', 'nodeType')
+  )
 
   return results
 }
