@@ -195,6 +195,11 @@ export class Babel extends Helper {
       begin = begin.loc
     }
 
+    if (begin && begin.start && begin.end && !end) {
+      end = begin.end
+      begin = begin.start
+    }
+
     const isValid = node =>
       !isUndefined(get(node, 'start.line')) && !isUndefined(get(node, 'end.line'))
 
@@ -410,6 +415,63 @@ export class Babel extends Helper {
       .filter(Boolean)
   }
 
+  get classDeclarations() {
+    return this.findNodes(({ node }) => node.type === 'ClassDeclaration')
+  }
+
+  get classInstanceMethods() {
+    return this.findNodes(({ node }) => node.type === 'ClassMethod' && node.kind === 'method' && !node.static)
+  }
+
+  get classGetters() {
+    return this.findNodes(({ node }) => node.type === 'ClassMethod' && node.kind === 'get' && !node.static)
+  }
+
+  get staticClassMethods() {
+    return this.findNodes(({ node }) => node.type === 'ClassMethod' && node.kind === 'method' && node.static)
+  }
+
+  get staticClassGetters() {
+    return this.findNodes(({ node }) => node.type === 'ClassMethod' && node.kind === 'get' && node.static)
+  }
+
+  get classProperties() {
+    return this.findNodes(({ node }) => node.type === 'ClassProperty' && !node.static)
+  }
+
+  get staticClassProperties() {
+    return this.findNodes(({ node }) => node.type === 'ClassProperty' && node.static)
+  }
+
+  get undocumentedClassMembers() {
+    const { isEmpty, omitBy, get } = this.lodash
+
+    const types = [
+      'ClassDeclaration',
+      'ClassMethod',
+      'ClassProperty'
+    ]
+
+    const undocumented = this.findNodes(({ node }) => types.indexOf(node.type) > -1 && isEmpty(node.leadingComments))
+
+    const getNames = (result) =>
+      result.node.type === 'ClassDeclaration'
+        ? { name: get(result.node, 'id.name'), className: get(result.node, 'id.name') }
+        : { name: get(result.node, 'key.name'), className: get(result.parentPath, 'container.id.name') } 
+
+    return undocumented.map(result => {
+      const { node } = result
+
+      return {
+        ...getNames(result),
+        loc: node.loc,
+        lineNumber: node.loc.start.line,
+        type: node.type,
+        kind: node.kind,
+        static: node.static,
+      }
+    })
+  }
   /**
    * Lists the modules the script imports using es6 import syntax
    */

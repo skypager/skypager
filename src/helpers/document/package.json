@@ -55,7 +55,8 @@
     "buildFolder": "lib",
     "providesScripts": [
       "generate-api-docs",
-      "test-code-blocks"
+      "test-code-blocks",
+      "inspect-docs"
     ],
     "externals": {
       "react": "React",

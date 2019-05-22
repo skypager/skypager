@@ -230,11 +230,52 @@ class Mdx extends MdxBase {
   }
 
   async createVMRunners(options = {}) {
+    const { runtime } = this
+    const { castArray } = this.lodash
     const { codeBlocks } = this
 
     const script = await this.toScriptHelper(options)
     const prefix = script.name
-    const { vmContext } = await script.createVMRunner(options)
+    
+    await script.parse()
+
+    const scriptRunner = await script.createVMRunner(options)
+    const { vmContext } = scriptRunner
+
+    const requireScripts = castArray(options.require).filter(Boolean)
+
+    if (requireScripts.length) {
+      const code = await Promise.all(
+        requireScripts.map(p => {
+          let modPath = runtime.resolve(p)
+
+          if (!runtime.fsx.existsSync(modPath)) {
+            modPath = runtime.packageFinder.attemptResolve(modPath)
+            modPath = modPath || require.resolve(p)
+
+            if (!modPath) {
+              throw new Error(`Could not require setup script: ${p}`)
+            }
+          }
+
+          return runtime.fsx.readFileAsync(modPath).then(buf => buf.toString())
+        })
+      )
+      
+      Object.defineProperty(vmContext, 'global', {
+        get: () => vmContext
+      })
+
+      code.forEach(
+        content => {
+          const s = runtime.createScript(content)
+          s.runInContext(vmContext)
+        }
+      )
+    }
+
+    this.hide('scriptRunner', scriptRunner)
+    this.hide('vmContext', vmContext)
 
     return Promise.all(
       codeBlocks

@@ -5,6 +5,7 @@ runtime.use(require('@skypager/helpers-document'))
 const { clear, print, colors } = runtime.cli
 const { green, red, bold } = colors
 const { flatten } = runtime.lodash
+const { testHelpers } = runtime.argv
 
 main()
 
@@ -20,7 +21,9 @@ async function main() {
   let failCount = 0
 
   for (let doc of docs) {
-    await doc.toRunnable()
+    await doc.toRunnable({
+      ...testHelpers && { require: [testHelpers]}
+    })
 
     total = total + doc.runners.length
 

@@ -41,24 +41,37 @@ async function main() {
   await Promise.all(scripts.map(generateMarkdown))
 
   let docs = []
+  let errors = []
 
   if (runtime.argv.verify !== false) {
     await runtime.mdxDocs.discover()
-  
+
     docs = await Promise.all(
       runtime.mdxDocs.available.map(id => {
         const mdxDoc = runtime.mdxDoc(id)
-        return mdxDoc.process().then(() => mdxDoc).catch((error) => {
-          console.error(`Error while processing ${id}`)
-          console.error(error.message)
-          return false
-        })
+        return mdxDoc
+          .process()
+          .then(() => mdxDoc)
+          .catch(error => {
+            errors.push({ error, id, mdxDoc})
+            return false
+          })
       })
     ).then(results => results.filter(Boolean))
   }
 
   if (runtime.argv.interactive || runtime.argv.console) {
     await runtime.repl('interactive').launch({ runtime, sourceFiles, apiDocs, docs })
+  }
+
+  if (runtime.argv.verify !== false && errors.length) {
+    console.error('Some documents failed to generate valid MDX.')
+    errors.map(({ error, id }) => {
+      console.log(`File: ${id}`)
+      console.log(error.message)
+      console.log("")
+    })
+    process.exit(1)
   }
 }
 
