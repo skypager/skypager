@@ -10,10 +10,10 @@ export default class HomePage extends Component {
   render() {
     return (
       <Container id="home-page" style={{ padding: '48px' }}>
-        <Header as="h1" content="Welcome to my Website" />
-        <p>This is some paragraph copy about my website.</p>
+        <Header as="h1" content="Welcome to my Website BRO!" />
+        <p>TNAh......</p>
         <p>This is some additional paragraph copy about my website.</p>
-        <Button content="Click here to learn more" />
+        <Button content="Click here to learn more ABOUT THIS!" />
       </Container>
     )
   }

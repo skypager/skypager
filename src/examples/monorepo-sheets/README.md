@@ -147,4 +147,4 @@ However, you can use the [Document Helper](../../helpers/document) to do the sam
 
 You can even use the [Sketch Helper](../../helpers/sketch) to sync sketchfiles with a google spreadsheet AND with your CSS code!
 
-[COMING SOON: Sync UI Copy and Labels in your React Components with a google spreadsheet](../react-sheets-cms)
+[COMING SOON: Sync UI Copy and Labels in your React Components with a google spreadsheet](../ui-copy-manager)

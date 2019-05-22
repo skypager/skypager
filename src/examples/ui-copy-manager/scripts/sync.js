@@ -25,6 +25,49 @@ const {
 // When creating the sheet this converts each empty value into the string $EMPTY so that we can change it
 const EMPTY = '$EMPTY'
 
+/**
+ * Creates a ContentElement class which extends the RowEntity class
+ * and makes it responsible for handling all of the rows found in the $sheetName
+ * sheet of the $sheetTitle google spreadsheet.
+ */
+async function entities(sheet) {
+  class ContentElement extends sheet.RowEntity {
+    set english(value) {
+      this.value = value
+    }
+
+    get english() {
+      return this.value
+    }
+
+    get startPosition() {
+      const parts = String(this.nodeId).split(':')
+
+      return {
+        line: parts[0],
+        col: parts[1],
+      }
+    }
+
+    get endPosition() {
+      const parts = String(this.nodeId).split(':')
+
+      return {
+        line: parts[2],
+        col: parts[3],
+      }
+    }
+  }
+
+  await sheet.whenReady()
+
+  try {
+    return sheet.registerEntity(sheetName, () => ContentElement)
+  } catch (error) {
+    console.log(sheet.worksheetIds, sheet.worksheetTitles)
+  }
+}
+
 async function main() {
   if (runtime.argv.help || runtime.argv._[0] === 'help') {
     displayHelp()
@@ -38,7 +81,7 @@ async function main() {
 
     await siteCopy.whenReady()
 
-    const driveFile = await monorepo.tryResult('getDriveFile', {})
+    const driveFile = await siteCopy.tryResult('getDriveFile', {})
 
     if (driveFile && driveFile.alternateLink) {
       Promise.resolve(runtime.opener.openInBrowser(driveFile.alternateLink))
@@ -63,7 +106,7 @@ async function main() {
     content,
   } = await loadSiteCopy()
 
-  // Get the package entities for all of the packages in our monorepo's scope
+  // Get the package entities for all of the packages in our siteCopy's scope
 
   // run the script with --console to start REPL to be able to inspect the data
   if (runtime.argv.console) {
@@ -118,7 +161,6 @@ async function updateLocal({ siteCopy, content, worksheet } = {}) {
         return true
       }
     })
-
 
     if (updateNode) {
       const isMultiLine = endLine - startLine > 0
@@ -268,36 +310,6 @@ async function loadSiteCopy() {
     siteCopy,
     worksheet,
     content,
-  }
-}
-
-async function entities(sheet) {
-  class ContentElement extends sheet.RowEntity {
-    get startPosition() {
-      const parts = String(this.nodeId).split(':')
-
-      return {
-        line: parts[0],
-        col: parts[1],
-      }
-    }
-
-    get endPosition() {
-      const parts = String(this.nodeId).split(':')
-
-      return {
-        line: parts[2],
-        col: parts[3],
-      }
-    }
-  }
-
-  await sheet.whenReady()
-
-  try {
-    return sheet.registerEntity(sheetName, () => ContentElement)
-  } catch (error) {
-    console.log(sheet.worksheetIds, sheet.worksheetTitles)
   }
 }
 
