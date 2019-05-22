@@ -40,23 +40,40 @@ async function main() {
 
   await Promise.all(scripts.map(generateMarkdown))
 
-  if (runtime.argv.interactive) {
-    await runtime.repl('interactive').launch({ runtime, sourceFiles, apiDocs })
+  let docs = []
+
+  if (runtime.argv.verify !== false) {
+    await runtime.mdxDocs.discover()
+  
+    docs = await Promise.all(
+      runtime.mdxDocs.available.map(id => {
+        const mdxDoc = runtime.mdxDoc(id)
+        return mdxDoc.process().then(() => mdxDoc).catch((error) => {
+          console.error(`Error while processing ${id}`)
+          console.error(error.message)
+          return false
+        })
+      })
+    ).then(results => results.filter(Boolean))
+  }
+
+  if (runtime.argv.interactive || runtime.argv.console) {
+    await runtime.repl('interactive').launch({ runtime, sourceFiles, apiDocs, docs })
   }
 }
 
 async function generateMarkdown(script) {
   const { dirname } = runtime.pathUtils
-  const { relative } = script.provider
+  const { relative } = script.file
   const destination = relative.replace(baseFolder, 'docs/api').replace('.js', '.md')
 
   const output = await runtime
     .select('process/output', {
-      cmd: `jsdoc2md ${script.provider.relative}`,
+      cmd: `jsdoc2md ${script.file.relative}`,
       format: 'raw',
     })
     .catch(error => {
-      console.log(`Error Generating Markdown for ${script.provider.relative}`)
+      console.log(`Error Generating Markdown for ${script.file.relative}`)
       console.error(error.message)
       console.log(String(error.stdout))
     })

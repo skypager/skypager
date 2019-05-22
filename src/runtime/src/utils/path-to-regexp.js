@@ -437,7 +437,7 @@ function tokensToRegExp(tokens, keys, options) {
  *
  * An empty array can be passed in for the keys, which will hold the
  * placeholder key descriptions. For example, using `/user/:id`, `keys` will
- * contain `[{ name: 'id', delimiter: '/', optional: false, repeat: false }]`.
+ * look like name=id delimiter=/ optional=false repeat=false
  *
  * @param  {(string|RegExp|Array)} path
  * @param  {(Array|Object)=}       keys

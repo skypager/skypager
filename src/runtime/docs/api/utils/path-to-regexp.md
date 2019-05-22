@@ -52,7 +52,7 @@
 <dd><p>Normalize the given path string, returning a regular expression.</p>
 <p>An empty array can be passed in for the keys, which will hold the
 placeholder key descriptions. For example, using <code>/user/:id</code>, <code>keys</code> will
-contain <code>[{ name: &#39;id&#39;, delimiter: &#39;/&#39;, optional: false, repeat: false }]</code>.</p>
+look like name=id delimiter=/ optional=false repeat=false</p>
 </dd>
 </dl>
 
@@ -217,7 +217,7 @@ Normalize the given path string, returning a regular expression.
 
 An empty array can be passed in for the keys, which will hold the
 placeholder key descriptions. For example, using `/user/:id`, `keys` will
-contain `[{ name: 'id', delimiter: '/', optional: false, repeat: false }]`.
+look like name=id delimiter=/ optional=false repeat=false
 
 **Kind**: global function  
 
