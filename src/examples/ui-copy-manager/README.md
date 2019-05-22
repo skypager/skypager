@@ -1,4 +1,4 @@
-# Monorepo Sheets Sync
+# UI Content / Copy Management Demo 
 
 Easily edit all of the string literals in your source code project (UI Copy / Content) 
 from a google spreadsheet.
