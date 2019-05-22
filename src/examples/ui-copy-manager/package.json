@@ -12,7 +12,8 @@
     "build": "skypager build",
     "postbuild": "skypager hash-build",
     "start": "NODE_ENV=production NO_CLEAR=true node ./start.js --log-level debug --cors",
-    "dev": "NODE_ENV=development NO_CLEAR=true node ./start.js --hot --log-level debug --cors"
+    "dev": "NODE_ENV=development NO_CLEAR=true node ./start.js --hot --log-level debug --cors",
+    "test:walkthrough": "cross-env GCLOUD_PROJECT=skypager-4dab8 skypager test-code-blocks WALKTHROUGH.md --test-helpers @skypager/devtools/testing/mocha-test-setup"
   },
   "license": "MIT",
   "dependencies": {

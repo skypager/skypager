@@ -46,6 +46,8 @@ runtime
   }))
 
 runtime.should.have.property('mdxDoc').that.is.a('function')
+runtime.should.have.property('sheets').that.is.an('object')
+  .that.has.property('discover').that.is.a('function')
 ```
 
 
@@ -55,13 +57,20 @@ runtime.should.have.property('mdxDoc').that.is.a('function')
 async function loadReactComponents() {
   await runtime.scripts.discover({ include: [/src.*(components|pages).*\.js$/] })
   await Promise.all(
-    runtime.scripts.allInstances({ cacheHelper: true }).map(script => script.parse())
+    runtime.scripts
+      .allInstances({ cacheHelper: true })
+      .map(script => script.parse())
   )
 
-  return runtime.scripts.allInstances({ cacheHelper: true })
+  return runtime.scripts.allInstances({ cacheHelper: true }).filter(({ name }) => name.match(/(pages|components)/))
 } 
 
-loadReactComponents()
+loadReactComponents().then((results) => {
+  results.should.be.an('array').that.is.not.empty
+  results[0].should.be.an('object').with.property('ast')
+  results[0].should.have.property('file').that.is.an('object')
+  results[0].should.have.property('importsModules').that.is.an('array').that.includes('react')
+})
 ```
 
 ### Step Two: Find all of the StringLiteral or JSXAttribute nodes in the file
@@ -85,6 +94,12 @@ const records = onlyPropsNamedContent.map(({ node }) => ({
   value: node.value, 
   nodeId: at(node.loc, 'start.line', 'start.column', 'end.line', 'end.column').join(':')
 }))
+
+const valid = records.map(({ value }) => value)
+  .filter(v => v && v.length)
+
+valid.should.have.property('length', records.length)
+valid.should.not.be.empty
 ```
 
 

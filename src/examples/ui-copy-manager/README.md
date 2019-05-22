@@ -15,6 +15,7 @@ corresponds to a source code location in your project.  We're only interested in
 
 Once it puts all of these values in the sheet, you or somebody else can edit the sheet, and apply those edits back to the source code using these scripts.
 
+
 ## Required Setup
 
 You'll need
@@ -66,23 +67,36 @@ You can find the email address in `client_id` property of the service account js
 
 ## Usage 
 
-Get Help
+You can run the following command to start the web application with hot module reloading, and open it in a browser
 
 ```shell
-$ node scripts/sync.js help
+$ yarn dev --open
+```
+
+You can run the next command to open the google sheet
+
+```shell
+$ skypager sync --open 
 ```
 
 Running the following will read all of the React Components in your project, parse their AST to find string literals, and publishes each instance to google sheets.
 
 ```shell
-$ node scripts/sync.js 
+$ skypager sync 
 ```
 
 Running the following will read the google sheet, and apply any changes it needs to the React Components so that they are in sync.
 
 ```shell
-$ node scripts/sync.js inbound
+$ skypager sync inbound
 ```
+
+If you get stuck
+
+```shell
+$ skypager sync help
+```
+
 
 ## How It Works
 
