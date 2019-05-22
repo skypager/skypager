@@ -183,6 +183,9 @@ export class Babel extends Helper {
    * Given two location objects { start: { line, column }, end: { line, column } }
    * or a single node with a loc.property that has start and end Position objects,
    * returns an object with a toString() method that will return the source for that node
+   * 
+   * @param {SourcePosition} begin
+   * @param {SourcePosition} end
    */
   extractSourceFromLocations(begin, end) {
     const { clone, isUndefined, get } = this.lodash
@@ -374,7 +377,7 @@ export class Babel extends Helper {
   }
 
   get unwrappedContent() {
-    return this.currentState.content || this.options.content || this.provider.content
+    return this.currentState.content || this.options.content || this.provider.content || this.get('file.content')
   }
 
   get file() {

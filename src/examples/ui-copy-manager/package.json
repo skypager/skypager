@@ -1,0 +1,53 @@
+{
+  "name": "@skypager/ui-copy-manager",
+  "version": "1.0.1",
+  "description": "sync your ui copy with google spreadsheets.",
+  "author": "Jon Soeder <jon@chicago.com>",
+  "main": "lib/index.js",
+  "scripts": {
+    "console": "skypager sync --console",
+    "update:sheet": "skypager sync",
+    "update:local": "skypager sync --inbound",
+    "test": "exit 0",
+    "build": "skypager build",
+    "postbuild": "skypager hash-build",
+    "start": "NODE_ENV=production NO_CLEAR=true node ./start.js --log-level debug --cors",
+    "dev": "NODE_ENV=development NO_CLEAR=true node ./start.js --hot --log-level debug --cors"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@skypager/helpers-sheet": "^1.0.1"
+  },
+  "skypager": {
+    "category": "cli",
+    "sheetTitle": "skypagerUiCopyManager",
+    "projectType": "webapp",
+    "buildFolder": "lib",
+    "webpack": {
+      "externals": {
+        "react": "React",
+        "react-dom": "ReactDOM",
+        "react-router-dom": "ReactRouterDOM",
+        "@skypager/runtime": "skypager",
+        "@skypager/web": "skypager",
+        "prop-types": "PropTypes"
+      },
+      "copy": {
+        "@skypager/web": [
+          "lib/skypager-runtimes-web.min.js",
+          "lib/skypager-runtimes-web.js"
+        ]
+      }
+    }
+  },
+  "gitHead": "66f2da16f4d6ebc315f1d244ba314647a8630011",
+  "keywords": [],
+  "contributors": [],
+  "homepage": "https://skypager.io",
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
+}

@@ -602,6 +602,14 @@ export function updateFileContent(fileId, content) {
 }
 
 export async function readAllContent(options = {}) {
+  if (this.lodash.isArray(options)) {
+    options = { include: options }
+  }
+
+  if (this.lodash.isString(options)) {
+    options = { include: [options] }
+  }
+
   const { include = [], exclude = [/secret/, /\.env/, /build\//] } = options
 
   const toFileId = path => normalize(this.runtime.relative(path))

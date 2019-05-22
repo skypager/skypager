@@ -61,6 +61,7 @@ export default class RowEntity {
         if (cell) {
           cell.value = newValue
           if (this.__autoSave) {
+            Promise.resolve(cell.save())
             this.parent.runtime.debug(`Autosaving sheet entity`, {
               newValue,
               attributeName,
