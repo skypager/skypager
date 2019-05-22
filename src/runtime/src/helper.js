@@ -1025,6 +1025,10 @@ export function _attach(host, helperClass, options = {}) {
     return helperInstance
   })
 
+  hideProperty(host[registryProp], 'allInstances', (options = {}) =>
+    Object.keys(host[registryProp].allMembers()).map(id => host[lookupProp](id, options))
+  )
+
   hideProperty(
     host[registryProp],
     'createLookup',
