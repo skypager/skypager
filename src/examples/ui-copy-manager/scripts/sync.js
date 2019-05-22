@@ -80,6 +80,9 @@ async function main() {
   }
 }
 
+const splice = str => (start, length, replacement) =>
+  str.substr(0, start) + replacement + str.substr(start + length)
+
 async function updateLocal({ siteCopy, content, worksheet } = {}) {
   const { pickBy, values, keyBy } = runtime.lodash
   const local = await scanProject()
@@ -116,8 +119,6 @@ async function updateLocal({ siteCopy, content, worksheet } = {}) {
       }
     })
 
-    const splice = str => (start, length, replacement) =>
-      str.substr(0, start) + replacement + str.substr(start + length)
 
     if (updateNode) {
       const isMultiLine = endLine - startLine > 0
@@ -127,7 +128,9 @@ async function updateLocal({ siteCopy, content, worksheet } = {}) {
         const updateLine = lines[startLine - 1]
         const newLine = splice(updateLine)(startCol + 1, endCol - startCol - 2, to)
         lines[startLine - 1] = newLine
-        script.state.set('content', lines.join("\n"))
+        script.state.set('content', lines.join('\n'))
+      } else {
+        console.log('Multiline replacements TODO')
       }
 
       // How do i now edit the node and update the source code?
@@ -135,7 +138,14 @@ async function updateLocal({ siteCopy, content, worksheet } = {}) {
     }
   }
 
+  const seen = {}
+
   for (let update of updateQueue) {
+    if (!seen[update.file]) {
+      console.log(`Updating ${update.file}`)
+      seen[update.file] = true
+    }
+
     const { script } = update
     await runtime.fsx.writeFileAsync(script.file.path, script.state.get('content'), 'utf8')
   }
