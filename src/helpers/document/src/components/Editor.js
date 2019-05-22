@@ -37,9 +37,11 @@ export default class Editor extends Component {
 
     this.setState({ loading: false })
 
-    const containerNode = findDOMNode(this).closest('pre[data-line-number]')
+    const containerNode = findDOMNode(this).closest(
+      `${this.props.parentTag || 'div'}[data-line-number]`
+    )
 
-    if (containerNode) {
+    if (containerNode && containerNode.dataset) {
       const lineNumber = containerNode.dataset.lineNumber
       console.log('Setting Editor CodeBlockID', `codeBlock${lineNumber}`)
       this.setState({
