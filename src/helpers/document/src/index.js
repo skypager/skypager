@@ -236,7 +236,7 @@ class Mdx extends MdxBase {
 
     const script = await this.toScriptHelper(options)
     const prefix = script.name
-    
+
     await script.parse()
 
     const scriptRunner = await script.createVMRunner(options)
@@ -261,17 +261,15 @@ class Mdx extends MdxBase {
           return runtime.fsx.readFileAsync(modPath).then(buf => buf.toString())
         })
       )
-      
+
       Object.defineProperty(vmContext, 'global', {
-        get: () => vmContext
+        get: () => vmContext,
       })
 
-      code.forEach(
-        content => {
-          const s = runtime.createScript(content)
-          s.runInContext(vmContext)
-        }
-      )
+      code.forEach(content => {
+        const s = runtime.createScript(content)
+        s.runInContext(vmContext)
+      })
     }
 
     this.hide('scriptRunner', scriptRunner)

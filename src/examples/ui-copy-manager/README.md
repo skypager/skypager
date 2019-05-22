@@ -87,3 +87,26 @@ $ node scripts/sync.js inbound
 ## How It Works
 
 [See The Walkthrough](WALKTHROUGH.md)
+
+You can even confirm that the walkthrough is valid! This command uses the [Test Code Blocks Script](../../helpers/document/scripts/test-code-blocks.js)
+
+```shell
+$ GCLOUD_PROJECT=skypager-4dab8 skypager test-code-blocks WALKTHROUGH.md --test-helpers @skypager/devtools/testing/mocha-test-setup
+```
+
+Which results in the following output:
+
+```
+UI Copy Manager Walkthrough
+
+     Step Zero: We setup the project to use the google sheet helper
+
+     Step One: Uses @skypager/helpers-document to parse your React Components
+
+     Step Two: Find all of the StringLiteral or JSXAttribute nodes in the file
+
+     Step Three: Get the string value, and create an entry for this node in the spreadsheet
+
+4/4 tests PASSED
+```
+

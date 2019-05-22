@@ -420,19 +420,27 @@ export class Babel extends Helper {
   }
 
   get classInstanceMethods() {
-    return this.findNodes(({ node }) => node.type === 'ClassMethod' && node.kind === 'method' && !node.static)
+    return this.findNodes(
+      ({ node }) => node.type === 'ClassMethod' && node.kind === 'method' && !node.static
+    )
   }
 
   get classGetters() {
-    return this.findNodes(({ node }) => node.type === 'ClassMethod' && node.kind === 'get' && !node.static)
+    return this.findNodes(
+      ({ node }) => node.type === 'ClassMethod' && node.kind === 'get' && !node.static
+    )
   }
 
   get staticClassMethods() {
-    return this.findNodes(({ node }) => node.type === 'ClassMethod' && node.kind === 'method' && node.static)
+    return this.findNodes(
+      ({ node }) => node.type === 'ClassMethod' && node.kind === 'method' && node.static
+    )
   }
 
   get staticClassGetters() {
-    return this.findNodes(({ node }) => node.type === 'ClassMethod' && node.kind === 'get' && node.static)
+    return this.findNodes(
+      ({ node }) => node.type === 'ClassMethod' && node.kind === 'get' && node.static
+    )
   }
 
   get classProperties() {
@@ -446,18 +454,19 @@ export class Babel extends Helper {
   get undocumentedClassMembers() {
     const { isEmpty, omitBy, get } = this.lodash
 
-    const types = [
-      'ClassDeclaration',
-      'ClassMethod',
-      'ClassProperty'
-    ]
+    const types = ['ClassDeclaration', 'ClassMethod', 'ClassProperty']
 
-    const undocumented = this.findNodes(({ node }) => types.indexOf(node.type) > -1 && isEmpty(node.leadingComments))
+    const undocumented = this.findNodes(
+      ({ node }) => types.indexOf(node.type) > -1 && isEmpty(node.leadingComments)
+    )
 
-    const getNames = (result) =>
+    const getNames = result =>
       result.node.type === 'ClassDeclaration'
         ? { name: get(result.node, 'id.name'), className: get(result.node, 'id.name') }
-        : { name: get(result.node, 'key.name'), className: get(result.parentPath, 'container.id.name') } 
+        : {
+            name: get(result.node, 'key.name'),
+            className: get(result.parentPath, 'container.id.name'),
+          }
 
     return undocumented.map(result => {
       const { node } = result

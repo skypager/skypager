@@ -53,7 +53,7 @@ async function main() {
           .process()
           .then(() => mdxDoc)
           .catch(error => {
-            errors.push({ error, id, mdxDoc})
+            errors.push({ error, id, mdxDoc })
             return false
           })
       })
@@ -69,7 +69,7 @@ async function main() {
     errors.map(({ error, id }) => {
       console.log(`File: ${id}`)
       console.log(error.message)
-      console.log("")
+      console.log('')
     })
     process.exit(1)
   }

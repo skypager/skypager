@@ -13,7 +13,7 @@ async function main() {
   const pattern = runtime.argv._[0] || runtime.argv.pattern || 'docs/api/**/*.md'
   const docs = await registerDocHelpers(pattern)
 
-  for(let doc of docs) {
+  for (let doc of docs) {
     const { name, title } = doc
     print(`ID ${bold.green(name)} Title: ${bold(title)} `)
   }
@@ -30,9 +30,12 @@ async function registerDocHelpers(pattern) {
     matches.map(file => {
       const docId = file.relative.replace(/\.mdx?$/, '')
       const doc = runtime.mdxDoc(docId)
-      return doc.process().then(() => doc).catch((error) => {
-        doc.setState({ error: error.message })
-      })
+      return doc
+        .process()
+        .then(() => doc)
+        .catch(error => {
+          doc.setState({ error: error.message })
+        })
     })
   )
 

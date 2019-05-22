@@ -22,7 +22,7 @@ async function main() {
 
   for (let doc of docs) {
     await doc.toRunnable({
-      ...testHelpers && { require: [testHelpers]}
+      ...(testHelpers && { require: [testHelpers] }),
     })
 
     total = total + doc.runners.length

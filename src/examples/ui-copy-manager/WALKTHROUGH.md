@@ -31,20 +31,34 @@ $ skypager sync inbound
 Following the Setup Requirements in [README](./README.md)
 
 ```javascript
-const serviceAccount = runtime.resolve('secrets/serviceAccount.json')
 const runtime = require('@skypager/node')
+const serviceAccount = runtime.resolve('secrets/serviceAccount.json')
+
+if (!runtime.fsx.existsSync(serviceAccount)) {
+  throw new Error(`Could not find serviceAccount at specified path: ${serviceAccount}`)
+}
+
+runtime
   .use(require('@skypager/helpers-document'))
   .use(require('@skypager/helpers-sheet', {
     serviceAccount,
-    projectId: require(serviceAccount).project_id
+    googleProject: 'skypager-4dab8'
   }))
+
+runtime.should.have.property('mdxDoc').that.is.a('function')
 ```
+
+
 ### Step One: Uses @skypager/helpers-document to parse your React Components
 
 ```javascript
 async function loadReactComponents() {
   await runtime.scripts.discover({ include: [/src.*(components|pages).*\.js$/] })
-  return runtime.scripts.available
+  await Promise.all(
+    runtime.scripts.allInstances({ cacheHelper: true }).map(script => script.parse())
+  )
+
+  return runtime.scripts.allInstances({ cacheHelper: true })
 } 
 
 loadReactComponents()
@@ -53,8 +67,9 @@ loadReactComponents()
 ### Step Two: Find all of the StringLiteral or JSXAttribute nodes in the file
 
 ```javascript
-const homePage = runtime.script('src/pages/HomePage')
-const jsxAttributesWithStringLiterals = runtime
+const homePage = runtime.script('src/pages/HomePage', { cacheHelper: true })
+
+const jsxAttributesWithStringLiterals = homePage 
   .findNodes(({ parent, node }) => node.type === 'StringLiteral' && parent.type === 'JSXAttribute')
 
 const onlyPropsNamedContent = jsxAttributesWithStringLiterals.filter(({ parent }) => parent.name && parent.name.name === 'content')
