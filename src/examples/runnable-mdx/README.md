@@ -1,10 +1,84 @@
 # Runnable MDX Example
 
+This project contains an example web application which uses the [@skypager/helpers-document](../../helpers/document) to build a database of documents,
+and then display it as a website.  We use the [Runnable](../../helpers/document/src/components/Runnable.js) or [Renderable](../../helpers/document/src/components/Renderable.js) components
+to render our markdown code blocks as special components that use [Ace Editor](#) to let the user edit the code block, and get immediate feedback
+when the code changes in the form of component examples or REPL like output with the results of each line.  
+
+> TODO: Include Visual Example 
+
+You can launch the demo using the following
+
+```shell
+$ yarn demo
+```
+
+## Testable Markdown
+
+Running the following command will give you just one potential application of having markdown documents which can run their code blocks. 
+
+```shell
+$ skypager test-code-blocks README.md
+```
+
+![Testable Markdown Docs Example](./test-code-blocks-example.png)
+
 ## Runnable MDX Code Blocks
 
-## Runnable Markdown Documents
+As of MDX.js 1.0, we can pass additional props to our components for code blocks
 
-Runnable MDX Documents can 
+```markdown
+This code block will be editable, and runnable:
+
+~~~javascript runnable=true
+const sum = 1 + 1
+console.log('YO YO', sum)
+~~~
+```
+
+This will result in `<Editor value="const sum = 1 + 1\nconsole.log('YO YO', sum)" runnable mode="javascript" />`
+
+## Highlights
+
+We can discover all of the mdx files in our project, process them, and make them runnable
+
+```javascript
+const runtime = require('@skypager/node').use(require('@skypager/helpers-document'))
+
+async function createRunnableDocs() {
+  await runtime.mdxDocs.discover()
+  const docs = runtime.mdxDocs.allInstances({ cacheHelper: true })
+
+  return Promise.all(
+    docs.map((doc) => doc.process()).then(() => doc.toRunnable())
+  )
+
+  return docs
+}
+```
+
+### Convert Markdown blocks to a JavaScript Module
+
+Once we have a runnable markdown document, we can convert it to a JavaScript module.
+
+The module exports will consist of functions named after the parent headings the code block belong to. 
+
+```javascript
+const runnable = runtime.mdxDoc('README', { cacheHelper: true })
+
+async function useRunnable() {
+  await runnable.process()
+  const runnableModule = await runnable.toExport()
+
+  return runnableModule
+}
+
+useRunnable().then((mod) => {
+  mod.should.have.property('highlights').that.is.a('function')
+})
+```
+
+## How does it work
 
 We can use the MDX AST to extract the language nouns and attributes are used in the writing.
 
@@ -344,3 +418,5 @@ async function main() {
 ```
 
 You can use all of this information to run scripts which run on behalf of, or in the context of, this document. 
+
+We can hook these scripts up to React Components.  Combined with MDX, this turns markdown into living documents with user interfaces.
