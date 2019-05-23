@@ -70,9 +70,8 @@ const mdxComponents = (baseProps = {}, doc) => ({
         {...props}
         {...baseProps.code || {}}
         footer={footerComponent({ doc })}
+        header={headerComponent({ doc })}
         getDocument={() => doc}
-        showGutter
-        showPrintMargin
         value={props.children}
         mode={props.lang ? props.lang : String(props.className).replace(/^language-/, '')}
       />
@@ -182,7 +181,13 @@ export default class ActiveDocument extends Component {
         code: {
           ...(stateMdxProps.code || {}),
           ...(docStateMdxProps.code || {}),
-          height: '400px',
+          maxLines: 40,
+          wrapperProps: {
+            style: {
+              marginTop: '40px',
+              marginBottom: '40px',
+            }
+          },
           onLoad: (aceEditor, comp) => {
             const componentProps = comp.props
 
@@ -202,9 +207,17 @@ export default class ActiveDocument extends Component {
 
     return (
       <MDXProvider components={components}>
-        <Component />
+        <div className='active-document-wrapper' style={{ height: '100%', width: '100%', margin: 0, padding: 0 }}>
+          <Component />
+        </div>
       </MDXProvider>
     )
+  }
+}
+
+function headerComponent({ doc = {} }) {
+  return () => {
+    return <div />
   }
 }
 

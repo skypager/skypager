@@ -3,6 +3,7 @@ import * as DocumentHelper from '@skypager/helpers-document'
 import * as AppClient from './client'
 import * as moduleFactory from './module-factory'
 import VoiceSynthesis from './features/synth'
+import SpeechRecognition from './features/speech'
 
 skypager
   .use(DocumentHelper)
@@ -10,6 +11,7 @@ skypager
   .use(moduleFactory)
 
 skypager.features.register('voice-synthesis', () => VoiceSynthesis)
+skypager.features.register('speech-recognition', () => SpeechRecognition)
 
 skypager.clients.register('app', () => AppClient)
 
@@ -25,8 +27,10 @@ global.doc = skypager.mdxDoc('voice-synthesis', {
   cacheHelper: true,
 })
 
-skypager.speechSynthesis = speechSynthesis
-skypager.SpeechSynthesisUtterance = SpeechSynthesisUtterance
-speechSynthesis && speechSynthesis.getVoices()
+if (typeof speechSynthesis !== 'undefined') {
+  skypager.speechSynthesis = speechSynthesis
+  skypager.SpeechSynthesisUtterance = SpeechSynthesisUtterance
+  speechSynthesis && speechSynthesis.getVoices()
+}
 
 export default skypager

@@ -131,9 +131,9 @@ export default class SpeechSynthesis extends Feature {
         .last()
         .get('name')
         .value() || this.defaultVoice
-    )   
+    )
   }
-  
+
   get someRandomAmerican() {
     return (
       this.chain
