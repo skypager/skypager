@@ -1,11 +1,29 @@
-import React, { forwardRef, createRef, Component } from 'react'
+import React, { forwardRef, createRef, useState, Component } from 'react'
 import types from 'prop-types'
 import { Editor } from '@skypager/helpers-document'
-import { Segment, Header, Button } from 'semantic-ui-react'
+import { Form, Divider, Input, Segment, Header, Button } from 'semantic-ui-react'
 import { render, findDOMNode } from 'react-dom'
 import { MDXProvider } from '@mdx-js/react'
 
-const mdxComponents = (baseProps = {}) => ({
+function handleAction({ action, params = {}, props, doc }) {
+  return async (e) => {
+    const { block } = params
+
+    if (block === 'saySomething') {
+      const saySomethingBlock = doc.codeBlocks.find(block => block && block.meta && block.meta.match(/name=saySomething/))
+
+      eval(`${saySomethingBlock.value}; window.saySomething = say`)
+       
+      const phrase = doc.state.get(params.phrase)
+
+      if (phrase && phrase.length) {
+        window.saySomething(phrase)
+      }
+    }
+  }
+}
+
+const mdxComponents = (baseProps = {}, doc) => ({
   h1: props => <Header as="h1" dividing content={props.children} />,
   h2: props => <Header as="h2" content={props.children} />,
   h3: props => <Header as="h3" content={props.children} />,
@@ -14,11 +32,34 @@ const mdxComponents = (baseProps = {}) => ({
   h6: props => <Header as="h6" content={props.children} />,
 
   pre: props => <div {...props} />,
+
+  a: (props) => {
+    const { children, href = '' } = props
+
+    if (href.startsWith('doc://')) {
+      const { query = '', host: action } = doc.runtime.urlUtils.parseUrl(href)  
+      const params = query && query.length 
+        ? doc.runtime.urlUtils.parseQueryString(query) 
+        : {}
+
+      if (action === 'prompt') {
+        const [val, setVal] = useState('')
+        return <Input type="text" name={params.name} value={val} onChange={(e, { value }) => { doc.state.set(params.name, value); setVal(value) } }/>
+      } else {
+        return <Button onClick={handleAction({ action, params, props, doc })}>{children}</Button>
+      }
+    }
+
+    return <a {...props} />
+  },
+
   code: props => {
     return (
       <Editor
         {...props}
         {...baseProps.code || {}}
+        footer={footerComponent({ doc })}
+        getDocument={() => doc}
         showGutter
         showPrintMargin
         value={props.children}
@@ -37,8 +78,15 @@ export default class ActiveDocument extends Component {
     doc: null,
   }
 
-  componentDidMount() {
+  async componentDidMount() {
+    const { babel = true } = this.props
     const { runtime } = this.context
+
+    if (babel && !global.Babel) {
+      await runtime.feature('babel').enable()  
+      await runtime.feature('babel').whenReady()
+      console.log('Babel Loaded!')
+    }
 
     if (runtime.currentState.docsLoaded) {
       this.loadDocument()
@@ -89,7 +137,17 @@ export default class ActiveDocument extends Component {
 
     this.setState({ doc }, () => {
       this.docDisposer = this.state.doc.state.observe(({ name, newValue }) => {
-        this.setState({ docState: this.state.doc.currentState })
+        if (name === 'mdxProps') {
+          this.setState((current) => {
+            return {
+              ...current,
+              mdxProps: {
+                ...current.mdxProps,
+                ...newValue
+              }
+            }
+          })
+        }
       })
     })
   }
@@ -112,7 +170,6 @@ export default class ActiveDocument extends Component {
       code: {
         ...(stateMdxProps.code || {}),
         ...(docStateMdxProps.code || {}),
-        footer: footerComponent({ doc }),
         onLoad: (aceEditor, comp) => {
           const componentProps = comp.props
 
@@ -124,7 +181,7 @@ export default class ActiveDocument extends Component {
           }
         },
       },
-    })
+    }, doc)
 
     const { Component } = doc
 
@@ -137,11 +194,77 @@ export default class ActiveDocument extends Component {
 }
 
 function footerComponent({ doc = {} }) {
-  return function(editorComponent) {
-    const { name } = editorComponent.props
-    const { value } = editorComponent.state
 
+  class SpeechStatus extends Component {
+    state = {
+      enabled: false,
+      voiceOptions: [],
+      phrase: undefined,
+    }  
+
+    componentDidMount() {
+      this.disposer = this.props.doc.state.observe(({ name, newValue }) => {
+        if (name === 'speechEnabled') {
+          if (newValue) {
+          this.setState({ enabled: newValue })
+          }
+        }
+      })
+    }
+
+    componentWillUnmount() {
+      this.disposer()
+    }
+
+    handleToggle = () => {
+      const newValue = !this.props.doc.state.get('speechEnabled')
+
+      if (newValue === true) {
+        const voices = speechSynthesis.getVoices()
+        this.props.doc.runtime.feature('voice-synthesis').enable({
+          speechSynthesis,
+          SpeechSynthesisUtterance,
+          voices 
+        })
+          .then(() => {
+            this.props.doc.state.set('speechEnabled', true)
+            const voiceOptions = Array.from(this.props.doc.runtime.feature('voice-synthesis').speechSynthesis.getVoices())
+              .map((v) => ({ key: v.name, value: String(v.name).toLowerCase(), text: v.name }))
+
+            this.setState({ voiceOptions })
+          })
+      }
+
+    }
+
+    render() {
+      if (this.state.enabled) {
+        return (
+          <Form as={Segment}>
+            <Form.Input label='What do you want to say?' type="text" value={this.state.phrase || ''} onChange={(e, { value: phrase }) => this.setState({ phrase })} />
+            <Form.Dropdown selection value={this.state.voice || 'alex'} label='In Whose Voice?' options={this.state.voiceOptions} onChange={(e, { value }) => this.setState({ voice: value }) } />
+            <Form.Button content='Say it!' onClick={() => this.props.doc.runtime.synth.say(this.state.phrase, String(this.state.voice).toLowerCase())} />
+          </Form>
+        )
+      } else {
+        return <Button toggle content='Enable Speech Feature' onClick={this.handleToggle} />
+      }      
+    }
+  }
+
+  return function(editorComponent) {
+    const { thisContext = false, name, runnable = false } = editorComponent.props
+    const { value } = editorComponent.state
+  
     if (name === 'saySomething') {
+      return <Divider />
+    }
+
+    if (name === 'enableSpeech') {
+      return <SpeechStatus doc={doc} />
+    }
+
+    if (name === 'huh') {
       const runHandler = async () => {
         return doc.runtime.appClient
           .processSnippet({
@@ -150,11 +273,10 @@ function footerComponent({ doc = {} }) {
           .then(({ instructions }) => {
             const runner = doc.runtime.feature('vm-runner', {
               ...instructions,
-              sandbox: {
-                speechSynthesis,
-                SpeechSynthesisUtterance,
-              },
               filename: `${doc.name}.md`,
+              vmContext: doc.runtime.vm.createContext(
+                doc.runtime.lodash.omit(window, 'webkitStorageInfo', 'parent', 'Window')
+              )
             })
 
             doc.editors.set(editorComponent.props['data-line-number'], {
@@ -162,9 +284,7 @@ function footerComponent({ doc = {} }) {
               runner,
             })
 
-            return runner.run({ polyfill: false }).then(() => {
-              runner.vmContext.say('YO YO YOOOOO')
-            })
+            return runner.run({ polyfill: false, thisContext })
           })
       }
 
@@ -173,7 +293,7 @@ function footerComponent({ doc = {} }) {
           handler: runHandler,
         })
 
-      return (
+      return String(runnable) !== 'false' && (
         <Segment basic clearing>
           <Button basic floated="right" onClick={handleRun} content="Run" />
         </Segment>
