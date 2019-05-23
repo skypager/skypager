@@ -22,9 +22,11 @@ skypager.setState({ docsLoaded: true })
 global.runtime = skypager
 
 global.doc = skypager.mdxDoc('voice-synthesis', {
-  cacheHelper: true
+  cacheHelper: true,
 })
 
+skypager.speechSynthesis = speechSynthesis
+skypager.SpeechSynthesisUtterance = SpeechSynthesisUtterance
 speechSynthesis && speechSynthesis.getVoices()
 
 export default skypager

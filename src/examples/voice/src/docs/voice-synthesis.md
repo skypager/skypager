@@ -146,3 +146,33 @@ if (isVoiceSupported) {
   })
 }
 ```
+
+## Build a Vocal Progress Bar
+
+We can use the voice synthesis feature in our React applications.
+
+Here we're going to build a progress bar that talks to us.
+
+```javascript module=components/VocalProgressBar runnable=false name=vocalProgress
+function LoudProgress() {
+  const stages = [{
+    level: 50,
+    message: 'Half way there'
+  }, {
+    level: 75,
+    message: 'Almost Done'
+  }]
+
+  function handleLevelChange({ message, voice }) {
+    runtime.synth.say(message, voice)
+  }
+
+  return (
+    <VocalProgressBar 
+      stages={stages} 
+      handleLevelChange={handleLevelChange}
+      voice="Alaex"
+    />
+  )  
+} 
+```
