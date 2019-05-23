@@ -6,29 +6,28 @@ export default class SpeechSynthesis extends Feature {
   static isCacheable = true
 
   initialState = {
-    voicesAvailable: false,  
-    activated: false
+    voicesAvailable: false,
+    activated: false,
   }
 
   featureWasEnabled(settings = {}) {
     if (settings.speechSynthesis) {
-      this.speechSynthesis = settings.speechSynthesis  
+      this.speechSynthesis = settings.speechSynthesis
     }
 
     if (settings.SpeechSynthesisUtterance) {
-      this.SpeechSynthesisUtterance = settings.SpeechSynthesisUtterance  
-    }   
+      this.SpeechSynthesisUtterance = settings.SpeechSynthesisUtterance
+    }
 
     this.state.set('activated', settings.active !== false)
 
     this.speechSynthesis.onvoiceschanged = () => {
       try {
         this.loadVoices()
-      } catch(error) {
-      }
+      } catch (error) {}
     }
   }
-  
+
   get isActivated() {
     return !!(this.runtime.featureIsEnabled('voice-synthesis') && this.state.get('activated'))
   }
@@ -73,7 +72,7 @@ export default class SpeechSynthesis extends Feature {
       speechSynthesis = this.runtime.speechSynthesis || window.speechSynthesis,
       SpeechSynthesisUtterance = this.runtime.SpeechSynthesisUtterance ||
         window.SpeechSynthesisUtterance,
-    } = this.options 
+    } = this.options
 
     if (speechSynthesis) {
       this.speechSynthesis = speechSynthesis
@@ -104,7 +103,7 @@ export default class SpeechSynthesis extends Feature {
 
     const fetched = Array.from(this.speechSynthesis.getVoices())
     console.log('fetched', fetched)
-  
+
     if (fetched[0]) {
       this.state.set('voices', fetched)
       this.state.set('voicesAvailable', true)
@@ -123,15 +122,28 @@ export default class SpeechSynthesis extends Feature {
       .value()
   }
 
+  get someRando() {
+    return (
+      this.chain
+        .get('voices')
+        .values()
+        .shuffle()
+        .last()
+        .get('name')
+        .value() || this.defaultVoice
+    )   
+  }
+  
   get someRandomAmerican() {
-    return this
-      .chain
-      .get('americanVoices')  
-      .values()
-      .shuffle()
-      .last()
-      .get('name')
-      .value() || this.defaultVoice
+    return (
+      this.chain
+        .get('americanVoices')
+        .values()
+        .shuffle()
+        .last()
+        .get('name')
+        .value() || this.defaultVoice
+    )
   }
 
   /**
@@ -143,7 +155,7 @@ export default class SpeechSynthesis extends Feature {
   }
 
   activate() {
-    this.state.set('activated', true)  
+    this.state.set('activated', true)
     return this
   }
 

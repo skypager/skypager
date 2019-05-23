@@ -307,9 +307,10 @@ function footerComponent({ doc = {} }) {
     if (name === 'vocalProgress') {
       return (
         <Segment>
-          <VocalProgressBar 
-            doc={doc} 
-            handleLevelChange={({ message, voice }) => doc.runtime.synth.say(message, voice)} />
+          <VocalProgressBar
+            doc={doc}
+            handleLevelChange={({ message, voice }) => doc.runtime.synth.say(message, voice)}
+          />
         </Segment>
       )
     }
