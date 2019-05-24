@@ -23,15 +23,16 @@
     "@skypager/cli": "^1.1.1",
     "@skypager/helpers-server": "^1.1.1",
     "@skypager/helpers-sheet": "^1.1.1",
-    "@skypager/node": "^1.1.1",
-    "@skypager/web": "^1.1.1",
+    "@skypager/node": "^1.1.1"
+  },
+  "devDependencies": {
     "@skypager/webpack": "^1.1.1",
     "prop-types": "^15.6.2",
-    "react": "^16.5.2",
-    "react-dom": "^16.5.2",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
     "react-hot-loader": "^4.3.11",
     "react-router-dom": "^4.3.1",
-    "semantic-ui-react": "^0.82.5"
+    "semantic-ui-react": "^0.86.0"
   },
   "skypager": {
     "buildFolders": [

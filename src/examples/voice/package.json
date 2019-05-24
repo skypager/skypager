@@ -24,7 +24,9 @@
   "license": "MIT",
   "dependencies": {
     "@skypager/helpers-document": "^1.1.1",
-    "@skypager/node": "^1.1.1",
+    "@skypager/node": "^1.1.1"
+  },
+  "devDependenies": {
     "@skypager/webpack": "^1.1.1"
   },
   "repository": {
