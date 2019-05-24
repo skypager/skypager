@@ -4,7 +4,7 @@ import { TextArea, Segment, Message, Button, Header } from 'semantic-ui-react'
 
 export default class Dictation extends Component {
   static contextTypes = {
-    runtime: types.object
+    runtime: types.object,
   }
 
   state = {
@@ -12,7 +12,7 @@ export default class Dictation extends Component {
     enabled: false,
     supported: undefined,
     status: 'Not Listening.',
-    transcripts: {}
+    transcripts: {},
   }
 
   componentDidMount() {
@@ -26,12 +26,12 @@ export default class Dictation extends Component {
     })
 
     this.disposer = recognition.transcripts.observe(({ name, newValue }) => {
-      this.setState((current) => ({
+      this.setState(current => ({
         ...current,
         transcripts: {
           ...current.transcripts,
-          [name]: newValue
-        }
+          [name]: newValue,
+        },
       }))
     })
   }
@@ -46,7 +46,7 @@ export default class Dictation extends Component {
     runtime.feature('speech-recognition').enable()
 
     this.setState({
-      enabled: true
+      enabled: true,
     })
   }
 
@@ -57,15 +57,14 @@ export default class Dictation extends Component {
 
     if (speech.isListening) {
       speech.stop()
-    } 
+    }
 
-    
-    if(isFunction(this.abortListening)) {
+    if (isFunction(this.abortListening)) {
       this.abortListening()
-      delete(this.abortListening)
+      delete this.abortListening
       console.log('stopped listening')
       this.setState({ listening: false })
-      return  
+      return
     }
 
     if (speech) {
@@ -73,11 +72,11 @@ export default class Dictation extends Component {
       this.abortListening = speech.listen({
         transcriptId: uniqueId('demo'),
         onEvent: () => this.setState({ listening: true }),
-        onComplete: (transcript) => {
+        onComplete: transcript => {
           if (transcript && transcript.length) {
             this.setState({ transcript })
           }
-        }
+        },
       })
     }
   }
@@ -93,35 +92,45 @@ export default class Dictation extends Component {
     } else if (supported === false) {
       return (
         <Segment>
-          <Message error content='Voice Recognition is not supported by this browser.' />  
+          <Message error content="Voice Recognition is not supported by this browser." />
         </Segment>
       )
     } else if (!enabled) {
       return (
-        <Button color="purple" size="huge" content="Enable Speech Recognition" onClick={this.handleEnable} />
+        <Button
+          color="purple"
+          size="huge"
+          content="Enable Speech Recognition"
+          onClick={this.handleEnable}
+        />
       )
     } else {
       return (
         <Segment basic>
           <Segment clearing>
-            <Header 
-              subheader={`Current status: ${status}`} 
-              icon="microphone" 
-              floated="left" 
-              as="h2" 
-              content="Dictation Machine" 
-            />   
-            <Button 
-              color={listening ? 'red' : 'green'} 
-              content={clickMessage} 
-              floated="right" 
-              onClick={this.handleToggle} 
+            <Header
+              subheader={`Current status: ${status}`}
+              icon="microphone"
+              floated="left"
+              as="h2"
+              content="Dictation Machine"
+            />
+            <Button
+              color={listening ? 'red' : 'green'}
+              content={clickMessage}
+              floated="right"
+              onClick={this.handleToggle}
             />
           </Segment>
-          {availableTranscripts.filter(id => transcripts[id] && transcripts[id].length).map((id) => <Message info key={id}>{transcripts[id]}</Message>)}
+          {availableTranscripts
+            .filter(id => transcripts[id] && transcripts[id].length)
+            .map(id => (
+              <Message info key={id}>
+                {transcripts[id]}
+              </Message>
+            ))}
         </Segment>
       )
     }
-
   }
-} 
+}

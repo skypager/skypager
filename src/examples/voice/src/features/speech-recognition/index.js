@@ -69,9 +69,9 @@ export default class SpeechRecognition extends Feature {
   stop() {
     try {
       this.recognition.abort()
-    } catch(error) {
+    } catch (error) {
       console.log('error stopping', error)
-    } 
+    }
 
     return this
   }
