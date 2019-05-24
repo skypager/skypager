@@ -1,4 +1,5 @@
 import VocalProgressBar from '../components/VocalProgressBar'
+import Dictation from '../features/speech-recognition/Dictation'
 
 # Skypager Voice Runtime
 
@@ -20,9 +21,14 @@ export function attach(runtime) {
 
 and re-use it in any application that needs to talk or be heard. 
 
-This tutorial will cover how to build a component like this one, with React
+This tutorial will cover how to build a component like this one, with React, which uses the speech synthesis APIs
 
 <VocalProgressBar progresInterval={450} />
+
+And because anyone or anything who only talks and never listens gets old after a while, this tutorial will cover how to develop
+a component like this one, which can transcribe what you say.
+
+<Dictation />
 
 ## Table of Contents
 
