@@ -1,12 +1,6 @@
-// import Babel from './babel/babel'
-import Mdx from './mdx/mdx'
-import Skypage from './components/Skypage'
-import EditorComponent from './components/LazyEditor'
+import EditorComponent from './components/BundledEditor'
 import RunnableComponent from './components/Runnable'
 import RenderableComponent from './components/Renderable'
-import editor from './features/editor'
-import VmRunner from './features/vm-runner'
-import bundle from './features/bundle'
 
 export function Runnable(props = {}) {
   return <RunnableComponent Editor={EditorComponent} {...props} />
@@ -17,25 +11,19 @@ export function Renderable(props = {}) {
 }
 
 export function Editor(props = {}) {
-  if (props.runnable) {
+  const renderable = String(props.renderable) === 'true'
+  const editable = String(props.editable) === 'true'
+  const runnable = String(props.runnable) === 'true'
+
+  if (runnable) {
     return <Runnable {...props} />
-  } else if (props.renderable) {
+  } else if (renderable) {
     return <Renderable {...props} />
-  } else if (props.editable) {
+  } else if (editable) {
     return <EditorComponent {...props} />
   } else {
     return <EditorComponent {...props} readOnly />
   }
 }
 
-export { Skypage }
-
-export function attach(runtime) {
-  runtime.features.add({
-    'vm-runner': VmRunner,
-    editor,
-    bundle,
-  })
-
-  Mdx.attach(runtime)
-}
+export default Editor

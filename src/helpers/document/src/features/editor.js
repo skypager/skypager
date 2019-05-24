@@ -20,6 +20,22 @@ export default class Editor extends Feature {
     return assetLoader
   }
 
+  syncWithDocument(editorComponent, aceEditor, documentHelper) {
+    const { get } = this.lodash
+    this.makeDocumentEditable(documentHelper)
+
+    const { props } = editorComponent
+    const lineNumber = get(props, 'data-line-number')
+
+    if (lineNumber) {
+      documentHelper.editors.set(lineNumber, {
+        ...(documentHelper.editors.get(lineNumber) || {}),
+        editor: aceEditor,
+        component: editorComponent,
+      })
+    }
+  }
+
   async loadEditorDependencies() {
     const { assetLoader } = this
 
@@ -58,5 +74,44 @@ export default class Editor extends Feature {
   async loadBraceTheme(theme) {
     await this.assetLoader.script(`https://unpkg.com/brace@0.11.1/theme/${theme}`)
     return theme
+  }
+
+  async enableBabel(options = {}) {
+    const babel = this.runtime.feature('babel', options)
+    await babel.enable(options)
+    await babel.whenReady()
+
+    return (this.babel = babel)
+  }
+
+  makeDocumentEditable(documentHelper) {
+    const { get } = this.lodash
+    const { runtime } = this
+
+    if (documentHelper.blockContent) {
+      return documentHelper
+    }
+
+    console.log('Preparing Document For Editor Sync', documentHelper)
+
+    const codeBlocksContent = documentHelper.codeBlocks.reduce(
+      (memo, codeBlock) => ({
+        ...memo,
+        [get(codeBlock, 'position.start.line')]: get(codeBlock, 'value'),
+      }),
+      {}
+    )
+
+    runtime.makeObservable(
+      {
+        components: ['shallowMap', {}],
+        mdxProps: ['shallowMap', {}],
+        editors: ['shallowMap', {}],
+        blockContent: ['shallowMap', codeBlocksContent],
+      },
+      documentHelper
+    )
+
+    return documentHelper
   }
 }

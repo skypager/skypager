@@ -15,11 +15,21 @@ import nodeToString from 'mdast-util-to-string'
  * @extends {Helper}
  */
 export class Mdx extends Helper {
-  // every call to runtime.page(pageId) will produce a new instance of a page
-  static isCacheable = false
-
-  // each instance of a page has observable state
+  static isCacheable = true
   static isObservable = true
+
+  initialize() {
+    this.actions = this.createCascadingRegistry()
+  }
+
+  createCascadingRegistry(components = {}) {
+    const { partialRight } = this.lodash
+
+    return Helper.createContextRegistry('actions', {
+      context: Helper.createMockContext(components),
+      wrapper: mod => partialRight(mod.bind(this), { ...this.context, doc: this }),
+    })
+  }
 
   get initialState() {
     return {
@@ -143,7 +153,21 @@ export class Mdx extends Helper {
   }
 
   get codeBlocks() {
-    return this.body.filter(({ type }) => type === 'code')
+    const metaToProps = ({ meta = '' }) =>
+      String(meta)
+        .split(' ')
+        .reduce((memo, pair) => {
+          const [name, value] = pair.split('=').map(v => v.trim())
+          memo[name] = value
+          return memo
+        }, {})
+
+    return this.body
+      .filter(({ type }) => type === 'code')
+      .map(block => ({
+        ...metaToProps(block),
+        ...block,
+      }))
   }
 
   get javascriptBlocks() {
@@ -177,6 +201,59 @@ export class Mdx extends Helper {
     return options.stringify ? this.stringify(headingNode) : headingNode
   }
 
+  action(actionId) {
+    try {
+      return this.actions.lookup(actionId)
+    } catch (error) {
+      return this.runtime.mdxDocs.actions.lookup(actionId)
+    }
+  }
+
+  renderLinkTo(docLink = {}) {
+    const actionId = docLink.matched
+    const action = this.action(actionId)
+
+    const output = action(
+      {
+        ...docLink.params,
+        props: docLink.props || {},
+        actionType: 'link',
+      },
+      {
+        ...this.context,
+        doc: this,
+      }
+    )
+
+    return output
+  }
+
+  resolveDocLink(url) {
+    const { runtime } = this
+    const { parseUrl, parseQueryString } = runtime.urlUtils
+    const { isEmpty, mapKeys } = runtime.lodash
+
+    const parsed = parseUrl(url)
+
+    const params = mapKeys(isEmpty(parsed.query) ? {} : parseQueryString(parsed.query), (v, k) =>
+      k.replace('[]', '')
+    )
+
+    const request = [parsed.host, parsed.path]
+      .filter(v => !isEmpty(v))
+      .join('/')
+      .replace(/\?.*$/, '')
+      .replace(/\/\//, '/')
+
+    const matched = this.actions.checkKey(request) || this.runtime.mdxDocs.actions.checkKey(request)
+
+    return {
+      ...parsed,
+      matched,
+      request,
+      params,
+    }
+  }
   /**
    * Returns the React component that was produced by the mdx webpack loader
    *
@@ -200,6 +277,9 @@ export class Mdx extends Helper {
     })
 
     runtime.mdxDocs.getter('runtime', () => runtime)
+    runtime.mdxDocs.actions = Helper.createContextRegistry('actions', {
+      context: Helper.createMockContext(options.actions || {}),
+    })
   }
 }
 

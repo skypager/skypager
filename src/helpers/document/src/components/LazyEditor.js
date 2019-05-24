@@ -1,6 +1,5 @@
 import React, { Component } from 'react'
 import types from 'prop-types'
-import { findDOMNode } from 'react-dom'
 
 export default class Editor extends Component {
   static contextTypes = {
@@ -11,15 +10,19 @@ export default class Editor extends Component {
     id: types.string.isRequired,
     mode: types.oneOf(['html', 'jsx', 'markdown', 'css', 'javascript', 'sh']),
     value: types.string.isRequired,
+    innerProps: types.object,
+    wrapperProps: types.object,
+    headerProps: types.object,
+    footerProps: types.object,
+  }
+
+  static defaultProps = {
+    mode: 'jsx',
   }
 
   state = {
     loading: true,
     value: this.props.value,
-  }
-
-  static defaultProps = {
-    mode: 'jsx',
   }
 
   async componentDidMount() {
@@ -36,18 +39,6 @@ export default class Editor extends Component {
     this.ReactAce = this.AceEditor = ReactAce
 
     this.setState({ loading: false })
-
-    const containerNode = findDOMNode(this).closest(
-      `${this.props.parentTag || 'div'}[data-line-number]`
-    )
-
-    if (containerNode && containerNode.dataset) {
-      const lineNumber = containerNode.dataset.lineNumber
-      console.log('Setting Editor CodeBlockID', `codeBlock${lineNumber}`)
-      this.setState({
-        codeBlockId: `codeBlock${lineNumber}`,
-      })
-    }
   }
 
   handleRunResult = async (result = {}) => {
@@ -100,28 +91,37 @@ export default class Editor extends Component {
   }
 
   render() {
-    const { header, footer, results } = this.props
-    const { loading, value } = this.state
+    const {
+      header = () => null,
+      footer = () => null,
+      renderLoader = () => null,
+      wrapperProps,
+      headerProps,
+      footerProps,
+      innerProps,
+    } = this.props
 
-    if (loading) {
-      return this.props.renderLoader ? this.props.renderLoader() : <div />
-    }
+    const { loading, value } = this.state
 
     const { AceEditor } = this
 
-    console.log('Rendering Editor', this.props)
+    if (loading) {
+      return renderLoader()
+    }
 
     return (
-      <div>
-        {typeof header === 'function' && header(this)}
-        <CodeEditor
-          {...this.props}
-          AceEditor={AceEditor}
-          onChange={this.handleChange}
-          onLoad={this.handleLoad}
-          value={value}
-        />
-        {typeof footer === 'function' && footer(this)}
+      <div className="sk-editor-wrapper" {...wrapperProps}>
+        <div className="sk-editor-header" {...headerProps} children={header(this)} />
+        <div className="sk-inner-wrapper" {...innerProps}>
+          <CodeEditor
+            {...this.props}
+            AceEditor={AceEditor}
+            onChange={this.handleChange}
+            onLoad={this.handleLoad}
+            value={value}
+          />
+        </div>
+        <div className="sk-editor-footer" {...footerProps} children={footer(this)} />
       </div>
     )
   }
