@@ -21,6 +21,8 @@ import { Feature } from '../feature'
  *
  */
 export default class VmFeature extends Feature {
+  static shortcut = 'vm'
+
   /**
    * When the vm is enabled, these methods get mixed into the runtime itself
    */

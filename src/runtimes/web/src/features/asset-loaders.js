@@ -1,6 +1,4 @@
-import runtime from '@skypager/runtime'
-
-const { Feature } = runtime
+import { Feature } from '@skypager/runtime'
 
 /**
  * @class AssetLoader
@@ -115,15 +113,11 @@ export default class AssetLoader extends Feature {
           var parent = 'body'
           var attr = 'src'
 
-          window.lastElement = element
-
           // Important success and error for the promise
           element.onload = function() {
-            console.log('loading', url)
             resolve(url)
           }
           element.onerror = function(...args) {
-            console.log('error', url, ...args)
             reject(url)
           }
 
@@ -149,9 +143,8 @@ export default class AssetLoader extends Feature {
 
           // Inject into document to kick off loading
           element[attr] = url
-          console.log('appending', element, document[parent])
+
           const result = document[parent].appendChild(element)
-          console.log(result)
         })
       }
     }
