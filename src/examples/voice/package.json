@@ -9,7 +9,7 @@
   "scripts": {
     "build": "skypager build",
     "postbuild": "skypager hash-build",
-    "deploy": "cd lib && now --static && now alias",
+    "deploy": "cp deploy.json lib/package.json && cd lib && now --npm && now alias",
     "start": "NODE_ENV=production NO_CLEAR=true node ./start.js --log-level debug --cors",
     "dev": "NODE_ENV=development NO_CLEAR=true node ./start.js --hot --log-level debug --cors",
     "test": "exit 0",

@@ -24,7 +24,7 @@ export default class SpeechRecognition extends Feature {
   }
 
   get isActivated() {
-    return !!(this.runtime.featureIsEnabled('voice-recognition') && this.state.get('activated'))
+    return !!(this.runtime.isFeatureEnabled('speech-recognition') && this.state.get('activated'))
   }
 
   get isSupported() {
@@ -66,7 +66,15 @@ export default class SpeechRecognition extends Feature {
     return this._recognition || (this._recognition = new this.SpeechRecognition())
   }
 
-  stop() {}
+  stop() {
+    try {
+      this.recognition.abort()
+    } catch(error) {
+      console.log('error stopping', error)
+    } 
+
+    return this
+  }
 
   get isListening() {
     return !!this.state.get('listening')
@@ -139,6 +147,9 @@ export default class SpeechRecognition extends Feature {
 
     recognition.start()
 
-    return () => recognition.abort()
+    return () => {
+      this.state.set('listening', false)
+      return recognition.abort()
+    }
   }
 }
