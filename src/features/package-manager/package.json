@@ -38,7 +38,7 @@
     "pacote": "^9.5.0",
     "tar": "^4.4.8"
   },
-  "gitHead": "66f2da16f4d6ebc315f1d244ba314647a8630011",
+  "gitHead": "9392473e420c7a46eb0be31bc7739ca16c8eb130",
   "keywords": [],
   "contributors": [],
   "module": "lib/es/index.js",
