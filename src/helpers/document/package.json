@@ -10,7 +10,7 @@
   "react-native": "lib/index.js",
   "scripts": {
     "prebuild": "rimraf lib",
-    "build": "yarn build:node && yarn build:es && yarn build:web",
+    "build": "yarn build:node && yarn build:es && skypager run-all build:web build:editor",
     "build:node": "cross-env BUILD_ENV=build babel --comments --source-maps -d lib src",
     "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src",
     "build:web": "skypager build --app-only --no-clean --include-unminified",
