@@ -1,6 +1,6 @@
 {
   "name": "@skypager/cli",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "the skypager CLI",
   "author": "Jon Soeder <jon@chicago.com>",
   "homepage": "https://skypager-cli.skypager.io",
@@ -22,9 +22,9 @@
   "dependencies": {
     "@babel/register": "^7.2.0",
     "@babel/runtime": "^7.3.1",
-    "@skypager/helpers-repl": "^1.0.1",
-    "@skypager/helpers-server": "^1.0.1",
-    "@skypager/node": "^1.0.1",
+    "@skypager/helpers-repl": "^1.1.0",
+    "@skypager/helpers-server": "^1.1.0",
+    "@skypager/node": "^1.1.0",
     "chalk": "^2.4.2",
     "esm": "^3.0.84",
     "ink": "^2.0.0-17",
