@@ -46,12 +46,15 @@
         "@skypager/runtime": "skypager",
         "@skypager/web": "skypager",
         "prop-types": "PropTypes",
-        "@skypager/helpers-document": "SkypagerHelpersDocument"
+        "@skypager/helpers-document": "SkypagerHelpersDocument",
+        "@skypager/helpers-document/lib/skypager-document-editor": "SkypagerEditor"
       },
       "copy": {
         "@skypager/helpers-document": [
           "lib/skypager-helpers-document.js",
-          "lib/skypager-helpers-document.min.js"
+          "lib/skypager-helpers-document.min.js",
+          "lib/skypager-document-editor.js",
+          "lib/skypager-document-editor.min.js"
         ],
         "@skypager/web": [
           "lib/skypager-runtimes-web.min.js",

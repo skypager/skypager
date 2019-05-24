@@ -6,3 +6,7 @@
 .active-document-wrapper p {
   font-size: 1.2em;
 }
+
+.active-document-wrapper li {
+  font-size: 1.1em;
+}

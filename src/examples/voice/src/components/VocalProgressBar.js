@@ -20,22 +20,18 @@ export default class VocalProgressBar extends Component {
     stages: [
       {
         level: 0,
-        message: 'YES!',
-      },
-      {
-        level: 5,
-        message: 'WOAH. NOW WE STARTING',
+        message: 'Yes.  Get ready to burn baby.  Ready....to....burn.',
       },
       {
         level: 20,
-        message: 'NICE! Twenty percent. You movin.',
+        message: 'Nice.... baby. Twenty percent. We movin. We movin real good',
       },
       {
         level: 30,
         message: 'Dont slow down on me',
       },
       {
-        level: 35,
+        level: 40,
         message: 'Already bro? you tired?',
       },
       {
@@ -43,24 +39,16 @@ export default class VocalProgressBar extends Component {
         message: 'Thats what im talkin bout baby. Half way there',
       },
       {
-        level: 60,
-        message: 'Yeah baby.',
-      },
-      {
         level: 65,
-        message: 'OH MY GAWD',
+        message: 'oh......my......god. Yeah Son.',
       },
       {
-        level: 80,
-        message: 'Yeah son.',
-      },
-      {
-        level: 90,
-        message: 'Who are YOU DAWG? Who THE FUCK ARE YOU',
+        level: 85,
+        message: 'Who are you dawg? Who the fuck are you?',
       },
       {
         level: 100,
-        message: 'Wow son. Wow. BEAST. BEAST. A.F.',
+        message: 'Wow son. Wow. Beast. Beast mode............ as..... Fuck. ',
       },
     ],
   }
@@ -90,7 +78,7 @@ export default class VocalProgressBar extends Component {
       this.setState(
         current => ({
           ...current,
-          voice: synth.someRando,
+          voice: synth.randomEnglish.name.toLowerCase(),
           percent: current.percent + (Math.random() * this.props.tick || 1) + 0.1,
         }),
         () => {
@@ -105,15 +93,13 @@ export default class VocalProgressBar extends Component {
   }
 
   handleMessaging = () => {
+    const { runtime } = this.context
+
     const sayNextThing = ({ stages = [], voice }) => {
       const currentStage = stages.shift()
       const { message } = currentStage
 
-      this.props.handleLevelChange &&
-        this.props.handleLevelChange({
-          ...currentStage,
-          voice,
-        })
+      runtime.synth.say(message, voice)
 
       return {
         stages,
@@ -137,19 +123,7 @@ export default class VocalProgressBar extends Component {
     })
   }
 
-  componentDidMount() {
-    const { doc } = this.props
-
-    this.disposer = doc.state.observe(({ name, newValue }) => {
-      if (name === 'progressStarted' && newValue) {
-        this.setState({ started: true })
-        this.handleStart()
-      }
-    })
-  }
-
   componentWillUnmount() {
-    this.disposer()
     this._interval && clearInterval(this._interval)
   }
 
@@ -163,7 +137,9 @@ export default class VocalProgressBar extends Component {
           <Button
             huge
             content="Lets start!"
-            onClick={() => this.props.doc.state.set('progressStarted', true)}
+            onClick={() => {
+              this.setState({ started: true }, () => this.handleStart())
+            }}
           />
         )}
         {started && <Progress percent={this.state.percent} indicating />}

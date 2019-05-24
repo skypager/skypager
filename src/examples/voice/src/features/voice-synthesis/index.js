@@ -122,6 +122,15 @@ export default class SpeechSynthesis extends Feature {
       .value()
   }
 
+  get randomEnglish() {
+    return this.chain
+      .get('voices')
+      .filter(({ lang }) => lang.startsWith('en'))
+      .shuffle()
+      .first()
+      .value()
+  }
+
   get someRando() {
     return (
       this.chain

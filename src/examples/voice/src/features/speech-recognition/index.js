@@ -10,12 +10,12 @@ export default class SpeechRecognition extends Feature {
     logLevel: 'silent',
     listening: false,
     resultCount: 0,
-    errorCount: 0
+    errorCount: 0,
   }
 
   observables() {
     return {
-      transcripts: ["shallowMap", []]
+      transcripts: ['shallowMap', []],
     }
   }
 
@@ -28,7 +28,11 @@ export default class SpeechRecognition extends Feature {
   }
 
   get isSupported() {
-    return !!(this.runtime.isBrowser && this.SpeechRecognition || window.SpeechRecognition || window.webkitSpeechRecognition)
+    return !!(
+      (this.runtime.isBrowser && this.SpeechRecognition) ||
+      window.SpeechRecognition ||
+      window.webkitSpeechRecognition
+    )
   }
 
   featureWasEnabled(settings = {}) {
@@ -49,7 +53,8 @@ export default class SpeechRecognition extends Feature {
   initialize() {
     const {
       SpeechRecognition = this.runtime.SpeechRecognition ||
-        window.SpeechRecognition || window.webkitSpeechRecognition,
+        window.SpeechRecognition ||
+        window.webkitSpeechRecognition,
     } = this.options
 
     if (SpeechRecognition) {
@@ -61,9 +66,7 @@ export default class SpeechRecognition extends Feature {
     return this._recognition || (this._recognition = new this.SpeechRecognition())
   }
 
-  stop() {
-
-  }
+  stop() {}
 
   get isListening() {
     return !!this.state.get('listening')
@@ -72,13 +75,13 @@ export default class SpeechRecognition extends Feature {
   listen(options = {}) {
     const { recognition } = this
 
-    const { 
-      onComplete = (transcript) => console.log({ transcript }), 
-      onEvent, 
-      continuous = true , 
-      maxAlternatives = 10, 
-      stream = true, 
-      interimResults = stream
+    const {
+      onComplete = transcript => console.log({ transcript }),
+      onEvent,
+      continuous = true,
+      maxAlternatives = 10,
+      stream = true,
+      interimResults = stream,
     } = options
 
     let finalTranscript = ''
@@ -94,13 +97,13 @@ export default class SpeechRecognition extends Feature {
     }
 
     recognition.onerror = () => {
-      this.state.set('errorCount', this.state.get('errorCount') + 1)  
+      this.state.set('errorCount', this.state.get('errorCount') + 1)
     }
 
-    recognition.onresult = (event) => {
+    recognition.onresult = event => {
       this.emit('result', event)
       this.state.set('resultCount', this.state.get('resultCount') + 1)
-      
+
       let interimTranscript = ''
 
       onEvent && onEvent(event, { speech: this, interimTranscript })
@@ -119,24 +122,23 @@ export default class SpeechRecognition extends Feature {
             this.transcripts.set(options.transcriptId, interimTranscript)
           }
         }
-      }      
+      }
 
       if (options.transcriptId) {
         onComplete && onComplete(finalTranscript)
         this.transcripts.set(options.transcriptId, finalTranscript)
       }
-    }  
+    }
 
     if (continuous) {
       recognition.continuous = true
     }
 
     recognition.maxAlternatives = maxAlternatives
-    recognition.interimResults = interimResults  
+    recognition.interimResults = interimResults
 
     recognition.start()
 
-    return () =>
-      recognition.abort() 
+    return () => recognition.abort()
   }
 }

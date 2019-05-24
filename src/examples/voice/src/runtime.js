@@ -1,36 +1,34 @@
-import skypager from '@skypager/web'
+import runtime from '@skypager/web'
 import * as DocumentHelper from '@skypager/helpers-document'
 import * as AppClient from './client'
 import * as moduleFactory from './module-factory'
-import VoiceSynthesis from './features/synth'
-import SpeechRecognition from './features/speech'
+import VoiceSynthesis from './features/voice-synthesis'
+import SpeechRecognition from './features/speech-recognition'
+import * as documentActions from './actions'
 
-skypager
+runtime
   .use(DocumentHelper)
   .use('editor')
   .use(moduleFactory)
+  .use(documentActions)
 
-skypager.features.register('voice-synthesis', () => VoiceSynthesis)
-skypager.features.register('speech-recognition', () => SpeechRecognition)
+runtime.features.register('voice-synthesis', () => VoiceSynthesis)
+runtime.features.register('speech-recognition', () => SpeechRecognition)
 
-skypager.clients.register('app', () => AppClient)
+runtime.clients.register('app', () => AppClient)
 
-skypager.appClient = skypager.client('app')
+runtime.appClient = runtime.client('app')
 
-skypager.mdxDocs.add(require.context('./docs', true, /\.md$/))
+runtime.mdxDocs.add(require.context('.', true, /\.md$/))
 
-skypager.setState({ docsLoaded: true })
+runtime.setState({ docsLoaded: true })
 
-global.runtime = skypager
-
-global.doc = skypager.mdxDoc('voice-synthesis', {
-  cacheHelper: true,
-})
+global.runtime = runtime
 
 if (typeof speechSynthesis !== 'undefined') {
-  skypager.speechSynthesis = speechSynthesis
-  skypager.SpeechSynthesisUtterance = SpeechSynthesisUtterance
+  runtime.speechSynthesis = speechSynthesis
+  runtime.SpeechSynthesisUtterance = SpeechSynthesisUtterance
   speechSynthesis && speechSynthesis.getVoices()
 }
 
-export default skypager
+export default runtime
