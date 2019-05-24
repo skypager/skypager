@@ -16,7 +16,7 @@
     "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src",
     "postbuild:es": "yarn docs:api",
     "postbuild": "skypager hash-build",
-    "docs:api": "skypager generate-api-docs",
+    "docs:api": "skypager generate-api-docs --no-verify",
     "test": "skypager test --mocha --timeout 30000"
   },
   "skypager": {

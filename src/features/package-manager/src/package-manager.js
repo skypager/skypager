@@ -335,7 +335,7 @@ export default class PackageManager extends Feature {
       latestMap,
     } = this
 
-    return pickBy(versionMap, (v, k) => semver.gt(v, latestMap[k]))
+    return pickBy(versionMap, (v, k) => v && latestMap[k] && semver.gt(v, latestMap[k]))
   }
 
   /**
@@ -370,7 +370,7 @@ export default class PackageManager extends Feature {
       latestMap,
     } = this
 
-    return pickBy(versionMap, (v, k) => semver.lt(v, latestMap[k]))
+    return pickBy(versionMap, (v, k) => v && latestMap[k] && semver.lt(v, latestMap[k]))
   }
 
   get outdated() {
