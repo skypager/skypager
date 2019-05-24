@@ -1,6 +1,6 @@
 {
   "name": "@skypager/webpack",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "skypager": {
     "projectType": "helper",
     "providesScripts": [
@@ -26,7 +26,7 @@
     "@babel/preset-react": "^7.0.0",
     "@babel/register": "^7.2.0",
     "@babel/runtime": "^7.2.0",
-    "@skypager/helpers-mdx": "^1.1.0",
+    "@skypager/helpers-mdx": "^1.1.1",
     "@svgr/webpack": "4.1.0",
     "babel-eslint": "9.0.0",
     "babel-loader": "8.0.5",
