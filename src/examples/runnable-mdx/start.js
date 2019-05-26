@@ -2,6 +2,7 @@ const runtime = require('@skypager/node').use(require('@skypager/helpers-documen
 const bodyParser = require('body-parser')
 const mdx = require('./endpoints/mdx')
 const babel = require('./endpoints/babel')
+const retext = require('./endpoints/retext')
 
 const AppServer = {
   cors: true,
@@ -25,6 +26,7 @@ runtime.servers.add({
 runtime.endpoints.add({
   babel,
   mdx,
+  retext
 })
 
 async function main() {
@@ -48,7 +50,7 @@ async function main() {
     })
   }
 
-  const port = await runtime.networking.findOpenPort(3000)
+  const port = await runtime.networking.findOpenPort(runtime.argv.port || 3000)
 
   if (runtime.isDevelopment) {
     copyPublicFolder(runtime.resolve('public'), runtime.resolve('lib'))
@@ -63,7 +65,7 @@ async function main() {
         root: runtime.resolve('lib'),
       },
     }),
-    endpoints: ['babel', 'mdx'],
+    endpoints: ['babel', 'mdx', 'retext'],
     showBanner: false,
   })
 

@@ -3,7 +3,7 @@ module.exports = function(app) {
   const mdxParser = require('@skypager/helpers-mdx/parser')
 
   app.post('/mdx', async (req, res) => {
-    const { content } = req.body
+    const { content, filename = '/docs/main.md' } = req.body
 
     if (!content || !content.length) {
       res.status(400).json({
@@ -13,7 +13,9 @@ module.exports = function(app) {
     }
 
     try {
-      const parsed = await mdxParser(content)
+      const parsed = await mdxParser(content, {
+        filePath: filename
+      })
       res.status(200).json({
         content,
         parsed,

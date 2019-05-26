@@ -11,7 +11,7 @@
     "postbuild": "skypager hash-build",
     "start": "NODE_ENV=production NO_CLEAR=true node ./start.js --log-level debug --cors",
     "dev": "NODE_ENV=development NO_CLEAR=true node ./start.js --hot --log-level debug --cors",
-    "test": "exit 0",
+    "test": "node ./test.js",
     "bundle:mdx": "skypager bundle-mdx --no-prefix",
     "demo": "skypager test-code-blocks README.md --test-helpers @skypager/devtools/testing/mocha-test-setup",
     "postdemo": "yarn dev --open"
@@ -21,18 +21,18 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@skypager/helpers-document": "^1.1.1",
-    "@skypager/node": "^1.1.1"
-  },
-  "devDependencies": {
-    "@skypager/webpack": "^1.1.1"
+    "@skypager/helpers-document": "^1.0.1",
+    "@skypager/node": "^1.0.1",
+    "@skypager/webpack": "^1.0.1",
+    "retext": "^6.0.1",
+    "retext-keywords": "^4.0.2"
   },
   "repository": {
     "type": "github",
     "url": "https://github.com/skypager/skypager"
   },
   "homepage": "https://skypager.io",
-  "gitHead": "9392473e420c7a46eb0be31bc7739ca16c8eb130",
+  "gitHead": "66f2da16f4d6ebc315f1d244ba314647a8630011",
   "keywords": [],
   "contributors": [],
   "skypager": {
@@ -47,11 +47,14 @@
         "@skypager/runtime": "skypager",
         "@skypager/web": "skypager",
         "prop-types": "PropTypes",
-        "@skypager/helpers-document": "SkypagerHelpersDocument"
+        "@skypager/helpers-document": "SkypagerHelpersDocument",
+        "@skypager/helpers-document/lib/skypager-document-editor": "SkypagerEditor"
       },
       "copy": {
         "@skypager/helpers-document": [
           "lib/skypager-helpers-document.js",
+          "lib/skypager-document-editor.js",
+          "lib/skypager-document-editor.min.js",
           "lib/skypager-helpers-document.min.js"
         ],
         "@skypager/web": [
