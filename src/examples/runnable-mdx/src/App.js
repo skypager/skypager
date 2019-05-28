@@ -1,11 +1,15 @@
 import React, { Component } from 'react'
 import types from 'prop-types'
-import { Link, Switch, Route, BrowserRouter } from 'react-router-dom'
-import runtime from '@skypager/web'
-import HomePage from './pages/HomePage'
+import { Switch, Route, BrowserRouter } from 'react-router-dom'
 import DocPage from './pages/DocPage'
+import HomePage from './pages/HomePage'
+import runtime from './runtime'
 
 import './App.css'
+
+function docPage(docId) {
+  return (props = {}) => <DocPage {...props} docId={docId} />
+}
 
 export default class App extends Component {
   static propTypes = {
@@ -28,8 +32,10 @@ export default class App extends Component {
     return (
       <BrowserRouter>
         <Switch>
-          <Route path="/" exact component={HomePage} />
-          <Route path="/docs/:docId*" component={DocPage} />
+          <Route path="/docs/runnable" exact component={docPage('runnable')} />
+          <Route path="/docs/renderable" exact component={docPage('renderable')} />
+          <Route path="/docs/site-template" exact component={docPage('site-template')} />
+          <Route path="*" component={HomePage} />
         </Switch>
       </BrowserRouter>
     )

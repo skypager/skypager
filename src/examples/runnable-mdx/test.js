@@ -5,7 +5,6 @@ let attempts = 0
 let pass = false
 const serverPort = runtime.argv.port || 3000
 
-
 let port
 
 main()

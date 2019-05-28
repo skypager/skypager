@@ -8,6 +8,7 @@
   "react-native": "lib/index.js",
   "scripts": {
     "build": "skypager build && yarn bundle:mdx",
+    "console": "node ./start.js --console",
     "postbuild": "skypager hash-build",
     "start": "NODE_ENV=production NO_CLEAR=true node ./start.js --log-level debug --cors",
     "dev": "NODE_ENV=development NO_CLEAR=true node ./start.js --hot --log-level debug --cors",
@@ -24,6 +25,7 @@
     "@skypager/helpers-document": "^1.0.1",
     "@skypager/node": "^1.0.1",
     "@skypager/webpack": "^1.0.1",
+    "compromise": "^11.13.2",
     "retext": "^6.0.1",
     "retext-keywords": "^4.0.2"
   },

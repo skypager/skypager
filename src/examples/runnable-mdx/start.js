@@ -26,10 +26,13 @@ runtime.servers.add({
 runtime.endpoints.add({
   babel,
   mdx,
-  retext
+  retext,
 })
 
 async function main() {
+  await runtime.fileManager.startAsync()
+  await runtime.fileManager.readAllContent({ include: /.*/, hash: true })
+
   if (runtime.argv.buildDocHelper) {
     await runtime.proc.async.spawn('yarn', ['build:web', '--include-unminified'], {
       cwd: runtime.resolve('..', '..', 'helpers', 'document'),
@@ -65,17 +68,23 @@ async function main() {
         root: runtime.resolve('lib'),
       },
     }),
-    endpoints: ['babel', 'mdx', 'retext'],
+    endpoints: ['babel', 'mdx', 'retext', 'file-manager'],
     showBanner: false,
   })
 
-  await server.start()
 
-  console.log(`Server is listening on http://localhost:${server.port}`)
+  if (runtime.argv.interactive || runtime.argv.console) {
+    await runtime.repl('interactive').launch({ runtime, server, skypager: runtime })
+  } else {
+    await server.start()
+    console.log(`Server is listening on http://localhost:${server.port}`)
+  }
 
   if (runtime.argv.open) {
     await runtime.opener.openInBrowser(`http://localhost:${server.port}`)
   }
+
+
 }
 
 main()
