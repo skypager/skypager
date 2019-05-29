@@ -72,7 +72,6 @@ async function main() {
     showBanner: false,
   })
 
-
   if (runtime.argv.interactive || runtime.argv.console) {
     await runtime.repl('interactive').launch({ runtime, server, skypager: runtime })
   } else {
@@ -83,8 +82,6 @@ async function main() {
   if (runtime.argv.open) {
     await runtime.opener.openInBrowser(`http://localhost:${server.port}`)
   }
-
-
 }
 
 main()

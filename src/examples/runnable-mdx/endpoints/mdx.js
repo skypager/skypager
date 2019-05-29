@@ -14,21 +14,21 @@ module.exports = function(app) {
 
     try {
       let rehypeAst
-      
+
       const parsed = await mdxParser(content, {
         filePath: filename,
-        rehypePlugins:  [
+        rehypePlugins: [
           () => tree => {
             rehypeAst = tree
             return tree
-          },          
-        ]
+          },
+        ],
       })
 
       res.status(200).json({
         content,
         parsed,
-        rehypeAst
+        rehypeAst,
       })
     } catch (error) {
       runtime.error(`Error parsing mdx`, error)

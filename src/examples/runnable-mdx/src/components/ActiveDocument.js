@@ -1,11 +1,9 @@
 import React, { createRef, useReducer, useEffect, useState, Component } from 'react'
 import types from 'prop-types'
 import Editor from '@skypager/helpers-document/lib/skypager-document-editor'
-import { Loader, Input, Header, Button } from 'semantic-ui-react'
+import { Loader, Header } from 'semantic-ui-react'
 import { MDXProvider } from '@mdx-js/react'
-import { Link } from 'react-router-dom'
 import DocLink from './DocLink'
-import BlockRenderer from './BlockRenderer'
 import * as semanticUIReact from 'semantic-ui-react'
 
 export const defaultSandbox = Object.assign({}, semanticUIReact, {
@@ -14,7 +12,7 @@ export const defaultSandbox = Object.assign({}, semanticUIReact, {
   useReducer,
   useState,
   createRef,
-  React
+  React,
 })
 
 const mdxComponents = (baseProps = {}, doc) => ({
@@ -31,13 +29,16 @@ const mdxComponents = (baseProps = {}, doc) => ({
     return <DocLink {...props} parentDocument={doc} />
   },
 
-  inlineCode: (props) =>
-    <code style={{ color: 'magenta' }}><em>{props.children}</em></code>,
+  inlineCode: props => (
+    <code style={{ color: 'magenta' }}>
+      <em>{props.children}</em>
+    </code>
+  ),
 
   code: props => {
     return (
       <Editor
-        {...(props.renderable || props.runnable) && { debounceChangePeriod: 400 } }
+        {...(props.renderable || props.runnable) && { debounceChangePeriod: 400 }}
         {...props}
         {...baseProps.code || {}}
         sandbox={defaultSandbox}

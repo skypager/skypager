@@ -13,16 +13,14 @@ export async function processMdx(options = {}) {
     await this.listFiles(options.file).then(({ path, content }) => {
       options.content = content
       options.filename = path
-    })  
+    })
   }
 
   return this.client.post(`/mdx`, options).then(r => r.data)
 }
 
-export function listFiles(pathId='') {
-  pathId = pathId.length
-    ? `/${pathId}`.replace(/\/\//g,'/')
-    : ''
+export function listFiles(pathId = '') {
+  pathId = pathId.length ? `/${pathId}`.replace(/\/\//g, '/') : ''
 
-  return this.client.get(`/api/file-manager${pathId}`).then((r) => r.data)
+  return this.client.get(`/api/file-manager${pathId}`).then(r => r.data)
 }
