@@ -2,7 +2,9 @@
 
 We developed the [Voice Synthesis Feature](/synthesis) and the  [Speech Recognition](/recognition) features as standalone modules which could be enabled if supported.
 
-We can create a `VoiceCommander` feature which combines these two features, to build a system which you can have a conversation with.  
+In the [Previous Section](/commander) we showed how the speech recognition feature could be hooked up to React, so we could work with speech recognition data as state and events. 
+
+We will put it all together to create a `VoiceCommander` feature which combines these two features, to build a system which you can have a conversation with.  
 
 The `VoiceCommander` will take a stream of commands, and determine what it currently should be working on.  
 
@@ -233,7 +235,10 @@ function fetchPackageGraph() {
   return axios({
     url: '/packages.json',
     method: 'GET'
-  }).then((r) => r.data.slice(0, 8))
+  }).then((r) => {
+    $doc.state.set('packageData', r.data)
+    return r.data.slice(0, 8)
+  })
 }
 
 function headerRow() {
@@ -378,7 +383,21 @@ This handler function will be called with:
 - the list of all the commands
 - the index of the current command in the list
 
-The actual handler function which processes the current command is a huge mess
+**The actual handler function which processes the current command is a huge mess! and it is too tightly bound to the example script. A Real world implementation would have to lean on natural language processing techniques that I am not even aware of yet.** 
+
+The signature for the command processing function looks like.
+
+```javascript example=VoiceCommander
+function yourCommandProcessor(currentCommand, commandState, allCommands, currentIndex, currentCommandId) {
+  // you would come up with this exact object based on the currentCommand, commandState, etc
+  const update = { whatever: true }
+
+  return {
+    ...currentCommand,
+    update
+  }  
+}
+```
 
 The assumption is that a sequence of commands will come in a few categories:
 
@@ -406,7 +425,9 @@ we can identify which category our current conversation belongs to.
 Once we know that, and we know the dataset, we can use the `nouns`, `verbs`, `values` and other properties that get stored with each command,
 to build some standard query object that can be rendered from the dataset and filters.
 
-The handler implementation is below
+The handler implementation is below. 
+
+Feel free to edit it! 
 
 ```javascript editable=true example=VoiceDashboard
 const processTask = async (currentCommand, commandState = {}, commands, index, commandId) => {
@@ -474,6 +495,28 @@ const processTask = async (currentCommand, commandState = {}, commands, index, c
 }
 ```
 
+After any command is processed, the `VoiceCommander` feature state will have a `current` object,
+this object tells us:
+
+```javascript
+  const { 
+    // what type of query is it? show
+    queryType: type, 
+    // what are we querying? projects
+    queryTargets: targets = [],
+    // how are we modifying the query? 
+    queryModifiers: modifiers = []
+    // what actions are we taking on the results it returns
+    queryActions: actions = [], 
+  } = query  
+```
+
+Any time we get a new `query`, we analyze its components, and try and apply it to filter the data.
+
+Any time the data changes, React renders new output.
+
+## Getting Started
+
 The state management aspect of our application is all completely handled by the skypager runtime and features we built.
 
 The observable apis and event emitters skypager provide us work very well with React hooks.
@@ -481,6 +524,22 @@ The observable apis and event emitters skypager provide us work very well with R
 Below we define the `VoiceDashboard` component, which renders our App based on all of this state we're building up as we speak to this app.
 
 ```javascript renderable=true includeExamples=VoiceDashboard
+function QueryOutput({ query }) {
+  const { 
+    queryType: type, 
+    queryTargets: targets = [],
+    queryActions: actions = [], 
+    queryModifiers: modifiers = []
+  } = query  
+
+  return (
+    <Segment basic>
+      <pre>
+        {JSON.stringify(query, null, 2)}
+      </pre>
+    </Segment>
+  )
+}
 function VoiceDashboard() {
   const { enabled, listening, stop, start, ...rest } = useVoiceControl()
   const commandState = useCommandState(processTask)
@@ -521,7 +580,8 @@ function VoiceDashboard() {
           {$runtime.voiceCommander.commands.values().map(({ command, commandId }) => <Segment key={commandId}>{command}</Segment>)}
         </Grid.Column>       
         <Grid.Column width={8}>
-          <pre>{JSON.stringify(rest.current, null, 2)}</pre>
+          {!rest.current && <Message content="Say something to begin!" />}
+          {rest.current && <QueryOutput query={rest.current} />}
         </Grid.Column>
       </Grid.Row>
     </Grid>

@@ -16,6 +16,42 @@ export const defaultSandbox = Object.assign({}, semanticUIReact, {
 })
 
 const mdxComponents = (baseProps = {}, doc) => ({
+  wrapper: (props) => {
+    let children = props.children
+
+    if (props.section) {
+      const headingId = doc.runtime.stringUtils.kebabCase(String(props.section).toLowerCase())
+      const { headingsMap } = doc  
+      const loc = headingsMap.headings[props.section] || headingsMap.headings[headingId] 
+
+      if (loc) {
+        const [line] = loc
+        const headingNode = doc.ast.children.find((node) => node.position.start.line === line)
+        const nextHeading = headingNode && doc.findAllNodesAfter(headingNode).find(({ type, depth }) => type === 'heading' && depth === headingNode.depth)
+
+        if (headingNode && nextHeading) {
+          const startLine = headingNode.position.start.line
+          const endLine = nextHeading.position.start.line
+
+          children = children.filter(({ props }) => props['data-line-number'] >= startLine && props['data-line-number'] < endLine)
+        } else if (headingNode && !nextHeading) {
+          const startLine = headingNode.position.start.line
+          children = children.filter(({ props }) => props['data-line-number'] >= startLine)
+        } else {
+          children = [
+            <div>could not find section</div>
+          ]
+        }
+      }
+    }
+
+    return (
+      <div>
+        <h1 style={{ display: 'none' }}>{doc.title}</h1>
+        <main {...props} children={children} />  
+      </div>
+    )
+  },
   h1: props => <Header as="h1" dividing content={props.children} />,
   h2: props => <Header as="h2" content={props.children} />,
   h3: props => <Header as="h3" content={props.children} />,
@@ -142,7 +178,7 @@ export default class ActiveDocument extends Component {
           className="active-document-wrapper"
           style={{ height: '100%', width: '100%', margin: 0, padding: 0 }}
         >
-          <Component />
+          <Component {...this.props} />
         </div>
       </MDXProvider>
     )

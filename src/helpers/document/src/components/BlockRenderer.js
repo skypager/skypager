@@ -79,19 +79,21 @@ export default class BlockRenderer extends Component {
     let headers = []
 
     if (includeExamples && includeExamples.length) {
-      const includeCodeBlocks = doc.select(`code[meta*="example=${includeExamples}"]`).map(({ value }) => value)
+      const includeCodeBlocks = doc
+        .select(`code[meta*="example=${includeExamples}"]`)
+        .map(({ value }) => value)
       headers.push(...includeCodeBlocks)
     }
 
-    const code = this.mergeCode(content, headers) 
+    const code = this.mergeCode(content, headers)
     const compiler = editor.babel.createCodeRunner(code)
 
     try {
-      const compiled = await compiler({ 
-        ...doc.state.get('sandbox') || {},
-        ...this.props.sandbox, 
-        $runtime: runtime, 
-        $doc: doc 
+      const compiled = await compiler({
+        ...(doc.state.get('sandbox') || {}),
+        ...this.props.sandbox,
+        $runtime: runtime,
+        $doc: doc,
       })
       render(compiled, this.renderArea.current)
     } catch (error) {
@@ -110,31 +112,27 @@ export default class BlockRenderer extends Component {
 
   mergeCode(code, headers = []) {
     console.log('merging code', {
-      code, headers
+      code,
+      headers,
     })
     const { runtime } = this.context
     const { uniq, partition } = runtime.lodash
 
-    let [ imports = [], body = [] ] = partition(code.split("\n"), (line) => line.trim().startsWith('import'))
+    let [imports = [], body = []] = partition(code.split('\n'), line =>
+      line.trim().startsWith('import')
+    )
 
-    headers.forEach((block) => {
-      const [hImports, hBody] = partition(block.split("\n"), (line) => line.trim().startsWith('import'))
+    headers.forEach(block => {
+      const [hImports, hBody] = partition(block.split('\n'), line =>
+        line.trim().startsWith('import')
+      )
 
-      imports = [
-        ...hImports,
-        ...imports
-      ]
+      imports = [...hImports, ...imports]
 
-      body = [
-        ...hBody,
-        ...body,  
-      ]
+      body = [...hBody, ...body]
     })
 
-    return [
-      ...uniq(imports),
-      ...body,
-    ].join("\n")
+    return [...uniq(imports), ...body].join('\n')
   }
 
   render() {
@@ -150,4 +148,3 @@ export default class BlockRenderer extends Component {
     )
   }
 }
-
