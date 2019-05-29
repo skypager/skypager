@@ -37,6 +37,12 @@ export default class App extends Component {
             component={docPage('features/speech-recognition/README')}
           />
           <Route exact path="/synthesis" component={docPage('features/voice-synthesis/README')} />
+          <Route exact path="/commander" component={docPage('features/commander/README')} />
+          <Route
+            exact
+            path="/commander-tutorial"
+            component={docPage('features/commander/tutorial')}
+          />
           <Route path="*" exact component={docPage('docs/introduction')} />
         </Switch>
       </BrowserRouter>

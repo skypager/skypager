@@ -32,6 +32,8 @@ a component like this one, which can transcribe what you say.
 
 ## Table of Contents
 
-- [Web Speech API Specification](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis)
 - [Building the Voice Synthesis Feature](/synthesis)
 - [Building the Speech Recognition Feature](/recognition)
+- [Combining Features to do something Awesome](/commander)
+- Further Reading
+  - [Web Speech API Specification](https://developer.mozilla.org/en-US/docs/Web/API/SpeechSynthesis)

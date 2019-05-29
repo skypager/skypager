@@ -1,10 +1,21 @@
-import React, { forwardRef, createRef, useState, Component } from 'react'
+import React, { useReducer, useEffect, createRef, useState, Component } from 'react'
 import types from 'prop-types'
 import Editor from '@skypager/helpers-document/lib/skypager-document-editor'
 import { Loader, Input, Header, Button } from 'semantic-ui-react'
 import { MDXProvider } from '@mdx-js/react'
 import { Link } from 'react-router-dom'
 import DocLink from './DocLink'
+
+const defaultSandbox = {
+  React,
+  Component,
+  useState,
+  useEffect,
+  useReducer,
+  createRef,
+  ...global.semanticUIReact,
+  console,
+}
 
 const mdxComponents = (baseProps = {}, doc) => ({
   h1: props => <Header as="h1" dividing content={props.children} />,
@@ -17,6 +28,14 @@ const mdxComponents = (baseProps = {}, doc) => ({
   pre: props => <div {...props} />,
 
   a: props => {
+    const content = String(props.children).toLowerCase()
+
+    if (content === 'next page') {
+      return <Button primary content="Next Page" as={Link} to={props.href} />
+    } else if (content === 'previous page') {
+      return <Button content="Previous Page" as={Link} to={props.href} />
+    }
+
     return <DocLink {...props} parentDocument={doc} />
   },
 
@@ -109,6 +128,7 @@ export default class ActiveDocument extends Component {
               marginBottom: '40px',
             },
           },
+          sandbox: defaultSandbox,
           onLoad: (aceEditor, component) => {
             doc.runtime.editor.syncWithDocument(component, aceEditor, doc)
           },

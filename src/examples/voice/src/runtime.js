@@ -3,6 +3,7 @@ import * as DocumentHelper from '@skypager/helpers-document'
 import * as AppClient from './client'
 import * as moduleFactory from './module-factory'
 import VoiceSynthesis from './features/voice-synthesis'
+import Commander from './features/commander'
 import SpeechRecognition from './features/speech-recognition'
 import * as documentActions from './actions'
 
@@ -14,6 +15,7 @@ runtime
 
 runtime.features.register('voice-synthesis', () => VoiceSynthesis)
 runtime.features.register('speech-recognition', () => SpeechRecognition)
+runtime.features.register('voice-commander', () => Commander)
 
 runtime.clients.register('app', () => AppClient)
 

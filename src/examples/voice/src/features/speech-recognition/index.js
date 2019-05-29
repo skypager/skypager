@@ -68,7 +68,7 @@ export default class SpeechRecognition extends Feature {
 
   stop() {
     try {
-      this.recognition.abort()
+      return this.recognition.stop()
     } catch (error) {
       console.log('error stopping', error)
     }
@@ -94,13 +94,21 @@ export default class SpeechRecognition extends Feature {
 
     let finalTranscript = ''
 
+    const transcriptId =
+      typeof options.transcriptId === 'function'
+        ? options.transcriptId(event, this)
+        : options.transcriptId
+
+    recognition.onspeechend = () => {
+      this.state.set('listening', false)
+    }
+
     recognition.onstart = () => {
       this.state.set('listening', true)
       this.emit('listening')
     }
 
     recognition.onend = () => {
-      this.state.set('listening', false)
       this.emit('stopped')
     }
 
@@ -114,8 +122,6 @@ export default class SpeechRecognition extends Feature {
 
       let interimTranscript = ''
 
-      onEvent && onEvent(event, { speech: this, interimTranscript })
-
       if (this.state.get('logLevel') === 'debug') {
         this.runtime.debug('speech event', event)
       }
@@ -124,17 +130,29 @@ export default class SpeechRecognition extends Feature {
         let transcript = event.results[i][0].transcript
         if (event.results[i].isFinal) {
           finalTranscript += transcript
+          onComplete && onComplete(finalTranscript)
+
+          if (transcriptId) {
+            this.transcripts.set(transcriptId, finalTranscript)
+          }
+
+          if (options.clear) {
+            finalTranscript = ''
+          }
         } else {
           interimTranscript += transcript
-          if (options.transcriptId) {
-            this.transcripts.set(options.transcriptId, interimTranscript)
+          onEvent &&
+            onEvent(event, {
+              speech: this,
+              interimTranscript,
+              transcript: interimTranscript,
+              partial: transcript,
+            })
+
+          if (transcriptId) {
+            this.transcripts.set(transcriptId, interimTranscript)
           }
         }
-      }
-
-      if (options.transcriptId) {
-        onComplete && onComplete(finalTranscript)
-        this.transcripts.set(options.transcriptId, finalTranscript)
       }
     }
 
@@ -148,8 +166,9 @@ export default class SpeechRecognition extends Feature {
     recognition.start()
 
     return () => {
+      const res = recognition.stop()
       this.state.set('listening', false)
-      return recognition.abort()
+      return res
     }
   }
 }
