@@ -123,8 +123,8 @@ function CommandList({ listening }) {
   const [expanded, updateExpanded] = useState({})
 
   useEffect(() => 
-    $runtime.voiceCommander.commands.observe(() => {
-
+    $runtime.voiceCommander.commands.observe(({ object }) => {
+      updateCommands(object.toJSON())
     })
   )
 
@@ -295,7 +295,17 @@ Here's an overview:
 - 3) The processing of a command will update the `VoiceCommander` state with a property `current` that contains all of the built up parameters
 - 4) If there are no more statements left to process, we use the `VoiceCommander` current state data to render a display 
 
-```javascript renderable=true
+## Defining some Hooks
+
+We're going to define a few custom hooks.
+
+Our `VoiceCommander` feature has two observable objects: `commands` and `state`.  The idea is that every time we
+receive a command from the microphone, we parse it to turn it into an object structure, and store it on the commands object.
+
+Our `useVoiceControl` hook will enable the voice commander feature, load the nlp library, enable speech recognition, 
+and return the `voiceCommander.state` whenever it changes 
+
+```javascript editable=true example=VoiceDashboard 
 function useVoiceControl() {
   const [enabled, setEnabled] = useState($runtime.isFeatureEnabled('voice-commander'))
   const [state, updateVoiceState] = useState($runtime.feature('voice-commander').currentState)
@@ -328,7 +338,16 @@ function useVoiceControl() {
     ...state,
   } 
 }
+```
 
+Our `useCommandState` hook observes the commands queue, and listens for a `commandReceived` event,
+which it reacts to by processing the last command we received.
+
+How each command is processed depends on the current command, and any contextual information that
+has been built up from previous commands.
+
+
+```javascript editable=true example=VoiceDashboard
 function useCommandState(handler) {
   const [commandState, updateCommandState] = useState({})
 
@@ -348,8 +367,48 @@ function useCommandState(handler) {
 
   return commandState
 }
+```
 
+To make the `useCommandState` hook work, we need to provide it a handler function to use to process the current command.
 
+This handler function will be called with:
+
+- the current command (first one that hasn't been completed)
+- the current commandState  
+- the list of all the commands
+- the index of the current command in the list
+
+The actual handler function which processes the current command is a huge mess
+
+The assumption is that a sequence of commands will come in a few categories:
+
+**starting with a data set, limiting that data set, taking action on the matches**
+
+- command: prepare the full dataset called "whatever" to be searched
+- command: limit the full dataset by this parameter 
+- command: customize the resulting data set by some available transformation
+- command: customize the resulting data set by some another transformation
+- command: perform some action on the dataset
+
+**finding a single item, taking an action on it**
+
+- command: show me these items
+- command: show me less
+- command: ok found it, get details for this item 
+- command: do this in the context of this item
+- command: now do this
+
+**requesting a specific view of a dataset**
+
+so by analyzing the current command, past commands, and having a current state that gets updated after anything changes, 
+we can identify which category our current conversation belongs to.
+
+Once we know that, and we know the dataset, we can use the `nouns`, `verbs`, `values` and other properties that get stored with each command,
+to build some standard query object that can be rendered from the dataset and filters.
+
+The handler implementation is below
+
+```javascript editable=true example=VoiceDashboard
 const processTask = async (currentCommand, commandState = {}, commands, index, commandId) => {
   const update = {}
 
@@ -413,11 +472,18 @@ const processTask = async (currentCommand, commandState = {}, commands, index, c
     update
   } 
 }
+```
 
+The state management aspect of our application is all completely handled by the skypager runtime and features we built.
+
+The observable apis and event emitters skypager provide us work very well with React hooks.
+
+Below we define the `VoiceDashboard` component, which renders our App based on all of this state we're building up as we speak to this app.
+
+```javascript renderable=true includeExamples=VoiceDashboard
 function VoiceDashboard() {
   const { enabled, listening, stop, start, ...rest } = useVoiceControl()
   const commandState = useCommandState(processTask)
-
 
   if (!enabled) {
     return (
@@ -425,14 +491,39 @@ function VoiceDashboard() {
     )
   }
 
+  const commands = [
+    "Show me my projects",
+    "Lets just see the webapps",
+    "Which ones have changed in the past two weeks?",
+    "Let's look at the screenshots",
+    "Ok lets deploy them to a preview URL"
+  ]
+  
   return (
     <Grid>
-      <Grid.Column width={4}>
-        <Button onClick={() => !listening ? start() : stop()} color={listening ? 'red' : 'green'} content={listening ? 'STOP' : 'START'} />
-      </Grid.Column>
-      <Grid.Column width={12}>
-        <pre>{JSON.stringify(rest, null, 2)}</pre>
-      </Grid.Column>
+      <Grid.Row columns="one">
+        <Grid.Column style={{ paddingLeft: '25px', paddingRight: '25px' }}>
+          <Button 
+            content={listening ? 'STOP' : 'START'} 
+            color={listening ? 'red' : 'green'} 
+            onClick={() => listening ? stop() : start()} 
+            fluid
+          />
+        </Grid.Column>
+      </Grid.Row>
+      <Grid.Row divided="vertical">
+        <Grid.Column width={4}>
+          <Header dividing content="Stick to the script!" />
+          {commands.map((command) => <Segment key={command}>{command}</Segment>)}
+        </Grid.Column>
+        <Grid.Column width={4}>
+          <Header dividing content="Received Commands" />
+          {$runtime.voiceCommander.commands.values().map(({ command, commandId }) => <Segment key={commandId}>{command}</Segment>)}
+        </Grid.Column>       
+        <Grid.Column width={8}>
+          <pre>{JSON.stringify(rest.current, null, 2)}</pre>
+        </Grid.Column>
+      </Grid.Row>
     </Grid>
   )
 }

@@ -38,7 +38,7 @@ export default class Renderable extends Component {
         <Editor {...this.props} />
       </div>,
       <div style={wrapperStyle}>
-        <BlockRenderer doc={doc} line={this.props['data-line-number']} sandbox={sandbox} />
+        <BlockRenderer {...this.props} doc={doc} line={this.props['data-line-number']} sandbox={sandbox} />
       </div>,
     ]
 

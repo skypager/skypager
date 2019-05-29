@@ -67,12 +67,32 @@ export default class BlockRenderer extends Component {
 
   async handleCompilation() {
     const { runtime } = this.context
-    const { doc } = this.props
+    const { doc, includeExamples } = this.props
     const { editor } = runtime
-    const compiler = editor.babel.createCodeRunner(this.state.content)
+
+    const { content } = this.state
+
+    if (!content) {
+      return
+    }
+
+    let headers = []
+
+    if (includeExamples && includeExamples.length) {
+      const includeCodeBlocks = doc.select(`code[meta*="example=${includeExamples}"]`).map(({ value }) => value)
+      headers.push(...includeCodeBlocks)
+    }
+
+    const code = this.mergeCode(content, headers) 
+    const compiler = editor.babel.createCodeRunner(code)
 
     try {
-      const compiled = await compiler({ ...this.props.sandbox, $runtime: runtime, $doc: doc })
+      const compiled = await compiler({ 
+        ...doc.state.get('sandbox') || {},
+        ...this.props.sandbox, 
+        $runtime: runtime, 
+        $doc: doc 
+      })
       render(compiled, this.renderArea.current)
     } catch (error) {
       this.setState({ hasErrors: true, error })
@@ -88,6 +108,35 @@ export default class BlockRenderer extends Component {
     return blockContent || codeBlock.value
   }
 
+  mergeCode(code, headers = []) {
+    console.log('merging code', {
+      code, headers
+    })
+    const { runtime } = this.context
+    const { uniq, partition } = runtime.lodash
+
+    let [ imports = [], body = [] ] = partition(code.split("\n"), (line) => line.trim().startsWith('import'))
+
+    headers.forEach((block) => {
+      const [hImports, hBody] = partition(block.split("\n"), (line) => line.trim().startsWith('import'))
+
+      imports = [
+        ...hImports,
+        ...imports
+      ]
+
+      body = [
+        ...hBody,
+        ...body,  
+      ]
+    })
+
+    return [
+      ...uniq(imports),
+      ...body,
+    ].join("\n")
+  }
+
   render() {
     const {
       style = {},
@@ -101,3 +150,4 @@ export default class BlockRenderer extends Component {
     )
   }
 }
+
