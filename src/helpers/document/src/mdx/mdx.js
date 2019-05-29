@@ -7,6 +7,12 @@ import findAllAfter from 'unist-util-find-all-after'
 import findAllBefore from 'unist-util-find-all-before'
 import nodeToString from 'mdast-util-to-string'
 
+const registry = ({ name, members, scope, partialArg }) =>
+  Helper.createContextRegistry(name, {
+    context: Helper.createMockContext(members),
+    wrapper: mod => partialRight(mod.bind(scope), partialArg),
+  })
+
 /**
  * The Mdx Helper is a wrapper for working with markdown or mdx documents.
  *
@@ -19,15 +25,21 @@ export class Mdx extends Helper {
   static isObservable = true
 
   initialize() {
-    this.actions = this.createCascadingRegistry()
-  }
+    const base = {
+      scope: this,
+      partialArg: { ...this.context, doc: this },
+    }
 
-  createCascadingRegistry(components = {}) {
-    const { partialRight } = this.lodash
+    this.actions = registry({
+      name: 'actions',
+      members: this.tryResult('actions', {}),
+      ...base,
+    })
 
-    return Helper.createContextRegistry('actions', {
-      context: Helper.createMockContext(components),
-      wrapper: mod => partialRight(mod.bind(this), { ...this.context, doc: this }),
+    this.sandboxes = registry({
+      name: 'sandboxes',
+      members: this.tryResult('sandboxes', {}),
+      ...base,
     })
   }
 
@@ -201,11 +213,23 @@ export class Mdx extends Helper {
     return options.stringify ? this.stringify(headingNode) : headingNode
   }
 
-  action(actionId) {
+  sandbox(actionId) {
+    const { partialRight } = this.lodash
     try {
       return this.actions.lookup(actionId)
     } catch (error) {
-      return this.runtime.mdxDocs.actions.lookup(actionId)
+      const fn = this.runtime.mdxDocs.actions.lookup(actionId)
+      return partialRight(fn.bind(this), { ...this.context, doc: this })
+    }
+  }
+
+  action(actionId) {
+    const { partialRight } = this.lodash
+    try {
+      return this.actions.lookup(actionId)
+    } catch (error) {
+      const fn = this.runtime.mdxDocs.actions.lookup(actionId)
+      return partialRight(fn.bind(this), { ...this.context, doc: this })
     }
   }
 
@@ -277,8 +301,13 @@ export class Mdx extends Helper {
     })
 
     runtime.mdxDocs.getter('runtime', () => runtime)
+
     runtime.mdxDocs.actions = Helper.createContextRegistry('actions', {
       context: Helper.createMockContext(options.actions || {}),
+    })
+
+    runtime.mdxDocs.sandboxes = Helper.createContextRegistry('sandboxes', {
+      context: Helper.createMockContext(options.contexts || {}),
     })
   }
 }

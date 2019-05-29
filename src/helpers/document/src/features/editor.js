@@ -78,8 +78,14 @@ export default class Editor extends Feature {
 
   async enableBabel(options = {}) {
     const babel = this.runtime.feature('babel', options)
-    await babel.enable(options)
-    await babel.whenReady()
+
+    if (!this.runtime.isFeatureEnabled('babel')) {
+      await babel.enable(options)
+    }
+
+    if (!global.Babel) {
+      await babel.whenReady()
+    }
 
     return (this.babel = babel)
   }

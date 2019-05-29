@@ -152,6 +152,7 @@ function CodeEditor(props) {
       height="100px"
       {...value && { value: String(value).trim() }}
       highlightActiveLine={false}
+      minLines={1}
       maxLines={Infinity}
       showGutter={false}
       showPrintMargin={false}
