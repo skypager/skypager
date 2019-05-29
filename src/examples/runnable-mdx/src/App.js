@@ -7,8 +7,8 @@ import runtime from './runtime'
 
 import './App.css'
 
-function docPage(docId) {
-  return (props = {}) => <DocPage {...props} docId={docId} />
+function docPage(docId, baseProps = {}) {
+  return (props = {}) => <DocPage {...baseProps} {...props} docId={docId} />
 }
 
 export default class App extends Component {
@@ -35,6 +35,7 @@ export default class App extends Component {
           <Route path="/docs/runnable" exact component={docPage('runnable')} />
           <Route path="/docs/renderable" exact component={docPage('renderable')} />
           <Route path="/docs/site-template" exact component={docPage('site-template')} />
+          <Route path="/docs/unpkg" exact component={docPage('unpkg', { processImports: true })} />
           <Route path="*" component={HomePage} />
         </Switch>
       </BrowserRouter>

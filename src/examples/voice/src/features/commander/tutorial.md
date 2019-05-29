@@ -6,6 +6,20 @@ In the [Previous Section](/commander) we showed how the speech recognition featu
 
 We will put it all together to create a `VoiceCommander` feature which combines these two features, to build a system which you can have a conversation with.  
 
+```javascript renderable=true includeExamples=VoiceDashboard hideEditor=true
+class App extends Component {
+  render() {
+    return (
+      <Segment piled style={{ margin: '36px' }}>
+        <VoiceDashboard />
+      </Segment>
+    )
+  }
+}
+
+<App />
+```
+
 The `VoiceCommander` will take a stream of commands, and determine what it currently should be working on.  
 
 It will work on it, and give you feedback as it does.
@@ -45,6 +59,7 @@ function CommandTracker({ toggleExpand, commandId, data = {} }) {
     const previous = commands[index - 1]
     const currentState = $runtime.voiceCommander.state.get('current') || (previous && previous.update) || {}
 
+    console.log({ currentState, update })
     if (index === 0) {
       update.firstCommand = true
     } else {
@@ -54,6 +69,7 @@ function CommandTracker({ toggleExpand, commandId, data = {} }) {
     if (currentCommand) {
       const { structured = [], nouns = [] } = currentCommand 
 
+      console.log('parsing current command', currentCommand)
       if (update.firstCommand && structured[0] === 'show') {
         update.queryType = 'show'
         update.queryTargets = nouns.map((n) => ({
@@ -63,7 +79,8 @@ function CommandTracker({ toggleExpand, commandId, data = {} }) {
       }
 
       if (!update.firstCommand) {
-        if(update.queryType === 'show' && structured[0] === 'see just') {
+        console.log('not first command', structured, update)
+        if(update.queryType === 'show' && (structured[0] === 'see just' || structured[0] === 'just see')) {
           update.firstCommand = false
           update.queryModifiers = nouns.map((n) => ({
             type: 'only',
@@ -77,7 +94,7 @@ function CommandTracker({ toggleExpand, commandId, data = {} }) {
             update.queryModifiers = update.queryModifiers || []
             update.queryModifiers.push({
               type: 'filter',
-              args: subjects,
+              args: subjects.map(val => String(val).trim()),
               values: currentCommand.values,
               dates: currentCommand.dates
             })
@@ -459,7 +476,7 @@ const processTask = async (currentCommand, commandState = {}, commands, index, c
     }
 
     if (!update.firstCommand) {
-      if(update.queryType === 'show' && structured[0] === 'see just') {
+      if(update.queryType === 'show' && (structured[0] === 'see just' || structured[0] === 'just see')) {
         update.firstCommand = false
         update.queryModifiers = nouns.map((n) => ({
           type: 'only',
@@ -521,25 +538,136 @@ The state management aspect of our application is all completely handled by the 
 
 The observable apis and event emitters skypager provide us work very well with React hooks.
 
-Below we define the `VoiceDashboard` component, which renders our App based on all of this state we're building up as we speak to this app.
+Everytime the `useCommandState` hook returns a value, that will get rendered by the `QueryOutput` component below
 
-```javascript renderable=true includeExamples=VoiceDashboard
+```javascript editable=true example=VoiceDashboard
 function QueryOutput({ query }) {
+  const [projects, updateProjects] = useState(
+    $doc.state.get('packageData') || []
+  )
+
+  useEffect(() => $doc.state.observe(({ name, newValue }) => name === 'packageData' && updateProjects(newValue)))
+
   const { 
     queryType: type, 
     queryTargets: targets = [],
     queryActions: actions = [], 
-    queryModifiers: modifiers = []
+    queryModifiers: modifiers = [],
+    firstCommand = true
   } = query  
+
+  let currentView = 'results'
+
+  let results = []
+
+  const data = {
+    projects
+  }
+
+
+  if (type === 'show' && targets.length) {
+    targets.forEach(({ noun }) => {
+      if (data[noun]) {
+        results.push(...data[noun])
+      }
+    })
+  }
+
+  if (type === 'show' && modifiers.length) {
+    modifiers.forEach(({ type, noun, args = [] }) => {
+      if (type === 'only' && noun === 'web apps') {
+        results = results.filter(project => project && project.skypager && project.skypager.projectType === 'webapp')
+      } else if (type === 'filter' && args[0] === 'change' && args[1] === 'weeks') {
+        results = results.slice(0, 4)
+      }
+    })
+  }
+
+  if (type === 'show' && actions.length) {
+    actions.forEach(({ type, args = [] }) => {
+      if (type === 'subcommand') {
+        currentView = args.join('_')
+      }
+    })
+  }
 
   return (
     <Segment basic>
-      <pre>
-        {JSON.stringify(query, null, 2)}
-      </pre>
+      {results.slice(0, 6).map((result, i) => {
+        switch(currentView) {
+          case 'look_screenshots':
+            return (
+              <ScreenshotBrowser project={result} />
+            )
+          case 'deploy_preview url': 
+            return (
+              <DeploymentAction project={result} />
+            )
+          case 'results':
+          default:  
+            return (
+              <Segment key={`result-${i}`}>
+                <Header as="h4" content={result.name} subheader={result.description} />
+              </Segment>              
+            )
+        }
+
+      })}
     </Segment>
   )
 }
+
+function DeploymentAction({ project }) {
+  const [percent, update] = useState(0)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      update(percent = percent + 2)
+      if (percent > 100) {
+        clearInterval(interval)
+      }
+    }, 30)
+
+    setTimeout(() => {
+      update(100)
+    }, 600)
+
+    return () => {} 
+  })
+
+  return (
+     <Segment key={`result-${project.name}`}>
+      <Header as="h4" content={`Deploying ${project.name}`} subheader={project.homepage} />   
+      {percent < 100 && <Progress indicating percent={percent} />}
+      {percent >= 100 && <Button success content="Deployed! Open Preview" as="a" target="_blank" />}
+    </Segment>
+  )
+}
+
+function ScreenshotBrowser({ project }) {
+  return (
+    <Segment key={`result-${project.name}`}>
+      <Header as="h4" content={`Screenshots of ${project.name}`} subheader={project.homepage} />
+      <Table>
+        <Table.Body>
+          <Table.Row>
+            <Table.Cell>Home Page</Table.Cell>
+            <Table.Cell><Icon name="image" circular /></Table.Cell>
+          </Table.Row>
+          <Table.Row>
+            <Table.Cell>Login Page</Table.Cell>
+            <Table.Cell><Icon name="image" circular /></Table.Cell>
+          </Table.Row>                   
+        </Table.Body>
+      </Table>
+    </Segment>    
+  )  
+}
+```
+
+Below we define the `VoiceDashboard` component which ties these all together.
+
+```javascript editable=true example=VoiceDashboard 
 function VoiceDashboard() {
   const { enabled, listening, stop, start, ...rest } = useVoiceControl()
   const commandState = useCommandState(processTask)
@@ -560,16 +688,6 @@ function VoiceDashboard() {
   
   return (
     <Grid>
-      <Grid.Row columns="one">
-        <Grid.Column style={{ paddingLeft: '25px', paddingRight: '25px' }}>
-          <Button 
-            content={listening ? 'STOP' : 'START'} 
-            color={listening ? 'red' : 'green'} 
-            onClick={() => listening ? stop() : start()} 
-            fluid
-          />
-        </Grid.Column>
-      </Grid.Row>
       <Grid.Row divided="vertical">
         <Grid.Column width={4}>
           <Header dividing content="Stick to the script!" />
@@ -580,14 +698,29 @@ function VoiceDashboard() {
           {$runtime.voiceCommander.commands.values().map(({ command, commandId }) => <Segment key={commandId}>{command}</Segment>)}
         </Grid.Column>       
         <Grid.Column width={8}>
-          {!rest.current && <Message content="Say something to begin!" />}
+          {listening && !rest.current && <Message content="Say something to begin!" />}
           {rest.current && <QueryOutput query={rest.current} />}
         </Grid.Column>
       </Grid.Row>
+      <Grid.Row columns="one">
+        <Grid.Column style={{ paddingLeft: '25px', paddingRight: '25px' }}>
+          <Button 
+            icon='microphone'
+            content={listening ? 'STOP' : 'Enable Speech Recognition'} 
+            color={listening ? 'red' : 'green'} 
+            onClick={() => listening ? stop() : start()} 
+            fluid
+          />
+        </Grid.Column>
+      </Grid.Row>      
     </Grid>
   )
 }
+```
 
+## Demo
+
+```javascript renderable=true includeExamples=VoiceDashboard hideEditor=true
 class App extends Component {
   render() {
     return (

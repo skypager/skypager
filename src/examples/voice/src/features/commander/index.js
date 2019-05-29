@@ -155,6 +155,8 @@ export default class Commander extends Feature {
   }
 
   receiveCommand(command) {
+    command = String(command).trim()
+
     const { uniqueId } = this.lodash
     const parser = this.nlp(command)
 
@@ -187,7 +189,7 @@ export default class Commander extends Feature {
       dates,
       adverbs,
       adjectives,
-      structured: questions.concat(infinitives).concat(nouns.map(n => n.normal)),
+      structured: questions.concat(infinitives).concat(nouns.map(n => n.normal)).map(v => String(v).trim()),
     }
 
     const commandId = uniqueId('command')

@@ -16,31 +16,36 @@ export const defaultSandbox = Object.assign({}, semanticUIReact, {
 })
 
 const mdxComponents = (baseProps = {}, doc) => ({
-  wrapper: (props) => {
+  wrapper: props => {
     let children = props.children
 
     if (props.section) {
       const headingId = doc.runtime.stringUtils.kebabCase(String(props.section).toLowerCase())
-      const { headingsMap } = doc  
-      const loc = headingsMap.headings[props.section] || headingsMap.headings[headingId] 
+      const { headingsMap } = doc
+      const loc = headingsMap.headings[props.section] || headingsMap.headings[headingId]
 
       if (loc) {
         const [line] = loc
-        const headingNode = doc.ast.children.find((node) => node.position.start.line === line)
-        const nextHeading = headingNode && doc.findAllNodesAfter(headingNode).find(({ type, depth }) => type === 'heading' && depth === headingNode.depth)
+        const headingNode = doc.ast.children.find(node => node.position.start.line === line)
+        const nextHeading =
+          headingNode &&
+          doc
+            .findAllNodesAfter(headingNode)
+            .find(({ type, depth }) => type === 'heading' && depth === headingNode.depth)
 
         if (headingNode && nextHeading) {
           const startLine = headingNode.position.start.line
           const endLine = nextHeading.position.start.line
 
-          children = children.filter(({ props }) => props['data-line-number'] >= startLine && props['data-line-number'] < endLine)
+          children = children.filter(
+            ({ props }) =>
+              props['data-line-number'] >= startLine && props['data-line-number'] < endLine
+          )
         } else if (headingNode && !nextHeading) {
           const startLine = headingNode.position.start.line
           children = children.filter(({ props }) => props['data-line-number'] >= startLine)
         } else {
-          children = [
-            <div>could not find section</div>
-          ]
+          children = [<div>could not find section</div>]
         }
       }
     }
@@ -48,7 +53,7 @@ const mdxComponents = (baseProps = {}, doc) => ({
     return (
       <div>
         <h1 style={{ display: 'none' }}>{doc.title}</h1>
-        <main {...props} children={children} />  
+        <main {...props} children={children} />
       </div>
     )
   },
@@ -99,7 +104,14 @@ export default class ActiveDocument extends Component {
   async componentDidMount() {
     const { runtime } = this.context
 
+    this.setState({ loading: true })
     this.setState({ doc: this.loadDocument() })
+
+    if (this.props.processImports) {
+
+    }
+
+    this.setState({ loading: false })
 
     this.disposer = runtime.state.observe(({ name, oldValue, newValue }) => {
       if (name === 'mdxProps' && newValue) {
@@ -141,13 +153,13 @@ export default class ActiveDocument extends Component {
 
   render() {
     const { runtime } = this.context
-    const { doc } = this.state
+    const { doc, loading } = this.state
     const { get } = runtime.lodash
 
     const stateMdxProps = get(this.state, 'mdxProps', {})
 
-    if (!doc) {
-      return <div>No Doc</div>
+    if (!doc || loading) {
+      return <div />
     }
 
     const components = mdxComponents(
