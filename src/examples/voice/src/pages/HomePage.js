@@ -8,8 +8,7 @@ export default class HomePage extends Component {
     runtime: types.object,
   }
 
-  receiveDoc = (doc, component) => {
-  }
+  receiveDoc = (doc, component) => {}
 
   state = {
     docId: this.props.docId,
@@ -26,14 +25,18 @@ export default class HomePage extends Component {
       <Fragment>
         <Responsive {...Responsive.onlyMobile}>
           <div id="page-container" className="mobile">
-            {this.state.docId && <ActiveDocument onLoad={this.receiveDoc} docId={this.state.docId} />}
+            {this.state.docId && (
+              <ActiveDocument {...this.props} onLoad={this.receiveDoc} docId={this.state.docId} />
+            )}
           </div>
         </Responsive>
         <Responsive minWidth={Responsive.onlyTablet.minWidth}>
           <Container id="page-container">
-            {this.state.docId && <ActiveDocument onLoad={this.receiveDoc} docId={this.state.docId} />}
+            {this.state.docId && (
+              <ActiveDocument {...this.props} onLoad={this.receiveDoc} docId={this.state.docId} />
+            )}
           </Container>
-        </Responsive>       
+        </Responsive>
       </Fragment>
     )
   }

@@ -1,7 +1,7 @@
 import React, { createRef, useReducer, useEffect, useState, Component } from 'react'
 import types from 'prop-types'
 import Editor from '@skypager/helpers-document/lib/skypager-document-editor'
-import { Loader, Header } from 'semantic-ui-react'
+import { Loader, Header, Icon } from 'semantic-ui-react'
 import { MDXProvider } from '@mdx-js/react'
 import DocLink from './DocLink'
 import * as semanticUIReact from 'semantic-ui-react'
@@ -50,10 +50,34 @@ const mdxComponents = (baseProps = {}, doc) => ({
       }
     }
 
+   const wrappedChildren = children.map((child, i) => (
+      <div
+        className={`mdx-el mdx-${child.props.mdxType}`}
+        key={`mdx-${i}`}
+        style={{ clear: 'both' }}
+      >
+        {props.displayGutter && (
+          <div className="mdx-gutter" style={{ float: 'left', width: '16px' }}>
+            {child.props.mdxType === 'pre' && <Icon name="bars" size="tiny" />}
+          </div>
+        )}
+        <div
+          className="mdx-content"
+          style={{
+            float: 'left',
+            width: '100%',
+            ...(props.displayGutter && { marginLeft: '20px' }),
+          }}
+        >
+          {child}
+        </div>
+      </div>
+    ))
+
     return (
       <div>
         <h1 style={{ display: 'none' }}>{doc.title}</h1>
-        <main {...props} children={children} />
+        <main children={wrappedChildren} />
       </div>
     )
   },
@@ -82,7 +106,7 @@ const mdxComponents = (baseProps = {}, doc) => ({
         {...(props.renderable || props.runnable) && { debounceChangePeriod: 400 }}
         {...props}
         {...baseProps.code || {}}
-        sandbox={defaultSandbox}
+        sandbox={{ ...defaultSandbox, ...doc.get('currentState.vmSandbox', {})}}
         renderLoader={() => <Loader active />}
         getDocument={() => doc}
         value={props.children}
@@ -104,10 +128,14 @@ export default class ActiveDocument extends Component {
   async componentDidMount() {
     const { runtime } = this.context
 
-    this.setState({ loading: true })
-    this.setState({ doc: this.loadDocument() })
+    const doc = this.loadDocument()
+    this.setState({ loading: true, doc })
 
+    console.log('props!', this.props)
     if (this.props.processImports) {
+      console.log('processing imports')
+      const resp = await doc.action('asset-loaders/imports-section')(true)
+      console.log('processed', resp)
     }
 
     this.setState({ loading: false })

@@ -23,14 +23,29 @@ const mdxComponents = (baseProps = {}, doc) => ({
 
     console.log('wrapper', children)
 
-    const wrappedChildren = children.map((child, i) => 
-      <div className={`mdx-el mdx-${child.props.mdxType}`} key={`mdx-${i}`} style={{ clear: 'both' }}>
-        {props.displayGutter && <div className='mdx-gutter' style={{ float: 'left', width: '16px' }}>
-          {child.props.mdxType === 'pre' && <Icon name="bars" size="tiny" />}
-        </div>}
-          <div className='mdx-content' style={{ float: 'left', width: '100%', ...(props.displayGutter && { marginLeft: '20px' }) }}>{child}</div>
+    const wrappedChildren = children.map((child, i) => (
+      <div
+        className={`mdx-el mdx-${child.props.mdxType}`}
+        key={`mdx-${i}`}
+        style={{ clear: 'both' }}
+      >
+        {props.displayGutter && (
+          <div className="mdx-gutter" style={{ float: 'left', width: '16px' }}>
+            {child.props.mdxType === 'pre' && <Icon name="bars" size="tiny" />}
+          </div>
+        )}
+        <div
+          className="mdx-content"
+          style={{
+            float: 'left',
+            width: '100%',
+            ...(props.displayGutter && { marginLeft: '20px' }),
+          }}
+        >
+          {child}
+        </div>
       </div>
-    )
+    ))
 
     return <main {...rest} children={wrappedChildren} />
   },

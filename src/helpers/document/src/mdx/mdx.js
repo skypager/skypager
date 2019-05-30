@@ -278,6 +278,7 @@ export class Mdx extends Helper {
       params,
     }
   }
+
   /**
    * Returns the React component that was produced by the mdx webpack loader
    *
@@ -309,6 +310,8 @@ export class Mdx extends Helper {
     runtime.mdxDocs.sandboxes = Helper.createContextRegistry('sandboxes', {
       context: Helper.createMockContext(options.contexts || {}),
     })
+
+    runtime.mdxDocs.actions.register('asset-loaders/imports-section', () => processImportSection)
   }
 }
 
@@ -334,4 +337,57 @@ function filter(...args) {
     }))
     .filter(...args)
     .value()
+}
+
+function processImportSection(autoLoad = true) {
+  const importSectionLine = this.headingsMap.headings.imports
+
+  if (typeof importSectionLine === 'undefined') {
+    return false
+  }
+
+  const listNodes = this.select('list')
+  const importsList = listNodes.length && listNodes.find((list) => {
+    const parentHeading = this.findParentHeading(list)
+    return parentHeading && String(this.stringify(parentHeading)).toLowerCase().trim().startsWith('imports')
+  })
+
+  if (!importsList) {
+    return false
+  }
+
+  const links = this.select('link', importsList)
+
+  const unpkgRequest = links.reduce((memo, link) => ({
+    ...memo,
+    [this.stringify(link)]: link.url
+  }), {})
+  
+  this.state.set('importDependencies', {
+    ...this.state.get('importDependencies') || {},
+    ...unpkgRequest
+  })
+
+    this.runtime.bundle.register()  
+  
+  if (autoLoad === true) {
+    const { mapKeys } = this.lodash
+    return Promise.resolve(
+      this.runtime.assetLoader.unpkg(unpkgRequest)
+    ).then(response => {
+      if (this.runtime.isFeatureEnabled('bundle') && this.runtime.bundle) {
+        const payload = mapKeys(response, (v,k) => unpkgRequest[k].split('@')[0])
+        this.runtime.bundle.register(payload)
+      }
+
+      this.state.set('vmSandbox', {
+        ...this.state.get('vmSandbox') || {},
+        ...response
+      })
+      
+      return response  
+    })
+  } else {
+    return unpkgRequest
+  }
 }

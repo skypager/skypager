@@ -83,6 +83,7 @@ export default class Bundle extends Feature {
         }
       } else if (registeredValue) {
         response = registeredValue
+        return response
       }
     } else {
       console.log('BUNDLE DOESNT HAVE', request)

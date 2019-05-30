@@ -12,6 +12,9 @@ We need to know the `global variable name` and the path to the module on `unpkg.
 For example, the following markdown list can convey the information
 
 ```markdown
+
+## Imports
+
 - [React](react@16.8.6/umd/react.development.js)
 - [ReactDOM](react-dom@16.8.6/umd/react-dom.development.js)
 ```
@@ -20,21 +23,100 @@ For example, the following markdown list can convey the information
 
 We're going to be loading the [Zdog](https://zzz.dog) library for working with svg and canvas.
 
-We can type it as a link.
+- [Zdog](zdog@1.0.1/dist/zdog.dist.min.js)
 
-- [Zdog](zdog@1.0.1/js/index.js)
+Under the hood, the Document helper component can detect the list element under the imports heading,
+and process each item to extract the arguments it needs to be able to load these libraries for us prior to rendering
+the examples on the page itself.  
 
-We can parse this list element 
+## Using our imported dependency 
+
+As you can see, our renderable block won't display until the dependencies have been imported.
 
 ```javascript renderable=true
-const doc = $doc
-const importSectionNode = $doc.body.find(({ position }) => 
-  positon.start.line === $doc.headingsMap.headings.imports[0]
-)
+typeof Zdog
+```
 
-function ParsedOutput() {
-  return (<pre>hello</pre>)
+Any dependencies imported this way will be automatically in scope in your code blocks.
+
+You can also use them in require statements
+
+```javascript renderable=true
+const React = require('react')
+const Zdog = require('zdog')
+const { Component } = React
+
+class Imported extends Component {
+  render() {
+    return typeof Zdog === 'undefined'  
+      ? <div>'Oh no!</div>
+      : <div>even imports work</div>
+  }
 }
 
-<ParsedOutput />
+<Imported />
+```
+
+As well as import statements
+
+```javascript renderable=true
+import Zdog from 'zdog'
+
+function Z() {
+  return <div>typeof Zdog is {typeof Zdog}</div>
+}
+
+<Z />
+```
+
+and it will still be resolved by the global variable, since the dependencies are loaded via a script tag.
+
+regardless, this makes your code examples more copy paste friendly between the documentation and the real code!
+
+## Zdog Demo
+
+Just by loading this markdown file in the skypager runtime, with the @skypager/helpers-document plugin,
+we can write code demos and tutorials with dependencies from NPM. 
+
+```javascript renderable=true
+class Illustration extends Component {
+  renderIllustration() {
+
+    // create illo
+    const illo = new Zdog.Illustration({
+      // set canvas with selector
+      element: '.zdog-canvas',
+    })
+    
+    // add circle
+    new Zdog.Ellipse({
+      addTo: illo,
+      diameter: 80,
+      stroke: 20,
+      color: '#636',
+    })
+    
+    // update & render
+    illo.updateRenderGraph()
+  }
+
+  componentDidMount() {
+    this.renderIllustration()
+  }
+
+  render() {
+    return (
+      <Container textAlign="center">
+        <canvas 
+          className="zdog-canvas"
+          width={240}
+          height={240}
+          style={{ backgroundColor: 'pink' }}
+        />
+      </Container>
+    )
+  }
+}
+
+<Illustration />
 ```
