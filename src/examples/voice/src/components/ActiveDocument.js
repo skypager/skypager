@@ -1,7 +1,7 @@
-import React, { useReducer, useEffect, createRef, useState, Component } from 'react'
+import React, { useReducer, useEffect, createRef, useState, Component, Fragment } from 'react'
 import types from 'prop-types'
 import Editor from '@skypager/helpers-document/lib/skypager-document-editor'
-import { Loader, Icon, Input, Header, Button } from 'semantic-ui-react'
+import { Loader, Icon, Header, Button, Segment } from 'semantic-ui-react'
 import { MDXProvider } from '@mdx-js/react'
 import { Link } from 'react-router-dom'
 import DocLink from './DocLink'
@@ -47,7 +47,21 @@ const mdxComponents = (baseProps = {}, doc) => ({
       </div>
     ))
 
-    return <main {...rest} children={wrappedChildren} />
+    return (
+      <Fragment>
+        <Segment basic clearing>
+          <Button
+            basic
+            floated="right"
+            circular
+            icon="bullhorn"
+            content="Read this page outloud"
+            onClick={() => readAloud(doc)}
+          />
+        </Segment>
+        <main {...rest} children={wrappedChildren} />
+      </Fragment>
+    )
   },
   h1: props => <Header as="h1" dividing content={props.children} />,
   h2: props => <Header as="h2" content={props.children} />,
@@ -170,4 +184,20 @@ export default class ActiveDocument extends Component {
       </MDXProvider>
     )
   }
+}
+
+async function readAloud(doc) {
+  const { sortBy } = doc.lodash
+
+  await doc.runtime.feature('voice-synthesis').enable()
+
+  doc.state.set('readingAloud', true)
+
+  const nodes = doc.select('heading, paragraph')
+
+  const stringified = sortBy(nodes, node => node.position.start.line).map(node =>
+    doc.stringify(node)
+  )
+
+  stringified.forEach(line => doc.runtime.synth.say(line))
 }

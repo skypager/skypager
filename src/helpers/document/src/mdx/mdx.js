@@ -347,10 +347,18 @@ function processImportSection(autoLoad = true) {
   }
 
   const listNodes = this.select('list')
-  const importsList = listNodes.length && listNodes.find((list) => {
-    const parentHeading = this.findParentHeading(list)
-    return parentHeading && String(this.stringify(parentHeading)).toLowerCase().trim().startsWith('imports')
-  })
+  const importsList =
+    listNodes.length &&
+    listNodes.find(list => {
+      const parentHeading = this.findParentHeading(list)
+      return (
+        parentHeading &&
+        String(this.stringify(parentHeading))
+          .toLowerCase()
+          .trim()
+          .startsWith('imports')
+      )
+    })
 
   if (!importsList) {
     return false
@@ -358,34 +366,35 @@ function processImportSection(autoLoad = true) {
 
   const links = this.select('link', importsList)
 
-  const unpkgRequest = links.reduce((memo, link) => ({
-    ...memo,
-    [this.stringify(link)]: link.url
-  }), {})
-  
+  const unpkgRequest = links.reduce(
+    (memo, link) => ({
+      ...memo,
+      [this.stringify(link)]: link.url,
+    }),
+    {}
+  )
+
   this.state.set('importDependencies', {
-    ...this.state.get('importDependencies') || {},
-    ...unpkgRequest
+    ...(this.state.get('importDependencies') || {}),
+    ...unpkgRequest,
   })
 
-    this.runtime.bundle.register()  
-  
+  this.runtime.bundle.register()
+
   if (autoLoad === true) {
     const { mapKeys } = this.lodash
-    return Promise.resolve(
-      this.runtime.assetLoader.unpkg(unpkgRequest)
-    ).then(response => {
+    return Promise.resolve(this.runtime.assetLoader.unpkg(unpkgRequest)).then(response => {
       if (this.runtime.isFeatureEnabled('bundle') && this.runtime.bundle) {
-        const payload = mapKeys(response, (v,k) => unpkgRequest[k].split('@')[0])
+        const payload = mapKeys(response, (v, k) => unpkgRequest[k].split('@')[0])
         this.runtime.bundle.register(payload)
       }
 
       this.state.set('vmSandbox', {
-        ...this.state.get('vmSandbox') || {},
-        ...response
+        ...(this.state.get('vmSandbox') || {}),
+        ...response,
       })
-      
-      return response  
+
+      return response
     })
   } else {
     return unpkgRequest

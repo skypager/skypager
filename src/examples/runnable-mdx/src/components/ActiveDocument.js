@@ -50,7 +50,7 @@ const mdxComponents = (baseProps = {}, doc) => ({
       }
     }
 
-   const wrappedChildren = children.map((child, i) => (
+    const wrappedChildren = children.map((child, i) => (
       <div
         className={`mdx-el mdx-${child.props.mdxType}`}
         key={`mdx-${i}`}
@@ -106,7 +106,7 @@ const mdxComponents = (baseProps = {}, doc) => ({
         {...(props.renderable || props.runnable) && { debounceChangePeriod: 400 }}
         {...props}
         {...baseProps.code || {}}
-        sandbox={{ ...defaultSandbox, ...doc.get('currentState.vmSandbox', {})}}
+        sandbox={{ ...defaultSandbox, ...doc.get('currentState.vmSandbox', {}) }}
         renderLoader={() => <Loader active />}
         getDocument={() => doc}
         value={props.children}
