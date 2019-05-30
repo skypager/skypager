@@ -9,4 +9,18 @@
 
 .active-document-wrapper li {
   font-size: 1.1em;
+} 
+
+.mdx-el .mdx-content {
+  margin-bottom: 16px;
+}
+
+#page-container.mobile .mdx-el .mdx-content {
+  padding-right: 16px;
+  padding-left: 16px;
+}
+
+#page-container.mobile .mdx-el.mdx-pre .mdx-content {
+  padding-right: 0px;
+  padding-left: 0px;
 }

@@ -33,10 +33,10 @@ One of the jobs of the `VoiceCommander` is to take the commands it has received 
 ```javascript renderable=true position=above
 const commands = [
   "Show me my projects",
-  "Lets just see the webapps",
+  "Lets just see the websites",
   "Which ones have changed in the past two weeks?",
-  "Let's look at the screenshots",
-  "Ok lets deploy them to a preview URL"
+  "look at the screenshots",
+  "Launch them mothafuckas"
 ]
 
 function CommandTracker({ toggleExpand, commandId, data = {} }) {
@@ -59,7 +59,6 @@ function CommandTracker({ toggleExpand, commandId, data = {} }) {
     const previous = commands[index - 1]
     const currentState = $runtime.voiceCommander.state.get('current') || (previous && previous.update) || {}
 
-    console.log({ currentState, update })
     if (index === 0) {
       update.firstCommand = true
     } else {
@@ -69,7 +68,6 @@ function CommandTracker({ toggleExpand, commandId, data = {} }) {
     if (currentCommand) {
       const { structured = [], nouns = [] } = currentCommand 
 
-      console.log('parsing current command', currentCommand)
       if (update.firstCommand && structured[0] === 'show') {
         update.queryType = 'show'
         update.queryTargets = nouns.map((n) => ({
@@ -79,7 +77,6 @@ function CommandTracker({ toggleExpand, commandId, data = {} }) {
       }
 
       if (!update.firstCommand) {
-        console.log('not first command', structured, update)
         if(update.queryType === 'show' && (structured[0] === 'see just' || structured[0] === 'just see')) {
           update.firstCommand = false
           update.queryModifiers = nouns.map((n) => ({
@@ -532,7 +529,7 @@ Any time we get a new `query`, we analyze its components, and try and apply it t
 
 Any time the data changes, React renders new output.
 
-## Getting Started
+## Tying together our features and our UI 
 
 The state management aspect of our application is all completely handled by the skypager runtime and features we built.
 
@@ -575,7 +572,7 @@ function QueryOutput({ query }) {
 
   if (type === 'show' && modifiers.length) {
     modifiers.forEach(({ type, noun, args = [] }) => {
-      if (type === 'only' && noun === 'web apps') {
+      if (type === 'only' && noun.match(/web/i)) {
         results = results.filter(project => project && project.skypager && project.skypager.projectType === 'webapp')
       } else if (type === 'filter' && args[0] === 'change' && args[1] === 'weeks') {
         results = results.slice(0, 4)
@@ -587,6 +584,11 @@ function QueryOutput({ query }) {
     actions.forEach(({ type, args = [] }) => {
       if (type === 'subcommand') {
         currentView = args.join('_')
+
+        if (currentView.match(/launch/)) {
+          // temporary hack! synthesized voice have a hard time w the phrases 
+          currentView = 'launch'
+        }
       }
     })
   }
@@ -599,7 +601,7 @@ function QueryOutput({ query }) {
             return (
               <ScreenshotBrowser project={result} />
             )
-          case 'deploy_preview url': 
+          case 'launch': 
             return (
               <DeploymentAction project={result} />
             )
@@ -680,18 +682,18 @@ function VoiceDashboard() {
 
   const commands = [
     "Show me my projects",
-    "Lets just see the webapps",
+    "Lets just see the websites",
     "Which ones have changed in the past two weeks?",
-    "Let's look at the screenshots",
-    "Ok lets deploy them to a preview URL"
+    "Look at the screenshots",
+    "Launch them motherfuckas!"
   ]
   
   return (
     <Grid>
       <Grid.Row divided="vertical">
         <Grid.Column width={4}>
-          <Header dividing content="Stick to the script!" />
-          {commands.map((command) => <Segment key={command}>{command}</Segment>)}
+          <Header dividing content="Stick to the script!" subheader='Click on a command to have the computer say it' />
+          {commands.map((command) => <Segment onClick={() => $runtime.synth.say(command, "google us english male")} key={command}>{command}</Segment>)}
         </Grid.Column>
         <Grid.Column width={4}>
           <Header dividing content="Received Commands" />

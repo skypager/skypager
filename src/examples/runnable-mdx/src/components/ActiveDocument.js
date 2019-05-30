@@ -108,7 +108,6 @@ export default class ActiveDocument extends Component {
     this.setState({ doc: this.loadDocument() })
 
     if (this.props.processImports) {
-
     }
 
     this.setState({ loading: false })

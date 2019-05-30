@@ -76,7 +76,6 @@ export default class Editor extends Component {
       const lineNumber = this.props['data-line-number']
 
       if (lineNumber) {
-        console.log('updating document codeblock content')
         const doc = getDocument()
         doc.blockContent.set(lineNumber, newValue)
         const codeBlock = doc.codeBlocks.find(
@@ -84,7 +83,6 @@ export default class Editor extends Component {
         )
 
         if (codeBlock) {
-          console.log('updating the code block in the ast')
           codeBlock.value = newValue
         }
       }
@@ -106,7 +104,6 @@ export default class Editor extends Component {
   }
 
   render() {
-    console.log('Rendering Editor', this.props)
     const {
       header = () => null,
       footer = () => null,
@@ -159,7 +156,6 @@ function CodeEditor(props) {
       tabSize={2}
       {...rest}
       style={{
-        padding: '28px',
         ...(rest.style || {}),
       }}
       editorProps={{ $blockScrolling: Infinity, ...(rest.editorProps || {}) }}

@@ -1,6 +1,6 @@
-import React, { Component } from 'react'
+import React, { Fragment, Component } from 'react'
 import types from 'prop-types'
-import { Container } from 'semantic-ui-react'
+import { Container, Responsive } from 'semantic-ui-react'
 import ActiveDocument from 'components/ActiveDocument'
 
 export default class HomePage extends Component {
@@ -9,7 +9,6 @@ export default class HomePage extends Component {
   }
 
   receiveDoc = (doc, component) => {
-    console.log('Got the Doc', doc.name)
   }
 
   state = {
@@ -24,9 +23,18 @@ export default class HomePage extends Component {
 
   render() {
     return (
-      <Container style={{ padding: '48px' }}>
-        {this.state.docId && <ActiveDocument onLoad={this.receiveDoc} docId={this.state.docId} />}
-      </Container>
+      <Fragment>
+        <Responsive {...Responsive.onlyMobile}>
+          <div id="page-container" className="mobile">
+            {this.state.docId && <ActiveDocument onLoad={this.receiveDoc} docId={this.state.docId} />}
+          </div>
+        </Responsive>
+        <Responsive minWidth={Responsive.onlyTablet.minWidth}>
+          <Container id="page-container">
+            {this.state.docId && <ActiveDocument onLoad={this.receiveDoc} docId={this.state.docId} />}
+          </Container>
+        </Responsive>       
+      </Fragment>
     )
   }
 }

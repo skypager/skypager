@@ -1,7 +1,7 @@
 import React, { useReducer, useEffect, createRef, useState, Component } from 'react'
 import types from 'prop-types'
 import Editor from '@skypager/helpers-document/lib/skypager-document-editor'
-import { Loader, Input, Header, Button } from 'semantic-ui-react'
+import { Loader, Icon, Input, Header, Button } from 'semantic-ui-react'
 import { MDXProvider } from '@mdx-js/react'
 import { Link } from 'react-router-dom'
 import DocLink from './DocLink'
@@ -18,6 +18,22 @@ const defaultSandbox = {
 }
 
 const mdxComponents = (baseProps = {}, doc) => ({
+  wrapper: (props = {}) => {
+    const { children, ...rest } = props
+
+    console.log('wrapper', children)
+
+    const wrappedChildren = children.map((child, i) => 
+      <div className={`mdx-el mdx-${child.props.mdxType}`} key={`mdx-${i}`} style={{ clear: 'both' }}>
+        {props.displayGutter && <div className='mdx-gutter' style={{ float: 'left', width: '16px' }}>
+          {child.props.mdxType === 'pre' && <Icon name="bars" size="tiny" />}
+        </div>}
+          <div className='mdx-content' style={{ float: 'left', width: '100%', ...(props.displayGutter && { marginLeft: '20px' }) }}>{child}</div>
+      </div>
+    )
+
+    return <main {...rest} children={wrappedChildren} />
+  },
   h1: props => <Header as="h1" dividing content={props.children} />,
   h2: props => <Header as="h2" content={props.children} />,
   h3: props => <Header as="h3" content={props.children} />,
@@ -25,7 +41,7 @@ const mdxComponents = (baseProps = {}, doc) => ({
   h5: props => <Header as="h5" content={props.children} />,
   h6: props => <Header as="h6" content={props.children} />,
 
-  pre: props => <div {...props} />,
+  pre: props => <div {...props} className="code-wrapper" />,
 
   a: props => {
     const content = String(props.children).toLowerCase()
@@ -122,12 +138,6 @@ export default class ActiveDocument extends Component {
         code: {
           ...(stateMdxProps.code || {}),
           maxLines: 40,
-          wrapperProps: {
-            style: {
-              marginTop: '40px',
-              marginBottom: '40px',
-            },
-          },
           sandbox: defaultSandbox,
           onLoad: (aceEditor, component) => {
             doc.runtime.editor.syncWithDocument(component, aceEditor, doc)
@@ -141,12 +151,7 @@ export default class ActiveDocument extends Component {
 
     return (
       <MDXProvider components={components}>
-        <div
-          className="active-document-wrapper"
-          style={{ height: '100%', width: '100%', margin: 0, padding: 0 }}
-        >
-          <Component />
-        </div>
+        <Component {...this.props} />
       </MDXProvider>
     )
   }
