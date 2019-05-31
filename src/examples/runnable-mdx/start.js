@@ -53,7 +53,7 @@ async function main() {
     })
   }
 
-  const port = await runtime.networking.findOpenPort(runtime.argv.port || 3000)
+  const port = await runtime.networking.findOpenPort(runtime.argv.port || process.env.PORT || 3000)
 
   if (runtime.isDevelopment) {
     copyPublicFolder(runtime.resolve('public'), runtime.resolve('lib'))

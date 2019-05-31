@@ -83,19 +83,19 @@ You can control positioning with the `position=above|below|left|right` attribute
 
 ### Above
 
-```javascript renderable=true position=above
+```javascript renderable=true position=above minLines=6
 <Button size="huge" color="pink" content="I am above my code" />
 ```
 
 ### Left  
 
-```javascript renderable=true position=left
+```javascript renderable=true position=left minLines=6
 <Button size="huge" color="purple" content="I am to the left of my code" />
 ```
 
 ### Right 
 
-```javascript renderable=true position=right
+```javascript renderable=true position=right minLines=6
 <Container style={{ width: '80%' }}>
   <Button 
     size="huge" 
@@ -107,7 +107,7 @@ You can control positioning with the `position=above|below|left|right` attribute
 
 ### Below 
 
-```javascript renderable=true position=below
+```javascript renderable=true position=below minLines=6
 <Button size="huge" color="red" content="I am beneath my code" />
 ```
 

@@ -77,6 +77,10 @@ export default class Editor extends Feature {
   }
 
   async enableBabel(options = {}) {
+    if (this.babel) {
+      return this.babel
+    }
+
     const babel = this.runtime.feature('babel', options)
 
     if (!this.runtime.isFeatureEnabled('babel')) {
@@ -97,8 +101,6 @@ export default class Editor extends Feature {
     if (documentHelper.blockContent) {
       return documentHelper
     }
-
-    console.log('Preparing Document For Editor Sync', documentHelper)
 
     const codeBlocksContent = documentHelper.codeBlocks.reduce(
       (memo, codeBlock) => ({

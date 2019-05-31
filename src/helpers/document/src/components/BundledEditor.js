@@ -138,11 +138,11 @@ export default class Editor extends Component {
 }
 
 function CodeEditor(props) {
-  const { id, mode, value, ...rest } = props
+  const { id, name = id, mode, value, ...rest } = props
 
   return (
     <AceEditor
-      name={id}
+      name={name}
       mode={mode}
       theme="dracula"
       width="100%"

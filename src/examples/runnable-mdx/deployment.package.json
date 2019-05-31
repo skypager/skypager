@@ -3,9 +3,6 @@
   "version": "1.1.1",
   "description": "skypager runnable mdx example",
   "author": "Jon Soeder <jon@chicago.com>",
-  "main": "lib/index.js",
-  "browser": "lib/skypager-helpers-document.min.js",
-  "react-native": "lib/index.js",
   "scripts": {
     "build": "skypager build && yarn bundle:mdx",
     "console": "node ./start.js --console",
@@ -15,11 +12,7 @@
     "test": "node ./test.js",
     "bundle:mdx": "skypager bundle-mdx --no-prefix",
     "demo": "skypager test-code-blocks README.md --test-helpers @skypager/devtools/testing/mocha-test-setup",
-    "postdemo": "yarn dev --open",
-    "prepackage": "yarn build",
-    "package": "docker build -t datapimp/skypager-docs-server:latest .",
-    "start:docker": "yarn package && docker run -p 5000:5000 datapimp/skypager-docs-server:latest",
-    "deploy": "now --docker && now alias"
+    "postdemo": "yarn dev --open"
   },
   "publishConfig": {
     "access": "public"
@@ -27,10 +20,10 @@
   "license": "MIT",
   "dependencies": {
     "@skypager/helpers-document": "^1.0.1",
+    "@skypager/helpers-mdx": "^1.0.1",
+    "@skypager/cli": "^1.0.1",
     "@skypager/node": "^1.0.1",
-    "@skypager/webpack": "^1.0.1",
     "compromise": "^11.13.2",
-    "react-json-view": "^1.19.1",
     "retext": "^6.0.1",
     "retext-keywords": "^4.0.2"
   },

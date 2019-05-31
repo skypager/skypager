@@ -3,6 +3,7 @@ import Mdx from './mdx/mdx'
 import Skypage from './components/Skypage'
 import EditorComponent from './components/LazyEditor'
 import BlockRenderer from './components/BlockRenderer'
+import BlockRunner from './components/BlockRunner'
 import RunnableComponent from './components/Runnable'
 import RenderableComponent from './components/Renderable'
 import editor from './features/editor'
@@ -29,7 +30,7 @@ export function Editor(props = {}) {
   }
 }
 
-export { BlockRenderer, Skypage }
+export { BlockRenderer, BlockRunner, Skypage }
 
 export function attach(runtime) {
   runtime.features.add({

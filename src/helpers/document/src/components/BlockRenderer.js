@@ -94,6 +94,7 @@ export default class BlockRenderer extends Component {
         ...this.props.sandbox,
         $runtime: runtime,
         $doc: doc,
+        $el: this.renderArea.current,
       })
       render(compiled, this.renderArea.current)
     } catch (error) {

@@ -7,6 +7,8 @@ skypager
   .use(DocumentHelper)
   .use('editor')
   .use(moduleFactory)
+  .use(next => setupDocs().then(() => next()))
+  .start()
 
 skypager.clients.register('app', () => AppClient)
 
@@ -14,8 +16,19 @@ skypager.appClient = skypager.client('app')
 
 skypager.mdxDocs.add(require.context('../docs', true, /\.md$/))
 
-skypager.setState({ docsLoaded: true })
-
 global.runtime = skypager
 
 export default skypager
+
+async function setupDocs() {
+  const { docsLoaded } = skypager.currentState
+
+  if (!docsLoaded) {
+    await Promise.all([
+      skypager.editor.loadBraceMode('markdown'),
+      skypager.editor.loadBraceMode('html'),
+    ])
+
+    skypager.setState({ docsLoaded: true })
+  }
+}

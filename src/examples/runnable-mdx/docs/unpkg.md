@@ -2,6 +2,8 @@
 
 This demo uses [unpkg](https://unpkg.com) to provide your document with dependencies from npm.
 
+[View Source](/source/unpkg)
+
 ## Defining Imports 
 
 We wil need to define a section called imports, so that the document helper can identify the following list element,
@@ -24,6 +26,7 @@ For example, the following markdown list can convey the information
 We're going to be loading the [Zdog](https://zzz.dog) library for working with svg and canvas.
 
 - [Zdog](zdog@1.0.1/dist/zdog.dist.min.js)
+- [THREE](three@0.77.0/three.min.js)
 
 Under the hood, the Document helper component can detect the list element under the imports heading,
 and process each item to extract the arguments it needs to be able to load these libraries for us prior to rendering
@@ -78,45 +81,17 @@ regardless, this makes your code examples more copy paste friendly between the d
 Just by loading this markdown file in the skypager runtime, with the @skypager/helpers-document plugin,
 we can write code demos and tutorials with dependencies from NPM. 
 
-```javascript renderable=true
-class Illustration extends Component {
-  renderIllustration() {
 
-    // create illo
-    const illo = new Zdog.Illustration({
-      // set canvas with selector
-      element: '.zdog-canvas',
-    })
-    
-    // add circle
-    new Zdog.Ellipse({
-      addTo: illo,
-      diameter: 80,
-      stroke: 20,
-      color: '#636',
-    })
-    
-    // update & render
-    illo.updateRenderGraph()
-  }
+```javascript runnable=true autorun=true
+let illo = new Zdog.Illustration({ element: '.canvas-element' })
 
-  componentDidMount() {
-    this.renderIllustration()
-  }
-
-  render() {
-    return (
-      <Container textAlign="center">
-        <canvas 
-          className="zdog-canvas"
-          width={240}
-          height={240}
-          style={{ backgroundColor: 'pink' }}
-        />
-      </Container>
-    )
-  }
-}
-
-<Illustration />
+// add circle
+const circle = new Zdog.Ellipse({
+  addTo: illo,
+  diameter: 80,
+  stroke: 20,
+  color: '#636',
+})
+ 
+illo.updateRenderGraph()
 ```

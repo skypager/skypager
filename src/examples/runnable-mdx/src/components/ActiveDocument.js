@@ -13,6 +13,7 @@ export const defaultSandbox = Object.assign({}, semanticUIReact, {
   useState,
   createRef,
   React,
+  requestAnimationFrame,
 })
 
 const mdxComponents = (baseProps = {}, doc) => ({
@@ -104,6 +105,7 @@ const mdxComponents = (baseProps = {}, doc) => ({
     return (
       <Editor
         {...(props.renderable || props.runnable) && { debounceChangePeriod: 400 }}
+        {...props.runnable && { run: true, compileToVMRunner }}
         {...props}
         {...baseProps.code || {}}
         sandbox={{ ...defaultSandbox, ...doc.get('currentState.vmSandbox', {}) }}
@@ -131,11 +133,8 @@ export default class ActiveDocument extends Component {
     const doc = this.loadDocument()
     this.setState({ loading: true, doc })
 
-    console.log('props!', this.props)
     if (this.props.processImports) {
-      console.log('processing imports')
-      const resp = await doc.action('asset-loaders/imports-section')(true)
-      console.log('processed', resp)
+      await doc.action('asset-loaders/imports-section')(true)
     }
 
     this.setState({ loading: false })
@@ -222,4 +221,17 @@ export default class ActiveDocument extends Component {
       </MDXProvider>
     )
   }
+}
+
+async function compileToVMRunner(code, component) {
+  const { line, doc } = component.props
+  const { runtime } = component.context
+
+  const response = await runtime.appClient.processSnippet({
+    content: code,
+    code,
+    filename: `${doc.name}/${line}.js`,
+  })
+
+  return response
 }

@@ -32,26 +32,32 @@ if(typeof runtime === 'undefined') {
 
 ### Find Headings By Depth
 
-```javascript runnable=true
-const siteTemplate = runtime.mdxDoc('SITE-TEMPLATE')
+```javascript runnable=true console=true
+const siteTemplate = runtime.mdxDoc('site-template')
 
 const findHeadingsByDepth = (depth) => siteTemplate.selectNode(`heading[depth=${depth}]`)
 
 const titles = findHeadingsByDepth(1)
 const subtitles = findHeadingsByDepth(2)
 const sections = findHeadingsByDepth(3)
+
+console.log('Titles', titles)
+console.log('Subtitles', subtitles)
+console.log('Sections', sections)
 ```
 
 ### Find Code Blocks By Language
 
 The doc helper has a `codeBlocks` property  
 
-```javascript runnable=true
-const siteTemplate = runtime.mdxDoc('SITE-TEMPLATE')
+```javascript runnable=true console=true
+const siteTemplate = runtime.mdxDoc('site-template')
 const { filter } = siteTemplate.lodash
 
 const findCodeBlocksByLanguage = (lang) => filter(siteTemplate.codeBlocks, { lang })
 
-const javscript = findCodeBlocksByLanguage('javascript')
+const javascript = findCodeBlocksByLanguage('javascript')
 const shellScripts = findCodeBlocksByLanguage('shell')
+console.log('JavaScript', javascript)
+console.log('Shell', shellScripts)
 ```
