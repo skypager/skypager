@@ -1,9 +1,21 @@
 import React, { Component } from 'react'
 import types from 'prop-types'
 import Editor from '@skypager/helpers-document/lib/skypager-document-editor'
-import { Loader, Grid, Button, Segment, Tab } from 'semantic-ui-react'
+import { Form, Popup, Button, Loader, Grid, Tab } from 'semantic-ui-react'
 import JsonView from 'react-json-view'
 import DocRepl from './DocRepl'
+
+export function Preferences({ onChange, ...values }) {
+  return (
+    <Form onSubmit={e => e.preventDefault()}>
+      <Form.Button
+        toggle
+        content="Show Info"
+        onClick={() => onChange({ showInfo: !values.showInfo })}
+      />
+    </Form>
+  )
+}
 
 export function InspectJson({ name, data }) {
   return <JsonView src={data} name={name} collapsed={1} />
@@ -17,6 +29,7 @@ export function CodeEditor(props = {}) {
       editable
       renderable={false}
       mode="markdown"
+      wrapEnabled
       id={props.id || props.name}
       {...props}
     />
@@ -48,12 +61,8 @@ export class FileInspector extends Component {
     const panes = [
       {
         active: activeIndex === 0,
-        menuItem: { content: 'File', id: 'file-tab' },
-        render: () => (
-          <Tab.Pane as="div">
-            <InspectJson name="fileData" data={omit(fileData, 'content')} />
-          </Tab.Pane>
-        ),
+        menuItem: { content: 'REPL', id: 'repl-tab' },
+        render: () => <Tab.Pane as="div">{doc && <DocRepl doc={doc} />}</Tab.Pane>,
       },
       {
         active: activeIndex === 1,
@@ -77,12 +86,13 @@ export class FileInspector extends Component {
           </Tab.Pane>
         ),
       },
-      doc && {
+
+      {
         active: activeIndex === 3,
-        menuItem: { content: 'REPL', id: 'repl-tab' },
+        menuItem: { content: 'File', id: 'file-tab' },
         render: () => (
           <Tab.Pane as="div">
-            <DocRepl doc={doc} />
+            <InspectJson name="fileData" data={omit(fileData, 'content')} />
           </Tab.Pane>
         ),
       },
@@ -94,43 +104,15 @@ export class FileInspector extends Component {
   }
 }
 
-export function SplitLayout(props = {}) {
-  const { showInfo, lang, file, toggleInfo, value, fileData, processedMdx } = props
-
-  const columns = showInfo
-    ? [
-        <CodeEditor key="code-editor" lang={lang} file={file} value={value} />,
-        <FileInspector file={file} fileData={fileData} processedMdx={processedMdx} />,
-      ]
-    : [<CodeEditor key="code-editor" lang={lang} file={file} value={value} />]
-
-  return (
-    <Grid columns={showInfo ? 'two' : 'one'} fluid style={{ paddingRight: '12px' }}>
-      <Grid.Row columns="one">
-        <Grid.Column>
-          <Button content="Toggle Info" onClick={toggleInfo} />
-        </Grid.Column>
-      </Grid.Row>
-      <Grid.Row>
-        {columns.map(col => (
-          <Grid.Column>{col}</Grid.Column>
-        ))}
-      </Grid.Row>
-    </Grid>
-  )
-}
-
 export default class SourceViewer extends Component {
   state = {
     loading: false,
-    showInfo: false,
     fileData: undefined,
     processedMdx: undefined,
     ready: false,
-  }
-
-  toggleInfo = () => {
-    this.setState(c => ({ ...c, showInfo: !c.showInfo }))
+    settings: {
+      showInfo: true,
+    },
   }
 
   async componentDidMount() {
@@ -158,22 +140,47 @@ export default class SourceViewer extends Component {
   }
 
   render() {
-    const { file } = this.props
-    const { ready, fileData, processedMdx, showInfo, loading } = this.state
+    const { file, lang } = this.props
+    const { settings = {}, ready, fileData, processedMdx, loading } = this.state
+    const { showInfo = true } = settings
 
     if (loading || !ready || !fileData) {
       return <div />
     }
 
     return (
-      <SplitLayout
-        file={file}
-        showInfo={showInfo}
-        toggleInfo={this.toggleInfo}
-        value={fileData.content}
-        fileData={fileData}
-        processedMdx={processedMdx}
-      />
+      <Grid
+        columns={showInfo ? 'two' : 'one'}
+        stackable
+        fluid
+        style={showInfo ? { paddingRight: '12px' } : {}}
+      >
+        <Grid.Row>
+          <Grid.Column stretched style={{ position: 'relative' }}>
+            <div style={{ position: 'absolute', top: '10px', right: '20px', zIndex: 30000 }}>
+              <Popup on="click" trigger={<Button icon="settings" circular />}>
+                <Preferences
+                  onChange={update =>
+                    this.setState(c => ({ ...c, settings: { ...c.settings, ...update } }))
+                  }
+                  {...settings}
+                />
+              </Popup>
+            </div>
+            <CodeEditor
+              key="code-editor"
+              lang={lang}
+              {...settings}
+              file={file}
+              value={fileData.content}
+            />
+            ,
+          </Grid.Column>
+          <Grid.Column>
+            <FileInspector file={file} fileData={fileData} processedMdx={processedMdx} />,
+          </Grid.Column>
+        </Grid.Row>
+      </Grid>
     )
   }
 }
@@ -186,26 +193,6 @@ const contextTypes = {
   }),
 }
 
-SplitLayout.propTypes = {
-  file: types.string.isRequired,
-  lang: types.string,
-  toggleInfo: types.func,
-  showInfo: types.bool,
-  fileData: types.shape({
-    relative: types.string,
-    path: types.string,
-    stats: types.shape({
-      mtime: types.oneOf([types.number, types.string]),
-    }),
-  }),
-}
-
-SplitLayout.defaultProps = {
-  lang: 'javascript',
-  showInfo: false,
-  fileData: {},
-}
-
 CodeEditor.propTypes = {
   file: types.string.isRequired,
   lang: types.string,
@@ -216,6 +203,7 @@ CodeEditor.defaultProps = {
   lang: 'javascript',
   value: '',
 }
+
 FileInspector.propTypes = {
   processedMdx: types.object,
   fileData: types.shape({
@@ -229,7 +217,6 @@ FileInspector.propTypes = {
 
 CodeEditor.contextTypes = contextTypes
 SourceViewer.contextTypes = contextTypes
-SplitLayout.contextTypes = contextTypes
 FileInspector.contextTypes = contextTypes
 
 function condense(mdxCode) {

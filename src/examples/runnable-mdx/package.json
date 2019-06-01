@@ -17,7 +17,7 @@
     "demo": "skypager test-code-blocks README.md --test-helpers @skypager/devtools/testing/mocha-test-setup",
     "postdemo": "yarn dev --open",
     "prepackage": "yarn build",
-    "package": "docker build -t datapimp/skypager-docs-server:latest .",
+    "package": "docker build -f Dockerfile.build -t datapimp/skypager-docs-server:latest . && docker push datapimp/skypager-docs-server:latest",
     "start:docker": "yarn package && docker run -p 5000:5000 datapimp/skypager-docs-server:latest",
     "deploy": "now --docker && now alias"
   },

@@ -1,8 +1,20 @@
 import React, { Component } from 'react'
 import types from 'prop-types'
-import { Segment, Button, Container, Label, Form } from 'semantic-ui-react'
+import { Segment, Button, Container, Label, Form, Message } from 'semantic-ui-react'
 import Editor from '@skypager/helpers-document/lib/skypager-document-editor'
 import JsonView from 'react-json-view'
+
+function DisplayResponse({ collapsed = 1, response, runtime }) {
+  const { isNumber, isString, isBoolean, isUndefined, isFunction } = runtime.lodash
+
+  if (isNumber(response) || isString(response) || isBoolean(response) || isUndefined(response)) {
+    return <pre>{String(response)}</pre>
+  } else if (isFunction(response)) {
+    return <Editor editable={false} mode="javascript" value={response.toString()} />
+  } else if (response) {
+    return <JsonView src={response} collapsed={collapsed} />
+  }
+}
 
 export function ReplOutput({ runtime, history = [], responses = [], processing = false }) {
   const merged = history.map((line, i) => {
@@ -23,7 +35,7 @@ export function ReplOutput({ runtime, history = [], responses = [], processing =
         <Editor mode="javascript" value={line} name={`repl-line-${index}`} editable={false} />
         <Segment basic loading={processing && pos === 0}>
           {response && !processing && (
-            <JsonView name="response" src={response} collapsed={pos > 0 ? true : 1} />
+            <DisplayResponse response={response} runtime={runtime} collapsed={pos > 0 ? true : 1} />
           )}
         </Segment>
       </div>
@@ -91,14 +103,24 @@ export default class DocRepl extends Component {
     }
   }
 
+  runCommand = async () => {
+    const { current = '' } = this.state
+
+    if (!current || !current.length) {
+      return
+    }
+
+    this.setState(c => ({
+      ...c,
+      history: c.history.concat([c.current]),
+      current: '',
+    }))
+  }
+
   handleKeyDown = e => {
     if (e.keyCode === 13) {
       e.persist()
-      this.setState(c => ({
-        ...c,
-        history: c.history.concat([c.current]),
-        current: '',
-      }))
+      this.runCommand()
     }
   }
 
@@ -192,17 +214,13 @@ export default class DocRepl extends Component {
         <Form fluid>
           <Form.Input
             disabled={processing}
+            placeholder="Enter some code and hit enter."
             type="text"
             fluid
-            labelPosition="right"
             value={current}
             onKeyDown={this.handleKeyDown}
             onChange={(e, { value }) => this.setState({ current: value })}
-          >
-            <Label icon="code" />
-            <input />
-            <Label as={Button} content="Run" />
-          </Form.Input>
+          />
         </Form>
         <Container style={{ paddingTop: '16px' }}>
           <ReplOutput
