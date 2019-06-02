@@ -138,7 +138,9 @@ export default class BlockRunner extends Component {
   }
 
   async compileToScriptRunner(code, options = {}, context = {}) {
+    console.log('Compiling To Script Runnner', this.props)
     code = code || this.buildBlockContent()
+    console.log('Code', code)
 
     const { runtime } = this.context
     const { babel } = runtime.editor
@@ -164,6 +166,8 @@ export default class BlockRunner extends Component {
   buildBlockContent(content = this.state.content || '') {
     const { doc, includeExamples } = this.props
 
+    console.log('Building Block Content', includeExamples, content)
+
     if (!content) {
       return
     }
@@ -175,9 +179,12 @@ export default class BlockRunner extends Component {
         .select(`code[meta*="example=${includeExamples}"]`)
         .map(({ value }) => value)
       headers.push(...includeCodeBlocks)
+
+      console.log('using combined examples', { content, headers })
+      return this.mergeCode(content, headers)
     }
 
-    return this.mergeCode(content, headers)
+    return content
   }
 
   get blockContent() {

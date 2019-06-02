@@ -211,6 +211,7 @@ export default class ActiveDocument extends Component {
           ],
           requireFn: doc.runtime.moduleFactory.createRequireFunction(`${doc.name}.js`),
           onLoad: (aceEditor, component) => {
+            console.log('Ace Editor Loading', doc.runtime.editor)
             doc.runtime.editor.syncWithDocument(component, aceEditor, doc)
           },
         },

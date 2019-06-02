@@ -48,7 +48,18 @@ export default class App extends Component {
             component={sourcePage('docs/site-template.md')}
           />
           <Route path="/docs/unpkg" exact component={docPage('unpkg', { processImports: true })} />
+          <Route
+            path="/docs/threejs/intro"
+            exact
+            component={docPage('threejs/intro', { processImports: true })}
+          />
+
           <Route path="/source/unpkg" exact component={sourcePage('docs/unpkg.md')} />
+          <Route
+            path="/source/threejs/intro"
+            exact
+            component={sourcePage('docs/threejs/intro.md')}
+          />
           <Route path="*" component={HomePage} />
         </Switch>
       </BrowserRouter>

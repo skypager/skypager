@@ -1,20 +1,13 @@
 import React, { Component } from 'react'
 import types from 'prop-types'
 import Editor from '@skypager/helpers-document/lib/skypager-document-editor'
-import { Form, Popup, Button, Loader, Grid, Tab } from 'semantic-ui-react'
+import { Form, Popup, Button, Loader, Grid, Tab, Segment } from 'semantic-ui-react'
 import JsonView from 'react-json-view'
 import DocRepl from './DocRepl'
+import ActiveDocument from './ActiveDocument'
 
 export function Preferences({ onChange, ...values }) {
-  return (
-    <Form onSubmit={e => e.preventDefault()}>
-      <Form.Button
-        toggle
-        content="Show Info"
-        onClick={() => onChange({ showInfo: !values.showInfo })}
-      />
-    </Form>
-  )
+  return <Form onSubmit={e => e.preventDefault()} as={Segment} basic inverted />
 }
 
 export function InspectJson({ name, data }) {
@@ -96,6 +89,15 @@ export class FileInspector extends Component {
           </Tab.Pane>
         ),
       },
+      {
+        active: activeIndex === 3,
+        menuItem: { content: 'Rendered', id: 'render-tab' },
+        render: () => (
+          <Tab.Pane as="div">
+            <ActiveDocument docId={doc.name} />
+          </Tab.Pane>
+        ),
+      },
     ].filter(Boolean)
 
     return (
@@ -110,9 +112,8 @@ export default class SourceViewer extends Component {
     fileData: undefined,
     processedMdx: undefined,
     ready: false,
-    settings: {
-      showInfo: true,
-    },
+    showInfo: true,
+    settings: {},
   }
 
   async componentDidMount() {
@@ -142,7 +143,7 @@ export default class SourceViewer extends Component {
   render() {
     const { file, lang } = this.props
     const { settings = {}, ready, fileData, processedMdx, loading } = this.state
-    const { showInfo = true } = settings
+    const { showInfo } = this.state
 
     if (loading || !ready || !fileData) {
       return <div />
@@ -158,14 +159,29 @@ export default class SourceViewer extends Component {
         <Grid.Row>
           <Grid.Column stretched style={{ position: 'relative' }}>
             <div style={{ position: 'absolute', top: '10px', right: '20px', zIndex: 30000 }}>
-              <Popup on="click" trigger={<Button icon="settings" circular />}>
-                <Preferences
-                  onChange={update =>
-                    this.setState(c => ({ ...c, settings: { ...c.settings, ...update } }))
-                  }
-                  {...settings}
+              <Button.Group size="mini">
+                <Button icon="save" size="mini" />
+                <Popup
+                  open={this.state.showPreferences}
+                  onClose={() => this.setState({ showPreferences: false })}
+                  onOpen={() => this.setState({ showPreferences: true })}
+                  inverted
+                  on="click"
+                  trigger={<Button size="mini" icon="settings" circular />}
+                >
+                  <Preferences
+                    onChange={update => {
+                      this.setState(c => ({ ...c, settings: { ...c.settings, ...update } }))
+                    }}
+                    {...settings}
+                  />
+                </Popup>
+                <Button
+                  icon="info"
+                  size="mini"
+                  onClick={() => this.setState(c => ({ ...c, showInfo: !c.showInfo }))}
                 />
-              </Popup>
+              </Button.Group>
             </div>
             <CodeEditor
               key="code-editor"

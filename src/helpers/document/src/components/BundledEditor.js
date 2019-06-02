@@ -107,6 +107,8 @@ export default class Editor extends Component {
 
     this.editor = editor
 
+    console.log('BundledEditor#handleLoad', this, this.props, editor)
+
     if (onLoad) {
       onLoad(editor, this, this.props)
     }
