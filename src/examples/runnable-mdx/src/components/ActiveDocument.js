@@ -200,6 +200,13 @@ export default class ActiveDocument extends Component {
               marginBottom: '40px',
             },
           },
+          dynamicMarkers: [{
+            inFront: true,
+            update: (...args) => {
+              console.log('dynamic markers')
+              return "<div><h1>wow</h1></div>"  
+            } 
+          }],
           onLoad: (aceEditor, component) => {
             doc.runtime.editor.syncWithDocument(component, aceEditor, doc)
           },

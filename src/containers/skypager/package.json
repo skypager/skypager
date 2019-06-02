@@ -1,0 +1,33 @@
+{
+  "name": "@skypager/container",
+  "version": "1.1.1",
+  "description": "skypager docker container",
+  "author": "Jon Soeder <jon@chicago.com>",
+  "scripts": {
+    "package": "docker build -t datapimp/skypager .",
+    "push": "docker push datapimp/skypager:latest"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@skypager/helpers-document": "^1.0.1",
+    "@skypager/node": "^1.0.1",
+    "@skypager/cli": "^1.0.1",
+    "@skypager/webpack": "^1.1.1",
+    "@skypager/devtools": "^1.1.1"
+  },
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/skypager/skypager"
+  },
+  "homepage": "https://skypager.io",
+  "gitHead": "66f2da16f4d6ebc315f1d244ba314647a8630011",
+  "keywords": [],
+  "contributors": [],
+  "skypager": {
+    "category": "containers",
+    "projectType": "container"
+  }
+}

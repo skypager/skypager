@@ -28,7 +28,6 @@
   "dependencies": {
     "@skypager/helpers-document": "^1.0.1",
     "@skypager/node": "^1.0.1",
-    "@skypager/webpack": "^1.0.1",
     "compromise": "^11.13.2",
     "react-json-view": "^1.19.1",
     "retext": "^6.0.1",
