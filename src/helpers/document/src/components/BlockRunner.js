@@ -83,6 +83,7 @@ export default class BlockRunner extends Component {
   }
 
   async handleRun() {
+    console.log('BlockRunner is running')
     this.setState({ running: true, ran: false, logs: [] })
 
     const { runtime } = this.context
@@ -136,13 +137,24 @@ export default class BlockRunner extends Component {
     return vmRunner
   }
 
-  async compileToScriptRunner(code) {
+  async compileToScriptRunner(code, options = {}, context = {}) {
     code = code || this.buildBlockContent()
 
     const { runtime } = this.context
     const { babel } = runtime.editor
 
-    const run = await babel.createCodeRunner(code)
+    const run = await babel.createCodeRunner(
+      code,
+      {
+        ...this.props.codeRunnerOptions,
+        ...options,
+      },
+      {
+        ...(this.props.requireFn && { require: this.props.requireFn }),
+        ...this.props.sandbox,
+        ...context,
+      }
+    )
 
     return {
       run: async (...args) => run(...args),

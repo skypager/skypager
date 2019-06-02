@@ -33,8 +33,6 @@ export default class Renderable extends Component {
       }
     }
 
-    console.log('Runnable', { wrapperStyle })
-
     let children = [
       <div style={{ ...wrapperStyle, ...(String(hideEditor) === 'true' && { display: 'none' }) }}>
         <Editor {...this.props} />

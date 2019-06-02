@@ -14,45 +14,6 @@ import 'brace/theme/tomorrow'
 import 'brace/theme/solarized_light'
 import 'brace/theme/solarized_dark'
 
-class AceEditorWithDynamicMarkers extends AceEditor {
-  componentDidMount() {
-    super.componentDidMount()
-
-    if (this.props.dynamicMarkers) {
-      console.log('we got dynamic markers')
-      this.handleDynamicMarkers()  
-    }
-  }
-
-  componentDidUpdate(prevProps, prevState) {
-    super.componentDidUpdate(prevProps, prevState)
-  }
-
-  handleDynamicMarkers(markers = []) {
-    console.log('handling markers')
-    // remove foreground markers
-    let currentMarkers = this.editor.getSession().getMarkers(true);
-    for (const i in currentMarkers) {
-      if (currentMarkers.hasOwnProperty(i)) {
-        this.editor.getSession().removeMarker(currentMarkers[i].id);
-      }
-    }
-    // remove background markers except active line marker and selected word marker
-    currentMarkers = this.editor.getSession().getMarkers(false);
-    for (const i in currentMarkers) {
-      if (
-        currentMarkers.hasOwnProperty(i) &&
-        currentMarkers[i].clazz !== "ace_active-line" &&
-        currentMarkers[i].clazz !== "ace_selected-word"
-      ) {
-        this.editor.getSession().removeMarker(currentMarkers[i].id);
-      }
-    }
-    // add new markers
-    markers.forEach((marker) => this.editor.getSession().addDynamicMarker(marker, marker.inFront));
-  }
-}
-
 export default class Editor extends Component {
   static contextTypes = {
     runtime: types.object,
@@ -77,14 +38,13 @@ export default class Editor extends Component {
     value: this.props.value,
   }
 
-  // gives us access to their range class or other low level ace methods
-  captureAce = (ace) => {
+  captureAce = ace => {
     const { beforeLoad } = this.props
     this.aceLibrary = ace
 
-    const { Range } = ace.acequire("ace/range")
+    const { Range } = ace.acequire('ace/range')
 
-    this.Range = Range 
+    this.Range = Range
 
     if (beforeLoad) {
       beforeLoad(ace)
@@ -195,7 +155,7 @@ function CodeEditor(props) {
   const { id, name = id, mode, value, ...rest } = props
 
   return (
-    <AceEditorWithDynamicMarkers
+    <AceEditor
       name={name}
       mode={mode}
       theme="dracula"

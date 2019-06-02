@@ -69,6 +69,7 @@ export default class BabelCompiler extends Feature {
   /**
    * @param {String} code the code you wish to compile a sandbox
    * @param {Object} options options for the code runner
+   * @param {Object} context things to inject into the context
    * @returns {Function} a function which will compile your code and run it in a sandbox. This function accepts an object which will be added to the sandbox scope
    *
    * @example
@@ -84,7 +85,7 @@ export default class BabelCompiler extends Feature {
     const { runtime } = this
     const { vm } = runtime
     const { mapValues, pick } = this.lodash
-    const compiled = this.compile(code)
+    const compiled = this.compile(code, options)
     const script = vm.createScript(compiled)
 
     const me = this
@@ -94,17 +95,19 @@ export default class BabelCompiler extends Feature {
      * @param {Object} vars variables that will be considered part of window inside your code
      */
     function codeRunner(vars = {}) {
-      const sandbox = vm.createContext({
-        runtime,
-        skypager: runtime,
-        ...context,
-      })
+      const sandbox =
+        options.vmContext ||
+        vm.createContext({
+          runtime,
+          skypager: runtime,
+          ...context,
+        })
 
       mapValues(vars, (v, k) => {
         sandbox[k] = v
       })
 
-      const result = script.runInContext(sandbox)
+      const result = options.thisContext ? script.runInThisContext() : script.runInContext(sandbox)
 
       me.lastSandbox = sandbox
 

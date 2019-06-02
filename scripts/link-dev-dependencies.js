@@ -27,13 +27,13 @@ run(async runtime => {
   const linkDep = name =>
     Promise.all(
       projectRoots.map(subfolder =>
-        runtime.fsx.ensureSymlinkAsync(
-          // this could be dynamic and we can add a list of dev dependencies to link
-          runtime.resolve('node_modules', '.bin', name),
-          runtime.resolve(subfolder, 'node_modules', '.bin', name)
-        ).catch((error) => {
-          
-        })
+        runtime.fsx
+          .ensureSymlinkAsync(
+            // this could be dynamic and we can add a list of dev dependencies to link
+            runtime.resolve('node_modules', '.bin', name),
+            runtime.resolve(subfolder, 'node_modules', '.bin', name)
+          )
+          .catch(error => {})
       )
     )
 

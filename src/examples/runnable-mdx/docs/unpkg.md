@@ -23,9 +23,8 @@ For example, the following markdown list can convey the information
 
 ## Imports
 
-We're going to be loading the [Zdog](https://zzz.dog) library for working with svg and canvas.
+We're going to be loading the [Three.js](https://threejs.org) library for working with 3d
 
-- [Zdog](zdog@1.0.1/dist/zdog.dist.min.js)
 - [THREE](three@0.77.0/three.min.js)
 
 Under the hood, the Document helper component can detect the list element under the imports heading,
@@ -37,7 +36,7 @@ the examples on the page itself.
 As you can see, our renderable block won't display until the dependencies have been imported.
 
 ```javascript renderable=true
-typeof Zdog
+typeof THREE 
 ```
 
 Any dependencies imported this way will be automatically in scope in your code blocks.
@@ -46,12 +45,12 @@ You can also use them in require statements
 
 ```javascript renderable=true
 const React = require('react')
-const Zdog = require('zdog')
+const THREE = require('three')
 const { Component } = React
 
 class Imported extends Component {
   render() {
-    return typeof Zdog === 'undefined'  
+    return typeof THREE === 'undefined'  
       ? <div>'Oh no!</div>
       : <div>even imports work</div>
   }
@@ -63,10 +62,10 @@ class Imported extends Component {
 As well as import statements
 
 ```javascript renderable=true
-import Zdog from 'zdog'
+import * as THREE from 'three'
 
 function Z() {
-  return <div>typeof Zdog is {typeof Zdog}</div>
+  return <div>typeof THREE is {typeof THREE}</div>
 }
 
 <Z />
@@ -76,22 +75,19 @@ and it will still be resolved by the global variable, since the dependencies are
 
 regardless, this makes your code examples more copy paste friendly between the documentation and the real code!
 
-## Zdog Demo
+## Three.js Demo
 
 Just by loading this markdown file in the skypager runtime, with the @skypager/helpers-document plugin,
 we can write code demos and tutorials with dependencies from NPM. 
 
+```javascript runnable=true editable=true console=true
+async function wow() {
+  console.log('wow dawg!')
+}
 
-```javascript runnable=true autorun=true
-let illo = new Zdog.Illustration({ element: '.canvas-element' })
+wow()
+```
 
-// add circle
-const circle = new Zdog.Ellipse({
-  addTo: illo,
-  diameter: 80,
-  stroke: 20,
-  color: '#636',
-})
- 
-illo.updateRenderGraph()
+```javascript
+console.log('Not sure why the last code block is never editable :(')
 ```

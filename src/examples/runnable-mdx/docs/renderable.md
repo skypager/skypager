@@ -141,3 +141,9 @@ function DocReporter({ doc }) {
 
 <DocReporter doc={$doc} />
 ```
+
+well
+
+```javascript renderable=true
+<div>wtf</div>
+```
