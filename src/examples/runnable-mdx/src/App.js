@@ -4,7 +4,6 @@ import { Switch, Route, Router } from 'react-router-dom'
 import DocPage from './pages/DocPage'
 import SourceViewer from './components/SourceViewer'
 import NavLayout from './components/NavLayout'
-import HomePage from './pages/HomePage'
 import runtime from './runtime'
 
 import './App.css'
@@ -51,20 +50,25 @@ export default class App extends Component {
               exact
               component={sourcePage('docs/site-template.md')}
             />
-            <Route path="/docs/unpkg" exact component={docPage('unpkg', { processImports: true })} />
+            <Route
+              path="/docs/unpkg"
+              exact
+              component={docPage('unpkg', { processImports: true })}
+            />
             <Route
               path="/docs/threejs/intro"
               exact
               component={docPage('threejs/intro', { processImports: true })}
             />
-  
+
             <Route path="/source/unpkg" exact component={sourcePage('docs/unpkg.md')} />
             <Route
               path="/source/threejs/intro"
               exact
               component={sourcePage('docs/threejs/intro.md')}
             />
-            <Route path="*" component={HomePage} />
+            <Route path="/" exact component={docPage('README')} />
+            <Route path="*" component={() => <div style={{ minHeight: '600px', height: '100%'}}><h1>Not Found</h1></div>} />
           </Switch>
         </NavLayout>
       </Router>

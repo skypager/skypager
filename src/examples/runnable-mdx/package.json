@@ -57,6 +57,19 @@
         "@skypager/helpers-document/lib/skypager-document-editor": "SkypagerEditor"
       },
       "copy": {
+        "brace": [{
+          "from": "theme",
+          "flatten": false
+         }, {
+          "from": "ext",
+          "flatten": false
+        }, {
+          "from": "keybinding",
+          "flatten": false
+        }, {
+          "from": "mode",
+          "flatten": false         
+        }],
         "@skypager/helpers-document": [
           "lib/skypager-helpers-document.js",
           "lib/skypager-document-editor.js",

@@ -509,7 +509,11 @@ export class Babel extends Helper {
   }
 
   get defaultExportName() {
-    return this.chain.get('exportData').find(({ name }) => name === 'default').get('exportName').value()
+    return this.chain
+      .get('exportData')
+      .find(({ name }) => name === 'default')
+      .get('exportName')
+      .value()
   }
 
   /**
@@ -566,7 +570,6 @@ export class Babel extends Helper {
 
     return flatten(names).filter(Boolean)
   }
-
 
   async createVMRunner(options = {}) {
     const { runtime } = this
@@ -728,10 +731,7 @@ export const attach = (...args) => Script.attach(...args)
 export default Babel
 
 function findAllBy(...args) {
-  return this 
-    .available
-    .map((id) => this.runtime.script(id))
-    .filter(...args)
+  return this.available.map(id => this.runtime.script(id)).filter(...args)
 }
 
 function filter(iterator) {

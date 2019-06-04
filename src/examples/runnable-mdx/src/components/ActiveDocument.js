@@ -1,9 +1,10 @@
 import React, { createRef, useReducer, useEffect, useState, Component } from 'react'
 import types from 'prop-types'
 import Editor from '@skypager/helpers-document/lib/skypager-document-editor'
-import { Loader, Header, Icon } from 'semantic-ui-react'
+import { Loader, Icon } from 'semantic-ui-react'
 import { MDXProvider } from '@mdx-js/react'
 import DocLink from './DocLink'
+import ScrollableHeader from './ScrollableHeader'
 import * as semanticUIReact from 'semantic-ui-react'
 
 export const defaultSandbox = Object.assign({}, semanticUIReact, {
@@ -82,12 +83,12 @@ const mdxComponents = (baseProps = {}, doc) => ({
       </div>
     )
   },
-  h1: props => <Header as="h1" dividing content={props.children} />,
-  h2: props => <Header as="h2" content={props.children} />,
-  h3: props => <Header as="h3" content={props.children} />,
-  h4: props => <Header as="h4" content={props.children} />,
-  h5: props => <Header as="h5" content={props.children} />,
-  h6: props => <Header as="h6" content={props.children} />,
+  h1: props => <ScrollableHeader as="h1" dividing content={props.children} />,
+  h2: props => <ScrollableHeader as="h2" content={props.children} />,
+  h3: props => <ScrollableHeader as="h3" content={props.children} />,
+  h4: props => <ScrollableHeader as="h4" content={props.children} />,
+  h5: props => <ScrollableHeader as="h5" content={props.children} />,
+  h6: props => <ScrollableHeader as="h6" content={props.children} />,
 
   pre: props => <div {...props} />,
 
@@ -194,12 +195,6 @@ export default class ActiveDocument extends Component {
         code: {
           ...(stateMdxProps.code || {}),
           maxLines: 40,
-          wrapperProps: {
-            style: {
-              marginTop: '40px',
-              marginBottom: '40px',
-            },
-          },
           dynamicMarkers: [
             {
               inFront: true,
@@ -210,8 +205,13 @@ export default class ActiveDocument extends Component {
             },
           ],
           requireFn: doc.runtime.moduleFactory.createRequireFunction(`${doc.name}.js`),
+          beforeLoad: (ace) => {
+            console.log('Before Load')
+            ace.config.set('modePath', '/mode')
+            ace.config.set('themePath', '/theme')
+            ace.config.set('workerPath', '/worker')
+          },
           onLoad: (aceEditor, component) => {
-            console.log('Ace Editor Loading', doc.runtime.editor)
             doc.runtime.editor.syncWithDocument(component, aceEditor, doc)
           },
         },

@@ -7,7 +7,8 @@ import { createBrowserHistory } from 'history'
 skypager.history = createBrowserHistory()
 
 skypager.history.listen((location, action) => {
-  skypager.setState({ location })
+  const { hash: locationHash, pathname: locationPathname } = location
+  skypager.setState({ location, locationPathname, locationHash })
 })
 
 skypager
@@ -28,14 +29,5 @@ global.runtime = skypager
 export default skypager
 
 async function setupDocs() {
-  const { docsLoaded } = skypager.currentState
-
-  if (!docsLoaded) {
-    await Promise.all([
-      skypager.editor.loadBraceMode('markdown'),
-      skypager.editor.loadBraceMode('html'),
-    ])
-
-    skypager.setState({ docsLoaded: true })
-  }
+  skypager.setState({ docsLoaded: true })
 }

@@ -27,6 +27,7 @@ const mapValues = require('lodash/mapValues')
 const mapKeys = require('lodash/mapKeys')
 const pick = require('lodash/pick')
 const isEmpty = require('lodash/isEmpty')
+const isString = require('lodash/isString')
 const isArray = require('lodash/isArray')
 const flatten = require('lodash/flatten')
 const castArray = require('lodash/castArray')
@@ -915,8 +916,20 @@ function createCopyPlugins(currentProject) {
       entries.map(([modName, sourcePath]) =>
         castArray(sourcePath)
           .map(sourcePath => {
-            const exists = runtime.packageFinder.attemptResolve(`${modName}/${sourcePath}`)
-            return exists && { from: exists }
+            if (isString(sourcePath)) {
+              const exists = runtime.packageFinder.attemptResolve(`${modName}/${sourcePath}`)
+              return exists && { from: exists }
+            } else if (sourcePath.from) {
+              const base = runtime.packageFinder.attemptResolve(`${modName}`)
+              if (base) {
+                const from = runtime.resolve(runtime.pathUtils.dirname(base), sourcePath.from)
+
+                return {
+                  ...sourcePath,
+                  from
+                }
+              }
+            }
           })
           .filter(Boolean)
       )
