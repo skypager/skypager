@@ -11,7 +11,7 @@ the editor is saved.</p>
 ## Functions
 
 <dl>
-<dt><a href="#createCodeRunner">createCodeRunner(code, options)</a> ⇒ <code>function</code></dt>
+<dt><a href="#createCodeRunner">createCodeRunner(code, options, context)</a> ⇒ <code>function</code></dt>
 <dd></dd>
 </dl>
 
@@ -66,7 +66,7 @@ Waits until Babel standalone compiler is available
 
 <a name="createCodeRunner"></a>
 
-## createCodeRunner(code, options) ⇒ <code>function</code>
+## createCodeRunner(code, options, context) ⇒ <code>function</code>
 **Kind**: global function  
 **Returns**: <code>function</code> - a function which will compile your code and run it in a sandbox. This function accepts an object which will be added to the sandbox scope  
 
@@ -74,6 +74,7 @@ Waits until Babel standalone compiler is available
 | --- | --- | --- |
 | code | <code>String</code> | the code you wish to compile a sandbox |
 | options | <code>Object</code> | options for the code runner |
+| context | <code>Object</code> | things to inject into the context |
 
 **Example**  
 ```js

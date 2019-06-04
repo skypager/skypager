@@ -18,4 +18,15 @@ export async function discover(options = {}) {
       },
     })
   )
+
+  const initializer = (id) => {
+    const scriptHelper = this.runtime.script(id)
+    return typeof options.create === 'function'
+      ? options.create(scriptHelper)
+      : scriptHelper
+  }
+
+  return options.create
+    ? this.available.map(initializer)
+    : this.available
 }

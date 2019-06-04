@@ -1,8 +1,9 @@
 import React, { Component } from 'react'
 import types from 'prop-types'
-import { Switch, Route, BrowserRouter } from 'react-router-dom'
+import { Switch, Route, Router } from 'react-router-dom'
 import DocPage from './pages/DocPage'
 import SourceViewer from './components/SourceViewer'
+import NavLayout from './components/NavLayout'
 import HomePage from './pages/HomePage'
 import runtime from './runtime'
 
@@ -34,35 +35,39 @@ export default class App extends Component {
   }
 
   render() {
-    return (
-      <BrowserRouter>
-        <Switch>
-          <Route path="/docs/runnable" exact component={docPage('runnable')} />
-          <Route path="/source/runnable" exact component={sourcePage('docs/runnable.md')} />
-          <Route path="/docs/renderable" exact component={docPage('renderable')} />
-          <Route path="/source/renderable" exact component={sourcePage('docs/renderable.md')} />
-          <Route path="/docs/site-template" exact component={docPage('site-template')} />
-          <Route
-            path="/source/site-template"
-            exact
-            component={sourcePage('docs/site-template.md')}
-          />
-          <Route path="/docs/unpkg" exact component={docPage('unpkg', { processImports: true })} />
-          <Route
-            path="/docs/threejs/intro"
-            exact
-            component={docPage('threejs/intro', { processImports: true })}
-          />
+    const { runtime } = this.props
 
-          <Route path="/source/unpkg" exact component={sourcePage('docs/unpkg.md')} />
-          <Route
-            path="/source/threejs/intro"
-            exact
-            component={sourcePage('docs/threejs/intro.md')}
-          />
-          <Route path="*" component={HomePage} />
-        </Switch>
-      </BrowserRouter>
+    return (
+      <Router history={runtime.history}>
+        <NavLayout runtime={this.props.runtime}>
+          <Switch>
+            <Route path="/docs/runnable" exact component={docPage('runnable')} />
+            <Route path="/source/runnable" exact component={sourcePage('docs/runnable.md')} />
+            <Route path="/docs/renderable" exact component={docPage('renderable')} />
+            <Route path="/source/renderable" exact component={sourcePage('docs/renderable.md')} />
+            <Route path="/docs/site-template" exact component={docPage('site-template')} />
+            <Route
+              path="/source/site-template"
+              exact
+              component={sourcePage('docs/site-template.md')}
+            />
+            <Route path="/docs/unpkg" exact component={docPage('unpkg', { processImports: true })} />
+            <Route
+              path="/docs/threejs/intro"
+              exact
+              component={docPage('threejs/intro', { processImports: true })}
+            />
+  
+            <Route path="/source/unpkg" exact component={sourcePage('docs/unpkg.md')} />
+            <Route
+              path="/source/threejs/intro"
+              exact
+              component={sourcePage('docs/threejs/intro.md')}
+            />
+            <Route path="*" component={HomePage} />
+          </Switch>
+        </NavLayout>
+      </Router>
     )
   }
 }

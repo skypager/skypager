@@ -16,22 +16,21 @@ export default class DocPage extends Component {
     docsLoaded: true,
   }
 
-  componentDidUpdate() {
+  componentDidMount() {
     const { runtime } = this.context
 
     const docsLoaded = runtime.currentState.docsLoaded
 
-    console.log('DOC PAGE', docsLoaded)
-
     this.setState({ docsLoaded })
 
     if (!docsLoaded) {
-      runtime.once('docsLoadedDidChangeState', (...args) => {
-        console.log('YO YO DOCS LOADED', ...args)
-        this.setState({ docsLoaded: true })
+      runtime.once('docsLoadedDidChangeState', ({ newValue }) => {
+        this.setState({ docsLoaded: newValue })
       })
     }
+  }
 
+  componentDidUpdate() {
     if (this.state.docId !== this.props.docId) {
       this.setState({ docId: this.props.docId })
     }
@@ -60,7 +59,7 @@ export default class DocPage extends Component {
           </div>
         </Responsive>
         <Responsive minWidth={Responsive.onlyTablet.minWidth}>
-          <Container id="page-container">
+          <div id="page-container" style={{ paddingRight: '16px' }}>
             {!docsLoaded && <Loader active />}
             {this.state.docId && (
               <ActiveDocument {...this.props} onLoad={this.receiveDoc} docId={this.state.docId} />
@@ -74,7 +73,7 @@ export default class DocPage extends Component {
                 to={`/source/${this.state.docId}`}
               />
             </Segment>
-          </Container>
+          </div>
         </Responsive>
       </Fragment>
     )

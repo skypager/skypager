@@ -2,6 +2,13 @@ import skypager from '@skypager/web'
 import * as DocumentHelper from '@skypager/helpers-document'
 import * as AppClient from './client'
 import * as moduleFactory from './module-factory'
+import { createBrowserHistory } from 'history'
+
+skypager.history = createBrowserHistory()
+
+skypager.history.listen((location, action) => {
+  skypager.setState({ location })
+})
 
 skypager
   .use(DocumentHelper)

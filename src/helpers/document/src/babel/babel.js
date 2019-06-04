@@ -508,6 +508,10 @@ export class Babel extends Helper {
     return this.exportData.map(exp => exp.name)
   }
 
+  get defaultExportName() {
+    return this.chain.get('exportData').find(({ name }) => name === 'default').get('exportName').value()
+  }
+
   /**
    * WIP. statically analyze what a module exports without running the code
    */
@@ -522,7 +526,7 @@ export class Babel extends Helper {
           return {
             name: 'default',
             index,
-            exportName: get(node, 'declaration.name'),
+            exportName: get(node, 'declaration.id.name'),
             start: get(node, 'declaration.loc.start.line'),
             end: get(node, 'declaration.loc.end.line'),
           }
@@ -562,6 +566,7 @@ export class Babel extends Helper {
 
     return flatten(names).filter(Boolean)
   }
+
 
   async createVMRunner(options = {}) {
     const { runtime } = this
@@ -722,22 +727,13 @@ export const attach = (...args) => Script.attach(...args)
 
 export default Babel
 
-function findAllBy(registry, ...args) {
-  return registry.chain
-    .get('available')
-    .map(id => this.runtime.script(id))
+function findAllBy(...args) {
+  return this 
+    .available
+    .map((id) => this.runtime.script(id))
     .filter(...args)
-    .value()
 }
 
-function filter(registry, ...args) {
-  return registry.chain
-    .invoke('allMembers')
-    .entries()
-    .map(([id, script]) => ({
-      ...script,
-      id,
-    }))
-    .filter(...args)
-    .value()
+function filter(iterator) {
+  return this.findAllBy(iterator)
 }
