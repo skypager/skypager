@@ -4,26 +4,30 @@ import types from 'prop-types'
 
 export default class ScrollableHeader extends Component {
   static contextTypes = {
-    runtime: types.object
+    runtime: types.object,
   }
 
   linkRef = createRef()
 
   state = {
     scrolled: false,
-    locationHash: undefined
+    locationHash: undefined,
   }
 
   componentDidMount() {
     const { runtime } = this.context
     const { kebabCase } = runtime.stringUtils
-    const slug = kebabCase(String(this.props.content).trim().toLowerCase())
-    
+    const slug = kebabCase(
+      String(this.props.content)
+        .trim()
+        .toLowerCase()
+    )
+
     const { locationHash } = runtime.currentState
 
     this.setState({
       locationHash,
-      slug
+      slug,
     })
 
     this.disposer = runtime.state.observe(({ name, newValue }) => {
@@ -35,7 +39,7 @@ export default class ScrollableHeader extends Component {
 
   componentDidUpdate() {
     const { slug, scrolled, locationHash } = this.state
-    
+
     const linkRef = this.linkRef
 
     if (!scrolled && locationHash && locationHash.length) {
@@ -53,7 +57,11 @@ export default class ScrollableHeader extends Component {
   render() {
     const { runtime } = this.context
     const { kebabCase } = runtime.stringUtils
-    const slug = kebabCase(String(this.props.content).trim().toLowerCase())
+    const slug = kebabCase(
+      String(this.props.content)
+        .trim()
+        .toLowerCase()
+    )
 
     return (
       <Fragment>

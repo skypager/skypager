@@ -205,23 +205,49 @@ export default class DocRepl extends Component {
     return runtime.lodash.cloneDeep({ response }).response
   }
 
+  renderMultiLineEditor() {
+    const { current } = this.state
+
+    return (
+      <div>
+        <Editor
+          name="replEditor"
+          id="replEditor"
+          mode="javascript"
+          maxLines={16}
+          minLines={8}
+          value={current}
+          onChange={(e, { value }) => this.setState({ current: value })}
+        />
+        <Button floated="right" content="Run" icon="lightning" />
+      </div>
+    )
+  }
+
+  renderSingleLineInput() {
+    const { current, processing } = this.state
+    return (
+      <Form fluid>
+        <Form.Input
+          disabled={processing}
+          placeholder="Enter some code and hit enter."
+          type="text"
+          fluid
+          value={current}
+          onKeyDown={this.handleKeyDown}
+          onChange={(e, { value }) => this.setState({ current: value })}
+        />
+      </Form>
+    )
+  }
+
   render() {
     const { runtime } = this.context
-    const { current, history, responses, processing } = this.state
+    const { editorMode, current, history, responses, processing } = this.state
 
     return (
       <Container>
-        <Form fluid>
-          <Form.Input
-            disabled={processing}
-            placeholder="Enter some code and hit enter."
-            type="text"
-            fluid
-            value={current}
-            onKeyDown={this.handleKeyDown}
-            onChange={(e, { value }) => this.setState({ current: value })}
-          />
-        </Form>
+        {editorMode ? this.renderMultiLineEditor() : this.renderSingleLineInput()}
         <Container style={{ paddingTop: '16px' }}>
           <ReplOutput
             runtime={runtime}

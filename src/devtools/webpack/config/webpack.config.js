@@ -926,7 +926,7 @@ function createCopyPlugins(currentProject) {
 
                 return {
                   ...sourcePath,
-                  from
+                  from,
                 }
               }
             }

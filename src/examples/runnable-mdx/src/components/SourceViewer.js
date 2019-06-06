@@ -135,7 +135,7 @@ export default class SourceViewer extends Component {
       this.setState({ processedMdx, fileData })
     } catch (error) {
       console.error('ERROR', error)
-      this.setState({ error: `Failed to load source for ${this.props.file} ${ error.message }` })
+      this.setState({ error: `Failed to load source for ${this.props.file} ${error.message}` })
     } finally {
       this.setState({ loading: false })
     }

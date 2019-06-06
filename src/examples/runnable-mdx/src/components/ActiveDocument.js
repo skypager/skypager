@@ -151,7 +151,8 @@ export default class ActiveDocument extends Component {
     const { docId } = this.props
 
     if (docId !== previousProps.docId) {
-      this.loadDocument()
+      const doc = this.loadDocument()
+      this.setState({ doc })
     }
   }
 
@@ -161,6 +162,7 @@ export default class ActiveDocument extends Component {
 
   loadDocument() {
     if (this.state.doc && this.state.doc.name === this.props.docId) {
+      console.log('Loading New Document SKIPPED')
       return
     }
 
@@ -171,6 +173,7 @@ export default class ActiveDocument extends Component {
       cacheHelper: true,
     })
 
+    console.log('Loading New Document Succeeded', docId)
     runtime.editor.makeDocumentEditable(doc)
 
     onLoad && onLoad(doc, this)
@@ -205,7 +208,7 @@ export default class ActiveDocument extends Component {
             },
           ],
           requireFn: doc.runtime.moduleFactory.createRequireFunction(`${doc.name}.js`),
-          beforeLoad: (ace) => {
+          beforeLoad: ace => {
             console.log('Before Load')
             ace.config.set('modePath', '/mode')
             ace.config.set('themePath', '/theme')
@@ -221,6 +224,7 @@ export default class ActiveDocument extends Component {
 
     const { Component } = doc
 
+    console.log('Rendering Active Document', doc.name)
     return (
       <MDXProvider components={components}>
         <div

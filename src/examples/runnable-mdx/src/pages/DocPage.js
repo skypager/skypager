@@ -31,6 +31,7 @@ export default class DocPage extends Component {
   }
 
   componentDidUpdate() {
+    console.log('DOC PAGE DID UPDATE', this.state.docId, this.props.docId)
     if (this.state.docId !== this.props.docId) {
       this.setState({ docId: this.props.docId })
     }
@@ -38,6 +39,11 @@ export default class DocPage extends Component {
 
   render() {
     const { docsLoaded } = this.state
+
+    console.log('Rendering Doc Page', {
+      docId: this.state.docId,
+      docsLoaded: this.state.docsLoaded,
+    })
 
     return (
       <Fragment>

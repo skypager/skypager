@@ -85,13 +85,15 @@ function NavMenuItems({ toggle }) {
 export default class NavLayout extends Component {
   static propTypes = {
     runtime: types.object,
-    containerStyles: types.object
+    containerStyles: types.object,
+    showToggle: types.bool,
   }
 
   static defaultProps = {
+    showToggle: true,
     containerStyles: {
-      marginLeft: '32px'
-    }
+      marginLeft: '32px',
+    },
   }
 
   state = {
@@ -106,7 +108,7 @@ export default class NavLayout extends Component {
     this.disposer = runtime.state.observe(({ name }) => {
       if (name === 'locationPathname') {
         this.setState({ menuVisible: false })
-        window.scrollTo(0,0)
+        window.scrollTo(0, 0)
       }
     })
   }
@@ -135,7 +137,7 @@ export default class NavLayout extends Component {
               visible={menuVisible}
             >
               <NavMenuItems toggle={this.toggleMenu} />
-            </Sidebar>       
+            </Sidebar>
           </Grid.Column>
         )}
         <Grid.Column width={menuVisible ? 13 : 16}>

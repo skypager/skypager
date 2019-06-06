@@ -13,9 +13,10 @@ function docPage(docId, baseProps = {}) {
 }
 
 function DocRoute(props = {}) {
-  const docId = props.match.params.docId  
+  const docId =
+    props.docId || runtime.get('currentState.location.match.params', props.match.params).docId
   return (
-    <NavLayout runtime={props.runtime}>
+    <NavLayout runtime={props.runtime} showToggle>
       <DocPage {...props} docId={docId} />
     </NavLayout>
   )
@@ -24,9 +25,17 @@ function DocRoute(props = {}) {
 function SourceRoute(props = {}) {
   const { fileType, sourceId } = props.match.params
   return (
-    <NavLayout runtime={props.runtime} containerStyles={{ marginLeft: '0px,', margin: 0, padding: 0 }} showToggle={false}>
-      <SourceViewer {...props} file={ fileType === 'docs' ? `docs/${sourceId}.md` : `src/${sourceId}.js`} lang={fileType === 'docs' ? 'markdown' : 'javascript'} />
-    </NavLayout>  
+    <NavLayout
+      runtime={props.runtime}
+      containerStyles={{ marginLeft: '0px,', margin: 0, padding: 0 }}
+      showToggle={false}
+    >
+      <SourceViewer
+        {...props}
+        file={fileType === 'docs' ? `docs/${sourceId}.md` : `src/${sourceId}.js`}
+        lang={fileType === 'docs' ? 'markdown' : 'javascript'}
+      />
+    </NavLayout>
   )
 }
 
@@ -52,22 +61,32 @@ export default class App extends Component {
 
     return (
       <Router history={runtime.history}>
-          <Switch>
->           <Route
-              path="/docs/:docId*"
-              exact
-              render={(props) => <DocRoute {...props} runtime={runtime} />}
-            />
- 
-            <Route
-              path="/source/:fileType/:sourceId*"
-              exact
-              render={(props) => <SourceRoute {...props} runtime={runtime} />}
-            />
- 
-            <Route path="/" exact component={docPage('README')} />
-            <Route path="*" component={() => <div style={{ minHeight: '600px', height: '100%'}}><h1>Not Found</h1></div>} />
-          </Switch>
+        <Switch>
+          >{' '}
+          <Route
+            path="/docs/:docId*"
+            exact
+            render={props => <DocRoute {...props} runtime={runtime} />}
+          />
+          <Route
+            path="/source/:fileType/:sourceId*"
+            exact
+            render={props => <SourceRoute {...props} runtime={runtime} />}
+          />
+          <Route
+            path="/"
+            exact
+            render={props => <DocRoute {...props} docId="README" runtime={runtime} />}
+          />
+          <Route
+            path="*"
+            component={() => (
+              <div style={{ minHeight: '600px', height: '100%' }}>
+                <h1>Not Found</h1>
+              </div>
+            )}
+          />
+        </Switch>
       </Router>
     )
   }
