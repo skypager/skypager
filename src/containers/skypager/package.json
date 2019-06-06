@@ -5,7 +5,8 @@
   "author": "Jon Soeder <jon@chicago.com>",
   "scripts": {
     "package": "docker build -t datapimp/skypager .",
-    "push": "docker push datapimp/skypager:latest"
+    "push": "docker push datapimp/skypager:latest",
+    "prepush": "yarn package"
   },
   "publishConfig": {
     "access": "public"

@@ -85,6 +85,13 @@ function NavMenuItems({ toggle }) {
 export default class NavLayout extends Component {
   static propTypes = {
     runtime: types.object,
+    containerStyles: types.object
+  }
+
+  static defaultProps = {
+    containerStyles: {
+      marginLeft: '32px'
+    }
   }
 
   state = {
@@ -97,8 +104,9 @@ export default class NavLayout extends Component {
     const { runtime } = this.props
 
     this.disposer = runtime.state.observe(({ name }) => {
-      if (name === 'location') {
+      if (name === 'locationPathname') {
         this.setState({ menuVisible: false })
+        window.scrollTo(0,0)
       }
     })
   }
@@ -108,7 +116,7 @@ export default class NavLayout extends Component {
   }
 
   renderDesktop() {
-    const { children } = this.props
+    const { children, containerStyles, showToggle } = this.props
     const { menuVisible } = this.state
 
     return (
@@ -131,7 +139,7 @@ export default class NavLayout extends Component {
           </Grid.Column>
         )}
         <Grid.Column width={menuVisible ? 13 : 16}>
-          {!menuVisible && (
+          {!menuVisible && showToggle && (
             <div style={{ float: 'left' }}>
               <Button size="tiny" icon="bars" circular basic onClick={() => this.toggleMenu()} />
             </div>
@@ -139,8 +147,8 @@ export default class NavLayout extends Component {
           <div
             style={
               menuVisible
-                ? { marginLeft: '16px' }
-                : { float: 'left', clear: 'right', marginLeft: '32px' }
+                ? { marginLeft: '16px', ...containerStyles }
+                : { float: 'left', clear: 'right', ...containerStyles }
             }
           >
             {Children.only(children)}

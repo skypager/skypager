@@ -135,6 +135,7 @@ export default class SourceViewer extends Component {
       this.setState({ processedMdx, fileData })
     } catch (error) {
       console.error('ERROR', error)
+      this.setState({ error: `Failed to load source for ${this.props.file} ${ error.message }` })
     } finally {
       this.setState({ loading: false })
     }
@@ -142,8 +143,12 @@ export default class SourceViewer extends Component {
 
   render() {
     const { file, lang } = this.props
-    const { settings = {}, ready, fileData, processedMdx, loading } = this.state
+    const { error, settings = {}, ready, fileData, processedMdx, loading } = this.state
     const { showInfo } = this.state
+
+    if (error && error.length) {
+      return <div>{error}</div>
+    }
 
     if (loading || !ready || !fileData) {
       return <div />

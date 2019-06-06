@@ -29,6 +29,7 @@
     "@skypager/helpers-document": "^1.1.2",
     "@skypager/node": "^1.0.1",
     "compromise": "^11.13.2",
+    "prism-react-renderer": "^0.1.6",
     "react-json-view": "^1.19.1",
     "retext": "^6.0.1",
     "retext-keywords": "^4.0.2"
@@ -57,19 +58,6 @@
         "@skypager/helpers-document/lib/skypager-document-editor": "SkypagerEditor"
       },
       "copy": {
-        "brace": [{
-          "from": "theme",
-          "flatten": false
-         }, {
-          "from": "ext",
-          "flatten": false
-        }, {
-          "from": "keybinding",
-          "flatten": false
-        }, {
-          "from": "mode",
-          "flatten": false         
-        }],
         "@skypager/helpers-document": [
           "lib/skypager-helpers-document.js",
           "lib/skypager-document-editor.js",

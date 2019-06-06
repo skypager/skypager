@@ -70,7 +70,7 @@ export default class DocPage extends Component {
                 basic
                 content="View Source"
                 as={Link}
-                to={`/source/${this.state.docId}`}
+                to={`/source/docs/${this.state.docId}`}
               />
             </Segment>
           </div>

@@ -1,13 +1,19 @@
 # Skypager Document Helper
 > Interactive Documents powered by MDX and Babel
 
-The Skypager Document Helper can be used to represent any source code file, such as a Markdown file (with MDX) or a JavaScript module.
+The Skypager Document Helper can be used to represent any source code file, such as a Markdown file (with MDX) or a JavaScript module, as if it were an [ActiveRecord](https://en.wikipedia.org/wiki/Active_record_pattern) like object. 
 
-Each file has its own unique instance of the document helper,  for example:
+Each source file is treated as a unique entity, an instance of the document helper, with an id that uses its unique path in the project
 
 ```javascript
+// README.md
 const readme = runtime.mdxDoc('README')
-const about = runtime.mdxDoc('ABOUT')
+// docs/renderable.md
+const renderable = runtime.mdxDoc('docs/renderable')
+// src/pages/HomePage.js
+const homePage = runtime.script('src/pages/HomePage')
+// src/layouts/NavbarLayout.js
+const navbarLayout = runtime.script('src/layouts/NavbarLayout')
 ```
 
 and each of these helpers can be queried to find information from the document, for example all of the javascript code examples under the `Examples` heading.
@@ -23,15 +29,61 @@ or the unique set of code languages
 const languages = new Set(readme.select('code[lang]').map(({ lang }) => lang))
 ```
 
-The document helper will give you access to the pure source code, the transpiled code, as well as access to the [AST](https://astexplorer.net) (the structured data that represents how different tools such as Webpack, Babel or MDX interpret our code in a  machine searchable way.)
+or all of the documents which have code samples underneath an examples section heading
+
+```javascript
+const docsWithExamples = runtime.mdxDocs.filter((doc) => .select('code')
+  .filter((block) => readme.findParentHeading(block, { stringify: true }) === 'Examples' ).length)
+```
+
+or get a list of all of the example languages used in your source code blocks across all of your markdown files:
+
+```javascript
+const getLanguages = (doc) => Array.from(new Set(doc.select('code[lang]').map(({ lang }) => lang)))
+
+const allLanguages = runtime.chain
+  .invoke('mdxDocs.allInstances')
+  .map(getLanguages)
+  .uniq()
+  .value()
+```
+
+or query by the YAML frontmatter or `export const meta = {}` component of an MDX doc
+
+```markdown
+---
+status: draft
+keywords: 
+  - javascript
+---
+
+# One of many docs with metadata
+
+You could have dozens of these 
+```
+
+```javascript
+const drafts = runtime.mdxDocs.filter((doc) => doc.meta.status === 'draft')
+const published = runtime.mdxDocs.filter((doc) => doc.meta.status === 'published')
+```
+
+For both Markdown, and JavaScript, The document helper will give you access to the pure source code, the compiled code, as well as access to the [AST](https://astexplorer.net) (the structured data that represents how different tools such as Webpack, Babel or MDX interpret our code in a  machine searchable way.)
+
+The script and mdx document helpers both provide utility functions for querying the AST to find nodes. 
+
+Since the kind of writing that lives in JavaScript source code and markdown documentation is highly structured and pattern based already (common headings, and common export names for similar modules or documents) we can take advantage of this in a lot of creative ways by using their AST. This lets us represent each of these files as objects, with schemas, with attributes derived from any aspect of the file's content.
+
+You could use this to build a REST or GraphQL API that reads and writes from your code!
+
+## Real World Example
 
 One example of something you can build with it, is our [UI Copy Manager Example](https://github.com/skypager/skypager/tree/master/src/examples/ui-copy-manager).  In this example, we find all of our React components and automatically upload all of the string literals found in them to a Google Spreadsheet.  
 
 We take any changes made in the spreadsheet, and re-apply them directly to the source code.  You would never know, from looking at the git history, if these changes came from a developer in their IDE or through the tool. 
 
-This kind of seamless integration between the source code and the useful information it contains is one thing the document helper makes possible.
+This kind of seamless integration between the source code and the useful information it contains is one thing the document helper makes possible.  Since not only can we read from the AST, we can modify the AST and update the file to match. 
 
-Since the kind of writing that lives in JavaScript source code and markdown documentation is highly structured and pattern based, we can take advantage of this in a lot of creative ways.
+This is how the tool [prettier](https://github.com/prettier/prettier) revolutionized the code formatting game! instead of just formatting the code, our example opens up parts of the code to be edited by others using their own tools.
 
 ## Usage in Node
 
