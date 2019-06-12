@@ -84,6 +84,12 @@ const mdxComponents = (baseProps = {}, doc) => ({
     return <DocLink {...props} parentDocument={doc} />
   },
 
+  inlineCode: props => (
+    <code style={{ color: 'magenta' }}>
+      <em>{props.children}</em>
+    </code>
+  ),
+
   code: props => {
     return (
       <Editor
