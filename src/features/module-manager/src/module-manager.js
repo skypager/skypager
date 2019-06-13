@@ -1,5 +1,4 @@
 import { Feature } from '@skypager/node'
-import pacote from 'pacote'
 
 /**
  * @class ModuleManager
