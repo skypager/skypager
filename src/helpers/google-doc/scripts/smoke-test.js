@@ -1,59 +1,48 @@
 const runtime = require('@skypager/node')
-const { mkdirSync, existsSync, writeFileSync } = require('fs')
-const { dirname, resolve } = require('path')
+const GoogleDocHelper = require('@skypager/helpers-google-doc')
 
-const isCI = process.env.CI || process.env.JOB_NAME
-const serviceAccountPath =
-  process.env.GOOGLE_APPLICATION_CREDENTIALS ||
-  resolve(__dirname, '..', 'secrets', 'serviceAccount.json')
-const credentialExists = existsSync(serviceAccountPath)
+const pathToServiceAccount = process.env.GOOGLE_APPLICATION_CREDENTIALS || runtime.resolve('secrets', 'serviceAccount.json') 
+const serviceAccount = require(pathToServiceAccount)
+const googleProject = process.env.GCLOUD_PROJECT || serviceAccount.project_id
 
-if (isCI && !credentialExists && process.env.SERVICE_ACCOUNT_DATA) {
-  !existsSync(dirname(serviceAccountPath)) && mkdirSync(dirname(serviceAccountPath))
-  writeFileSync(serviceAccountPath, process.env.SERVICE_ACCOUNT_DATA)
-}
-
-runtime.use(require('../lib'), {
-  serviceAccount: serviceAccountPath,
-  googleProject: require(serviceAccountPath).project_id,
+runtime.use(GoogleDocHelper, {
+  serviceAccount: pathToServiceAccount,
+  googleProject
 })
 
-const { colors, print } = runtime.cli
+main()
 
 async function main() {
-  print(`Performing sanity test on the google sheets / drive integration`)
-  await runtime.sheets.discover()
+  await runtime.googleDocs.discover({ includeTeamDrives: true })
 
-  if (!runtime.sheets.available.length) {
-    print(`Could not find any sheeets`)
-    print(colors.red('FAIL'))
-    process.exit(1)
-  } else {
-    const sheet = runtime.sheet(runtime.sheets.available[0])
+  const firstAvailable = runtime.googleDocs.available[0]
+  const googleDoc = runtime.googleDoc(firstAvailable)
 
-    await sheet.authorize()
-    const info = await sheet.getInfo().catch(error => {
-      print(colors.red('FAIL'))
-      print(error.message)
-      print(error.stack, 8, 2, 2)
-      process.exit(1)
-    })
+  await googleDoc.load()
 
-    if (!info || !info.worksheets) {
-      print(colors.red('FAIL'))
-      print(`Could not fetch spreadsheet info`)
-      process.exit(1)
-    }
+  const { 
+    // the title of your doc
+    title,
+    // all of the content nodes 
+    contentNodes = [],
+    // all the heading nodes
+    headingNodes = [],
+    // all the paragraph nodes
+    paragraphNodes = [], 
+    // all the lists
+    lists = [], 
+    // all the tables
+    tables = [] ,
+    // all of the styles (e.g. heading 1, heading 2)
+    namedStyles = {}
+  } = googleDoc
 
-    print(`Found ${runtime.sheets.available.length} sheets via the google drive files api`)
-    print(`Fetched worksheets from one of the sheets`)
-    print(colors.green('SUCCESS'))
-    process.exit(0)
-  }
+  console.log({ 
+    title, 
+    namedStyles,
+    contentNodes: contentNodes.length, 
+    headingNodes: headingNodes.length, 
+    lists: lists.length,
+    namedStyles: Object.keys(namedStyles).length
+  })
 }
-
-main().catch(error => {
-  print(colors.red('FAIL'))
-  print(error.message)
-  print(error.stack, 8, 2, 2)
-})

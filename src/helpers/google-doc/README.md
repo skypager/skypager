@@ -57,15 +57,23 @@ You can find the email address in `client_id` property of the service account js
 
 ## Usage
 
+Until I get better acquainted with the underlying google apis this library uses, the service account has to be saved to disk.
+
 ```javascript
-import runtime from '@skypager/node'
-import * as GoogleDocHelper from '@skypager/helpers-google-doc'
+const runtime = require('@skypager/node')
+const GoogleDocHelper = require('@skypager/helpers-google-doc')
 
-const serviceAccount = require('/path/to/service-account.json')
+const pathToServiceAccount = process.env.GOOGLE_APPLICATION_CREDENTIALS || '/path/to/service-account.json'
+const serviceAccount = require(pathToServiceAccount)
+const googleProject = process.env.GCLOUD_PROJECT || serviceAccount.project_id
 
+// this creates runtime.googleDocs and runtime.googleDoc 
 runtime.use(GoogleDocHelper, {
-  serviceAccount
+  serviceAccount: pathToServiceAccount,
+  googleProject
 })
+
+main()
 
 async function main() {
   await runtime.googleDocs.discover({ includeTeamDrives: true })
