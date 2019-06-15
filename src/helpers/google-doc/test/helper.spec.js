@@ -35,4 +35,20 @@ describe('The Google Documents Helper', function() {
     googleDoc.should.have.property('lists').that.is.not.empty
     googleDoc.should.have.property('tableNodes').that.is.not.empty
   })
+
+  it('can use an initializer function', async function() {
+    const docId = runtime.googleDoc('skypagerTestDocument').documentId
+
+    runtime.googleDocs.register('myDoc', {
+      documentId: docId,
+    })
+
+    const googleDoc = await runtime.googleDoc('myDoc', {
+      initialize: async () => {
+        runtime.setState({ docsIsReady: 'yesYesYall' })
+      },
+    })
+
+    runtime.currentState.should.have.property('docsIsReady', 'yesYesYall')
+  })
 })

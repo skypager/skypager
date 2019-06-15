@@ -20,6 +20,10 @@ export class GoogleSheet extends Helper {
     info: {},
   }
 
+  get sheetId() {
+    return this.tryResult('sheetId', this.tryResult('sheetId', this.provider.id))
+  }
+
   get RowEntity() {
     return this.tryGet('RowEntity', RowEntity)
   }
@@ -61,6 +65,12 @@ export class GoogleSheet extends Helper {
     }
 
     this.applySheetInterface()
+
+    const { initialize = this.provider.initialize } = this.options
+
+    if (typeof initialize === 'function') {
+      await initialize.call(this, this.options, this.context)
+    }
 
     return this.authorized
   }

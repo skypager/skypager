@@ -45,13 +45,25 @@ export function attach(runtime, options = {}) {
   const fileManager = runtime.feature('file-manager', fileManagerOptions)
 
   if (!disablePackageManager) {
-    runtime.use({ attach: attachPackageManager })
-    runtime.feature('package-manager').enable(fileManagerOptions)
+    try {
+      runtime.use({ attach: attachPackageManager })
+      runtime.feature('package-manager').enable(fileManagerOptions)
+    } catch (error) {
+      console.error(`Error enabling package-manager`)
+      console.error(error.message)
+      throw error
+    }
   }
 
   if (!disableModuleManager) {
-    runtime.use({ attach: attachModuleManager })
-    runtime.feature('module-manager').enable(fileManagerOptions)
+    try {
+      runtime.use({ attach: attachModuleManager })
+      runtime.feature('module-manager').enable(fileManagerOptions)
+    } catch (error) {
+      console.error(`Error enabling module-manager`)
+      console.error(error.message)
+      throw error
+    }
   }
 
   fileManager.enable(fileManagerOptions)

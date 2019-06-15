@@ -10,7 +10,7 @@ export class GoogleDoc extends Helper {
 
   initialState = {}
 
-  initialize() {
+  async initialize() {
     const { doc = this.options.doc } = this.provider
 
     if (doc) {
@@ -19,6 +19,12 @@ export class GoogleDoc extends Helper {
       Promise.resolve(this.load({ remote: true })).catch(error => {
         this.state.set('docLoadError', error)
       })
+    }
+
+    const { initialize = this.provider.initialize } = this.options
+
+    if (typeof initialize === 'function') {
+      await initialize.call(this, this.options, this.context)
     }
   }
 
@@ -44,6 +50,14 @@ export class GoogleDoc extends Helper {
 
   get contentNodes() {
     return this.get('doc.body.content', [])
+  }
+
+  get hasLoadError() {
+    return this.state.has('docLoadError')
+  }
+
+  get loadError() {
+    return this.state.get('docLoadError')
   }
 
   get paragraphContents() {

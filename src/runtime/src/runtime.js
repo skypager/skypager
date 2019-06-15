@@ -78,12 +78,12 @@ const enableStrictMode = get(
 )
 
 /**
- * @typedef {Object<string, function>} Mixin
+ * @typedef {Object<String,Function>} Mixin
  */
 
 /**
  *
- * @typedef {Object<string>} MixinOptions
+ * @typedef {Object} MixinOptions
  * @prop {Array} partial - an array of objects to be passed as arguments to the function
  * @prop {Boolean} right - whether to append the arguments
  * @prop {Boolean} insertOptions - whether to pass an empty object as the first arg automatically
@@ -1008,7 +1008,7 @@ export class Runtime {
    *
    * @abstract
    * @private
-   * @returns {PromiseLike<Runtime>}
+   * @returns {Promise<Runtime>}
    * @memberof Runtime#
    */
   async prepare() {
@@ -1021,7 +1021,7 @@ export class Runtime {
    * @abstract
    * @private
    * @memberof Runtime#
-   * @returns {PromiseLike<Runtime>}
+   * @returns {Promise<Runtime>}
    */
   async start() {
     return this
@@ -1322,7 +1322,7 @@ export class Runtime {
   /**
    * Returns a promise that will resolve when the runtime is started.
    *
-   * @returns {PromiseLike<Runtime>}
+   * @returns {Promise<Runtime>}
    * @memberof Runtime
    */
   whenStartedAsync() {
@@ -1359,7 +1359,7 @@ export class Runtime {
    *
    * @param {Function} fn
    * @param {Function} onError
-   * @returns {PromiseLike<Runtime>}
+   * @returns {Promise<Runtime>}
    * @memberof Runtime
    */
   whenPrepared(fn, onError) {
@@ -1383,7 +1383,7 @@ export class Runtime {
   /**
    * Returns a promise which will resolve once the runtime is prepared
    *
-   * @returns {PromiseLike<Runtime>}
+   * @returns {Promise<Runtime>}
    * @memberof Runtime
    */
   whenPreparedAsync() {
@@ -1635,11 +1635,11 @@ export class Runtime {
   }
 
   static ContextRegistry = ContextRegistry
-  static Helper = Helper
 
   static mobx = mobx
+
   get mobx() {
-    return this.constructor.mobx
+    return mobx
   }
 
   static observableMap = observable.map
@@ -1695,7 +1695,7 @@ export class Runtime {
    * Provides access to the global event bus shared by all runtime or helper instances
    *
    * @readonly
-   * @memberof Runtime
+   * @memberof Runtime#
    */
   get events() {
     return events
@@ -1706,7 +1706,7 @@ export class Runtime {
    * to run scripts or modules in an arbitrary global scope
    *
    * @readonly
-   * @memberof Runtime
+   * @memberof Runtime#
    */
   get sandbox() {
     return this.createSandbox(this.context)
@@ -1888,7 +1888,6 @@ export class Runtime {
    * however you can use one class in production and another in dev / test if you want to,
    *
    * @readonly
-   * @type {Class}
    * @memberof Runtime#
    */
   Helper = Helper
@@ -1897,7 +1896,7 @@ export class Runtime {
    * Provides access to the Helper registry
    *
    * @readonly
-   * @memberof Runtime
+   * @memberof Runtime#
    */
   get helpers() {
     return this.Helper.registry
@@ -1907,7 +1906,7 @@ export class Runtime {
    * Provides access to all of the Helper classes that have been registered
    *
    * @readonly
-   * @memberof Runtime
+   * @memberof Runtime#
    */
   get allHelpers() {
     return this.Helper.allHelpers
@@ -1916,7 +1915,6 @@ export class Runtime {
   /**
    * The default options that will be passed to Helper.attach.
    *
-   * @type {import("./helper").HelperAttachOptions}
    * @readonly
    * @memberof Runtime#
    */
@@ -1928,7 +1926,6 @@ export class Runtime {
    * Returns the base Feature class that the runtime uses.  You shouldn't need to change this,
    * however you can use one class in production and another in dev / test if you want to,
    *
-   * @type {Class}
    * @memberof Runtime#
    */
   Feature = Feature
@@ -1984,7 +1981,6 @@ export class Runtime {
       propUtils,
       stringUtils,
       urlUtils,
-      mobx,
       lodash,
       currentState: this.currentState,
       ...this.featureRefs,
@@ -2030,9 +2026,9 @@ export class Runtime {
    * @param {*} defaultValue the default value
    * @memberof Runtime
    */
-  tryGet(property, defaultValue) {
+  tryGet(objectPath, defaultValue) {
     return (
-      this.at(`options.${property}`, `context.${property}`).filter(
+      this.at(`options.${objectPath}`, `context.${objectPath}`).filter(
         v => typeof v !== 'undefined'
       )[0] || defaultValue
     )
@@ -2048,10 +2044,10 @@ export class Runtime {
    * @param {Object} options options object which will be passed to the property if it is a function
    * @param {Object} context context object which will be passed to the property if it is a function
    * @returns {*}
-   * @memberof Helper
+   * @memberof Runtime#
    */
-  tryResult(property, defaultValue, options = {}, context = {}) {
-    const val = this.tryGet(property)
+  tryResult(objectPath, defaultValue, options = {}, context = {}) {
+    const val = this.tryGet(objectPath)
 
     if (!val) {
       return typeof defaultValue === 'function'
@@ -2088,7 +2084,7 @@ export class Runtime {
    *
    * @param {*} selectorId
    * @param {*} args
-   * @returns {PromiseLike<*>}
+   * @returns {Promise<*>}
    * @memberof Runtime
    */
   async selectCached(selectorId, ...args) {
@@ -2106,7 +2102,7 @@ export class Runtime {
    *
    * @param {String} selectorId a selector function that exists in the selectors registry
    * @param {*} args
-   * @returns {PromiseLike<*>}
+   * @returns {Promise<*>}
    * @memberof Runtime
    * @example @lang js
    *
@@ -2137,7 +2133,7 @@ export class Runtime {
    * @param {String} selectorId a selector function that exists in the selectors registry
    * @param {*} args args to pass thru to the function. the last argument should be a function.
    * @memberof Runtime
-   * @returns {PromiseLike<*>}
+   * @returns {Promise<*>}
    */
   async selectThru(selectorId, ...args) {
     const fn =
@@ -2156,7 +2152,6 @@ export class Runtime {
    * @param {string} selectorId the id of the registered selector function
    * @param {...*} args args to pass thru to the selector.  if the last arg is a function
    *                    it will receive the value as a lodash chain.thru()
-   * @returns {LodashChain}
    */
   async selectChainThru(selectorId, ...args) {
     const fn =
@@ -2174,7 +2169,7 @@ export class Runtime {
    *
    * @param {String} selectorId a selector function that exists in the selectors registry
    * @param {*} args arguments to be passed thru to the selector function
-   * @returns {PromiseLike<*>}
+   * @returns {Promise<*>}
    */
   async selectChain(selectorId, ...args) {
     const results = await this.select(selectorId, ...args)

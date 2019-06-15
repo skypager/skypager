@@ -172,23 +172,31 @@ export function enabledHook(options = {}) {
   }
 
   if (!disableFileManager) {
-    runtime.lazy('fileManager', () => {
-      try {
-        runtime.invoke('profiler.profileStart', 'fileManagerEnabled')
-        require('@skypager/features-file-manager').attach(runtime, {
-          disableModuleManager,
-          disablePackageManager,
-        })
-        runtime.invoke('profiler.profileEnd', 'fileManagerEnabled')
-        return runtime.feature('file-manager')
-      } catch (e) {
-        console.error(`Error attaching file manager`, e.message, e.stack)
-        return e
-      }
-    })
+    try {
+      require('@skypager/features-file-manager').attach(runtime, {
+        disableModuleManager,
+        disablePackageManager,
+      })
+      runtime.getter('fileManager', () => runtime.feature('file-manager'))
+    } catch (e) {
+      console.error(`Error attaching file manager`, e.message, e.stack)
+      throw e
+    }
 
-    runtime.lazy('packageManager', () => runtime.fileManager && runtime.feature('package-manager'))
-    runtime.lazy('moduleManager', () => runtime.fileManager && runtime.feature('module-manager'))
+    runtime.lazy(
+      'packageManager',
+      () =>
+        runtime.fileManager &&
+        runtime.features.checkKey('package-manager') &&
+        runtime.feature('package-manager')
+    )
+    runtime.lazy(
+      'moduleManager',
+      () =>
+        runtime.fileManager &&
+        runtime.features.checkKey('module-manager') &&
+        runtime.feature('module-manager')
+    )
   }
 
   runtime.selectors.register('helpers/discover', () => require('./selectors/helpers/discover'))

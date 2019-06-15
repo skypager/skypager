@@ -55,8 +55,8 @@ You can find the email address in `client_id` property of the service account js
 Doing the following will create a registry of available sheet helpers at `runtime.sheets`
 
 ```javascript
-import runtime from '@skypager/node'
-import * as SheetHelper from '@skypager/helpers-sheet'
+const runtime = require('@skypager/node')
+const SheetHelper = require('@skypager/helpers-sheet')
 
 runtime.use(SheetHelper, {
   // or process.env.GOOGLE_APPLICATION_CREDENTIALS
@@ -201,6 +201,182 @@ async function main() {
 }
 
 main()
+```
+
+## Sheets as Modules
+
+The above examples show how to use this module.  
+
+A very common scenario is you have a project, and there are a few special spreadsheets that everyone references.
+
+In this scenario, you don't need to discover sheets, you will know their id's ahead of time.  
+
+Maybe you have a products sheet, one you use in development, and one that is used "in production".
+
+If all you need is the data, then the examples you've seen so far will work well.
+
+If you want to build a more complex system on top of the google sheets (say you have multiple google sheets) then the following setup is something you can build on.
+
+- `scripts`
+  - `reorder-all.js`
+  - `generate-website.js`
+- `src/`
+  - `sheets/`
+    - `products.js`
+    - `inventory.js`
+    - `promotions.js`
+  - `runtime.js`
+
+Your products.js is for your products sheet, which has a products worksheet that has a SKU column.
+
+We hard code the sheet id, and define an `initialize` hook which we use to associate a `Product` class
+with every row in the sheet's products worksehet.
+
+```javascript
+export const sheetId = 'sheet-id-for-your-products-sheet'
+
+export const eagerLoaded = true
+
+export async function initialize() {
+  const sheet = this
+
+  class Product extends sheet.RowEntity {
+    get stockSheet() {
+      return this.runtime.sheet('inventory')
+    }
+
+    get promotionsSheet() {
+      return this.runtime.sheet('promotions')  
+    }
+
+    get promotions() {
+      return this.promotionsSheet.products.filter(({ sku }) => sku === this.sku)
+    }
+
+    get inventory() {
+      return this.stockSheet.inventory.filter(({ sku }) => sku === this.sku)      
+    }
+
+    get inStock() {
+      return !!inventory.find(({ onHand }) => onHand > 0)
+    }  
+  }
+}
+```
+
+We do something similar for both `inventory.js` and `promotions.js`
+
+```javascript
+// inventory.js
+export const sheetId = 'your-inventory-sheet-id'
+
+export const eagerLoaded = true
+
+export async function initialize() {
+  const { RowEntity } = this  
+
+  class Stock extends RowEntity {
+    async reorder() {
+      const { sku, supplierEmail } = this
+      await this.runtime.emailer.send(supplierEmail, {
+        subject: `Re-order for ${sku}`,
+        message: 'yo resupply me'
+      })
+    }
+  }
+
+  this.registerEntity('stock', () => Stock)
+}
+```
+
+Promotions keeps track of promotion codes by product sku
+
+```javascript
+// promotions.js
+export const sheetId = 'your-promotions-sheet-id'
+
+export const eagerLoaded = true
+
+export async function initialize() {
+  const { RowEntity } = this  
+
+  class Promotion extends RowEntity {
+    get stockSheet() {
+      return this.runtime.sheet('inventory')
+    }
+
+    get inventory() {
+      return this.stockSheet.filter(({ sku }) => sku === this.sku)
+    }
+
+    // a promotion is only valid while we have enough stock, for example
+    get isStillValid() {
+      return !!inventory.find(({ onHand }) => onHand > this.minimumStockLevel)
+    }
+  }
+
+  this.registerEntity('promotions', () => Promotion)
+}
+```
+
+So three separate google docs are combined in this example, each one is represented by a module.
+
+Each module defines different classes to represent the data found in each row of their named worksheets.
+
+So we can register them with the sheets registry and use them all together, in a file called `runtime.js`  
+
+```javascript
+const runtime = require('@skypager/node')
+const SheetHelper = require('@skypager/helpers-sheet')
+
+runtime.use(SheetHelper, {
+  // or process.env.GOOGLE_APPLICATION_CREDENTIALS
+  serviceAccount: '/path/to/service.json'
+  // or process.env.GCLOUD_PROJECT or read from the service account project_id
+  googleProject: 'google-cloud-project'
+}).use((next) => {
+  runtime.sheets.register('products', () => require('./sheets/products.js'))
+  runtime.sheets.register('inventory', () => require('./sheets/inventory.js'))
+  runtime.sheets.register('promotions', () => require('./sheets/promotions.js'))
+
+  Promise.all([
+    runtime.sheets.allInstances().map((sheet) => sheet.whenReady())
+  ]).then(() => next()).catch((error) => next(error))
+})
+
+
+```
+
+Now in this hypothetical example, there are two scripts. `reorder-all.js` and `generate-website.js`
+
+The `reorder-all` script can be run weekly, to resupply all the items you're low on.
+
+The `generate-website` script can be run whenever the inventory, products, or promotions sheets change.
+
+both of them would only need to include your `runtime.js` module
+
+```javascript
+import runtime from '../src/runtime'
+
+async function main() {
+  await runtime.start()
+  const inventory = runtime.sheet('inventory')
+
+  const stockLevels = inventory.ws('stock')
+
+  for(stock of stockLevels) {
+    if (stock.onHand < stock.reorderPoint) {
+      await stock.reorder()
+    }
+  }
+}
+```
+
+and can be executed by running the scripts
+
+```shell
+$ skypager reorder-all --esm
+$ skypager generate-website --esm
 ```
 
 ## Internals

@@ -31,4 +31,27 @@ describe('The Sheets Helper', function() {
       .should.have.property('RowEntity')
       .that.is.a('function')
   })
+
+  it('can be registered with a google sheet id', async function() {
+    const sheetId = runtime.sheets.allInstances()[0].provider.id
+    runtime.sheets.register('mySheet', {
+      sheetId,
+    })
+
+    const sheet = runtime.sheet('mySheet')
+    sheet.sheetId.should.equal(sheetId)
+  })
+
+  it('can use an initializer function', async function() {
+    const sheetId = runtime.sheets.allInstances()[0].provider.id
+    runtime.sheets.register('myOtherSheet', {
+      sheetId,
+      initialize: async () => {
+        runtime.setState({ sheetIsReady: 'yayuh' })
+      },
+    })
+
+    const sheet = await runtime.sheet('myOtherSheet')
+    runtime.currentState.should.have.property('sheetIsReady', 'yayuh')
+  })
 })
