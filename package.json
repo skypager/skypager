@@ -4,9 +4,6 @@
   "version": "1.0.0",
   "description": "The Skypager Framework Monorepo",
   "main": "index.js",
-  "resolutions": {
-    "eslint-scope": "3.7.1"
-  },
   "scripts": {
     "start": "node scripts/start.js",
     "build": "node scripts/build.js",
@@ -56,6 +53,8 @@
     "jsdoc": "^3.5.5",
     "jsdoc-plugin-typescript": "^1.0.7",
     "jsdoc-to-markdown": "^4.0.1",
+    "jsdoc-export-default-interop": "^0.3.1",
+    "@otris/jsdoc-tsd": "^1.0.4",
     "lerna": "^3.4.0",
     "lint-staged": "^7.3.0",
     "mocha": "^6.1.4",

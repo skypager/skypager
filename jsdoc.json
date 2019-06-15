@@ -8,7 +8,8 @@
     },
     "plugins": [
         "node_modules/better-docs/category",
-        "jsdoc-plugin-typescript"
+        "jsdoc-plugin-typescript",
+        "node_modules/jsdoc-export-default-interop/dist/index"
     ],
     "typescript": {
       "moduleRoot": "src"
