@@ -1,6 +1,15 @@
 import { Runtime } from '../src/runtime'
 
 describe('@skypager/runtime', function() {
+  it('exposes Feature, Helper', function() {
+    Runtime.should.have.property('Feature')
+    Runtime.should.have.property('Helper')
+
+    const runtimeOne = new Runtime()
+    runtimeOne.should.have.property('Feature')
+    runtimeOne.should.have.property('Helper')
+  })
+  
   it('can create runtime instances using a Runtime class', function() {
     const runtimeOne = new Runtime()
     const runtimeTwo = new Runtime()
