@@ -27,6 +27,7 @@
     "pretest:web": "node scripts/prepare-web-release.js",
     "test:web": "cross-env CI=true skypager start-and-test --start start:test:webserver --test test:web:build",
     "test:portfolio": "lerna run test --stream",
+    "test:windows:ci": "lerna run test --stream --ignore='@skypager/runnable-mdx-example' --ignore='@skypager/apps-portfolio-browser' --ignore='@skypager/sheets-server'",
     "test:web:build": "mocha --file test/test.js test/web/**/*.spec.js",
     "start:test:webserver": "skypager serve public --hostname localhost",
     "postinstall": "node scripts/postinstall.js",
