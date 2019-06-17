@@ -31,6 +31,9 @@ async function main() {
   try {
     process.kill(-proc.childProcess.pid)
   } catch (error) {}
+  try {
+    process.kill(proc.childProcess.pid)
+  } catch (error) {}
 }
 
 async function runTests() {
@@ -65,8 +68,8 @@ async function testKeywords() {
     return false
   }
 
-  console.log(JSON.stringify(data, null, 2))
   if (!data.messages || !data.keywords || !data.keyphrases || !data.ast) {
+    console.log(JSON.stringify(data, null, 2))
     console.error('expected response to have keywords keyphrases and messages')
     return false
   }
