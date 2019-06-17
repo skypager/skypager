@@ -9,7 +9,7 @@ describe('@skypager/runtime', function() {
     runtimeOne.should.have.property('Feature')
     runtimeOne.should.have.property('Helper')
   })
-  
+
   it('can create runtime instances using a Runtime class', function() {
     const runtimeOne = new Runtime()
     const runtimeTwo = new Runtime()

@@ -167,9 +167,7 @@ main()
       if (localServer) {
         process.kill(-localServer.childProcess.pid)
       }
-    } catch(error) {
-
-    }
+    } catch (error) {}
 
     process.exit(0)
   })
@@ -178,9 +176,7 @@ main()
       if (localServer) {
         process.kill(-localServer.childProcess.pid)
       }
-    } catch(error) {
-
-    }
+    } catch (error) {}
 
     console.log('Exiting with process code 1')
     process.exit(1)
