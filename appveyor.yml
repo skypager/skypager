@@ -13,9 +13,10 @@ build: off
 test_script:
   - node --version
   - 'echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > .npmrc'
-  - yarn build runtime
-  - yarn build web
-  - yarn test
+  - >-
+    lerna run test --stream --ignore='@skypager/runnable-mdx-example'
+    --ignore='@skypager/apps-portfolio-browser'
+    --ignore='@skypager/sheets-server'
 cache:
   - '%LOCALAPPDATA%\Yarn'
   - node_modules -> package.json

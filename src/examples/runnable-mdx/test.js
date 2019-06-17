@@ -30,8 +30,7 @@ async function main() {
 
   try {
     process.kill(-proc.childProcess.pid)
-  } catch(error) {
-  }
+  } catch (error) {}
 }
 
 async function runTests() {
