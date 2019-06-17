@@ -162,16 +162,26 @@ function runTests(testUrl) {
 main()
   .then(() => {
     console.log(`${runtime.currentPackage.name} FINISHED`)
-    if (localServer) {
-      process.kill(-localServer.childProcess.pid)
+
+    try {
+      if (localServer) {
+        process.kill(-localServer.childProcess.pid)
+      }
+    } catch(error) {
+
     }
 
     process.exit(0)
   })
   .catch(error => {
-    if (localServer) {
-      process.kill(-localServer.childProcess.pid)
+    try {
+      if (localServer) {
+        process.kill(-localServer.childProcess.pid)
+      }
+    } catch(error) {
+
     }
+
     console.log('Exiting with process code 1')
     process.exit(1)
   })
