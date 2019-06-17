@@ -2,7 +2,7 @@ version: '{build}'
 skip_tags: true
 environment:
   matrix:
-    - nodejs_version: 9.11.1
+    - nodejs_version: 10.0.0
 init:
   - git config --global core.autocrlf input
 install:
