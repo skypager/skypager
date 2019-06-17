@@ -28,7 +28,10 @@ async function main() {
 
   console.log('SUCCESS!')
 
-  process.kill(proc.childProcess.pid)
+  try {
+    process.kill(-proc.childProcess.pid)
+  } catch(error) {
+  }
 }
 
 async function runTests() {
