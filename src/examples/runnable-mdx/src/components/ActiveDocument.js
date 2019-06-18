@@ -103,6 +103,12 @@ const mdxComponents = (baseProps = {}, doc) => ({
   ),
 
   code: props => {
+    if (doc && doc.name.startsWith('api')) {
+      return (<code>
+      <em>{props.children}</em>
+      </code>)     
+    }
+
     return (
       <Editor
         {...(props.renderable || props.runnable) && { debounceChangePeriod: 400 }}

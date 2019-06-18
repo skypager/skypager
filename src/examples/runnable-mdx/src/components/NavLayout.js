@@ -11,6 +11,7 @@ import {
 } from 'semantic-ui-react'
 import types from 'prop-types'
 import { NavLink, Link } from 'react-router-dom'
+import DocsMenu from './DocsMenu'
 
 function NavMenuItems({ toggle }) {
   return [
@@ -82,6 +83,7 @@ function NavMenuItems({ toggle }) {
     </Menu.Item>,
   ]
 }
+
 export default class NavLayout extends Component {
   static propTypes = {
     runtime: types.object,
@@ -136,7 +138,7 @@ export default class NavLayout extends Component {
               onHide={() => this.setState({ menuVisible: false })}
               visible={menuVisible}
             >
-              <NavMenuItems toggle={this.toggleMenu} />
+              <DocsMenu toggle={this.toggleMenu} />
             </Sidebar>
           </Grid.Column>
         )}
@@ -177,7 +179,7 @@ export default class NavLayout extends Component {
           onHide={() => this.setState({ menuVisible: false })}
           visible={menuVisible}
         >
-          <NavMenuItems toggle={this.toggleMenu} />
+          <DocsMenu toggle={this.toggleMenu} />
         </Sidebar>
         <Sidebar.Pusher>
           {!menuVisible && <Button basic onClick={this.toggleMenu} icon="bars" circular />}

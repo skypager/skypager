@@ -2,6 +2,7 @@ import skypager from '@skypager/web'
 import * as DocumentHelper from '@skypager/helpers-document'
 import * as AppClient from './client'
 import * as moduleFactory from './module-factory'
+import docs from './features/docs'
 import { createBrowserHistory } from 'history'
 
 skypager.history = createBrowserHistory()
@@ -15,6 +16,7 @@ skypager
   .use(DocumentHelper)
   .use('editor')
   .use(moduleFactory)
+  .use(docs)
   .use(next => setupDocs().then(() => next()))
   .start()
 
@@ -22,12 +24,11 @@ skypager.clients.register('app', () => AppClient)
 
 skypager.appClient = skypager.client('app')
 
-skypager.mdxDocs.add(require.context('../docs', true, /\.md$/))
-
 global.runtime = skypager
 
 export default skypager
 
 async function setupDocs() {
+  skypager.docs.acceptContext(require.context('../docs', true, /\.md$/))
   skypager.setState({ docsLoaded: true })
 }
