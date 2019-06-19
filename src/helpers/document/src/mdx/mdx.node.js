@@ -1,16 +1,61 @@
-import BaseMdx from './mdx'
+import Mdx from './mdx'
 
-export default class Mdx extends BaseMdx {
+/**
+ * @typedef {Object} FileWrapper
+ * @property {String} content
+ * @property {String} hash
+ * @property {String} path
+ * @property {String} relative
+ * @property {String} dir
+ * @property {String} relativeDirname
+ * @property {Object} stats
+ */
+
+/**
+ * @typedef {Object} Babel
+ * @property {Object} ast
+ * @property {Function} findNodes
+ */
+
+/**
+ * @typedef {Object} VmRunner
+ * @property {Function} run
+ * @property {Array} results
+ */
+
+/**
+ * @typedef {Object} ParsedMdx
+ * @property {String} code
+ * @property {Object} ast
+ * @property {Object} meta
+ * @property {Object} headingsMap
+ * @property {Function} default
+ */
+export default class MdxNode extends Mdx {
+  /**
+   * Reference to the underlying file wrapper in skypager's file manager.
+   * @memberof MdxNode#
+   * @type {FileWrapper}
+   */
   get file() {
     return this.tryGet('file', {
       path: `${this.name}.md`,
     })
   }
 
+  /**
+   * @type {String}
+   * @memberof MdxNode#
+   */
   get content() {
     return this.tryGet('content', this.tryGet('file.content'))
   }
 
+  /**
+   * Runs all of the code blocks.
+   * @param {Object} options
+   * @memberof MdxNode#
+   */
   async run(options = {}) {
     await this.process(options)
     await this.toRunnable()
@@ -23,6 +68,13 @@ export default class Mdx extends BaseMdx {
     }
   }
 
+  /**
+   * Compiles each of the code blocks and exports an object of functions that can be used to run the code block.
+   *
+   * @param {Object} options
+   * @memberof MdxNode#
+   * @returns {Promise<Object<String,Function>>}
+   */
   async toExport(options = {}) {
     const script = await this.toScriptHelper(options)
 
@@ -38,6 +90,12 @@ export default class Mdx extends BaseMdx {
     return this.toFunctions({ ...options, merge: true })
   }
 
+  /**
+   * Each codeblock can be turned into a script helper instance, giving us the ability to analyze the AST of a single block
+   *
+   * @type {Array<Babel>}
+   * @memberof MdxNode#
+   */
   get childScripts() {
     return this.chain
       .get('runners')
@@ -46,6 +104,12 @@ export default class Mdx extends BaseMdx {
       .value()
   }
 
+  /**
+   * Returns the VM Script Runner for each of the child scripts
+   *
+   * @type {Array<VmRunner>}
+   * @memberof MdxNode#
+   */
   get childRunners() {
     return this.chain
       .get('runners')
@@ -54,6 +118,13 @@ export default class Mdx extends BaseMdx {
       .value()
   }
 
+  /**
+   * Returns the results of each script that has been run.  Scripts will be keyed by their exportName,
+   * which is derived from the parent heading the code block belongs to.
+   *
+   * @type {Object}
+   * @memberof MdxNode#
+   */
   get resultsByExportName() {
     const { stringUtils } = this.runtime
     const { camelCase, kebabCase } = stringUtils
@@ -72,6 +143,13 @@ export default class Mdx extends BaseMdx {
       .value()
   }
 
+  /**
+   * @param {Object} options
+   * @param {Boolean} [options.merge=false] passing true will combine multiple blocks under the same heading into a single function
+   * @param {Function} [options.nameFn] a function which will return the name of the function for a given codeblock
+   * @returns {Object<String,Function>}
+   * @memberof MdxNode#
+   */
   toFunctions(options = {}) {
     const { stringUtils } = this.runtime
     const { camelCase, kebabCase } = stringUtils
@@ -110,12 +188,24 @@ export default class Mdx extends BaseMdx {
       .value()
   }
 
+  /**
+   * Converts this document instance to a runnable document instance. Involves creating VMRunner objects for each code block.
+   *
+   * @memberof MdxNode#
+   * @returns this
+   */
   async toRunnable(options = {}) {
     const runners = await this.createVMRunners(options)
     this.state.set('runners', runners)
     return this
   }
 
+  /**
+   * Returns the VMRunners for each of this document's code blocks.
+   *
+   * @type {Array<VmRunner>}
+   * @memberof MdxNode#
+   */
   get runners() {
     if (this.currentState.runners) {
       return this.currentState.runners
@@ -126,6 +216,11 @@ export default class Mdx extends BaseMdx {
     return this.state.get('runners')
   }
 
+  /**
+   * Creates a Babel script helper instance for this document's JS content.
+   * @memberof MdxNode#
+   * @returns {Promise<Babel>}
+   */
   async toScriptHelper(options = {}) {
     const { id = this.runtime.relative(this.file.path) } = options
 
@@ -147,9 +242,16 @@ export default class Mdx extends BaseMdx {
   }
 
   /**
+   * Uses @skypager/helpers-mdx to convert the content of this markdown document to
+   * a JavaScript module consisting of the React Component, AST, Headings Map, etc.
    *
+   * Useful when all you have is the content markdown as a string.
+   *
+   * @param {Object} options
+   * @memberof MdxNode#
+   * @returns {Promise<ParsedMdx>}
    */
-  async process(options) {
+  async process(options = {}) {
     const scriptHelper = await this.toScriptHelper(options)
     const { ast, headingsMap, default: defaultExport, meta } = await scriptHelper
       .parse()
@@ -164,6 +266,7 @@ export default class Mdx extends BaseMdx {
     this.state.set('ast', ast)
 
     return {
+      code: scriptHelper.content,
       ast,
       meta: this.currentState.meta,
       headingsMap,
@@ -172,8 +275,12 @@ export default class Mdx extends BaseMdx {
   }
 
   /**
-   * Takes the raw markdown mdx content, parses it with mdx, and then transpiles the resulting
-   * code.
+   * Takes the raw markdown mdx content, parses it with @skypager/helpers-mdx, and then transpiles the resulting
+   * code. Used by our process function internally.
+   *
+   * @private
+   * @memberof MdxNode#
+   * @returns {Promise<ParsedMdx>}
    */
   async transpile(options = {}) {
     const { code, meta, ast } = await require('@skypager/helpers-mdx')(this.content, {
@@ -192,8 +299,7 @@ export default class Mdx extends BaseMdx {
    */
   async parse(options = {}) {
     if (!this.file.path) {
-      console.log('WTF OVER')
-      process.exit(1)
+      throw new Error(`Missing underlying file component with a path.`)
     }
 
     const { code, ast, meta } = await require('@skypager/helpers-mdx')(this.content, {
@@ -214,6 +320,12 @@ export default class Mdx extends BaseMdx {
     return { ast, code, meta }
   }
 
+  /**
+   * Returns the line numbers of each heading found in the document.
+   *
+   * @type {Object<String,Number>}
+   * @memberof MdxNode#
+   */
   get headingLineNumbers() {
     return this.chain
       .get('headingsMap.lines')
@@ -225,6 +337,12 @@ export default class Mdx extends BaseMdx {
       .value()
   }
 
+  /**
+   * Creates VmRunners for each of the code blocks.
+   * @private
+   * @memberof MdxNode#
+   * @param {Object} options
+   */
   async createVMRunners(options = {}) {
     const { runtime } = this
     const { castArray } = this.lodash
@@ -310,8 +428,8 @@ export default class Mdx extends BaseMdx {
   }
 
   static attach(runtime, options) {
-    BaseMdx.attach(runtime, {
-      baseClass: Mdx,
+    Mdx.attach(runtime, {
+      baseClass: MdxNode,
       ...options,
     })
   }
