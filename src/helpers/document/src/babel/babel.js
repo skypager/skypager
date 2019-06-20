@@ -4,12 +4,80 @@ import * as core from '@babel/core'
 import traverse from '@babel/traverse'
 import types from '@babel/types'
 
+/** 
+ * @typedef {Object} Program
+ * @property {Array} comments
+ * @property {Array<ASTNode>} body
+ * 
+*/
+/** 
+ * @typedef {Object} BabelAST
+ * @property {Program} program
+*/
+
+/** 
+ * @typedef {Object} Coordinates
+ * @property {Number} line
+ * @property {Number} column
+*/
+
+/** 
+ * @typedef {Object} ASTPath
+ * @property {ASTNode} node 
+ * @property {Object} path 
+*/
+/** 
+ * @typedef {Object} ASTNode 
+ * @property {SourcePosition} loc 
+ * @property {String} type
+ * @property {Boolean} [static]
+ * @property {String} [kind]
+*/
+
+/** 
+ * @typedef {Object} SourcePosition
+ * @property {Coordinates} start
+ * @property {Coordinates} end 
+*/
+
+/** 
+ * @typedef {Object} SourceExtraction
+ * @property {Function} toString
+ * @property {SourcePosition} begin
+ * @property {SourcePosition} end 
+ * @property {Array<String>} extractedLines
+ * @property {Number} beginLine
+ * @property {Number} endLine 
+ * @property {Number} beginColumn 
+ * @property {Number} endColumn 
+*/
+
+/** 
+ * @typedef {Object} FileObject
+ * @property {String} content
+ * @property {String} hash 
+ * @property {String} path 
+ * @property {String} relative 
+ * @property {String} relativeDirname
+ * @property {String} extname 
+ * @property {Object} stats
+ * 
+*/
+
+/** 
+  * @typedef {Object} UndocumentedReport
+  * @property {String} name
+  * @property {String} className 
+  * @property {String} type  
+  * @property {String} kind 
+  * @property {Boolean} static 
+  * @property {Number} lineNumber
+  * @property {SourcePosition} loc
+*/
+
 /**
- * The Script Helper lets us work with our JavaScript files and their AST
- *
- * @export
- * @class Script
- * @extends {Helper}
+ * The Babel Helper lets us work with our JavaScript files and their AST
+ * 
  */
 export class Babel extends Helper {
   // every call to runtime.page(pageId) will produce a new instance of a page
@@ -26,12 +94,27 @@ export class Babel extends Helper {
 
   static allowAnonymousProviders = true
 
+  /** 
+   * @private
+  */
   initialize() {
+    /** 
+     * @property {Array<String>} lines
+     * @memberof Babel#
+    */
     this.lazy('lines', () => this.content.split('\n'))
   }
+  
   /**
    * Uses this.content and creates a @babel AST using @babel/core's parse function
    * using the babel config
+   * 
+   * @memberof Babel#
+   * @param {Object} options
+   * @param {Boolean} [options.refresh=false]
+   * @param {Boolean} [options.fresh=false]
+   * @param {String} [options.content=this.content]
+   * @memberof Babel#
    */
   async parse(options = {}) {
     if (this.parsedAst && !options.refresh && !options.fresh) {
@@ -75,17 +158,18 @@ export class Babel extends Helper {
    * Given an ast and optional code snippet for a source map, produce parsedAst babel code
    *
    * @param {Object} options - the options
-   * @param {Object} options.babel - options to be passed to the babel config generator (presetEnv)
-   * @param {Object} options.babelConfig - supply your own babel config don't generate any
-   * @param {Array} options.body - replace the body of our current ast program with a new body
-   * @param {String} options.code - code to use for sourcemap generation
-   * @param {Boolean} options.parse - create a new module from the generated code and return the module.exports
+   * @param {Object} [options.babel] - options to be passed to the babel config generator (presetEnv)
+   * @param {Object} [options.babelConfig] - supply your own babel config don't generate any
+   * @param {Array} [options.body] - replace the body of our current ast program with a new body
+   * @param {String} [options.code=this.content] - code to use for sourcemap generation
+   * @param {Boolean} [options.parse=false] - create a new module from the generated code and return the module.exports
    *
-   * @return {Object} returns a babel transform object, with code, ast, map properties
+   * @returns {Promise<Object>} returns a babel transform object, with code, ast, map properties
+   * @memberof Babel#
    */
   async transformAst(options = {}) {
     const { runtime } = this
-    const { body, code = this.contents } = options
+    const { body, code = this.content } = options
     let { ast = this.ast } = options
 
     const babelConfig = this.getBabelConfig(options)
@@ -147,6 +231,13 @@ export class Babel extends Helper {
   /**
    * Uses @babel/traverse to find nodes in the AST.  This can be combined with
    * findChildNodes to find nodes in the AST.
+   * 
+   * @param {Object} options
+   * @param {String} [options.type]
+   * @param {Function} [options.filter]
+   * @param {Object} [options.ast]
+   * @returns {Array<ASTPath>}
+   * @memberof Babel#
    */
   findNodes(options = {}) {
     const { isFunction } = this.lodash
@@ -186,6 +277,8 @@ export class Babel extends Helper {
    *
    * @param {SourcePosition} begin
    * @param {SourcePosition} end
+   * @memberof Babel#
+   * @returns {SourceExtraction}
    */
   extractSourceFromLocations(begin, end) {
     const { clone, isUndefined, get } = this.lodash
@@ -242,6 +335,12 @@ export class Babel extends Helper {
    * within that node.  ObjectExpression is a node type you would search within to find
    * certain usage patterns
    *
+   * @param {ASTNode} parentNode
+   * @param {Object} options
+   * @param {String} [options.type]
+   * @param {Function} [options.filter]
+   * @returns {Array<ASTNode>}
+   * @memberof Babel#
    */
   findChildNodes(parentNode, options = {}) {
     const { isFunction } = this.lodash
@@ -282,6 +381,11 @@ export class Babel extends Helper {
   /**
    * Find lines which match a pattern or set of patterns
    * Returns the lines that match along with their line number
+   * @param {RegExp|Array<RegExp>} patterns
+   * @param {Boolean} [includeInfo=true] include info about the match, and line number
+   * 
+   * @returns {Array<String>}
+   * @memberof Babel#
    */
   findLines(patterns, includeInfo = true) {
     const { castArray } = this.lodash
@@ -302,6 +406,15 @@ export class Babel extends Helper {
     return includeInfo ? matches : matches.map(match => match[1])
   }
 
+  /**
+   * Creates a module from a list of top level export names.
+   * 
+   * Note, currently the exports must be pure, and not rely on any scope in the module.
+   *
+   * @param {String} exportNames
+   * @returns {Object}
+   * @memberof Babel
+   */
   async sliceModule(...exportNames) {
     const body = await this.findNodesByExportName(...exportNames)
     const newMod = await this.transformAst({
@@ -311,8 +424,11 @@ export class Babel extends Helper {
 
     return newMod
   }
+
   /**
    * Provides access to the @babel modules we rely on to traverse the AST
+   * @memberof Babel#
+   * 
    */
   get babel() {
     return { core, types, traverse }
@@ -320,6 +436,12 @@ export class Babel extends Helper {
 
   /**
    * Returns babel config for use with parse() and transform() methods
+   * @returns {Object}
+   * @param {Object} options
+   * @param {Object} [options.babelConfig] specify babel config directly
+   * @param {Object} [options.babel] options to be passed to the babel-config generator
+   * @param {String} [options.modules] babel preset-env modules config 
+   * @memberof Babel#
    */
   getBabelConfig(options = {}) {
     const { omit, pick } = this.lodash
@@ -329,7 +451,7 @@ export class Babel extends Helper {
     const babelOptions =
       typeof options.babel === 'object'
         ? options.babel
-        : { transformRuntime: true, presetEnv: { modules: 'auto' } }
+        : { transformRuntime: true, presetEnv: { modules: options.modules || 'auto' } }
 
     const babelConfig = options.babelConfig || require('./babel-config')(babelOptions)
 
@@ -338,6 +460,7 @@ export class Babel extends Helper {
 
   /**
    * Returns the ast that parse() generated.
+   * @type {BabelAST}
    */
   get ast() {
     this.ensureState()
@@ -346,13 +469,21 @@ export class Babel extends Helper {
 
   /**
    * Replaces the current AST with a new one
+   * @memberof Babel#
+   * @param {BabelAST} value
    */
   set ast(value) {
+    /** 
+     * @memberof Babel#
+     * @property {BabelAST} parsedAst
+    */
     this.hide('parsedAst', value)
   }
 
   /**
    * Provides access to the comment nodes in the script
+   * @type {Array<ASTNode>}
+   * @memberof Babel#
    */
   get comments() {
     const { get } = this.lodash
@@ -361,18 +492,25 @@ export class Babel extends Helper {
 
   /**
    * The body section of the ast.program are the main nodes in the script
+   * @type {Array<ASTNode>}
+   * @memberof Babel#
    */
   get body() {
     const { get } = this.lodash
     return get(this, 'ast.program.body', [])
   }
 
+  /** 
+   * @type {Array<String>}
+   * @memberof Babel#
+  */
   get bodyNodeTypes() {
     return this.body.map(node => node.type)
   }
 
   /**
    * The file content of the script.  May include wrapper content if the script helper instance or the scripts registry has a wrapContent function
+   * @memberof Babel#
    */
   get content() {
     const wrapper = this.tryGet('wrapper', this.context.reg.wrapContent)
@@ -381,6 +519,11 @@ export class Babel extends Helper {
       : this.unwrappedContent
   }
 
+  /** 
+   * The raw content that powers this script helper.  Could have been passed in as options on create,
+   * registered as a provider, or be a part of a file discovered in the file manager.  Depending on how
+   * the script helper instance was created.
+  */
   get unwrappedContent() {
     return (
       this.currentState.content ||
@@ -390,11 +533,21 @@ export class Babel extends Helper {
     )
   }
 
+  /** 
+   * If there is an underlying file object in the file manager, for example,
+   * this will refer to that. 
+   * 
+   * @type {FileObject}
+   * @memberof Babel#
+  */
   get file() {
     return this.currentState.file || this.options.file || this.provider.file
   }
+
   /**
    * Gives us all of the nodes of type ImportDeclaration
+   * @type {Array<ASTNode>}
+   * @memberof Babel#
    */
   get importDeclarations() {
     return this.body.filter(node => node.type === 'ImportDeclaration')
@@ -402,6 +555,8 @@ export class Babel extends Helper {
 
   /**
    * Gives us all of the nodes that export something from the module
+   * @type {Array<{ index: Number, node: ASTNode }>}
+   * @memberof Babel#
    */
   get exportDeclarations() {
     return this.body
@@ -415,42 +570,79 @@ export class Babel extends Helper {
       .filter(Boolean)
   }
 
+  /** 
+   * @memberof Babel#
+   * @type {Array<ASTPath>}
+  */
   get classDeclarations() {
-    return this.findNodes(({ node }) => node.type === 'ClassDeclaration')
+    return this.findNodes({ type: 'ClassDeclaration' })
   }
 
+  /** 
+   * @memberof Babel#
+   * @type {Array<ASTPath>}
+  */
   get classInstanceMethods() {
-    return this.findNodes(
-      ({ node }) => node.type === 'ClassMethod' && node.kind === 'method' && !node.static
-    )
+    return this.findNodes({
+      filter: ({ node }) => node.type === 'ClassMethod' && node.kind === 'method' && !node.static
+    })
   }
 
+  /** 
+   * @memberof Babel#
+   * @type {Array<ASTPath>}
+  */
   get classGetters() {
-    return this.findNodes(
-      ({ node }) => node.type === 'ClassMethod' && node.kind === 'get' && !node.static
-    )
+    return this.findNodes({
+      filter: ({ node }) => node.type === 'ClassMethod' && node.kind === 'get' && !node.static 
+    }) 
   }
-
+  
+  /** 
+   * @memberof Babel#
+   * @type {Array<ASTPath>}
+  */
   get staticClassMethods() {
-    return this.findNodes(
-      ({ node }) => node.type === 'ClassMethod' && node.kind === 'method' && node.static
-    )
+    return this.findNodes({
+      filter: ({ node }) => node.type === 'ClassMethod' && node.kind === 'method' && node.static
+    })
   }
 
+  /** 
+   * @memberof Babel#
+   * @type {Array<ASTPath>}
+  */
   get staticClassGetters() {
-    return this.findNodes(
-      ({ node }) => node.type === 'ClassMethod' && node.kind === 'get' && node.static
-    )
+    return this.findNodes({
+      filter: ({ node }) => node.type === 'ClassMethod' && node.kind === 'get' && node.static
+    })
   }
 
+  /** 
+   * @memberof Babel#
+   * @type {Array<ASTPath>}
+  */
   get classProperties() {
-    return this.findNodes(({ node }) => node.type === 'ClassProperty' && !node.static)
+    return this.findNodes({ filter: ({ node }) => node.type === 'ClassProperty' && !node.static })
   }
 
+  /** 
+   * @memberof Babel#
+   * @type {Array<ASTPath>}
+  */
   get staticClassProperties() {
-    return this.findNodes(({ node }) => node.type === 'ClassProperty' && node.static)
+    return this.findNodes({
+      filter: ({ node }) => node.type === 'ClassProperty' && node.static
+    }) 
   }
 
+
+  /** 
+   * Returns the undocumented class members
+   * 
+   * @memberof Babel#
+   * @type {Array<UndocumentedReport>}
+  */
   get undocumentedClassMembers() {
     const { isEmpty, omitBy, get } = this.lodash
 
