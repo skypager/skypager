@@ -48,6 +48,10 @@ const registry = ({ name, members, scope, partialArg }) =>
  */
 
 /**
+ * The Remark AST is made up of nodes. Nodes are
+ * of a specific type based on their markdown syntax.  Every
+ * node has a position in the document, line number and column
+ *
  * @typedef {Object} RemarkASTNode
  * @property {String} type
  * @property {Array<RemarkASTNode>} children
@@ -56,6 +60,11 @@ const registry = ({ name, members, scope, partialArg }) =>
  */
 
 /**
+ * The Remark AST represents fenced codeblocks
+ * with optional language identifiers as type=code
+ * any additional name=value pairs that come after language
+ * are arbitrary properties
+ *
  * @typedef {Object} RemarkASTCodeNode
  * @property {String} type
  * @property {String} value
@@ -64,6 +73,9 @@ const registry = ({ name, members, scope, partialArg }) =>
  */
 
 /**
+ * The Remark AST represents heading nodes with their depth
+ * equal to the number of hashtags used to indicate heading level
+ *
  * @typedef {Object} RemarkASTHeadingNode
  * @property {String} type
  * @property {Array<RemarkASTNode>} children
@@ -72,6 +84,9 @@ const registry = ({ name, members, scope, partialArg }) =>
  */
 
 /**
+ * A markdown link to a doc:// url will resolve to some action
+ * which can render content in place of that link tag.
+ *
  * @typedef {Object} ResolvedDocLink
  * @property {String} matched
  * @property {Object} params
@@ -98,7 +113,7 @@ export class Mdx extends Helper {
    * A lifecycle hook which creates registries of actions that can belong to this document.
    *
    * @private
-   * @memberof Mdx#
+   *
    */
   initialize() {
     const base = {
@@ -108,7 +123,7 @@ export class Mdx extends Helper {
 
     /**
      * @property {Registry} actions
-     * @memberof Mdx#
+     *
      */
     this.actions = registry({
       name: 'actions',
@@ -118,7 +133,7 @@ export class Mdx extends Helper {
 
     /**
      * @property {Registry} sandboxes
-     * @memberof Mdx#
+     *
      */
     this.sandboxes = registry({
       name: 'sandboxes',
@@ -132,7 +147,7 @@ export class Mdx extends Helper {
    * parsed or not, which means we will have the AST.
    *
    * @private
-   * @memberof Mdx#
+   *
    */
   get initialState() {
     return {
@@ -146,7 +161,7 @@ export class Mdx extends Helper {
    * then we format the name of the document and try to guess the title based on that
    *
    * @type {String}
-   * @memberof Mdx#
+   *
    */
   get title() {
     const { title = this.options.title } = this.meta
@@ -178,7 +193,7 @@ export class Mdx extends Helper {
    * shows which line numbers headings are on based on their text.
    *
    * @type {HeadingsMap}
-   * @memberof Mdx#
+   *
    */
   get headingsMap() {
     return (
@@ -195,7 +210,7 @@ export class Mdx extends Helper {
    * or if the document uses actual mdx syntax and exports a meta property.
    *
    * @type {Object}
-   * @memberof Mdx#
+   *
    */
   get meta() {
     // checks options.meta, fallsback to provider.meta
@@ -209,7 +224,7 @@ export class Mdx extends Helper {
    * the markdown documents before rendering it as html or mdx.
    *
    * @type {RemarkAST}
-   * @memberof Mdx#
+   *
    */
   get ast() {
     return (
@@ -230,7 +245,7 @@ export class Mdx extends Helper {
    * the markdown documents before rendering it as React components.
    *
    * @type {RemarkAST}
-   * @memberof Mdx#
+   *
    */
   get rehypeAst() {
     return (
@@ -251,7 +266,7 @@ export class Mdx extends Helper {
    *
    * @param {Function} fn
    * @param {RemarkAST} [base=this.ast] the AST to visit. Defaults to this documents, but can be any AST.
-   * @memberof Mdx#
+   *
    */
   visit(fn, base = this.ast) {
     return visit(base, fn)
@@ -260,7 +275,7 @@ export class Mdx extends Helper {
   /**
    * @param {RemarkASTNode} node get the plaintext content of a markdown AST node.
    * @returns {String}
-   * @memberof Mdx#
+   *
    */
   stringify(node) {
     return nodeToString(node)
@@ -272,7 +287,7 @@ export class Mdx extends Helper {
    * @param {Number|RemarkASTNode} indexOrNode the numeric index of a node, or the actual node you want to find after.
    * @param {String|Function} test
    * @param {RemarkAST} [base=this.ast] the ast the node belongs to, defaults to the current document's AST
-   * @memberof Mdx#
+   *
    * @returns {Array<RemarkASTNode>}
    */
   findAllNodesAfter(indexOrNode, test, base = this.ast) {
@@ -285,7 +300,7 @@ export class Mdx extends Helper {
    * @param {Number|RemarkASTNode} indexOrNode the numeric index of a node, or the actual node you want to find after.
    * @param {String|Function} test
    * @param {RemarkAST} [base=this.ast] the ast the node belongs to, defaults to the current document's AST
-   * @memberof Mdx#
+   *
    * @returns {Array<RemarkASTNode>}
    */
   findAllNodesBefore(indexOrNode, test, base = this.ast) {
@@ -298,7 +313,7 @@ export class Mdx extends Helper {
    * @param {Number|RemarkASTNode} indexOrNode the numeric index of a node, or the actual node you want to find after.
    * @param {String|Function} test
    * @param {RemarkAST} [base=this.ast] the ast the node belongs to, defaults to the current document's AST
-   * @memberof Mdx#
+   *
    * @returns {RemarkASTNode}
    */
   findNodesAfter(indexOrNode, test, base = this.ast) {
@@ -310,7 +325,7 @@ export class Mdx extends Helper {
    *
    * @param {String} selector
    * @param {RemarkAST} [base=this.ast] the ast the node belongs to, defaults to the current document's AST
-   * @memberof Mdx#
+   *
    * @returns {Array<RemarkASTNode|RemarkASTHeadingNode|RemarkASTCodeNode>}
    */
   select(selector, base = this.ast) {
@@ -322,7 +337,7 @@ export class Mdx extends Helper {
    *
    * @param {String} selector
    * @param {RemarkAST} [base=this.ast] the ast the node belongs to, defaults to the current document's AST
-   * @memberof Mdx#
+   *
    * @returns {RemarkASTNode|RemarkASTCodeNode|RemarkASTHeadingNode}
    */
   selectNode(selector, base = this.ast) {
@@ -332,7 +347,7 @@ export class Mdx extends Helper {
   /**
    * Returns the AST's top level child nodes.
    *
-   * @memberof Mdx#
+   *
    * @type {Array<RemarkASTNode>}
    */
   get body() {
@@ -340,7 +355,7 @@ export class Mdx extends Helper {
   }
 
   /**
-   * @memberof Mdx#
+   *
    * @type {Array<RemarkASTHeadingNode>}
    */
   get headingNodes() {
@@ -352,7 +367,7 @@ export class Mdx extends Helper {
    * to treat these as abitrary attributes for the code block.  These attributes will be passed as props when we're using MDX
    * which lets us build our renderable and runnable example blocks.
    *
-   * @memberof Mdx#
+   *
    * @type {Array<RemarkASTCodeNode>}
    */
   get codeBlocks() {
@@ -377,7 +392,7 @@ export class Mdx extends Helper {
    * Returns all the codeblocks where the language is defined as javascript
    *
    * @type {Array<RemarkASTCodeNode>}
-   * @memberof Mdx#
+   *
    */
   get javascriptBlocks() {
     return this.codeBlocks.filter(({ type, lang }) => type === 'code' && lang === 'javascript')
@@ -387,7 +402,7 @@ export class Mdx extends Helper {
    * Returns all the codeblocks where the language is defined as shell or sh
    *
    * @type {Array<RemarkASTCodeNode>}
-   * @memberof Mdx#
+   *
    */
   get shellBlocks() {
     return this.codeBlocks.filter(
@@ -398,7 +413,7 @@ export class Mdx extends Helper {
   /**
    * Returns information about all of the headings, their depth, and line numbers.
    *
-   * @memberof Mdx#
+   *
    * @type {Array<Array>}
    */
   get structure() {
@@ -418,7 +433,7 @@ export class Mdx extends Helper {
    * @param {RemarkASTNode} node
    * @param {Object} options
    * @param {Boolean} options.stringify return the string content of the node instead of the node.
-   * @memberof Mdx#
+   *
    * @returns {String|RemarkASTHeadingNode|RemarkASTNode}
    */
   findParentHeading(node, options) {
@@ -443,7 +458,7 @@ export class Mdx extends Helper {
    * Every document has its own sandboxes registry, but all documents can use a shared registry
    * for common sandboxes.
    *
-   * @memberof Mdx#
+   *
    * @type {Registry}
    */
   get sharedSandboxes() {
@@ -454,7 +469,7 @@ export class Mdx extends Helper {
    * Every document has its own actions registry, but all documents can use a shared registry
    * for common actions.
    *
-   * @memberof Mdx#
+   *
    * @type {Registry}
    */
   get sharedActions() {
@@ -465,7 +480,7 @@ export class Mdx extends Helper {
    * Get the value for a named sandbox, searching first in this document's sandbox registry
    * and then falling back to the shared sandboxes registry.
    *
-   * @memberof Mdx#
+   *
    * @param {String} sandboxId
    * @returns {Object}
    */
@@ -483,7 +498,7 @@ export class Mdx extends Helper {
    * this document.  The last argument passed to this function is going to be this document's context,
    * which includes references to runtime, the document itself, and all the runtime's dependency injection variables.
    *
-   * @memberof Mdx#
+   *
    * @param {String} actionId
    * @returns {Function}
    */
@@ -561,7 +576,7 @@ export class Mdx extends Helper {
    * Returns the React component that was produced by the mdx webpack loader
    *
    * @readonly
-   * @memberof Mdx#
+   *
    */
   get Component() {
     const { componentExport = 'default' } = this.options

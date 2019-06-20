@@ -31,10 +31,16 @@ import Mdx from './mdx'
  * @property {Object} headingsMap
  * @property {Function} default
  */
+
+/**
+ * The MdxNode class is the wrapper around the Mdx document helper, when the
+ * runtime is a node.js runtime.  This gives us the capabilities to use server side
+ * compilation tools, as well as read and write content from disk
+ */
 export default class MdxNode extends Mdx {
   /**
    * Reference to the underlying file wrapper in skypager's file manager.
-   * @memberof MdxNode#
+   *
    * @type {FileWrapper}
    */
   get file() {
@@ -45,7 +51,7 @@ export default class MdxNode extends Mdx {
 
   /**
    * @type {String}
-   * @memberof MdxNode#
+   *
    */
   get content() {
     return this.tryGet('content', this.tryGet('file.content'))
@@ -54,7 +60,7 @@ export default class MdxNode extends Mdx {
   /**
    * Runs all of the code blocks.
    * @param {Object} options
-   * @memberof MdxNode#
+   * @returns {Promise<Boolean>}
    */
   async run(options = {}) {
     await this.process(options)
@@ -66,13 +72,15 @@ export default class MdxNode extends Mdx {
     for (let block of blocks) {
       await block.runner.run()
     }
+
+    return true
   }
 
   /**
    * Compiles each of the code blocks and exports an object of functions that can be used to run the code block.
    *
    * @param {Object} options
-   * @memberof MdxNode#
+   *
    * @returns {Promise<Object<String,Function>>}
    */
   async toExport(options = {}) {
@@ -94,7 +102,7 @@ export default class MdxNode extends Mdx {
    * Each codeblock can be turned into a script helper instance, giving us the ability to analyze the AST of a single block
    *
    * @type {Array<Babel>}
-   * @memberof MdxNode#
+   *
    */
   get childScripts() {
     return this.chain
@@ -108,7 +116,7 @@ export default class MdxNode extends Mdx {
    * Returns the VM Script Runner for each of the child scripts
    *
    * @type {Array<VmRunner>}
-   * @memberof MdxNode#
+   *
    */
   get childRunners() {
     return this.chain
@@ -123,7 +131,7 @@ export default class MdxNode extends Mdx {
    * which is derived from the parent heading the code block belongs to.
    *
    * @type {Object}
-   * @memberof MdxNode#
+   *
    */
   get resultsByExportName() {
     const { stringUtils } = this.runtime
@@ -148,7 +156,7 @@ export default class MdxNode extends Mdx {
    * @param {Boolean} [options.merge=false] passing true will combine multiple blocks under the same heading into a single function
    * @param {Function} [options.nameFn] a function which will return the name of the function for a given codeblock
    * @returns {Object<String,Function>}
-   * @memberof MdxNode#
+   *
    */
   toFunctions(options = {}) {
     const { stringUtils } = this.runtime
@@ -191,7 +199,7 @@ export default class MdxNode extends Mdx {
   /**
    * Converts this document instance to a runnable document instance. Involves creating VMRunner objects for each code block.
    *
-   * @memberof MdxNode#
+   *
    * @returns this
    */
   async toRunnable(options = {}) {
@@ -204,7 +212,7 @@ export default class MdxNode extends Mdx {
    * Returns the VMRunners for each of this document's code blocks.
    *
    * @type {Array<VmRunner>}
-   * @memberof MdxNode#
+   *
    */
   get runners() {
     if (this.currentState.runners) {
@@ -218,7 +226,7 @@ export default class MdxNode extends Mdx {
 
   /**
    * Creates a Babel script helper instance for this document's JS content.
-   * @memberof MdxNode#
+   *
    * @returns {Promise<Babel>}
    */
   async toScriptHelper(options = {}) {
@@ -248,7 +256,7 @@ export default class MdxNode extends Mdx {
    * Useful when all you have is the content markdown as a string.
    *
    * @param {Object} options
-   * @memberof MdxNode#
+   *
    * @returns {Promise<ParsedMdx>}
    */
   async process(options = {}) {
@@ -279,7 +287,7 @@ export default class MdxNode extends Mdx {
    * code. Used by our process function internally.
    *
    * @private
-   * @memberof MdxNode#
+   *
    * @returns {Promise<ParsedMdx>}
    */
   async transpile(options = {}) {
@@ -324,7 +332,7 @@ export default class MdxNode extends Mdx {
    * Returns the line numbers of each heading found in the document.
    *
    * @type {Object<String,Number>}
-   * @memberof MdxNode#
+   *
    */
   get headingLineNumbers() {
     return this.chain
@@ -340,7 +348,7 @@ export default class MdxNode extends Mdx {
   /**
    * Creates VmRunners for each of the code blocks.
    * @private
-   * @memberof MdxNode#
+   *
    * @param {Object} options
    */
   async createVMRunners(options = {}) {

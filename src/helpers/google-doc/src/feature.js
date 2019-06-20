@@ -128,6 +128,23 @@ export async function listFolders(options = {}) {
   })
 }
 
+/**
+ * Returns a list of file objects from the google drive files API.  Is a convenience wrapper for constructing
+ * the query syntax more easily. See https://developers.google.com/drive/api/v3/search-files for the exact parameters.
+ *
+ * @param {Object} options
+ * @param {Number} [options.maxResults=100] the maximum number of results to show
+ * @param {Boolean} [options.sharedWithMe=true] return files that are shared with you, in addition to ones you own
+ * @param {Boolean} [options.teamDrives=true] return files that are shared with you in team drives, in addition to ones you own
+ * @param {Boolean} [options.handleResponse=false] useful for debugging purposes to see the full axios response object from google's rest API
+ * @param {Object} [options.teamDriveOptions] specify your own team drive options
+ * @param {Boolean} [options.trashed=false] include trashed files in the results
+ * @param {String} [options.parentsOperator='and'] which operator to use when using the parents parameter
+ * @param {Array} [options.parents=[]] parent folder ids to search
+ * @param {String} [options.mimeType] limit the search by mimeType, useful for finding google docs, vs sheets, folders, etc
+ * @param {String} [options.and] an additional query condition that must return match
+ * @param {String} [options.or] an additional query condition that can also return match
+ */
 export async function listFiles(options = {}) {
   const { drive } = this
   const {
