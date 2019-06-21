@@ -1,6 +1,11 @@
 # Google Docs Helper
 
-Provides a model for working with google documents.
+Provides a model for working with google documents, as collections of documents and individual instances.
+
+Use this helper to build a content object model which combines an organized collection of google documents,
+with JavaScript functions that can be used to represent the information in them in some desired format. 
+
+This can be used to power a static site generator, a blog, use your imagination. 
 
 [Learn about their structure](https://developers.google.com/docs/api/concepts/structure)
 

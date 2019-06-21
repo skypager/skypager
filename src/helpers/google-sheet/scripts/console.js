@@ -13,11 +13,12 @@ async function main() {
 
   await runtime.sheets.discover()
 
-  const sheet = runtime.sheet(runtime.sheets.available[0])
+  const sheetId = runtime.argv.sheetId || 'skypagersheethelperfixture'
+  const sheet = runtime.sheet(sheetId)
 
   await sheet.loadAll()
 
-  const ws = sheet.sheet('sheet2')
+  const ws = sheet.sheet(runtime.argv.worksheet || 'sheet2')
 
   runtime.repl('interactive').launch({
     runtime,

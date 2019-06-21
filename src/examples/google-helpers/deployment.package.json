@@ -1,0 +1,36 @@
+{
+  "name": "@skypager/google-helpers-docs",
+  "version": "1.1.1",
+  "description": "documentation site about google helpers",
+  "author": "Jon Soeder <jon@chicago.com>",
+  "scripts": {
+    "start": "skypager serve"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@skypager/cli": "^1.0.1",
+    "@skypager/node": "^1.0.1"
+  },
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/skypager/skypager"
+  },
+  "homepage": "https://skypager.io",
+  "gitHead": "66f2da16f4d6ebc315f1d244ba314647a8630011",
+  "keywords": [],
+  "contributors": [],
+  "skypager": {
+    "category": "apps",
+    "projectType": "webapp",
+    "buildFolder": "lib"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie < 11",
+    "not op_mini all"
+  ]
+}

@@ -237,7 +237,7 @@ module.exports = function(webpackEnv, options = {}) {
       })
     }
 
-    if (shouldMinifyJS) {
+    if (isEnvProduction && shouldMinifyJS) {
       base = mapKeys(base, (v, k) => (k.endsWith('.min') ? k : `${k}.min`))
     }
 
