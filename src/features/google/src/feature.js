@@ -165,7 +165,7 @@ export async function createAuthClient(options = {}) {
 export function getDrive() {
   const { driveVersion = 'v2' } = this.settings
   return this.service('drive', {
-    version: driveVersion 
+    version: driveVersion,
   })
 }
 
@@ -243,7 +243,7 @@ export async function listFiles(options = {}) {
     return response
   }
 
-  let files = response.data.items || response.data.files || [] 
+  let files = response.data.items || response.data.files || []
 
   if (mimeType && mimeType.length) {
     files = files.filter(i => String(i.mimeType).toLowerCase() === mimeType.toLowerCase())
