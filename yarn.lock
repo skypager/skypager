@@ -5291,6 +5291,14 @@ create-hmac@^1.1.0, create-hmac@^1.1.2, create-hmac@^1.1.4:
     safe-buffer "^5.0.1"
     sha.js "^2.4.8"
 
+create-react-context@<=0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/create-react-context/-/create-react-context-0.2.2.tgz#9836542f9aaa22868cd7d4a6f82667df38019dca"
+  integrity sha512-KkpaLARMhsTsgp0d2NA/R94F/eDLbhXERdIq3LvX2biCAXcDvHYoOqHfWCHf1+OLj+HKBotLG3KqaOOf+C1C+A==
+  dependencies:
+    fbjs "^0.8.0"
+    gud "^1.0.0"
+
 crocket@^0.9.11:
   version "0.9.11"
   resolved "https://registry.yarnpkg.com/crocket/-/crocket-0.9.11.tgz#288fca11ef0d3dd239b62c488265f30c8edfb0c5"
@@ -7869,6 +7877,11 @@ gtoken@^2.3.0, gtoken@^2.3.2:
     jws "^3.1.5"
     mime "^2.2.0"
     pify "^4.0.0"
+
+gud@^1.0.0:
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/gud/-/gud-1.0.0.tgz#a489581b17e6a70beca9abe3ae57de7a499852c0"
+  integrity sha512-zGEOVKFM5sVPPrYs7J5/hYEw2Pof8KCyOwyhG8sAF26mCAeUFAcYPu1mwB7hhpIP29zOIBaDqwuHdLp0jvZXjw==
 
 gzip-size@5.0.0:
   version "5.0.0"
@@ -12050,6 +12063,11 @@ pnp-webpack-plugin@1.2.1:
   dependencies:
     ts-pnp "^1.0.0"
 
+popper.js@^1.14.4:
+  version "1.15.0"
+  resolved "https://registry.yarnpkg.com/popper.js/-/popper.js-1.15.0.tgz#5560b99bbad7647e9faa475c6b8056621f5a4ff2"
+  integrity sha512-w010cY1oCUmI+9KwwlWki+r5jxKfTFDVoadl7MSrIujHU5MJ5OR6HTDj6Xo8aoR/QsA56x8jKjA59qGH4ELtrA==
+
 portfinder@^1.0.9:
   version "1.0.20"
   resolved "https://registry.yarnpkg.com/portfinder/-/portfinder-1.0.20.tgz#bea68632e54b2e13ab7b0c4775e9b41bf270e44a"
@@ -13248,6 +13266,18 @@ react-loadable@^5.5.0:
   dependencies:
     prop-types "^15.5.0"
 
+react-popper@^1.3.3:
+  version "1.3.3"
+  resolved "https://registry.yarnpkg.com/react-popper/-/react-popper-1.3.3.tgz#2c6cef7515a991256b4f0536cd4bdcb58a7b6af6"
+  integrity sha512-ynMZBPkXONPc5K4P5yFWgZx5JGAUIP3pGGLNs58cfAPgK67olx7fmLp+AdpZ0+GoQ+ieFDa/z4cdV6u7sioH6w==
+  dependencies:
+    "@babel/runtime" "^7.1.2"
+    create-react-context "<=0.2.2"
+    popper.js "^1.14.4"
+    prop-types "^15.6.1"
+    typed-styles "^0.0.7"
+    warning "^4.0.2"
+
 react-reconciler@^0.20.0:
   version "0.20.2"
   resolved "https://registry.yarnpkg.com/react-reconciler/-/react-reconciler-0.20.2.tgz#f72fe0329d579371f253719080e7d090262330a9"
@@ -14243,6 +14273,21 @@ semantic-ui-react@^0.86.0:
     lodash "^4.17.11"
     prop-types "^15.6.2"
     react-is "^16.7.0"
+    shallowequal "^1.1.0"
+
+semantic-ui-react@^0.87.2:
+  version "0.87.2"
+  resolved "https://registry.yarnpkg.com/semantic-ui-react/-/semantic-ui-react-0.87.2.tgz#b312a5a1f7395b3ff871507c59c0557fae54c984"
+  integrity sha512-VusWdtK4IPWOgBYx/pHh1/nzMnBHa5Kt4FmIRR/AA9klzvfvNTqKSKodK7IY3DG4CSBn/sTUMc5igGQq2SzaRQ==
+  dependencies:
+    "@babel/runtime" "^7.1.2"
+    "@semantic-ui-react/event-stack" "^3.1.0"
+    classnames "^2.2.6"
+    keyboard-key "^1.0.4"
+    lodash "^4.17.11"
+    prop-types "^15.6.2"
+    react-is "^16.7.0"
+    react-popper "^1.3.3"
     shallowequal "^1.1.0"
 
 semver-compare@^1.0.0:
@@ -15648,6 +15693,11 @@ type-is@^1.6.16, type-is@~1.6.16:
     media-typer "0.3.0"
     mime-types "~2.1.18"
 
+typed-styles@^0.0.7:
+  version "0.0.7"
+  resolved "https://registry.yarnpkg.com/typed-styles/-/typed-styles-0.0.7.tgz#93392a008794c4595119ff62dde6809dbc40a3d9"
+  integrity sha512-pzP0PWoZUhsECYjABgCGQlRGL1n7tOHsgwYv3oIiEpJwGhFTuty/YNeduxQYzXXa3Ge5BdT6sHYIQYpl4uJ+5Q==
+
 typedarray@^0.0.6:
   version "0.0.6"
   resolved "https://registry.yarnpkg.com/typedarray/-/typedarray-0.0.6.tgz#867ac74e3864187b1d3d47d996a78ec5c8830777"
@@ -16217,7 +16267,7 @@ walk-back@^3.0.0:
   resolved "https://registry.yarnpkg.com/walk-back/-/walk-back-3.0.1.tgz#0c0012694725604960d6c2f75aaf1a1e7d455d35"
   integrity sha512-umiNB2qLO731Sxbp6cfZ9pwURJzTnftxE4Gc7hq8n/ehkuXC//s9F65IEIJA2ZytQZ1ZOsm/Fju4IWx0bivkUQ==
 
-warning@^4.0.1:
+warning@^4.0.1, warning@^4.0.2:
   version "4.0.3"
   resolved "https://registry.yarnpkg.com/warning/-/warning-4.0.3.tgz#16e9e077eb8a86d6af7d64aa1e05fd85b4678ca3"
   integrity sha512-rpJyN222KWIvHJ/F53XSZv0Zl/accqHR8et1kpaMTD/fLCRxtV8iX8czMzY7sVZupTI3zcUTg8eycS2kNF9l6w==

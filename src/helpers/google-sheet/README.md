@@ -1,5 +1,54 @@
 # Google Sheets Helper
 
+The Google Sheets Helper is an extension for the Skypager Node Runtime which lets you treat google sheet documents as modules.
+
+An instance of the Sheet Helper can be used in scripts, or node.js servers, to read and write from that spreadsheet in real time.
+
+- You can add, delete, or modify the worksheets in a google spreadsheet.
+- You can add, delete, or modify rows in a worksheet.
+- Each worksheet represents its data as objects.  The keys to this object correspond to the values of the columns in Row 1.  Aka your headers.
+- You can define classes which represent each row in a worksheet.  The default [RowEntity](src/RowEntity.js) class has getters and setters for each column attribute.
+
+For example, this google sheet [https://docs.google.com/spreadsheets/d/1w5LZe7wXL59S2NhafvbQXudFpdVI3Z0NVwBMrexQvXQ/edit?usp=sharing](https://docs.google.com/spreadsheets/d/1w5LZe7wXL59S2NhafvbQXudFpdVI3Z0NVwBMrexQvXQ/edit?usp=sharing)
+
+![example.png](example.png)
+
+- has a worksheet 'sheet1'
+- which has column headers `["column-one","column-two","column-three","column-four","column-five"]` 
+- has data in rows 2, 5
+
+it produces the following data
+
+```javascript
+const data = {
+  sheet1: [{
+    columnOne: "row one column one",
+    columnTwo: "row one column two",
+    columnThree: "row one column three",
+    columnFour: "row one column four",
+    columnFive: "row one column five"
+  }, /* ... */]
+}
+```
+
+
+
+## Installation
+
+To use this library in your own project, make sure to install it
+
+**Via NPM**
+
+```shell
+npm install @skypager/node @skypager/helpers-sheet --save
+```
+
+**Via YARN**
+
+```shell
+yarn add @skypager/node @skypager/helpers-sheet --save
+```
+
 ## Required Setup
 
 You'll need

@@ -11,6 +11,22 @@ This can be used to power a static site generator, a blog, use your imagination.
 
 This can be used to turn google documents into markdown, or to treat google documents as a content database for a CMS. 
 
+## Installation
+
+To use this library in your own project, make sure to install it
+
+**Via NPM**
+
+```shell
+npm install @skypager/node @skypager/helpers-google-doc --save
+```
+
+**Via YARN**
+
+```shell
+yarn add @skypager/node @skypager/helpers-google-doc --save
+```
+
 ## Required Setup
 
 You'll need
