@@ -5,11 +5,11 @@
 
 ![Logo](docs/skypager-logo-nobg.svg)
 
-Skypager provides you with a batteries included CLI for creating, building, running, publishing, and deploying cross platform JavaScript applications and modules, for node.js, the browser, React Native, and electron.  
+Skypager provides you with a batteries included CLI and JavaScript API for creating, building, running, publishing, and deploying cross platform JavaScript applications and modules. Designed for modules which work in node.js, the browser, React Native, and electron.  
 
-Publishing reusable components as modules, to npm and multiple CDNs, can be as simple as one command.  Downloading and mirroring modules from npm, or cdns is can also be one command.  
+With Skypager, everything can potentially be a module.  A single file. A folder, a Google Spreadsheet or Document, a Sketch File.
 
-Both can be accomplished with a JavaScript API as well. 
+Every module can be can be composed together and declaratively wired up, and lazy loaded.
 
 ## Build and Runtime Integration
 
@@ -17,17 +17,17 @@ In addition to scripts which automate the build / run / publish / deploy phases 
 
 Skypager provides a runtime framework that provides convenient APIs which help you develop reusable application modules that can package up and lazy load different features and capabilities, especially those which rely on third party dependencies, in a highly cacheable way.
 
-The goal is to enable you to be able build to light weight applications that only contain what is unique about them, but which can still leverage features that are provided by underlying modules that you can maintain yourself, or download from NPM.  
+The goal is to enable you to be able to build light weight applications that only contain what is unique about them, but which can still leverage features that are provided by underlying modules that you might also maintain yourself, or download from NPM.  
 
-These modules act as a sort of reusable framework, curated framework for you or your team. 
+Skypager makes it easy to identify which modules should act as a sort of reusable framework, or a curated set of modules and scripts for you or your team to rely on.  At the same time, it makes it clear which modules are specific to this project. 
 
-Your light weight applications will only deliver what is unique about them to the end user, and rely on shared caches for common code.
+Your light weight applications will only deliver what is unique about them to the end user, and rely on shared caches for common code for everything else.
 
 As a developer, you'll benefit from easily being able to manage your boilerplate in one place, separate from the things that make each project unique. 
 
-For a team of developers, Skypager's module boundaries, since they are based on where code is stored, makes it easier to solve problems in isolation, and incorporate that solution in multiple projects, which depend on the versions you have released. 
+For a team of developers, Skypager's module boundaries, since they are based on where code is stored, makes it easier to solve problems in isolation, and incorporate that solution in multiple projects, which only depend on the specific versions you have released. 
 
-Applicaton might depend on various combinations of `@myscope/servers-*` and `@myscope/themes-*`.  Whoever is developing the servers and the whoever is developing themes, could very well be completely different departments or companies.
+Applicatons might depend on various combinations of `@myscope/servers-*` and `@myscope/themes-*`.  Whoever is developing the servers and the whoever is developing themes, could very well be completely different departments or companies.
 
 The Skypager framework allows us to specify how the scripts and modules provided by a `server` module, get combined with the static css and image assets provided by a `theme` module, to provide a total user experience. 
 
@@ -95,11 +95,11 @@ So the `runtime` object you import can be used to tell you info about this speci
 
 If that project has a `skypager.js` file, that file will automatically be loaded and can be used to customize the node.js runtime for that project even further.
 
-This behavior allows you to write scripts which adapt to the current project they are in.  
+These behaviors allow you to write scripts which adapt to the current project they are in.  
 
-This makes it so when you develop a script for one project, it can easily be used by another.
+This makes it so when you develop a script for one project, it can easily be used by another, either by copy and pasting and duplicating it, or relying on it as a module dependency.
 
-This means much less copy and pasting and duplication of code, because you can write scripts and servers which are flexible and rely on the current `package.json`, or on other files following a similar file name conventions.
+This means you can trend toward less copying and pasting and duplication of code, because you can write scripts and servers which are flexible and rely on the current `package.json`, or on other files following a similar file name conventions.
 
 **How it works:**
 
