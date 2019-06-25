@@ -1,6 +1,37 @@
 const runtime = require('@skypager/node')
 
+main()
+
 async function main() {
+  const requestedHelp = runtime.argv.help || runtime.argv._[0] === 'help'
+
+  if (requestedHelp) {
+    displayHelp()
+  } else {
+    return handler()
+  }
+}
+
+function displayHelp() {
+  const { randomBanner, print } = runtime.cli
+
+  randomBanner('Skypager')
+  print(`Skypager REPL`)
+  print(`Enhanced REPL which auto-resolves promises and more.`)
+  console.log(
+    `
+  Usage:
+  
+    $ skypager console
+
+  Options:
+    --dev-mode    start fileManager, packageManager, enable @skypager/helpers-document
+
+  `.trim()
+  )
+}
+
+async function handler() {
   const requireScripts = runtime.lodash.castArray(runtime.argv.require).filter(Boolean)
 
   if (requireScripts.length) {
@@ -51,5 +82,3 @@ async function main() {
     packageManager: runtime.packageManager,
   })
 }
-
-main()

@@ -1,6 +1,50 @@
 const runtime = require('@skypager/node')
 
 async function main() {
+  const requestedHelp = runtime.argv.help || runtime.argv._[0] === 'help'
+
+  if (requestedHelp) {
+    displayHelp()
+  } else {
+    return handler()
+  }
+}
+
+function displayHelp() {
+  const { colors, randomBanner, print } = runtime.cli
+
+  randomBanner('Skypager')
+  print(colors.bold.underline(`Skypager Server`), 0, 0, 1)
+  console.log(
+    `
+    Starts a @skypager/helpers-server based server module.
+
+    ${colors.bold.underline('Examples')}:
+
+    Provide the path to the server helper module definition:
+
+      $ skypager serve server/index.js
+    
+    Provide a directory to serve as a static file server with html history fallback
+
+      $ skypager serve build/
+
+    ${colors.bold.underline('Options')}:
+      --esm                   enable es module import/export syntax
+      --babel                 enable @babel/register on the fly module transpilation
+      --port <port>           the port number to listen on, defaults to 3000
+      --host <hostname>       the interface to bind to (e.g. localhost, 0.0.0.0) defaults to 0.0.0.0   
+      --enable-logging        enable winston request logging
+      --build-folder <path>   which file to serve static files from
+      --no-cors               disable CORS support
+      --no-history            disable html history fallback
+      --no-single             same as --no-history
+      --no-show-banner        disable the automatic info banner
+    `.trim()
+  )
+}
+
+async function handler() {
   const { _ } = runtime.argv
   const request = _[0]
 

@@ -4,7 +4,32 @@ const { resolve } = runtime.pathUtils
 const { fromPairs, isEmpty, omitBy, get, mapValues } = runtime.lodash
 const { colors, print } = runtime.cli
 
-async function main(options = {}) {
+async function main(...args) {
+  const requestedHelp = runtime.argv.help || runtime.argv._[0] === 'help'
+
+  if (requestedHelp) {
+    displayHelp()
+  } else {
+    return handler(...args)
+  }
+}
+
+function displayHelp() {
+  const { colors, randomBanner, print } = runtime.cli
+
+  randomBanner('Skypager')
+  print(colors.bold.underline(`Skypager CLI Script Inspector`), 0, 0, 1)
+  console.log(`
+  Use when you want find out how a given skypager CLI command will be executed. 
+
+  The skypager CLI will search your local project, your package scope, and the @skypager/* packages
+  found in your node_modules resolution paths.  It will attempt to share any files found in the scripts/
+  folder of any of these projects, provided that project's package.json declares that it provides that script
+  as one that can be re-used in other skypager project folders. 
+  `.trim()) 
+}
+
+async function handler(options = {}) {
   const { validScripts, scriptFolders } = await listAllScripts(options)
 
   const rootFolder =

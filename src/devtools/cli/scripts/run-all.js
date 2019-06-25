@@ -135,6 +135,33 @@ const parseItem = command => {
 }
 
 async function main() {
+  const requestedHelp = runtime.argv.help || runtime.argv._[0] === 'help'
+
+  if (requestedHelp) {
+    displayHelp()
+  } else {
+    return handler()
+  }
+}
+
+function displayHelp() {
+  const { colors, randomBanner, print } = runtime.cli
+
+  randomBanner('Skypager')
+  print(colors.bold.underline(`Skypager Script Runner`), 0, 0, 1)
+  console.log(
+    `
+    Use to spawn multiple scripts in a single project, or in multiple projects in a monorepo.
+
+    With run-all you can spawn scripts sequentially, in parallel, and control the output of these
+    processes in different ways.  
+    
+    You can hide their output behind a spinner, if using a TTY, or stream their output with a prefix in CI.
+    `.trim()
+  )
+}
+
+async function handler() {
   const { profiler } = runtime
 
   profiler.profileStart('runAll')

@@ -1,44 +1,19 @@
 const runtime = require('@skypager/node')
 const axios = require('axios')
 
-let attempts = 0
-let pass = false
-const serverPort = runtime.argv.port || 3000
-
-let port
+const port = runtime.argv.port || process.env.PORT || 3000
 
 main()
 
 async function main() {
-  port = await runtime.networking.findOpenPort(port)
-  const proc = runtime.proc.async
-    .spawn('yarn', ['start', '--port', port], {
-      stdio: 'ignore',
-    })
-    .catch(error => {
-      if (error.message.match(/failed with code null/)) {
-        process.exit(pass ? 0 : 1)
-      }
-    })
-
-  await waitForServer()
-  await sleep(2000)
-
-  pass = await runTests()
-
-  console.log('SUCCESS!')
-
-  try {
-    process.kill(-proc.childProcess.pid)
-  } catch (error) {}
-  try {
-    process.kill(proc.childProcess.pid)
-  } catch (error) {}
-}
-
-async function runTests() {
-  await Promise.all([testVM(), testMdx(), testKeywords()]).catch(error => {
+  console.log(`Running API Tests against port ${port}`)
+  await Promise.all([
+    testVM().then(() => console.log('VM Test OK')), 
+    testMdx().then(() => console.log('MDX Test OK')), 
+    testKeywords().then(() => console.log('Keywords Test OK'))
+  ]).catch(error => {
     console.error(error.message)
+    process.exit(1)
     return false
   })
 
@@ -59,6 +34,17 @@ async function testKeywords() {
 
   const response = await axios.post(`http://localhost:${port}/keywords`, {
     content: testContent,
+  })
+  .catch((error) => {
+    if (error.response) {
+      const { status, data } = error.response
+      if (status !== 404) {
+        console.error({ response: data })
+      }
+      throw new Error(`Request to http://localhost:${port}/keywords failed with status ${status}`)
+    } else {
+      throw error
+    }
   })
 
   const { data, status } = response
@@ -92,6 +78,16 @@ async function testVM() {
     content: testBabelCode,
     transpile: true,
     name: 'test-babel',
+  }).catch((error) => {
+    if (error.response) {
+      const { status, data } = error.response
+      if (status !== 404) {
+        console.error({ response: data })
+      }
+      throw new Error(`Request to http://localhost:${port}/vm failed with status ${status}`)
+    } else {
+      throw error
+    }
   })
 
   const { data, status } = response
@@ -126,8 +122,17 @@ async function testMdx() {
     content: testMdxCode,
     transpile: true,
     name: 'test-babel',
+  }).catch((error) => {
+    if (error.response) {
+      const { status, data } = error.response
+      if (status !== 404) {
+        console.error({ response: data })
+      }
+      throw new Error(`Request to http://localhost:${port}/mdx failed with status ${status}`)
+    } else {
+      throw error
+    }
   })
-
   const { data, status } = response
 
   if (status !== 200) {
@@ -141,23 +146,4 @@ async function testMdx() {
   }
 
   return true
-}
-
-async function waitForServer(port = serverPort) {
-  const isPortListening = await runtime.networking.isPortOpen(port)
-
-  if (!isPortListening) {
-    attempts = attempts + 1
-    await sleep(attempts * 1000)
-    console.log('Waiting for server')
-    return waitForServer(port)
-  }
-
-  return true
-}
-
-function sleep(ms = 1000) {
-  return new Promise((resolve, reject) => {
-    setTimeout(resolve, ms)
-  })
 }
