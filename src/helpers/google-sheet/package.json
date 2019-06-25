@@ -1,6 +1,6 @@
 {
   "name": "@skypager/helpers-sheet",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "skypager sheet helper",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
@@ -21,9 +21,9 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@skypager/google": "^1.2.1",
     "axios": "github:axios/axios",
-    "google-spreadsheet": "^2.0.5",
-    "@skypager/google": "^1.2.0"
+    "google-spreadsheet": "^2.0.5"
   },
   "repository": {
     "type": "github",

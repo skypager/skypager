@@ -1,6 +1,6 @@
 {
   "name": "@skypager/ui-copy-manager",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "sync your ui copy with google spreadsheets.",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
@@ -17,7 +17,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@skypager/helpers-sheet": "^1.2.0"
+    "@skypager/helpers-sheet": "^1.2.1"
   },
   "skypager": {
     "category": "cli",
