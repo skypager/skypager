@@ -17,9 +17,7 @@ const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
 
 let localServer
 
-const testDelay = runtime.argv.testDelay
-  ? parseInt(runtime.argv.testDelay, 10)
-  : 5000
+const testDelay = runtime.argv.testDelay ? parseInt(runtime.argv.testDelay, 10) : 5000
 
 async function main() {
   const requestedHelp = runtime.argv.help || runtime.argv._[0] === 'help'
@@ -100,28 +98,26 @@ const checkServer = async testUrl => {
   }
 
   try {
-
-  axios
-    .get(testUrl)
-    .then(() => {
-      serverIsReady = true
-      runtime.emit('serverIsReady')
-      return testUrl
-    })
-    .catch(error => {
-      if (Date.now() - startAt > 20000) {
-        console.log(error)
-        console.log(`Something happened... ${error}`)
-        runtime.emit('serverFailed')
-        throw error
-      }
-      return sleep(1000).then(() => checkServer(testUrl))
-    })
-  } catch(error) {
+    axios
+      .get(testUrl)
+      .then(() => {
+        serverIsReady = true
+        runtime.emit('serverIsReady')
+        return testUrl
+      })
+      .catch(error => {
+        if (Date.now() - startAt > 20000) {
+          console.log(error)
+          console.log(`Something happened... ${error}`)
+          runtime.emit('serverFailed')
+          throw error
+        }
+        return sleep(1000).then(() => checkServer(testUrl))
+      })
+  } catch (error) {
     console.error(error.message)
     process.exit(1)
   }
-
 }
 
 async function buildUrl() {
@@ -146,7 +142,7 @@ async function buildUrl() {
 async function choosePort(chosenPort) {
   if (runtime.argv.auto || runtime.argv.port === 'auto') {
     chosenPort =
-      chosenPort || parseInt(process.env.SERVER_PORT || 7000 + Math.floor(Math.random() * 1000)) 
+      chosenPort || parseInt(process.env.SERVER_PORT || 7000 + Math.floor(Math.random() * 1000))
   }
 
   const { networking } = runtime
@@ -191,7 +187,7 @@ function spinUpLocalhost(builtUrlObj) {
     env: {
       PORT: builtUrlObj.port,
       ...process.env,
-    }
+    },
     // disabling eslint here because we're not letting the promise resolve gracefully, which means there's always an error thrown
     /* eslint-disable */
   }).catch(error => {
@@ -203,11 +199,11 @@ function spinUpLocalhost(builtUrlObj) {
 
 function runTests(testUrl, options = {}) {
   const { showBrowser = false, test = 'test' } = runtime.argv
-  let { port = runtime.argv.port || process.env.PORT } = options 
+  let { port = runtime.argv.port || process.env.PORT } = options
 
   // console.log('Running Tests', testUrl, options)
 
-  const args = [ test ]
+  const args = [test]
 
   if (showBrowser) {
     args.push('--show-browser')
@@ -215,15 +211,24 @@ function runTests(testUrl, options = {}) {
 
   if (runtime.argv.logLevel === 'debug') {
     console.log('yarn', args, {
-      env: { URL: testUrl, TEST_URL: testUrl, ...(port && String(port).length && { PORT: String(port) }) },
+      env: {
+        URL: testUrl,
+        TEST_URL: testUrl,
+        ...(port && String(port).length && { PORT: String(port) }),
+      },
       stdio: 'inherit',
     })
   }
 
   return spawn('yarn', args, {
-    env: { ...process.env, URL: testUrl, TEST_URL: testUrl, ...(port && String(port).length && { PORT: String(port) }) },
+    env: {
+      ...process.env,
+      URL: testUrl,
+      TEST_URL: testUrl,
+      ...(port && String(port).length && { PORT: String(port) }),
+    },
     stdio: 'inherit',
-  }) 
+  })
 }
 
 async function handler() {
@@ -231,7 +236,7 @@ async function handler() {
     await doWork()
     killServer()
     process.exit(0)
-  } catch(error) {
+  } catch (error) {
     killServer()
     process.exit(1)
   }
@@ -242,13 +247,11 @@ function killServer() {
     if (localServer) {
       process.kill(-localServer.childProcess.pid)
     }
-  } catch (error) {}  
+  } catch (error) {}
 }
 
 main()
-  .then(() => {
-
-    })
+  .then(() => {})
   .catch(error => {
     try {
       if (localServer) {

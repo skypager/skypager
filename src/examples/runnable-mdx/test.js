@@ -8,9 +8,9 @@ main()
 async function main() {
   console.log(`Running API Tests against port ${port}`)
   await Promise.all([
-    testVM().then(() => console.log('VM Test OK')), 
-    testMdx().then(() => console.log('MDX Test OK')), 
-    testKeywords().then(() => console.log('Keywords Test OK'))
+    testVM().then(() => console.log('VM Test OK')),
+    testMdx().then(() => console.log('MDX Test OK')),
+    testKeywords().then(() => console.log('Keywords Test OK')),
   ]).catch(error => {
     console.error(error.message)
     process.exit(1)
@@ -32,20 +32,21 @@ async function testKeywords() {
     the right column should contain content from the news feed
   `
 
-  const response = await axios.post(`http://localhost:${port}/keywords`, {
-    content: testContent,
-  })
-  .catch((error) => {
-    if (error.response) {
-      const { status, data } = error.response
-      if (status !== 404) {
-        console.error({ response: data })
+  const response = await axios
+    .post(`http://localhost:${port}/keywords`, {
+      content: testContent,
+    })
+    .catch(error => {
+      if (error.response) {
+        const { status, data } = error.response
+        if (status !== 404) {
+          console.error({ response: data })
+        }
+        throw new Error(`Request to http://localhost:${port}/keywords failed with status ${status}`)
+      } else {
+        throw error
       }
-      throw new Error(`Request to http://localhost:${port}/keywords failed with status ${status}`)
-    } else {
-      throw error
-    }
-  })
+    })
 
   const { data, status } = response
 
@@ -74,21 +75,23 @@ async function testVM() {
   main()
   `
 
-  const response = await axios.post(`http://localhost:${port}/vm`, {
-    content: testBabelCode,
-    transpile: true,
-    name: 'test-babel',
-  }).catch((error) => {
-    if (error.response) {
-      const { status, data } = error.response
-      if (status !== 404) {
-        console.error({ response: data })
+  const response = await axios
+    .post(`http://localhost:${port}/vm`, {
+      content: testBabelCode,
+      transpile: true,
+      name: 'test-babel',
+    })
+    .catch(error => {
+      if (error.response) {
+        const { status, data } = error.response
+        if (status !== 404) {
+          console.error({ response: data })
+        }
+        throw new Error(`Request to http://localhost:${port}/vm failed with status ${status}`)
+      } else {
+        throw error
       }
-      throw new Error(`Request to http://localhost:${port}/vm failed with status ${status}`)
-    } else {
-      throw error
-    }
-  })
+    })
 
   const { data, status } = response
 
@@ -118,21 +121,23 @@ async function testMdx() {
   ### Subheading 3
   `
 
-  const response = await axios.post(`http://localhost:${port}/mdx`, {
-    content: testMdxCode,
-    transpile: true,
-    name: 'test-babel',
-  }).catch((error) => {
-    if (error.response) {
-      const { status, data } = error.response
-      if (status !== 404) {
-        console.error({ response: data })
+  const response = await axios
+    .post(`http://localhost:${port}/mdx`, {
+      content: testMdxCode,
+      transpile: true,
+      name: 'test-babel',
+    })
+    .catch(error => {
+      if (error.response) {
+        const { status, data } = error.response
+        if (status !== 404) {
+          console.error({ response: data })
+        }
+        throw new Error(`Request to http://localhost:${port}/mdx failed with status ${status}`)
+      } else {
+        throw error
       }
-      throw new Error(`Request to http://localhost:${port}/mdx failed with status ${status}`)
-    } else {
-      throw error
-    }
-  })
+    })
   const { data, status } = response
 
   if (status !== 200) {

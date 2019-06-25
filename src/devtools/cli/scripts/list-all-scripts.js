@@ -19,14 +19,16 @@ function displayHelp() {
 
   randomBanner('Skypager')
   print(colors.bold.underline(`Skypager CLI Script Inspector`), 0, 0, 1)
-  console.log(`
+  console.log(
+    `
   Use when you want find out how a given skypager CLI command will be executed. 
 
   The skypager CLI will search your local project, your package scope, and the @skypager/* packages
   found in your node_modules resolution paths.  It will attempt to share any files found in the scripts/
   folder of any of these projects, provided that project's package.json declares that it provides that script
   as one that can be re-used in other skypager project folders. 
-  `.trim()) 
+  `.trim()
+  )
 }
 
 async function handler(options = {}) {

@@ -63,9 +63,7 @@ async function handler() {
 
   await runtime.fileManager.startAsync()
 
-  const {
-    hashFile: outputFilename = 'build-manifest.json'
-  } = runtime.argv
+  const { hashFile: outputFilename = 'build-manifest.json' } = runtime.argv
 
   const buildFolderNames = ['dist', 'build', 'lib']
 
@@ -87,7 +85,7 @@ async function handler() {
   const hashTables = await Promise.all(
     buildFolders.map(baseFolder =>
       runtime.fileManager
-        .hashBuildTree({ baseFolder, exclude: [ new RegExp(`${outputFilename}$`)] })
+        .hashBuildTree({ baseFolder, exclude: [new RegExp(`${outputFilename}$`)] })
         .then(hashTable =>
           runtime.fsx
             .writeFileAsync(
