@@ -9,7 +9,64 @@ Skypager provides you with a batteries included CLI for creating, building, runn
 
 In addition, Skypager provides a framework for developing reusable application runtimes that bundle different features and capabilities, and especially third party dependencies, in a highly cacheable way.
 
-You can develop dozens of different unique applications which all share the same core runtime bundle.   
+The goal is to enable you to be able to deploy dozens of different unique applications, which share the same core runtime bundle, and only deliver what is unique about them to the end user.
+
+An important concept in Skypager is the idea of separating your JavaScript source code into categories:
+
+- application / project specific code
+- 3rd party dependencies (from npm or other registries)
+- shared / common portfolio code (re-usable or generic modules such as authentication/firebase authentication/aws authentication/auth0)
+
+**Each of these groups change at different frequencies.**
+
+Your application / project specific code changes most often.
+
+Your third party dependencies are usually locked using a `yarn.lock` and only change when the `package.json` dependencies change.
+
+Your shared / common portfolio code changes as often as you are making changes to your framework code.  If your framework code is generally stable,
+this should be somewhere in between the other two.
+
+**Each of these groups have similar groups of authors**
+
+Your 3rd party dependencies generally come from the community at large.
+
+Your common / shared code, is generally imported like any other 3rd party dependency, but instead of coming from the community in general, might be developed by somebody else on your team.  Or, you might only work on your framework code in between your work on specific projects.  
+
+Your application / project specific code is authored by you (or the people you're collaborating with directly.).  It usually lives somewhere in the current working directory, usually `src`
+
+### Prior Art
+
+The Webpack module bundler can bundle up all of your application code, common framework code, and third party dependencies and serve it all in a single bundle.js file.
+
+This is great for prototyping but obviously doesn't scale well, so Webpack has various ways of doing "code splitting" and serving your bundle in multiple chunks.  
+
+You can define a chunk called vendor, which includes all of your third party npm dependencies, and a chunk called app which includes just your own project code.
+
+There is even a configuration for webpack when you're using HTML Webpack Plugin, where you can "inline the runtime".  All of the boilerplate module loading code that webpack injects into each chunk,
+is extracted out into a common block of code, which gets defined as a script tag inline in the HTML file that webpack generates.
+
+Skypager's concept of a shared global runtime, that can be extended, declaratively, with other modules (referred to generically as Helpers) and cached is based on the same idea.
+
+Skypager helps you develop re-usable application runtimes as modules which can be shared across many different projects, or within a single project, in such a way that your common reusable components are easily bundled in one chunk, separate from the unique parts of each page, screen, or view of the application.   
+
+You can use these application runtimes 
+
+- in your front-end React App (or any framework really.)
+- in your node.js scripts
+- in your node.js servers
+- in AWS Lambda / Google Cloud Functions event handlers
+- In your react-native apps
+- In your electron desktop apps
+
+An application runtime bundles:
+
+- Your 3rd party dependencies
+- Your shared dependencies (e.g. if you're working inside of a monorepo)
+- Your shared / common / reusable boilerplate which wires up dependencies
+
+This architecture allows you to write your applications, scripts, lambdas, using a runtime module as your project's global state machine, and dependency provider.
+
+Structuring your code this way has many advantages for you as a single developer, or for you as a team of developers working on a shared github repository.
 
 ## What makes it different?
 
@@ -48,15 +105,46 @@ If you wish to take advantage of webpack `build` `start` and `watch` scripts, mo
 $ yarn add @skypager/webpack --dev
 ```
 
+If you wish to use MDX, and the [Skypager Document Helper](src/helpers/document) to be able to build cool things using your project's Markdown and JavaScript modules as a database
+
+```shell
+$ yarn add @skypager/helpers-document --save
+```
+
 ## CLI
 
-Installing `@skypager/cli` will create an executable `skypager`
+Installing `@skypager/cli` will provide an executable `skypager`.
 
-The `skypager` CLI is a simple node.js script runner that makes it easy to share re-usable script commands across an entire portfolio.
+If you pass either the `--esm` or `--babel` flags, it will enable ES module support in any of the modules your script requires.
 
-In addition to running project scripts and shared scripts, you can pass either the `--esm` or `--babel` flags to enable ES module support, or the `--debug` flag to enable the node debugger.
+If you pass the `--debug` flag to any `skypager` command, it will enable the node debugger.
 
-It is easy to re-use scripts across projects because When you run 
+The `skypager` CLI is a node.js script runner that provides the above conveniences when running any script, but it also is designed to makes it easier to share re-usable script commands across an entire portfolio of JavaScript projects.  
+
+By this I mean, for any `skypager $command`
+
+- It will scan your current project for scripts to run, 
+- it will scan your monorepo or scoped packages if your project name includes a `@scope` prefix 
+- it will run any scripts provided by `@skypager/*` modules.  
+
+Any time any of these scripts uses the `@skypager/runtime` module (or `@skypager/node` or `@skypager/react`) these runtime instances will run in the context of the nearest `package.json` file.
+
+- `skypager.cwd` will point to the directory of the nearest `package.json`
+- `skypager.gitInfo.root` will point to the directory of the nearest `.git` folder
+
+This behavior makes it so that the current `package.json` represents the current project.  
+
+And the `runtime` object you import can be used to tell you info about this specific project. 
+
+If that project has a `skypager.js` file, that file will automatically be loaded and can be used to customize the node.js runtime for that project.
+
+This behavior allows you to write scripts which adapt to the current project they are in.
+
+This means much less copy and pasting and duplication of code, because you can write scripts and servers which are flexible and rely on the current `package.json`, or on other files following a similar file name conventions.
+
+**How it works:**
+
+When you run 
 
 ```shell
 $ skypager whatever
