@@ -21,8 +21,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@skypager/helpers-sheet": "^1.2.0",
-    "googleapis": "^38.0.0"
+    "@skypager/google": "^1.2.0"
   },
   "repository": {
     "type": "github",

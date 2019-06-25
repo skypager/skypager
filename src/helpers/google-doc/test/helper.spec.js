@@ -22,7 +22,7 @@ describe('The Google Documents Helper', function() {
     runtime.should.have.property('googleDoc').that.is.a('function')
   })
 
-  it('discovers available sheets from google drive', async function() {
+  it('discovers available docs from google drive', async function() {
     await runtime.googleDocs.discover()
     runtime.googleDocs.should.have.property('available').that.is.an('array').that.is.not.empty
   })

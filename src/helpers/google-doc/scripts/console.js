@@ -11,13 +11,12 @@ async function main() {
     googleProject: require(serviceAccountPath).project_id,
   })
 
-  await runtime.googleDocs.discover()
+  // await runtime.googleDocs.discover()
 
-  const doc = runtime.googleDoc(runtime.googleDocs.available[0])
+  // const doc = runtime.googleDoc(runtime.googleDocs.available[0])
 
   runtime.repl('interactive').launch({
     runtime,
-    doc,
   })
 }
 

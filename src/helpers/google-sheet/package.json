@@ -23,7 +23,7 @@
   "dependencies": {
     "axios": "github:axios/axios",
     "google-spreadsheet": "^2.0.5",
-    "googleapis": "^33.0.0"
+    "@skypager/google": "^1.2.0"
   },
   "repository": {
     "type": "github",

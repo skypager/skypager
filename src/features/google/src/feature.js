@@ -10,18 +10,18 @@ export const initialState = {
 }
 
 export const featureMethods = [
-    'createAuthClient',
-    'listSpreadsheets',
-    'listDocuments',
-    'listFiles',
-    'listFolders',
-    'getDrive',
-    'getDocs',
-    'whenReady',
-    'getHasErrors',
-    'getApis',
-    'service',
-  ]
+  'createAuthClient',
+  'listSpreadsheets',
+  'listDocuments',
+  'listFiles',
+  'listFolders',
+  'getDrive',
+  'getDocs',
+  'whenReady',
+  'getHasErrors',
+  'getApis',
+  'service',
+]
 
 export function getApis() {
   return g
@@ -163,7 +163,10 @@ export async function createAuthClient(options = {}) {
 }
 
 export function getDrive() {
-  return this.service('drive')
+  const { driveVersion = 'v2' } = this.settings
+  return this.service('drive', {
+    version: driveVersion 
+  })
 }
 
 export function getDocs() {
@@ -236,7 +239,11 @@ export async function listFiles(options = {}) {
 
   const response = await drive.files.list({ maxResults, q: query, ...teamDriveOptions })
 
-  let files = options.handleResponse ? response : response.data.items
+  if (options.handleResponse) {
+    return response
+  }
+
+  let files = response.data.items || response.data.files || [] 
 
   if (mimeType && mimeType.length) {
     files = files.filter(i => String(i.mimeType).toLowerCase() === mimeType.toLowerCase())
@@ -246,8 +253,9 @@ export async function listFiles(options = {}) {
 }
 
 export async function listDocuments(options = {}) {
-  const { pick, omit } = this.lodash
+  const { pick } = this.lodash
   const { parents = [], recursive = false } = options
+  const { docs } = this
 
   if (recursive) {
     const folders = await this.listFolders()

@@ -1,5 +1,5 @@
 import runtime from '@skypager/runtime'
-import * as GoogleFeature from './feature'
+import * as GoogleIntegration from '@skypager/google'
 
 if (runtime.isBrowser) {
   attach(runtime)
@@ -7,8 +7,7 @@ if (runtime.isBrowser) {
 
 export function attach(runtime, options = {}) {
   if (!runtime.features.checkKey('google')) {
-    runtime.features.register('google', () => GoogleFeature)
-    runtime.feature('google').enable(options.google || options)
+    runtime.use(GoogleIntegration, options)
   }
 
   runtime.use(require('./GoogleDoc'))
