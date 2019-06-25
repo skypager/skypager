@@ -11,6 +11,8 @@ const ourScriptPath = path.resolve(__dirname, 'scripts/', scriptFilename)
 
 let scriptPath = existsSync(localScriptPath) ? localScriptPath : ourScriptPath
 
+const requestedHelp = script === 'help'
+
 if (!existsSync(scriptPath)) {
   try {
     scriptPath = require.resolve(`@skypager/devtools/scripts/${scriptFilename}`)
@@ -61,7 +63,31 @@ if (args.indexOf('--global-sandbox') !== -1) {
   runtimeArgs.push('@skypager/node/context.js')
 }
 
-if (scriptIsMissing) {
+if (requestedHelp) {
+  require('./scripts/list-all-scripts')
+    .listAllScripts({ verbose: false })
+    .then(scriptsData => {
+      console.log('Skypager CLI')
+      console.log(`Version: ${require('./package.json').version}`)
+      const { validScripts = [] } = scriptsData
+      const cliScripts = validScripts.find(e => e[0] === '@skypager/cli')[1]
+
+      const rest = validScripts.slice(1).filter(e => e[1] && e[1].length)
+
+      console.log('\nScripts provided by @skypager/cli:')
+
+      cliScripts.forEach(script => {
+        console.log(`  - ${script.replace('.js', '')}`)
+      })
+
+      console.log("\n\nRun 'skypager $script help' to get detailed command info.\n")
+      console.log('  Example:\n')
+      console.log('  $ skypager console help')
+    })
+    .then(() => {
+      process.exit(0)
+    })
+} else if (scriptIsMissing) {
   require('./find-command')(scriptFilename, checkPaths, runtimeArgs, args)
     .then(result => process.exit(0))
     .catch(error => process.exit(1)) // eslint-disable-line

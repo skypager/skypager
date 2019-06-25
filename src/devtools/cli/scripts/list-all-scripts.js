@@ -131,7 +131,7 @@ async function listAllScripts({ verbose = false }) {
   }
 }
 
-if (!require.main === module) {
+if (require.main !== module) {
   module.exports = {
     listAllScripts,
   }
