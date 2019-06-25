@@ -5,37 +5,33 @@
 
 ![Logo](docs/skypager-logo-nobg.svg)
 
-Skypager provides you with a batteries included CLI for creating, building, running, and deploying cross platform JavaScript applications for node.js and the browser.  
+Skypager provides you with a batteries included CLI for creating, building, running, publishing, and deploying cross platform JavaScript applications and modules, for node.js, the browser, React Native, and electron.  
 
-It makes publishing or downloading reusable components as modules, either from npm or multiple CDNs, as simple as one command.
+Publishing reusable components as modules, to npm and multiple CDNs, can be as simple as one command.  Downloading and mirroring modules from npm, or cdns is can also be one command.  
 
-In addition, Skypager provides a framework for developing reusable application runtime modules that can package different features and capabilities, and especially third party dependencies, in a highly cacheable way.
+Both can be accomplished with a JavaScript API as well. 
 
-The goal is to enable you to be able build to light weight applications that only contain what is unique about them, on top of a runtime modules that you can maintain or download from NPM that act as a sort of reusable framework. 
+## Build and Runtime Integration
 
-These light weight applications will only deliver what is unique about them to the end user, and rely on shared caches for common code.
+In addition to scripts which automate the build / run / publish / deploy phases of your JavaScript projects,
 
-As a developer, you'll benefit from easily being able to manage your boilerplate, and separate it from what makes each project unique. 
+Skypager provides a runtime framework that provides convenient APIs which help you develop reusable application modules that can package up and lazy load different features and capabilities, especially those which rely on third party dependencies, in a highly cacheable way.
 
-As a team of developers, Skypager's module boundaries, based on where code is stored, makes it easier to solve problems once and reuse that solution in multiple projects any time you are ready to release a new version. 
+The goal is to enable you to be able build to light weight applications that only contain what is unique about them, but which can still leverage features that are provided by underlying modules that you can maintain yourself, or download from NPM.  
 
-Projects which use the Skypager framework only need to have access to the modules, and can be installed globally or as a project dependency.  
+These modules act as a sort of reusable framework, curated framework for you or your team. 
 
-## What makes it different?
+Your light weight applications will only deliver what is unique about them to the end user, and rely on shared caches for common code.
 
-Skypager is not like a traditional JavaScript framework, instead it gives JavaScript developers the pieces we need to build our own own frameworks on top of the "many different modules" we use (from repositories like NPM, and our own). 
+As a developer, you'll benefit from easily being able to manage your boilerplate in one place, separate from the things that make each project unique. 
 
-Skypager is designed for people who want to build their own portfolios, or monorepos, consisting of their own modules, while leveraging all of the solutions to problems that have already been solved by other people and published to NPM.  If you have a handful of apps, all which use the same "stack" of third party libraries, and you want the ability to standardize all of these apps and make it easier to share the progress you make on one app with all of the other apps, Skypager is for you.
+For a team of developers, Skypager's module boundaries, since they are based on where code is stored, makes it easier to solve problems in isolation, and incorporate that solution in multiple projects, which depend on the versions you have released. 
 
-Skypager enables you to develop the different layers of your portfolio separately from one another, so that the components and modules which rarely change are built once, cached, and re-used until they change again.  The pieces of the app which change more often, are developed in a separate layer.  This is especially ideal for projects which multiple people or multiple teams contribute to, as the different layers that naturally emerge are very inline with the different teams and skillsets which contribute to a modern application.
+Applicaton might depend on various combinations of `@myscope/servers-*` and `@myscope/themes-*`.  Whoever is developing the servers and the whoever is developing themes, could very well be completely different departments or companies.
 
-![Team Layers](docs/team-layers.png)
+The Skypager framework allows us to specify how the scripts and modules provided by a `server` module, get combined with the static css and image assets provided by a `theme` module, to provide a total user experience. 
 
-In the graphic above, each box might represent a completely different department in a product organization.  
-
-If you're a solo full stack developer, each box represents a separate concern that you need to address using whichever hat you're wearing at the time.  You might be in charge of everything, but use off the shelf themes from bootstrap or semantic ui, or your client may be providing these visual elements for you.  You should be able to easily incorporate, or swap out any element, without causing too much stress on all of the other parts.
-
-In other words, if you don't already manage these aspects of an application as their own independent layer, you are probably having a much harder time than you need to be when changing things in the different layers.
+Projects which use the Skypager framework only need to have access to the modules, which can be installed globally, or as a project dependency.  
 
 ## Installation
 
@@ -52,13 +48,16 @@ $ yarn add @skypager/cli @skypager/node --dev # for single page apps and not ser
 $ yarn add @skypager/web --save # for the browser builds, this is a runtime / production dependency
 ```
 
+**Optional**
+
 If you wish to take advantage of webpack `build` `start` and `watch` scripts, modeled after [Create React App](https://github.com/facebook/create-react-app), you can install `@skypager/webpack`
 
 ```shell
 $ yarn add @skypager/webpack --dev
 ```
 
-If you wish to use MDX, and the [Skypager Document Helper](src/helpers/document) to be able to build cool things using your project's Markdown and JavaScript modules as a database
+If you wish to use MDX, and the [Skypager Document Helper](src/helpers/document) to be able to build cool things using your project's Markdown and JavaScript modules as a database, such as generate
+runnable, editable websites from your README.md 
 
 ```shell
 $ yarn add @skypager/helpers-document --save
@@ -68,30 +67,37 @@ $ yarn add @skypager/helpers-document --save
 
 Installing `@skypager/cli` will provide an executable `skypager`.
 
-If you pass either the `--esm` or `--babel` flags, it will enable ES module support in any of the modules your script requires.
+If you pass either the `--esm` or `--babel` flags, it will enable ES module support in any of the modules your script requires. Scripts run with `skypager --babel` can import es6 modules, including JSX natively.
+
+Setting `process.env.SKYPAGER_BABEL=true` is the same as always passing `--babel`.  Likewise setting `process.env.SKYPAGER_ESM=true` is the same as always passing `--esm` to the `skypager` CLI.
 
 If you pass the `--debug` flag to any `skypager` command, it will enable the node debugger.
 
-The `skypager` CLI is a node.js script runner that provides the above conveniences when running any script, but it also is designed to makes it easier to share re-usable script commands across an entire portfolio of JavaScript projects.  
+The `skypager` CLI is a node.js script runner that provides the above conveniences when running any script, but it also is designed to make it easier to share re-usable script commands across an entire portfolio of JavaScript projects.  
 
-By this I mean, for any `skypager $command`
+By this I mean, for any `skypager command`
 
-- It will scan your current project for scripts to run, 
-- it will scan your monorepo or scoped packages if your project name includes a `@scope` prefix 
-- it will run any scripts provided by `@skypager/*` modules.  
+- It will scan your current project for scripts to run in `scripts/command.js`, 
+- it will scan your monorepo or scoped packages if your project name includes a `@scope` prefix, for any modules which have a `scripts/command.js` file. 
+- it will scan any `@skypager/*` module found in `node_modules` for `scripts/command.js`.  
 
-Any time any of these scripts uses the `@skypager/runtime` module (or `@skypager/node` or `@skypager/react`) these runtime instances will run in the context of the nearest `package.json` file.
+Any time any of these scripts uses the `@skypager/runtime` module (or `@skypager/node` or `@skypager/react`), 
+these runtime instances will run in the context of the nearest `package.json` file, and will have access to `process.argv` as an object `runtime.argv` as well as node's `process.env`
+
+This makes it easy for extensions to configure themselves based on the current project.
 
 - `skypager.cwd` will point to the directory of the nearest `package.json`
 - `skypager.gitInfo.root` will point to the directory of the nearest `.git` folder
 
-This behavior makes it so that the current `package.json` represents the current project.  
+This behavior makes it so that the current `package.json` can be used to store settings for the current project.  Whatever is in the `skypager` property in the `package.json` will be treated as `runtime.argv` as a convenience.  
 
-And the `runtime` object you import can be used to tell you info about this specific project. 
+So the `runtime` object you import can be used to tell you info about this specific project. 
 
-If that project has a `skypager.js` file, that file will automatically be loaded and can be used to customize the node.js runtime for that project.
+If that project has a `skypager.js` file, that file will automatically be loaded and can be used to customize the node.js runtime for that project even further.
 
-This behavior allows you to write scripts which adapt to the current project they are in.
+This behavior allows you to write scripts which adapt to the current project they are in.  
+
+This makes it so when you develop a script for one project, it can easily be used by another.
 
 This means much less copy and pasting and duplication of code, because you can write scripts and servers which are flexible and rely on the current `package.json`, or on other files following a similar file name conventions.
 
@@ -127,6 +133,8 @@ if there is no such file in any of your scoped packages, then it will search the
 Packages like `@skypager/webpack` provide scripts `build`, `start`, and `watch` because it [includes the following scripts](https://github.com/skypager/skypager/tree/master/src/devtools/webpack/scripts).  If this package is installed, it will be added to the search path
 
 if none of the @skypager/* scoped packages has the command, it will search the scripts provided by [@skypager/cli itself](https://github.com/skypager/skypager/tree/master/src/devtools/cli/scripts)
+
+Skypager's CLI is designed with, and uses node's native module resolution, so any of the per project scripts, or reusable scripts, will use the same version of the dependencies and scripts that your package.json and yarn.lock install.
 
 ### Skypager CLI Commands
 
