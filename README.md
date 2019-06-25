@@ -5,68 +5,21 @@
 
 ![Logo](docs/skypager-logo-nobg.svg)
 
-Skypager provides you with a batteries included CLI for creating, building, running, and deploying cross platform JavaScript applications. 
+Skypager provides you with a batteries included CLI for creating, building, running, and deploying cross platform JavaScript applications for node.js and the browser.  
 
-In addition, Skypager provides a framework for developing reusable application runtimes that bundle different features and capabilities, and especially third party dependencies, in a highly cacheable way.
+It makes publishing or downloading reusable components as modules, either from npm or multiple CDNs, as simple as one command.
 
-The goal is to enable you to be able to deploy dozens of different unique applications, which share the same core runtime bundle, and only deliver what is unique about them to the end user.
+In addition, Skypager provides a framework for developing reusable application runtime modules that can package different features and capabilities, and especially third party dependencies, in a highly cacheable way.
 
-An important concept in Skypager is the idea of separating your JavaScript source code into categories:
+The goal is to enable you to be able build to light weight applications that only contain what is unique about them, on top of a runtime modules that you can maintain or download from NPM that act as a sort of reusable framework. 
 
-- application / project specific code
-- 3rd party dependencies (from npm or other registries)
-- shared / common portfolio code (re-usable or generic modules such as authentication/firebase authentication/aws authentication/auth0)
+These light weight applications will only deliver what is unique about them to the end user, and rely on shared caches for common code.
 
-**Each of these groups change at different frequencies.**
+As a developer, you'll benefit from easily being able to manage your boilerplate, and separate it from what makes each project unique. 
 
-Your application / project specific code changes most often.
+As a team of developers, Skypager's module boundaries, based on where code is stored, makes it easier to solve problems once and reuse that solution in multiple projects any time you are ready to release a new version. 
 
-Your third party dependencies are usually locked using a `yarn.lock` and only change when the `package.json` dependencies change.
-
-Your shared / common portfolio code changes as often as you are making changes to your framework code.  If your framework code is generally stable,
-this should be somewhere in between the other two.
-
-**Each of these groups have similar groups of authors**
-
-Your 3rd party dependencies generally come from the community at large.
-
-Your common / shared code, is generally imported like any other 3rd party dependency, but instead of coming from the community in general, might be developed by somebody else on your team.  Or, you might only work on your framework code in between your work on specific projects.  
-
-Your application / project specific code is authored by you (or the people you're collaborating with directly.).  It usually lives somewhere in the current working directory, usually `src`
-
-### Prior Art
-
-The Webpack module bundler can bundle up all of your application code, common framework code, and third party dependencies and serve it all in a single bundle.js file.
-
-This is great for prototyping but obviously doesn't scale well, so Webpack has various ways of doing "code splitting" and serving your bundle in multiple chunks.  
-
-You can define a chunk called vendor, which includes all of your third party npm dependencies, and a chunk called app which includes just your own project code.
-
-There is even a configuration for webpack when you're using HTML Webpack Plugin, where you can "inline the runtime".  All of the boilerplate module loading code that webpack injects into each chunk,
-is extracted out into a common block of code, which gets defined as a script tag inline in the HTML file that webpack generates.
-
-Skypager's concept of a shared global runtime, that can be extended, declaratively, with other modules (referred to generically as Helpers) and cached is based on the same idea.
-
-Skypager helps you develop re-usable application runtimes as modules which can be shared across many different projects, or within a single project, in such a way that your common reusable components are easily bundled in one chunk, separate from the unique parts of each page, screen, or view of the application.   
-
-You can use these application runtimes 
-
-- in your front-end React App (or any framework really.)
-- in your node.js scripts
-- in your node.js servers
-- in AWS Lambda / Google Cloud Functions event handlers
-- In your react-native apps
-- In your electron desktop apps
-
-An application runtime bundles:
-
-- Your 3rd party dependencies
-- Your shared dependencies (e.g. if you're working inside of a monorepo)
-- Your shared / common / reusable boilerplate which wires up dependencies
-
-This architecture allows you to write your applications, scripts, lambdas, using a runtime module as your project's global state machine, and dependency provider.
-
-Structuring your code this way has many advantages for you as a single developer, or for you as a team of developers working on a shared github repository.
+Projects which use the Skypager framework only need to have access to the modules, and can be installed globally or as a project dependency.  
 
 ## What makes it different?
 
@@ -267,6 +220,138 @@ const App = ({ runtime }) =>
 runtime.start()
 .then(() => render(<App runtime={runtime} />, document.getElementById('app')) )
 ```
+
+### Extensions API 
+
+Extending the runtime with another module, relies on the following API
+
+Your extension module can:
+
+- **export an attach function** to run synchronously
+
+```javascript
+export function attach(runtime) {
+  // runtime is the instance of the runtime that is using the extension
+}
+```
+
+this style allows for extensions to take effect right away.
+
+- **export a function** to run asynchronously
+
+```javascript
+export default function initializer(next) {
+  const runtime = this
+  Promise.resolve().then(() => next())  
+}
+```
+
+this style allows for extensions to take effect whenever `runtime.start()` is called.
+
+Using an extension is possible with:
+
+```javascript
+import runtime from '@skypager/runtime'
+import asyncInitializer from './async-initializer'
+import * as syncAttach from './sync-attach'
+
+runtime
+  .use(syncAttach)
+  .use((next) => asyncInitializer(next))
+```
+
+The code that was part of the `attach` function above ran immediately.
+
+the code that war part of `asyncInitializer` above won't run until later on in my script, when I call
+
+```javascript
+async function main() {
+  await runtime.start()
+}
+
+main()
+```
+
+This extension API gives you full control, in your application, or in reusable components, for when code and dependencies can be loaded and how they are to be configured.  
+
+### Lazy Loading Example
+
+For example, with the extension API it is possible to package up modules which lazy load other modules on demand. 
+
+```javascript
+import runtime from '@skypager/web'
+
+function loadAtRuntime(next) {
+  const runtime = this
+
+  // runtime.currentState will equal whatever window.__INITIAL_STATE__ is set to.  This can be injected by
+  // whatever is outputing your HTML.  (Webpack / Express, etc.)
+  const settings = runtime.currentState.settings
+
+  // loads the requested feature from unpkg, assumes the global variable name each module exports follows the library package name convention
+  const feature = (name, options = {}) => {
+    const { version = 'latest' } = options
+    const { upperFirst, camelCase } = runtime.stringUtils
+    const globalVar = upperFirst(camelCase(name.replace('@', '').replace('/', '-'))) 
+
+    return runtime.assetLoaders
+      .unpkg({ [globalVar]: `${name}@${version}` })
+        .then(results => {
+          const extension = results[globalVar]
+          runtime.use(extension)
+        })
+  }
+
+  return Promise.all([
+    feature('@skypager/integrations-firebase', {
+      config: settings.firebase 
+    }),
+    feature('@skypager/integrations-npm', {
+      config: {
+        npmToken: settings.npmToken
+      }
+    }),
+    feature('@skypager/integrations-github', {
+      config: {
+        token: settings.githubToken
+      }
+    })
+  ])
+}
+
+export default runtime.use(loadAtRuntime)
+```
+
+In the above example, I've packaged up a runtime that comes complete with a firebase integration, a github and npm integration.
+
+All of the code needed to power these integrations is bundled with the runtime, and is lazy loaded when needed from unpkg.  
+
+This reusable module expects that it will be dynamically configured at runtime via `settings` that is pulled from the runtime's state.
+
+The runtime's state is data that can easily be controlled to be project specific, deployment specific, or dynamically controlled based on node's `process.env` or `process.argv` variables. (If you're deploying the same project to multiple URLs for example.)
+
+The extension itself just passes this data as arguments when enabling each feature.
+
+## Beyond Boilerplates 
+
+The idea of using boilerplate projects, or even most recently, Github template repositories, is appealing because github repositories are free and unlimited and disk space is cheap.  Duplicating npm dependencies, and boilerplate code for wiring up React with
+React Router, and with express and server side redering, is a manageable side effect as you begin to accumulate projects and repositories.
+
+Instead, when developing using a monorepo, or portfolio, the boilerplate is managed by conventions for project types and module exports (what we define in the `main` or `browser` `module` `style` or `unpkg` properties in our package.json )
+
+So it is possible to abstract things which provide build scripts in and say
+
+modules which provide build scripts are named `@myscope/build-scripts-*`
+
+modules which provide features are named `@myscope/features-*` 
+
+modules which provide servers are named `@myscope/servers-*` 
+
+In a monorepo, there can be multiple providers of `build-scripts`, `servers` and `features`.  
+
+Which one a particular project relies on, is better left to be determined by incorporating that specific project's `package.json` and combining it with `process.argv` or `process.env`. 
+
+Skypager makes this just in time module composition a first class citizen in your projects.
 
 ## What does the runtime provide your application?
 
