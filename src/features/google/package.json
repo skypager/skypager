@@ -1,0 +1,41 @@
+{
+  "name": "@skypager/google",
+  "version": "1.2.0",
+  "description": "skypager google integration",
+  "author": "Jon Soeder <jon@chicago.com>",
+  "main": "lib/index.js",
+  "react-native": "lib/index.js",
+  "module": "lib/es/index.js",
+  "scripts": {
+    "prepare": "yarn build",
+    "prebuild": "rimraf lib",
+    "build": "yarn build:node && yarn build:es",
+    "postbuild": "skypager hash-build",
+    "build:node": "cross-env BUILD_ENV=build babel --comments --source-maps -d lib src",
+    "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src",
+    "smoke-test": "skypager smoke-test",
+    "test": "skypager test --mocha --timeout 10000"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "axios": "github:axios/axios",
+    "google-spreadsheet": "^2.0.5",
+    "googleapis": "^33.0.0"
+  },
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/skypager/skypager"
+  },
+  "homepage": "https://skypager.io",
+  "gitHead": "9392473e420c7a46eb0be31bc7739ca16c8eb130",
+  "keywords": [],
+  "contributors": [],
+  "skypager": {
+    "category": "helpers",
+    "projectType": "helper",
+    "providesScripts": false
+  }
+}
