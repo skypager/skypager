@@ -46,6 +46,7 @@ const stageOne = [
 const stageTwo = [
   ['@skypager/helpers-server', 'src/helpers/server', 'lib'],
   ['@skypager/helpers-repl', 'src/helpers/repl', 'lib'],
+  ['@skypager/google', 'src/features/google', 'lib'],
 ]
 
 const stageThree = [
