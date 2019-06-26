@@ -361,6 +361,13 @@ Which one a particular project relies on, is better left to be determined by inc
 
 Skypager makes this just in time module composition a first class citizen in your projects.
 
+That being said, boilerplates are still good and have their place. 
+
+Here are a couple to use:
+
+- [Full Stack Skypager Application](https://github.com/soederpop/skypager-fullstack-boilerplate)
+- [Full Stack Skypager Application with Google Helpers](https://github.com/soederpop/skypager-google-project-boilerplate)
+
 ## What does the runtime provide your application?
 
 - See the [API DOCS](src/runtime/docs/api)

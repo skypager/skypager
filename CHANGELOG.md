@@ -2,6 +2,18 @@
 
 ## Releases
 
+### 1.2.1
+
+- [@skypager/cli] all commands support help and --help flags now
+- [@skypager/google] extracted all shared google drive code from the helpers-sheet and helpers-google-doc modules into a single module, making it a shared dependency.
+- [@skypager/helpers-sheet] use @skypager/google
+- [@skypger/helpers-google-doc] use @skypager/google
+
+### 1.1.1
+
+- [@skypager/helpers-document] major upgrade to the module, including API docs
+- Added a bunch of projects in the examples directory
+
 ### 1.0.0
 
 - All modules ship umd, commonjs, and es module formats
