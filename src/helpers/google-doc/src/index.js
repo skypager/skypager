@@ -1,5 +1,12 @@
 import runtime from '@skypager/runtime'
 import * as GoogleIntegration from '@skypager/google'
+import * as GoogleHelper from './GoogleDoc'
+
+const { GoogleDoc } = GoogleHelper
+
+export { GoogleDoc }
+
+export default GoogleDoc
 
 if (runtime.isBrowser) {
   attach(runtime)
@@ -10,7 +17,7 @@ export function attach(runtime, options = {}) {
     runtime.use(GoogleIntegration, options)
   }
 
-  runtime.use(require('./GoogleDoc'))
+  runtime.use(GoogleHelper, options)
 
   if (options.autoDiscover) {
     runtime.googleDocs.discover(options.discover || options).catch(error => error)

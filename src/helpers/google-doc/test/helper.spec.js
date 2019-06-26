@@ -18,7 +18,7 @@ describe('The Google Documents Helper', function() {
       .that.is.a('function')
   })
 
-  it('attaches a factory function for creating a sheet helper instance', function() {
+  it('attaches a factory function for creating a GoogleDoc helper instance', function() {
     runtime.should.have.property('googleDoc').that.is.a('function')
   })
 

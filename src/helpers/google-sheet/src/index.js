@@ -1,6 +1,13 @@
 import runtime from '@skypager/runtime'
-import * as GoogleSheet from './GoogleSheet'
+import * as SheetHelper from './GoogleSheet'
 import * as GoogleIntegration from '@skypager/google'
+import RowEntity from './RowEntity'
+
+const { GoogleSheet } = SheetHelper
+
+export { GoogleSheet, RowEntity }
+
+export default GoogleSheet
 
 if (runtime.isBrowser) {
   attach(runtime)
@@ -11,7 +18,7 @@ export function attach(runtime, options = {}) {
     runtime.use(GoogleIntegration, options)
   }
 
-  runtime.use(GoogleSheet)
+  runtime.use(SheetHelper, options)
 
   if (options.autoDiscover) {
     runtime.sheets.discover(options.discover || options).catch(error => error)
