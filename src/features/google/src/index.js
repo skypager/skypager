@@ -1,3 +1,5 @@
+import runtime from '@skypager/node'
+
 import * as GoogleFeature from './feature'
 
 export function attach(runtime, options = {}) {
