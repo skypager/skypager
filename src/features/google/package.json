@@ -36,6 +36,6 @@
   "skypager": {
     "category": "helpers",
     "projectType": "helper",
-    "providesScripts": false
+    "providesScripts": ["google"] 
   }
 }

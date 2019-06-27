@@ -228,6 +228,7 @@ export class GoogleIntegration extends Feature {
   get versions() {
     return {
       drive: this.settings.driveVersion || 'v2',
+      sheets: this.settings.sheetsVersion || 'v4',
       ...this.settings.versions,
     }
   }
@@ -324,6 +325,17 @@ export class GoogleIntegration extends Feature {
   }
 
   /**
+   * Returns an axios client for talking to the google sheets api.
+   * defaults to v1 of that api.
+   */
+  get sheets() {
+    const { sheetsVersion = this.serviceVersion('sheets') } = this.settings
+    return this.service('sheets', {
+      version: sheetsVersion,
+    })
+  }
+
+  /**
    * Returns an axios client for talking to the google docs api.
    * defaults to v1 of that api.
    */
@@ -367,6 +379,27 @@ export class GoogleIntegration extends Feature {
     })
   }
 
+  async createSpreadsheet(options = {}) {
+    if (typeof options === 'string') {
+      options = { title: options, auth: this.oauthClient }
+    }
+
+    const { auth = this.oauthClient } = options
+    const { title } = options
+
+    if (!auth) {
+      throw new Error(`This request requires an oauth client.`)
+    }
+
+    const response = await this.sheets.spreadsheets.create({
+      auth,
+      resource: {
+        properties: { title }
+      }
+    })
+
+    return response.data
+  }
   /**
    * This lifecycle hook of the Skypager Feature class will get called when
    * the runtime says runtime.feature('google').enable().  By the time this is called,

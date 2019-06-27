@@ -11,6 +11,18 @@ function setup() {
     process.env.GOOGLE_APPLICATION_CREDENTIALS ||
     runtime.resolve('secrets', 'serviceAccount.json')
 
+  const credentials =
+    runtime.argv.credentials ||
+    runtime.resolve('secrets', 'clientCredentials.json')
+
+  if (!runtime.fsx.existsSync(credentials)) {
+    console.error('Expected to find a credentials JSON file.')
+    console.error(
+      `Checked at ${credentials}.  Provide the path via --credentials flag`
+    )
+    process.exit(1)
+  }
+
   if (!runtime.fsx.existsSync(serviceAccount)) {
     console.error('Expected to find a service account JSON file.')
     console.error(
@@ -22,7 +34,7 @@ function setup() {
   runtime.use(googleIntegration, {
     serviceAccount,
     scopes: [
-      'https://www.googleapis.com/auth/drive.readonly',
+      'https://www.googleapis.com/auth/drive',
       'https://www.googleapis.com/auth/drive.metadata.readonly',
       'https://www.googleapis.com/auth/calendar.readonly',
     ],
@@ -43,17 +55,21 @@ async function main() {
     case 'authorize':
       await authorize()
       break
-    case 'list calendars':
-      const calendars = await listCalendars()
-      await runtime.repl('interactive').launch({ runtime, calendars })
+    case 'list calendar events':
+      await listCalendarEvents()
       break
     case 'list folders':
       await listFolders()
       break
+    case 'console':
+      await authorize()
+      await runtime.repl('interactive').launch({
+        runtime,
+        google: runtime.google
+      })
     default:
       displayHelp()
   }
-
 }
 
 async function listFolders() {
@@ -63,20 +79,20 @@ async function listFolders() {
 
   const response = await runtime.google.listFolders()
 
-  runtime.cli.print(
-    response.map(folder => folder.title)
-  )
+  runtime.cli.print(response.map(folder => folder.title))
 }
 
-async function listCalendars() {
+async function listCalendarEvents() {
   const client = await authorize()
-  const calendars = runtime.google.service('calendar', { version: 'v3', auth: client })
+  const calSvc = runtime.google.service('calendar', { version: 'v3', auth: client })
 
-  const response = await calendars.events.list({
+  const response = await calSvc.events.list({
     calendarId: 'primary',
   })
 
-  return response.data
+  const events = response.data.items
+
+  runtime.cli.print(events.map(event => event.summary))
 }
 
 async function authorize() {
