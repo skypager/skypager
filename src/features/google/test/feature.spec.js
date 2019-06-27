@@ -21,10 +21,12 @@ describe('The Google Integration', function() {
   it('provides access to the drive api', async function() {
     const drive = await runtime.google.drive
 
-    drive.should.be.an('object')
+    drive.should.be
+      .an('object')
       .with.property('files')
       .that.is.an('object')
-      .that.has.property('list').that.is.a('function')
+      .that.has.property('list')
+      .that.is.a('function')
   })
 
   it('has state', function() {
@@ -34,8 +36,7 @@ describe('The Google Integration', function() {
   })
 
   it('has settings', function() {
-    runtime.google.should.have.property('settings')
-      .that.is.an('object')  
+    runtime.google.should.have.property('settings').that.is.an('object')
 
     runtime.google.settings.should.have.property('serviceAccount').that.is.a('string')
     runtime.google.settings.should.have.property('googleProject').that.is.a('string')

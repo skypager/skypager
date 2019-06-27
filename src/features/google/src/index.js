@@ -7,13 +7,16 @@ export function attach(runtime, options = {}) {
 
   runtime.features.register('google', () => GoogleIntegration)
 
-  runtime.feature('google').enable({
-    ...options,
-    ...options.google || {}
-  }).then(() => {
-    runtime.debug(`Google Integration Enabled`, {
-      serviceAccountEmail: runtime.google.serviceAccountEmail,
-      projectId: runtime.google.settings.googleProject
+  runtime
+    .feature('google')
+    .enable({
+      ...options,
+      ...(options.google || {}),
     })
-  })
+    .then(() => {
+      runtime.debug(`Google Integration Enabled`, {
+        serviceAccountEmail: runtime.google.serviceAccountEmail,
+        projectId: runtime.google.settings.googleProject,
+      })
+    })
 }

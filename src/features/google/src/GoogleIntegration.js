@@ -245,18 +245,26 @@ export class GoogleIntegration extends Feature {
       ...settings,
       versions: {
         drive: 'v2',
-        ...this.options.versions || {},
-        ...settings.versions || {},
-        ...this.featureSettings.versions || {}
+        ...(this.options.versions || {}),
+        ...(settings.versions || {}),
+        ...(this.featureSettings.versions || {}),
       },
       scopes: uniq([
-        ...settings.scopes || [],
-        ...this.options.scopes || [],
-        ...this.featureSettings.scopes || []
-      ])
+        ...(settings.scopes || []),
+        ...(this.options.scopes || []),
+        ...(this.featureSettings.scopes || []),
+      ]),
     }
 
-    return pick(merged, 'serviceAccount', 'googleProject', 'driveVersion', 'docsVersion', 'scopes', 'versions')
+    return pick(
+      merged,
+      'serviceAccount',
+      'googleProject',
+      'driveVersion',
+      'docsVersion',
+      'scopes',
+      'versions'
+    )
   }
 
   get serviceAccountEmail() {
@@ -368,8 +376,16 @@ export class GoogleIntegration extends Feature {
   async featureWasEnabled(options = {}) {
     const { settings } = this
 
-    const googleProject = options.googleProject || options.projectId || settings.googleProject || settings.projectId || process.env.GCLOUD_PROJECT
-    const serviceAccount = options.serviceAccount || settings.serviceAccount || process.env.GOOGLE_APPLICATION_CREDENTIALS
+    const googleProject =
+      options.googleProject ||
+      options.projectId ||
+      settings.googleProject ||
+      settings.projectId ||
+      process.env.GCLOUD_PROJECT
+    const serviceAccount =
+      options.serviceAccount ||
+      settings.serviceAccount ||
+      process.env.GOOGLE_APPLICATION_CREDENTIALS
     const credentials = options.credentials || settings.credentials
     const scopes = options.scopes || settings.scopes || DEFAULT_SCOPES
 
@@ -378,12 +394,12 @@ export class GoogleIntegration extends Feature {
       scopes,
       googleProject,
       serviceAccount,
-      credentials
+      credentials,
     })
 
     try {
       await this.initializeGoogleAPI()
-    } catch(error) {
+    } catch (error) {
       this.runtime.error(`Error initializing google API`, error)
     }
   }
@@ -449,7 +465,7 @@ export class GoogleIntegration extends Feature {
 
     try {
       await this.createAuthClient({ cache: true })
-    } catch(error) {
+    } catch (error) {
       console.error(error)
     }
 
@@ -461,8 +477,8 @@ export class GoogleIntegration extends Feature {
     const { client = this.createOAuthClient(options), code } = options
 
     const token = await new Promise((resolve, reject) => {
-      client.getToken(code, (err, result) => err ? reject(err) : resolve(result))
-    }) 
+      client.getToken(code, (err, result) => (err ? reject(err) : resolve(result)))
+    })
 
     client.setCredentials(token)
 
@@ -470,11 +486,11 @@ export class GoogleIntegration extends Feature {
   }
 
   generateOAuthAccessURL(options = {}) {
-    const client = options.client || this.createOAuthClient(options)  
+    const client = options.client || this.createOAuthClient(options)
 
     const url = client.generateAuthUrl({
       access_type: options.accessType || 'offline',
-      scope: options.scopes || this.settings.scopes 
+      scope: options.scopes || this.settings.scopes,
     })
 
     return url
@@ -503,27 +519,33 @@ export class GoogleIntegration extends Feature {
 
       const credentialsJson = this.runtime.fsx.readJsonSync(pathToCredentials)
       // not sure where these values come from, i've seen both in the credentials i've downloaded
-      const values = credentialsJson.installed || credentialsJson.web || Object.values(credentialsJson)[0]
+      const values =
+        credentialsJson.installed || credentialsJson.web || Object.values(credentialsJson)[0]
 
-      if (typeof values !== 'object' || !(values.client_id && values.client_secret && values.redirect_uris)) {
-        throw new Error(`Invalid credentials JSON. Expected an object with client_id, client_secret, redirect_uris`)
+      if (
+        typeof values !== 'object' ||
+        !(values.client_id && values.client_secret && values.redirect_uris)
+      ) {
+        throw new Error(
+          `Invalid credentials JSON. Expected an object with client_id, client_secret, redirect_uris`
+        )
       }
 
       options = {
-        ...mapKeys(values, (v,k) => camelCase(k)),
+        ...mapKeys(values, (v, k) => camelCase(k)),
         ...options,
       }
     }
 
     const { clientId, clientSecret, redirectUris = [] } = {
       ...options,
-    } 
-
-    if (!clientId || !clientSecret || !redirectUris) {
-      throw new Error(`Must pass clientId, clientSecret, redirectUris`)      
     }
 
-    const oauthClient = new g.auth.OAuth2(clientId, clientSecret, redirectUris[0])    
+    if (!clientId || !clientSecret || !redirectUris) {
+      throw new Error(`Must pass clientId, clientSecret, redirectUris`)
+    }
+
+    const oauthClient = new g.auth.OAuth2(clientId, clientSecret, redirectUris[0])
 
     if (options.cache !== false) {
       this.hide('oauthClient', oauthClient)
@@ -532,22 +554,22 @@ export class GoogleIntegration extends Feature {
     return oauthClient
   }
 
-  /** 
+  /**
    * Creates an auth client for interacting with google's API.  Must pass an array of scopes,
    * we will ensure at least DEFAULT_SCOPES are requested to be able to work with drive and sheets as we do.
-  */
+   */
   async createAuthClient(options = {}) {
     if (this.auth && !options.fresh) {
-      return this.auth  
+      return this.auth
     }
 
     const { omit, uniq } = this.lodash
-    
+
     const scopes = uniq([
-      ...DEFAULT_SCOPES, 
-      ...this.settings.scopes || [],
-      ...options.scopes || []
-    ]) 
+      ...DEFAULT_SCOPES,
+      ...(this.settings.scopes || []),
+      ...(options.scopes || []),
+    ])
 
     const auth = g.auth.getClient({ ...omit(options, 'fresh', 'cache'), scopes })
 

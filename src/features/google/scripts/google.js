@@ -10,7 +10,7 @@ function setup() {
     runtime.argv.serviceAccount ||
     process.env.GOOGLE_APPLICATION_CREDENTIALS ||
     runtime.resolve('secrets', 'serviceAccount.json')
-  
+
   if (!runtime.fsx.existsSync(serviceAccount)) {
     console.error('Expected to find a service account JSON file.')
     console.error(
@@ -18,11 +18,13 @@ function setup() {
     )
     process.exit(1)
   }
-  
+
   runtime.use(googleIntegration, {
     serviceAccount,
     scopes: [
-      'https://www.googleapis.com/auth/calendar.readonly'
+      'https://www.googleapis.com/auth/drive.readonly',
+      'https://www.googleapis.com/auth/drive.metadata.readonly',
+      'https://www.googleapis.com/auth/calendar.readonly',
     ],
     googleProject:
       runtime.argv.projectId ||
@@ -37,17 +39,21 @@ main()
 async function main() {
   const subcommand = runtime.argv._.join(' ')
 
-  switch(subcommand) {
+  switch (subcommand) {
     case 'authorize':
       await authorize()
-      break;
+      break
     case 'list calendars':
-      await listCalendars()
+      const calendars = await listCalendars()
+      await runtime.repl('interactive').launch({ runtime, calendars })
+      break
     case 'list folders':
-      await listFolders()     
+      await listFolders()
+      break
     default:
       displayHelp()
   }
+
 }
 
 async function listFolders() {
@@ -57,7 +63,9 @@ async function listFolders() {
 
   const response = await runtime.google.listFolders()
 
-  console.log(response)
+  runtime.cli.print(
+    response.map(folder => folder.title)
+  )
 }
 
 async function listCalendars() {
@@ -65,10 +73,10 @@ async function listCalendars() {
   const calendars = runtime.google.service('calendar', { version: 'v3', auth: client })
 
   const response = await calendars.events.list({
-    calendarId: 'primary'
+    calendarId: 'primary',
   })
 
-  console.log(response.data)
+  return response.data
 }
 
 async function authorize() {
@@ -77,33 +85,35 @@ async function authorize() {
   /** @type {import("../src/GoogleIntegration").GoogleIntegration} */
   const google = runtime.google
 
-  const oauthClient = google.createOAuthClient({ credentials: runtime.resolve('secrets', 'clientCredentials.json') })
+  const oauthClient = google.createOAuthClient({
+    credentials: runtime.resolve('secrets', 'clientCredentials.json'),
+  })
 
-  const exists = await runtime.fsx.existsAsync(
-    runtime.resolve('secrets', 'accessToken.json')
-  )
+  const exists = await runtime.fsx.existsAsync(runtime.resolve('secrets', 'accessToken.json'))
 
   if (exists) {
-    const token = await runtime.fsx.readJsonAsync(
-      runtime.resolve('secrets', 'accessToken.json')
-    )
+    const token = await runtime.fsx.readJsonAsync(runtime.resolve('secrets', 'accessToken.json'))
     oauthClient.setCredentials(token)
     return oauthClient
   }
 
-
   const oauthUrl = google.generateOAuthAccessURL({
-    client: oauthClient
+    client: oauthClient,
   })
 
   runtime.opener.openInBrowser(oauthUrl)
 
   runtime.cli.clear()
-  runtime.cli.print(`Opening your browser to ${oauthUrl}.\nCopy and paste that token when ready.`, 0, 0, 4)
+  runtime.cli.print(
+    `Opening your browser to ${oauthUrl}.\nCopy and paste that token when ready.`,
+    0,
+    0,
+    4
+  )
   const { code } = await runtime.cli.ask({
     code: {
-      description: 'Paste the code:'
-    }
+      description: 'Paste the code:',
+    },
   })
 
   const token = await google.requestToken({ code, client: oauthClient })
@@ -113,9 +123,7 @@ async function authorize() {
     JSON.stringify(token, null, 2)
   )
 
-  return oauthClient 
+  return oauthClient
 }
 
-function displayHelp(subcommand = false) {
-
-}
+function displayHelp(subcommand = false) {}
