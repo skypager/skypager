@@ -1,9 +1,16 @@
 import { Feature } from '@skypager/runtime'
 import { google as g } from 'googleapis'
 
-export default class GoogleIntegration extends Feature {
+export const DEFAULT_SCOPES = [
+  'https://www.googleapis.com/auth/drive.readonly',
+  'https://www.googleapis.com/auth/drive.metadata.readonly',
+  'https://www.googleapis.com/auth/calendar.readonly',
+]
+
+export class GoogleIntegration extends Feature {
   static shortcut = 'google'
   static isObservable = true
+  static isCacheable = true
 
   static optionTypes = {
     googleProject: 'string',
@@ -191,6 +198,7 @@ export default class GoogleIntegration extends Feature {
       googleReady: false,
       googleError: false,
       settings: {
+        scopes: DEFAULT_SCOPES,
         ...pick(
           this.runtime.argv,
           'googleProject',
@@ -204,7 +212,8 @@ export default class GoogleIntegration extends Feature {
           'serviceAccount',
           'driveVersion',
           'docsVersion',
-          'versions'
+          'versions',
+          'scopes'
         ),
         ...(this.options.settings || {}),
       },
@@ -229,7 +238,33 @@ export default class GoogleIntegration extends Feature {
    * Some settings can be picked up from the node.js process.argv --flags
    */
   get settings() {
-    return this.state.get('settings') || {}
+    const { uniq, pick } = this.lodash
+    const settings = this.state.get('settings') || {}
+    const merged = {
+      ...this.featureSettings,
+      ...settings,
+      versions: {
+        drive: 'v2',
+        ...this.options.versions || {},
+        ...settings.versions || {},
+        ...this.featureSettings.versions || {}
+      },
+      scopes: uniq([
+        ...settings.scopes || [],
+        ...this.options.scopes || [],
+        ...this.featureSettings.scopes || []
+      ])
+    }
+
+    return pick(merged, 'serviceAccount', 'googleProject', 'driveVersion', 'docsVersion', 'scopes', 'versions')
+  }
+
+  get serviceAccountEmail() {
+    return this.state.get('serviceAccountEmail')
+  }
+
+  get serviceAccountClientId() {
+    return this.state.get('serviceAccountClientId')
   }
 
   /**
@@ -331,16 +366,26 @@ export default class GoogleIntegration extends Feature {
    * and which google project you expect to be talking to.
    */
   async featureWasEnabled(options = {}) {
+    const { settings } = this
+
+    const googleProject = options.googleProject || options.projectId || settings.googleProject || settings.projectId || process.env.GCLOUD_PROJECT
+    const serviceAccount = options.serviceAccount || settings.serviceAccount || process.env.GOOGLE_APPLICATION_CREDENTIALS
+    const credentials = options.credentials || settings.credentials
+    const scopes = options.scopes || settings.scopes || DEFAULT_SCOPES
+
     this.state.set('settings', {
-      ...(this.state.get('settings') || {}),
-      googleProject: process.env.GCLOUD_PROJECT,
-      serviceAccount:
-        process.env.GOOGLE_APPLICATION_CREDENTIALS ||
-        this.runtime.resolve('secrets', 'serviceAccount.json'),
-      ...options,
+      ...settings,
+      scopes,
+      googleProject,
+      serviceAccount,
+      credentials
     })
 
-    await this.initializeGoogleAPI()
+    try {
+      await this.initializeGoogleAPI()
+    } catch(error) {
+      this.runtime.error(`Error initializing google API`, error)
+    }
   }
 
   /**
@@ -351,26 +396,12 @@ export default class GoogleIntegration extends Feature {
    * @param {String} [options.googleProject=process.env.GCLOUD_PROJECT] he google project you're talking to
    */
   async initializeGoogleAPI(options = {}) {
-    const {
+    let {
       googleProject = process.env.GCLOUD_PROJECT,
       serviceAccount = process.env.GOOGLE_APPLICATION_CREDENTIALS,
     } = {
       ...this.settings,
       ...options,
-    }
-
-    // These values need to be set for the node.js sdk to work
-    process.env.GCLOUD_PROJECT = googleProject
-    process.env.GOOGLE_APPLICATION_CREDENTIALS = serviceAccount
-
-    if (!googleProject) {
-      const e = new Error(
-        `Missing GCLOUD_PROJECT please specify it as an environment variable, or with the --google-project command line flag`
-      )
-      console.error(e)
-      this.state.set('googleProjectError', e.message)
-      this.state.set('googleError', true)
-      this.emit('googleFailed', e)
     }
 
     if (!serviceAccount) {
@@ -393,20 +424,139 @@ export default class GoogleIntegration extends Feature {
       this.emit('googleFailed', e)
     }
 
-    const auth = await this.createAuthClient()
-    this.hide('auth', auth)
+    const serviceAccountData = await this.runtime.fsx.readJsonAsync(serviceAccount).catch(e => {})
+
+    if (serviceAccountData && serviceAccountData.client_email) {
+      this.state.set('serviceAccountEmail', serviceAccountData.client_email)
+      this.state.set('serviceAccountClientId', serviceAccountData.client_id)
+    }
+
+    googleProject = googleProject || serviceAccountData.project_id
+
+    if (!googleProject) {
+      const e = new Error(
+        `Missing GCLOUD_PROJECT please specify it as an environment variable, or with the --google-project command line flag`
+      )
+      console.error(e)
+      this.state.set('googleProjectError', e.message)
+      this.state.set('googleError', true)
+      this.emit('googleFailed', e)
+    }
+
+    // These values need to be set for the node.js sdk to work
+    process.env.GCLOUD_PROJECT = googleProject
+    process.env.GOOGLE_APPLICATION_CREDENTIALS = serviceAccount
+
+    try {
+      await this.createAuthClient({ cache: true })
+    } catch(error) {
+      console.error(error)
+    }
+
     this.state.set('googleReady', true)
     this.emit('googleIsReady', this)
   }
 
-  async createAuthClient(options = {}) {
-    const {
-      scopes = [
-        'https://www.googleapis.com/auth/drive.readonly',
-        'https://www.googleapis.com/auth/drive.metadata.readonly',
-      ],
-    } = options
+  async requestToken(options = {}) {
+    const { client = this.createOAuthClient(options), code } = options
 
-    return g.auth.getClient({ ...options, scopes })
+    const token = await new Promise((resolve, reject) => {
+      client.getToken(code, (err, result) => err ? reject(err) : resolve(result))
+    }) 
+
+    client.setCredentials(token)
+
+    return token
+  }
+
+  generateOAuthAccessURL(options = {}) {
+    const client = options.client || this.createOAuthClient(options)  
+
+    const url = client.generateAuthUrl({
+      access_type: options.accessType || 'offline',
+      scope: options.scopes || this.settings.scopes 
+    })
+
+    return url
+  }
+
+  createOAuthClient(options = {}) {
+    if (this.oauthClient && !options.fresh) {
+      return this.oauthClient
+    }
+
+    const { mapKeys } = this.lodash
+    const { camelCase } = this.runtime.stringUtils
+
+    options = {
+      ...this.settings,
+      ...options,
+    }
+
+    if (typeof options.credentials === 'string') {
+      const pathToCredentials = this.runtime.resolve(options.credentials)
+      const exists = this.runtime.fsx.existsSync(pathToCredentials)
+
+      if (!exists) {
+        throw new Error(`Credentials JSON not found at ${pathToCredentials}`)
+      }
+
+      const credentialsJson = this.runtime.fsx.readJsonSync(pathToCredentials)
+      // not sure where these values come from, i've seen both in the credentials i've downloaded
+      const values = credentialsJson.installed || credentialsJson.web || Object.values(credentialsJson)[0]
+
+      if (typeof values !== 'object' || !(values.client_id && values.client_secret && values.redirect_uris)) {
+        throw new Error(`Invalid credentials JSON. Expected an object with client_id, client_secret, redirect_uris`)
+      }
+
+      options = {
+        ...mapKeys(values, (v,k) => camelCase(k)),
+        ...options,
+      }
+    }
+
+    const { clientId, clientSecret, redirectUris = [] } = {
+      ...options,
+    } 
+
+    if (!clientId || !clientSecret || !redirectUris) {
+      throw new Error(`Must pass clientId, clientSecret, redirectUris`)      
+    }
+
+    const oauthClient = new g.auth.OAuth2(clientId, clientSecret, redirectUris[0])    
+
+    if (options.cache !== false) {
+      this.hide('oauthClient', oauthClient)
+    }
+
+    return oauthClient
+  }
+
+  /** 
+   * Creates an auth client for interacting with google's API.  Must pass an array of scopes,
+   * we will ensure at least DEFAULT_SCOPES are requested to be able to work with drive and sheets as we do.
+  */
+  async createAuthClient(options = {}) {
+    if (this.auth && !options.fresh) {
+      return this.auth  
+    }
+
+    const { omit, uniq } = this.lodash
+    
+    const scopes = uniq([
+      ...DEFAULT_SCOPES, 
+      ...this.settings.scopes || [],
+      ...options.scopes || []
+    ]) 
+
+    const auth = g.auth.getClient({ ...omit(options, 'fresh', 'cache'), scopes })
+
+    if (options.cache) {
+      this.hide('auth', auth)
+    }
+
+    return auth
   }
 }
+
+export default GoogleIntegration
