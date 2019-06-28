@@ -15,13 +15,13 @@ To use this library in your own project, make sure to install it
 **Via NPM**
 
 ```shell
-npm install @skypager/node @skypager/google --save
+npm install @skypager/node @skypager/google @skypager/cli --save
 ```
 
 **Via YARN**
 
 ```shell
-yarn add @skypager/node @skypager/google --save
+yarn add @skypager/node @skypager/google @skypager/cli --save
 ```
 
 ## Required Setup
@@ -29,13 +29,13 @@ yarn add @skypager/node @skypager/google --save
 You'll need
 
 1) a Service Account JSON (best to store it in `$projectRoot/secrets/serviceAccount.json`)
-2) The Google Drive and Google Sheets APIs
-3) Google Sheets shared with the `client_email` from the service account.
+2) The Google Drive, Google Sheets, Google Documents, and possibly Google Calendar APIs
+3) Google Sheets or Documents shared with the `client_email` from the service account (if not using oauth)
 
 **optional**
 
 4) oAuth2 Credentials JSON (a json with the key installed that has client_id, client_secret ) (best to store in `$projectRoot/secrets/clientCredentials.json`)
-5) a user who authorizes the application to access their account
+5) a user who authorizes the application to access their account (which you can do with `skypager google authorize`)
 
 ### Server to Server Auth
 
