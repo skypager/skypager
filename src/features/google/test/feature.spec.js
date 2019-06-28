@@ -13,9 +13,8 @@ describe('The Google Integration', function() {
     runtime.should.have.property('google')
   })
 
-  it('is enabled as a feature', function() {
+  it('is registered as a feature', function() {
     runtime.features.checkKey('google').should.equal('google')
-    runtime.isFeatureEnabled('google').should.equal(true)
   })
 
   it('provides access to the drive api', async function() {
