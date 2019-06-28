@@ -45,8 +45,13 @@ function displayMainHelp(subcommands = [], options = {}) {
     Object.entries(allCommands).map(([name, command]) => {
       const title = padEnd(command.title, maxLength)
       print(`  ${colors.bold(title)}\t${command.description}`, 0, 1, 0)
-      print(`  $ ${colors.green(`skypager google ${runtime.stringUtils.kebabCase(name)}`)}`, 0, 1, 1)
+      print(
+        `  $ ${colors.green(`skypager google ${runtime.stringUtils.kebabCase(name)}`)}`,
+        0,
+        1,
+        1
+      )
       print(`    commands: ${Object.keys(command.subcommands).join(', ')}`)
-    }) 
+    })
   }
 }

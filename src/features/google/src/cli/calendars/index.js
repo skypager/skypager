@@ -26,8 +26,8 @@ export function help(subcommands = [], options = {}) {
 
 main.help = help
 
-export const subcommands = main.subcommands = {
+export const subcommands = (main.subcommands = {
   list,
-}
+})
 
 export default main

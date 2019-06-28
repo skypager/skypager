@@ -35,10 +35,10 @@ export function help(subcommands = [], options = {}) {
 
 main.help = help
 
-export const subcommands = main.subcommands = {
+export const subcommands = (main.subcommands = {
   create,
   dump,
   list,
-}
+})
 
 export default main

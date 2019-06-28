@@ -42,8 +42,7 @@ function help(subcommands = [], options = {}) {
 
   print(colors.bold.underline('Sheets Commands'), 0, 1, 1)
   print(`
-    The sheets commands provide a CLI interface for browsing your google spreadsheets.  You can create new ones,
-    dump existing ones to JSON, and more.
+
   `)
   print(colors.bold.underline('Universal Options:'), 0, 0, 1)
   print(`
@@ -60,10 +59,10 @@ function help(subcommands = [], options = {}) {
 
 main.help = help
 
-export const subcommands = main.subcommands = {
+export const subcommands = (main.subcommands = {
   create,
   dump,
   list,
-}
+})
 
 export default main

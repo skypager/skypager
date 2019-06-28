@@ -24,8 +24,8 @@ export const commands = runtime.Helper.createContextRegistry('commands', {
     files: () => files,
     folders: () => folders,
     sheets: () => sheets,
-  })
-}) 
+  }),
+})
 
 runtime.commands = commands
 
@@ -111,14 +111,14 @@ export async function main(commands = argvCommands, options = ARGV) {
 
 main.help = (...args) => utils.help(...args)
 
-export const subcommands = main.subcommands = {
+export const subcommands = (main.subcommands = {
   calendars,
   calendarEvents,
   docs,
   files,
   folders,
   sheets,
-}
+})
 
 export { utils }
 

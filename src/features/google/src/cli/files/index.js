@@ -1,4 +1,5 @@
 import list from './list'
+import download from './download'
 
 export const title = 'Drive Files'
 
@@ -13,7 +14,10 @@ export async function main(commands = [], options = {}) {
 
   switch (subcommand) {
     case 'list':
-      await list(commands, options)
+      await list(commands.slice(1), options)
+      break
+    case 'download':
+      await download(commands.slice(1), options)
       break
     default:
       help(commands, options)
@@ -26,8 +30,8 @@ export function help(subcommands = [], options = {}) {
 
 main.help = help
 
-export const subcommands = main.subcommands = {
+export const subcommands = (main.subcommands = {
   list,
-}
+})
 
 export default main
