@@ -394,8 +394,8 @@ export class GoogleIntegration extends Feature {
     const response = await this.sheets.spreadsheets.create({
       auth,
       resource: {
-        properties: { title }
-      }
+        properties: { title },
+      },
     })
 
     return response.data
