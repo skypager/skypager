@@ -580,10 +580,11 @@ export class GoogleIntegration extends Feature {
 
     const oauthClient = new g.auth.OAuth2(clientId, clientSecret, redirectUris[0])
 
-    if (typeof options.accessToken === 'string' && this.runtime.fsx.existsSync(this.runtime.resolve(options.accessToken))) {
-      const accessToken = this.runtime.fsx.readJsonSync(
-        this.runtime.resolve(options.accessToken)
-      )
+    if (
+      typeof options.accessToken === 'string' &&
+      this.runtime.fsx.existsSync(this.runtime.resolve(options.accessToken))
+    ) {
+      const accessToken = this.runtime.fsx.readJsonSync(this.runtime.resolve(options.accessToken))
       oauthClient.setCredentials(accessToken)
     } else if (typeof options.accessToken === 'object') {
       oauthClient.setCredentials(options.accessToken)

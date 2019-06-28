@@ -6,14 +6,15 @@ const { openInBrowser } = runtime.opener
 const { readJsonAsync, writeFileAsync, existsAsync } = runtime.fsx
 const { resolve } = runtime
 
-/** 
- * @param {Array<string>} subcommands 
+/**
+ * @param {Array<string>} subcommands
  * @param {Object} options
  * @param {String} [options.credentials='$CWD/secrets/clientCredentials.json'] path to the oauth2 client credentials JSON
- * @param {String} [options.accessToken='$CWD/secrets/accessToken.json'] path to where the current user's access token JSON will be saved 
+ * @param {String} [options.accessToken='$CWD/secrets/accessToken.json'] path to where the current user's access token JSON will be saved
  * @param {Boolean} [options.refresh=false] pass true to regenerate the access token JSON if it already exists
  * @param {Boolean} [options.help=false] show the help screen
-*/
+ * @param {Boolean} [options.verbose=false] show progress output messages
+ */
 module.exports = async function authorize(subcommands = [], options = {}) {
   if (subcommands[0] === 'help' || options.help) {
     return help(subcommands, options)
@@ -29,17 +30,17 @@ module.exports = async function authorize(subcommands = [], options = {}) {
     accessToken = resolve('secrets', 'accessToken.json'),
   } = options
 
-  print('Authorizing oAuth Client.')
+  options.verbose && print('Authorizing oAuth Client.')
 
   const oauthClient = google.createOAuthClient({
     credentials,
-    default: true
+    default: true,
   })
 
   const exists = await existsAsync(accessToken)
 
   if (exists && !options.refresh) {
-    print(`Stored Access Token found ${colors.green('OK')}`)
+    options.verbose && print(`Stored Access Token found ${colors.green('OK')}`)
 
     const token = await readJsonAsync(accessToken)
     oauthClient.setCredentials(token)
@@ -53,12 +54,7 @@ module.exports = async function authorize(subcommands = [], options = {}) {
   openInBrowser(oauthUrl)
 
   clear()
-  print(
-    `Opening your browser to ${oauthUrl}.\nCopy and paste that token when ready.`,
-    0,
-    0,
-    4
-  )
+  print(`Opening your browser to ${oauthUrl}.\nCopy and paste that token when ready.`, 0, 0, 4)
   const { code } = await ask({
     code: {
       description: 'Paste the code:',

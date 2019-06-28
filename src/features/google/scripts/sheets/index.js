@@ -4,7 +4,7 @@ const list = require('./list')
 async function sheets(commands = [], options = {}) {
   if (commands[0] === 'help' || options.help) {
     return help(commands, options)
-  }  
+  }
 }
 
 function help(commands = [], options = {}) {
