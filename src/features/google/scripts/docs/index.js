@@ -1,6 +1,7 @@
 const runtime = require('@skypager/node')
 const create = require('./create')
 const list = require('./list')
+const dump = require('./dump')
 
 async function docs(commands = [], options = {}) {
   if (commands[0] === 'help' || options.help) {
@@ -13,6 +14,9 @@ async function docs(commands = [], options = {}) {
     case 'list':
       await list(commands.slice(1), options)
       break
+    case 'dump':
+    case 'export':
+      await dump(commands.slice(1), options)     
     case 'create':
       await create(commands.slice(1), options)
   }

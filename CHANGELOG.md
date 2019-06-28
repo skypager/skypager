@@ -2,6 +2,11 @@
 
 ## Releases
 
+### 1.2.2
+
+- [@skypager/google] ships a `skypager google` command that provides a tree of subcommands for working with google drive and calendar apis
+- [@skypager/google] can now manage oauth2 clients, and automates cli authorization of behalf of real google users.
+
 ### 1.2.1
 
 - [@skypager/cli] all commands support help and --help flags now
