@@ -385,11 +385,11 @@ export class GoogleIntegration extends Feature {
     })
   }
 
-  /** 
+  /**
    * @param {Object} options
    * @param {String} [options.title]
    * @param {Object} [options.auth]
-  */
+   */
   async createSpreadsheet(options = {}) {
     if (typeof options === 'string') {
       options = { title: options, auth: this.oauthClient }

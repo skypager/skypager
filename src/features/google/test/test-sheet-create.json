@@ -1,0 +1,11 @@
+{
+    "products": [{
+        "sku": "123",
+        "productName": "shoes",
+        "price": "1300.00"
+    }],
+    "inventory": [{
+        "sku": "123",
+        "quantity": "1"
+    }]
+}

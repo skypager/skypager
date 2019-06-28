@@ -23,7 +23,7 @@ async function setup() {
 async function create(commands = [], options = {}) {
   if (commands[0] === 'help' || options.help) {
     return help(commands, options)
-  }    
+  }
 
   /** @type {import("../../src/GoogleIntegration").GoogleIntegration} */
   const google = runtime.google
@@ -33,17 +33,19 @@ async function create(commands = [], options = {}) {
   const title = options.title || commands.join(' ')
 
   let worksheets
+  let worksheetData = {}
 
   if (options.from) {
     const importPath = runtime.resolve(options.from)
-    const importData = await runtime.fsx.readJsonAsync(
-      importPath
-    )
+    const importData = await runtime.fsx.readJsonAsync(importPath)
 
-    worksheets = Object.entries(importData).map(([title, rows]) => [title, Object.keys(rows[0] || {})])
+    worksheets = Object.entries(importData).map(([title, rows]) => {
+      worksheetData[title] = rows
+      return [title, Object.keys(rows[0] || {})]
+    })
   } else {
-    worksheets = castArray(options.worksheet).map((config) => {
-      const [title, columns] = config.split(':').map(v => v.trim()) 
+    worksheets = castArray(options.worksheet).map(config => {
+      const [title, columns] = config.split(':').map(v => v.trim())
       return [title, columns.split(',').map(v => v.trim())]
     })
   }
@@ -53,18 +55,18 @@ async function create(commands = [], options = {}) {
   const sheetId = sheet.spreadsheetId
 
   runtime.sheets.register(sheetId, () => ({
-    sheetId
+    sheetId,
   }))
 
   const sheetHelper = runtime.sheet(sheetId, {
-    auth: google.oauthClient
+    auth: google.oauthClient,
   })
 
   print(`Loading sheet metadata`)
   await sheetHelper.whenReady()
 
-  for(let worksheet of worksheets) {
-    const [title, headers] = worksheet  
+  for (let worksheet of worksheets) {
+    const [title, headers] = worksheet
     print(`Adding worksheet ${colors.green('title')}`)
     print('Headers:')
     print(headers.map(h => `- ${h}`), 4)
@@ -79,6 +81,16 @@ async function create(commands = [], options = {}) {
 
   if (options.open) {
     runtime.opener.openInBrowser(sheet.spreadsheetUrl)
+  }
+
+  if (options.from && Object.keys(worksheetData).length) {
+    const entries = Object.entries(worksheetData)
+
+    for (let entry of entries) {
+      const [id, rows] = entry
+      print(`Adding ${id} data. ${rows.length} rows`)
+      await Promise.all(rows.map(row => sheetHelper.addRow(id, row)))
+    }
   }
 
   process.exit(0)

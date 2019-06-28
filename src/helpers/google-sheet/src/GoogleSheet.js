@@ -669,7 +669,7 @@ export class GoogleSheet extends Helper {
       await this.spreadsheet.setAuthToken({
         type: auth.credentials.token_type,
         value: auth.credentials.access_token,
-        expires: auth.credentials.expiry_date
+        expires: auth.credentials.expiry_date,
       })
       authorized = true
     }
