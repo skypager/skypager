@@ -1,3 +1,1 @@
-module.exports = async function list() {
-  
-}
+module.exports = async function list() {}

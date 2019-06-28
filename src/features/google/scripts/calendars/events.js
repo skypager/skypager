@@ -1,3 +1,1 @@
-module.exports = async function events() {
-  
-}
+module.exports = async function events() {}

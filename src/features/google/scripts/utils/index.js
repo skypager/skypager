@@ -5,5 +5,5 @@ const help = require('./help')
 module.exports = {
   setup,
   authorize,
-  help
+  help,
 }

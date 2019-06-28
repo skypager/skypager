@@ -1,3 +1,1 @@
-module.exports = async function create() {
-  
-}
+module.exports = async function create() {}

@@ -580,8 +580,21 @@ export class GoogleIntegration extends Feature {
 
     const oauthClient = new g.auth.OAuth2(clientId, clientSecret, redirectUris[0])
 
+    if (typeof options.accessToken === 'string' && this.runtime.fsx.existsSync(this.runtime.resolve(options.accessToken))) {
+      const accessToken = this.runtime.fsx.readJsonSync(
+        this.runtime.resolve(options.accessToken)
+      )
+      oauthClient.setCredentials(accessToken)
+    } else if (typeof options.accessToken === 'object') {
+      oauthClient.setCredentials(options.accessToken)
+    }
+
     if (options.cache !== false) {
       this.hide('oauthClient', oauthClient)
+    }
+
+    if (options.default) {
+      g.options({ auth: oauthClient })
     }
 
     return oauthClient
@@ -604,10 +617,14 @@ export class GoogleIntegration extends Feature {
       ...(options.scopes || []),
     ])
 
-    const auth = g.auth.getClient({ ...omit(options, 'fresh', 'cache'), scopes })
+    const auth = await g.auth.getClient({ ...omit(options, 'fresh', 'cache', 'default'), scopes })
 
     if (options.cache) {
       this.hide('auth', auth)
+    }
+
+    if (options.default) {
+      g.options({ auth })
     }
 
     return auth

@@ -7,10 +7,10 @@ module.exports = function setup(options = {}) {
   }
 
   const {
-    serviceAccount = process.env.GOOGLE_APPLICATION_CREDENTIALS || runtime.resolve('secrets', 'serviceAccount.json'),
+    serviceAccount = process.env.GOOGLE_APPLICATION_CREDENTIALS ||
+      runtime.resolve('secrets', 'serviceAccount.json'),
     credentials = runtime.resolve('secrets', 'clientCredentials.json'),
-    googleProject = 
-      options.projectId ||
+    googleProject = options.projectId ||
       process.env.GCLOUD_PROJECT ||
       runtime.fsx.readJsonSync(serviceAccount).project_id,
   } = options
@@ -37,12 +37,12 @@ module.exports = function setup(options = {}) {
       'https://www.googleapis.com/auth/drive.metadata.readonly',
       'https://www.googleapis.com/auth/calendar.readonly',
     ],
-    googleProject
+    googleProject,
   })
 
-  /** 
+  /**
    * @type {import("../..").GoogleIntegration}
-  */
+   */
   const google = runtime.google
 
   return google
