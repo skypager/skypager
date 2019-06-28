@@ -5,6 +5,10 @@ import list from './list'
 
 const { colors, print } = runtime.cli
 
+export const title = 'Google Sheets'
+
+export const description = 'Create, Download, Modify google spreadsheets and their data'
+
 export async function main(commands = [], options = {}) {
   if (commands[0] === 'help' || options.help) {
     return help(commands, options)
@@ -32,7 +36,8 @@ function help(subcommands = [], options = {}) {
   const cmd = subcommands[0]
 
   if (cmd && main.subcommands[cmd]) {
-    return main.subcommands[cmd].help(subcommands, options)
+    main.subcommands[cmd].help(subcommands, options)
+    return
   }
 
   print(colors.bold.underline('Sheets Commands'), 0, 1, 1)
@@ -55,10 +60,10 @@ function help(subcommands = [], options = {}) {
 
 main.help = help
 
-main.subcommands = {
+export const subcommands = main.subcommands = {
   create,
   dump,
-  list
+  list,
 }
 
 export default main

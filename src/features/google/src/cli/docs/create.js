@@ -1,6 +1,4 @@
-export async function main(commands = [], options = {}) {
-
-}
+export async function main(commands = [], options = {}) {}
 
 export function help(commands, options = {}) {
   console.log('docs create help')

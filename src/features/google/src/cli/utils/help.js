@@ -1,3 +1,7 @@
+import runtime from '@skypager/node'
+
+import { commands } from '../command'
+
 import calendars from '../calendars'
 import calendarEvents from '../calendar-events'
 import docs from '../docs'
@@ -13,7 +17,7 @@ export default function help(subcommands = [], options = {}) {
 
     switch (subsection) {
       case 'calendar-events':
-        return calendarEvents.help(subcommands, options)     
+        return calendarEvents.help(subcommands, options)
       case 'calendars':
         return calendars.help(subcommands, options)
       case 'docs':
@@ -31,5 +35,18 @@ export default function help(subcommands = [], options = {}) {
 }
 
 function displayMainHelp(subcommands = [], options = {}) {
-  console.log('main help')
+  const { max, padEnd } = runtime.lodash
+  const { print, colors } = runtime.cli
+
+  if (!subcommands.length) {
+    const allCommands = commands.allMembers()
+    const maxLength = max(Object.values(allCommands).map(({ title }) => title.length))
+
+    Object.entries(allCommands).map(([name, command]) => {
+      const title = padEnd(command.title, maxLength)
+      print(`  ${colors.bold(title)}\t${command.description}`, 0, 1, 0)
+      print(`  $ ${colors.green(`skypager google ${runtime.stringUtils.kebabCase(name)}`)}`, 0, 1, 1)
+      print(`    commands: ${Object.keys(command.subcommands).join(', ')}`)
+    }) 
+  }
 }

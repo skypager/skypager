@@ -2,6 +2,10 @@ import create from './create'
 import dump from './dump'
 import list from './list'
 
+export const title = 'Documents'
+
+export const description = 'Work with google docs'
+
 export async function main(commands = [], options = {}) {
   if (commands[0] === 'help' || options.help) {
     return help(commands, options)
@@ -31,10 +35,10 @@ export function help(subcommands = [], options = {}) {
 
 main.help = help
 
-main.subcommands = {
+export const subcommands = main.subcommands = {
   create,
   dump,
-  list
+  list,
 }
 
 export default main

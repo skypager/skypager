@@ -1,5 +1,9 @@
 import list from './list'
 
+export const title = 'Drive Folders'
+
+export const description = 'Work with folders in google drive'
+
 export async function main(commands = [], options = {}) {
   if (commands[0] === 'help' || options.help) {
     return help(commands, options)
@@ -22,8 +26,8 @@ export function help(subcommands = [], options = {}) {
 
 main.help = help
 
-main.subcommands = {
-  list
+export const subcommands = main.subcommands = {
+  list,
 }
 
 export default main

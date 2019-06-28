@@ -1,11 +1,11 @@
 import runtime from '@skypager/node'
 
-import calendars from './calendars'
-import calendarEvents from './calendar-events'
-import docs from './docs'
-import files from './files'
-import folders from './folders'
-import sheets from './sheets'
+import * as calendars from './calendars'
+import * as calendarEvents from './calendar-events'
+import * as docs from './docs'
+import * as files from './files'
+import * as folders from './folders'
+import * as sheets from './sheets'
 import * as utils from './utils'
 
 const { clear, randomBanner, print } = runtime.cli
@@ -16,9 +16,22 @@ const ARGV = runtime.argv
 /** @type {Array<String>} */
 const argvCommands = ARGV._
 
+export const commands = runtime.Helper.createContextRegistry('commands', {
+  context: runtime.Helper.createMockContext({
+    calendars: () => calendars,
+    calendarEvents: () => calendarEvents,
+    docs: () => docs,
+    files: () => files,
+    folders: () => folders,
+    sheets: () => sheets,
+  })
+}) 
+
+runtime.commands = commands
+
 export async function main(commands = argvCommands, options = ARGV) {
-  const subcommand = commands[0] 
-  const subcommands = commands.slice(1) 
+  const subcommand = commands[0]
+  const subcommands = commands.slice(1)
 
   if (!options.json) {
     clear()
@@ -52,43 +65,43 @@ export async function main(commands = argvCommands, options = ARGV) {
     case 'calendar':
       await utils.authorize([], options)
       if (subcommands[1] === 'events') {
-        await calendarEvents(subcommands.slice(1), options) 
+        await calendarEvents.main(subcommands.slice(1), options)
       } else {
-        await calendars(subcommands, options)
+        await calendars.main(subcommands, options)
       }
       break
-      
+
     case 'calendar-events':
       await utils.authorize([], options)
-      await calendarEvents(subcommands, options) 
+      await calendarEvents.main(subcommands, options)
       break
 
     case 'calendars':
       await utils.authorize([], options)
-      await calendars(subcommands, options)
+      await calendars.main(subcommands, options)
       break
 
     case 'doc':
     case 'docs':
     case 'documents':
       await utils.authorize([], options)
-      await docs(subcommands, options)
+      await docs.main(subcommands, options)
       break
 
     case 'files':
       await utils.authorize([], options)
-      await files(subcommands, options)
+      await files.main(subcommands, options)
       break
 
     case 'folders':
       await utils.authorize([], options)
-      await folders(subcommands, options)
+      await folders.main(subcommands, options)
       break
 
     case 'sheets':
     case 'spreadsheets':
       await utils.authorize([], options)
-      await sheets(subcommands, options)
+      await sheets.main(subcommands, options)
       break
 
     default:
@@ -98,7 +111,7 @@ export async function main(commands = argvCommands, options = ARGV) {
 
 main.help = (...args) => utils.help(...args)
 
-main.subcommands = {
+export const subcommands = main.subcommands = {
   calendars,
   calendarEvents,
   docs,
