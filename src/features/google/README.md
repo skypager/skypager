@@ -1,5 +1,12 @@
 # Google Integration 
 
+The Google Feature provides an interface to the google apis node.js SDK.
+
+It makes it easy to browse files and folders, documents, spreadsheets, and calendars,
+either on behalf of a service account user (who users can share files with), or on behalf
+of actual users with an oauth2 application setup with the appropriate APIs enabled.
+
+It provides a CLI tool for doing many of the things you can do with the feature's JavaScript API 
 
 ## Installation
 
@@ -21,9 +28,14 @@ yarn add @skypager/node @skypager/google --save
 
 You'll need
 
-1) a Service Account JSON
+1) a Service Account JSON (best to store it in `$projectRoot/secrets/serviceAccount.json`)
 2) The Google Drive and Google Sheets APIs
 3) Google Sheets shared with the `client_email` from the service account.
+
+**optional**
+
+4) oAuth2 Credentials JSON (a json with the key installed that has client_id, client_secret ) (best to store in `$projectRoot/secrets/clientCredentials.json`)
+5) a user who authorizes the application to access their account
 
 ### Server to Server Auth
 
@@ -64,7 +76,9 @@ In the Google Cloud Console, under `APIs and Services` choose `Library` (e.g. `h
 
 With the server to server auth set up, the last step is to share the sheets you want to load with the service account client email you'll be using to access them.
 
-You can find the email address in `client_id` property of the service account json
+You can find the email address in `client_id` property of the service account json.
+
+If you do go with the oauth2 credentials setup, you can also access your own documents.
 
 
 ## Usage
@@ -76,6 +90,8 @@ const runtime = require('@skypager/node')
 const GoogleIntegration = require('@skypager/google')
 
 runtime.use(GoogleIntegration, {
+  // if you want to use oauth to talk to google on behalf of real users
+  credentials: '/path/to/client-credentials.json',
   // or process.env.GOOGLE_APPLICATION_CREDENTIALS
   serviceAccount: '/path/to/service.json'
   // or process.env.GCLOUD_PROJECT or read from the service account project_id
@@ -140,25 +156,83 @@ $ skypager google docs list --help
 
 ## API
 
+Generally you only need a single instance of the google integration, so it is available off of the runtime
+once it is enabled as a feature.
+
+```javascript
+const runtime = require('@skypager/node')
+  .use(require('@skypager/google'))
+
+const { 
+  /* @type { import("./src/GoogleIntegration").GoogleIntegration } */
+  google 
+} = runtime
+
+google.whenReady().then(() => {
+  console.log('google server to server auth ready')
+})
+```
+
 ### listFolders
 
 Returns all of the folders from the Drive Files list API.
+
+```javascript
+google.listFolders({ includeTeamDrives: true }).then((folders) => {
+  console.log(folders)
+})
+```
 
 ### listFiles
 
 Returns all of the files from the Drive Files list API.
 
+```javascript
+google.listFiles({ sharedWithMe: true, includeTeamDrives: true }).then((files) => {
+  console.log(files)
+})
+```
+
 ### listDocuments
 
 Returns all of the google docs files from the Drive Files list API.
 
+```javascript
+google.listDocuments({ sharedWithMe: true, includeTeamDrives: true })
+.then((documents) => {
+  console.log(documents)
+})
+```
+
+each result has a `getDocument` function, which will fetch that particular document from the google documents rest api
+
 ### listSpreadsheets
 
-Returns all of the google sheets files from the Drive Files list API.
+Returns all of the google sheets files from the Drive Files list API, formatted in a way that they can be used as providers for
+the `@skypager/helpers-sheet` class.
+
+each result has a `getDriveFile` function which will fetch the drive file record.
+
+```javascript
+const runtime = require('@skypager/node').use(require('@skypager/helpers-sheet'))
+
+google
+.listSpreadsheets({ sharedWithMe: true, includeTeamDrives: true })
+.then((sheets) => {
+  // now you can create instances of the GoogleSheet helper from this data.
+  sheets.forEach((sheet) => {
+    runtime.sheets.register(sheet.title, () => sheet)
+  })
+})
+```
 
 ### service
 
 Provides you with an arbitrary google API rest Client.  Your account must have this API enabled for it to work.
+
+```javascript
+google.service('calendar', { version: 'v3', auth: google.oauthClient })
+```
 
 ### createOAuthClient
 
