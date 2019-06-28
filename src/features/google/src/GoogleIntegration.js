@@ -385,13 +385,18 @@ export class GoogleIntegration extends Feature {
     })
   }
 
+  /** 
+   * @param {Object} options
+   * @param {String} [options.title]
+   * @param {Object} [options.auth]
+  */
   async createSpreadsheet(options = {}) {
     if (typeof options === 'string') {
       options = { title: options, auth: this.oauthClient }
     }
 
     const { auth = this.oauthClient } = options
-    const { title } = options
+    const { title = 'Skypager Google Sheet' } = options
 
     if (!auth) {
       throw new Error(`This request requires an oauth client.`)

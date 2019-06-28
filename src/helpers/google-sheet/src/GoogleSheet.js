@@ -650,21 +650,33 @@ export class GoogleSheet extends Helper {
    *
    * @returns {Promise<Boolean>}
    */
-  async authorize(serviceAccountPathOrJSON = this.runtime.get('google.settings.serviceAccount')) {
-    serviceAccountPathOrJSON =
-      serviceAccountPathOrJSON || this.runtime.google.settings.serviceAccount
+  async authorize(options = {}) {
+    const { google } = this.runtime
+    const { auth = this.tryGet('auth') } = options
 
-    const serviceAccount = await (typeof serviceAccountPathOrJSON === 'object'
-      ? serviceAccountPathOrJSON
-      : this.runtime.fsx.readJsonAsync(serviceAccountPathOrJSON))
+    let authorized
 
-    const authorized = await new Promise((resolve, reject) => {
-      this.spreadsheet.useServiceAccountAuth(serviceAccount, err =>
-        err ? reject(err) : resolve(true)
-      )
-    })
+    if (!auth) {
+      const serviceAccount = await this.runtime.fsx.readJsonAsync(google.settings.serviceAccount)
+      const serverAuth = await new Promise((resolve, reject) => {
+        this.spreadsheet.useServiceAccountAuth(serviceAccount, err =>
+          err ? reject(err) : resolve(true)
+        )
+      })
 
-    this.state.set('authorized', true)
+      authorized = !!serverAuth
+    } else if (auth && auth.credentials) {
+      await this.spreadsheet.setAuthToken({
+        type: auth.credentials.token_type,
+        value: auth.credentials.access_token,
+        expires: auth.credentials.expiry_date
+      })
+      authorized = true
+    }
+
+    setTimeout(() => {
+      this.state.set('authorized', !!authorized)
+    }, 100)
 
     return authorized
   }
