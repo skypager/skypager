@@ -47,10 +47,10 @@ export class GoogleIntegration extends Feature {
         : {})
 
     const files = await drive.files
-      .list({ 
-        maxResults, 
-        q: query, 
-        ...teamDriveOptions 
+      .list({
+        maxResults,
+        q: query,
+        ...teamDriveOptions,
       })
       .then(r => r.data)
 
@@ -93,9 +93,7 @@ export class GoogleIntegration extends Feature {
    * @param {String} [options.or] an additional query condition that can also return match
    */
   async listFiles(options = {}) {
-    const drive = options.auth 
-      ? this.service('drive', { auth: options.auth })    
-      : this.drive
+    const drive = options.auth ? this.service('drive', { auth: options.auth }) : this.drive
 
     const {
       maxResults = 100,
@@ -163,7 +161,7 @@ export class GoogleIntegration extends Feature {
 
     if (recursive) {
       const folders = await this.listFolders({
-        ...options.auth && { auth: options.auth }
+        ...(options.auth && { auth: options.auth }),
       })
       const parentIds = folders.map(f => f.id)
       parents.push(...parentIds)

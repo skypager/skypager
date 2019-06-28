@@ -85,6 +85,59 @@ runtime.use(GoogleIntegration, {
 
 You can now access `runtime.google` to interact with the integration.
 
+## CLI
+
+When you install `@skypager/google` the modules provides the [google script](scripts/google.js) which is a
+hierarchal command application for performing actions with the various APIS provided by the google integration
+
+Running the following will show the available help subjects
+
+```shell
+$ skypager google
+```
+
+If you wish to make calls e.g. to the calendars API, or any API on behalf of a real user instead of the service account
+email that you can share google files and things with, then you will need to setup an oauth2 client and save the credentials
+in e.g `secrets/clientCredentials.json`.  
+
+You can then authorize access with the following command, which will open a web browser and ask you to paste the resulting code.
+
+```shell
+$ skypager google authorize
+```
+
+Once authorized, or with your service account credentials, you can run commands such as
+
+```shell
+$ skypager google calendars list
+$ skypager google sheets list
+$ skypager google sheets dump my-ecommerce-sheet --output-path=backups/ecommerce.json 
+$ skypager google sheets create "Your Sheet Title" 
+  --worksheet="products: title, sku, manufacturer, cost, shippingCost, quantityOnHand" 
+  --worksheet="inventory: sku, warehouseId, locationId, quantityOnHand"
+```
+
+Passing the `--server` flag will prefer the service account auth over user specific oauth.
+
+To get help with any command
+
+```shell
+$ skypager google help authorize 
+$ skypager google help docs
+$ skypager google help sheets 
+$ skypager google help files 
+$ skypager google help calendars 
+$ skypager google help folders 
+```
+
+get help with subcommands
+
+```shell
+$ skypager google docs list help
+# or
+$ skypager google docs list --help
+```
+
 ## API
 
 ### listFolders
@@ -106,4 +159,12 @@ Returns all of the google sheets files from the Drive Files list API.
 ### service
 
 Provides you with an arbitrary google API rest Client.  Your account must have this API enabled for it to work.
+
+### createOAuthClient
+
+Creates an oauth2 client, capable of making calls on behalf of real google users instead of service account users.
+
+### createAuthClient
+
+Creates the server to server auth client that you need to pass to the google node.js sdks
 

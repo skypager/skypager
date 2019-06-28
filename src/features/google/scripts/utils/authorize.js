@@ -12,7 +12,7 @@ const { resolve } = runtime
  * @param {String} [options.credentials='$CWD/secrets/clientCredentials.json'] path to the oauth2 client credentials JSON
  * @param {String} [options.accessToken='$CWD/secrets/accessToken.json'] path to where the current user's access token JSON will be saved
  * @param {Boolean} [options.refresh=false] pass true to regenerate the access token JSON if it already exists
- * @param {Boolean} [options.server=false] prefer server to server authentication method 
+ * @param {Boolean} [options.server=false] prefer server to server authentication method
  * @param {Boolean} [options.help=false] show the help screen
  * @param {Boolean} [options.verbose=false] show progress output messages
  */
@@ -29,7 +29,7 @@ module.exports = async function authorize(subcommands = [], options = {}) {
   const {
     credentials = resolve('secrets', 'clientCredentials.json'),
     accessToken = resolve('secrets', 'accessToken.json'),
-    server = false
+    server = false,
   } = options
 
   if (server && google.settings.serviceAccount) {

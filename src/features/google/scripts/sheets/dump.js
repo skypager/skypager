@@ -1,22 +1,21 @@
 const runtime = require('@skypager/node')
 
-const print = runtime.argv.json
-  ? () => {}
-  : runtime.cli.print
+const print = runtime.argv.json ? () => {} : runtime.cli.print
 
 async function dump(commands = [], options = {}) {
-
   if (!runtime.sheets) {
     const sheetHelperPath = runtime.packageFinder.attemptResolve('@skypager/helpers-sheet')
 
     if (!sheetHelperPath) {
-      console.error(`This command depends on @skypager/helpers-sheet and it does not appear to be installed.`)
+      console.error(
+        `This command depends on @skypager/helpers-sheet and it does not appear to be installed.`
+      )
       process.exit(1)
     }
 
     runtime.use(require(sheetHelperPath), {
       serviceAccount: runtime.google.settings.serviceAccount,
-      googleProject: runtime.google.settings.googleProject
+      googleProject: runtime.google.settings.googleProject,
     })
   }
 
@@ -25,10 +24,10 @@ async function dump(commands = [], options = {}) {
   !options.json && print(`Searching for spreadsheet ${sheetTitleOrId}`)
 
   const spreadsheets = await runtime.google.listSpreadsheets({
-    ...!options.server && { auth: runtime.google.oauthClient },
+    ...(!options.server && { auth: runtime.google.oauthClient }),
   })
 
-  const found = spreadsheets.find((sheet) => {
+  const found = spreadsheets.find(sheet => {
     const { title, id } = sheet
     return id === sheetTitleOrId || String(title).toLowerCase() === sheetTitleOrId.toLowerCase()
   })
@@ -42,16 +41,18 @@ async function dump(commands = [], options = {}) {
     await sheet.loadAll()
 
     if (options.json) {
-      console.log(JSON.stringify(sheet.data, null, 2))  
-    }  else {
-      const outputPath = options.outputPath || runtime.resolve('sheets', `${found.title.replace(/\s/g, '-').replace(/--/g,'-')}.dump.json`)
+      console.log(JSON.stringify(sheet.data, null, 2))
+    } else {
+      const outputPath =
+        options.outputPath ||
+        runtime.resolve(
+          'sheets',
+          `${found.title.replace(/\s/g, '-').replace(/--/g, '-')}.dump.json`
+        )
       print(`Saving sheet data dump to ${outputPath}`)
-      await runtime.fsx.mkdirpAsync(
-        runtime.pathUtils.dirname(outputPath)
-      )
+      await runtime.fsx.mkdirpAsync(runtime.pathUtils.dirname(outputPath))
       await runtime.fsx.writeFileAsync(outputPath, JSON.stringify(sheet.data), 'utf8')
     }
-
   } else {
     console.log('not foundd')
   }

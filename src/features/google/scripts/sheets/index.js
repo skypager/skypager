@@ -15,7 +15,7 @@ async function sheets(commands = [], options = {}) {
       break
     case 'dump':
     case 'export':
-      await dump(commands.slice(1), options)     
+      await dump(commands.slice(1), options)
     case 'create':
       await create(commands.slice(1), options)
   }

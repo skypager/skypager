@@ -12,12 +12,14 @@ module.exports = async function list(commands = [], options = {}) {
   await google.whenReady()
 
   if ((options.server && !google.auth) || (!options.server && !google.oauthClient)) {
-    throw new Error(`Command requires an authenticated oauth client, or server to server auth setup`)
+    throw new Error(
+      `Command requires an authenticated oauth client, or server to server auth setup`
+    )
   }
 
   print(`Listing documents`)
   const items = await google.listDocuments({
-    ...!options.server && { auth: google.oauthClient },
+    ...(!options.server && { auth: google.oauthClient }),
     ...options,
   })
 
@@ -26,7 +28,7 @@ module.exports = async function list(commands = [], options = {}) {
     title: doc.title,
     lastModifiedBy: doc.lastModifyingUserName,
     lastModifiedAt: doc.modifiedDate,
-    owners: (doc.owners || []).map((owner) => owner.displayName)
+    owners: (doc.owners || []).map(owner => owner.displayName),
   }))
 
   if (options.json) {
@@ -42,9 +44,9 @@ module.exports = async function list(commands = [], options = {}) {
   records.forEach(rec => {
     docsTable.push([
       rec.title,
-      rec.owners.join("\n"),
+      rec.owners.join('\n'),
       `${rec.lastModifiedBy}\n${rec.lastModifiedAt}`,
-      rec.id
+      rec.id,
     ])
   })
 
