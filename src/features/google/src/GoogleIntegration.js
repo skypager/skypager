@@ -27,9 +27,8 @@ export class GoogleIntegration extends Feature {
    * Accepts the same arguments as listFiles, but hard codes the mimeType to the google-apps.spreadsheet
    */
   async listSpreadsheets(options = {}) {
+    const drive = options.auth ? this.service('drive', { auth: options.auth }) : this.drive
     const { maxResults = 100, sharedWithMe = true } = options
-
-    const { drive } = this
 
     let query = "trashed=false and mimeType='application/vnd.google-apps.spreadsheet'"
 
@@ -48,7 +47,11 @@ export class GoogleIntegration extends Feature {
         : {})
 
     const files = await drive.files
-      .list({ maxResults, q: query, ...teamDriveOptions })
+      .list({ 
+        maxResults, 
+        q: query, 
+        ...teamDriveOptions 
+      })
       .then(r => r.data)
 
     const { pick } = this.lodash
@@ -90,7 +93,10 @@ export class GoogleIntegration extends Feature {
    * @param {String} [options.or] an additional query condition that can also return match
    */
   async listFiles(options = {}) {
-    const { drive } = this
+    const drive = options.auth 
+      ? this.service('drive', { auth: options.auth })    
+      : this.drive
+
     const {
       maxResults = 100,
       sharedWithMe = true,
@@ -156,7 +162,9 @@ export class GoogleIntegration extends Feature {
     const { docs } = this
 
     if (recursive) {
-      const folders = await this.listFolders()
+      const folders = await this.listFolders({
+        ...options.auth && { auth: options.auth }
+      })
       const parentIds = folders.map(f => f.id)
       parents.push(...parentIds)
     }
@@ -170,7 +178,7 @@ export class GoogleIntegration extends Feature {
     })
 
     const records = files.map(i => ({
-      ...pick(i, 'id', 'title', 'modifiedDate', 'lastModifyingUserName'),
+      ...pick(i, 'id', 'title', 'modifiedDate', 'lastModifyingUserName', 'owners'),
       documentId: i.id,
       ...{
         getDocument: () => docs.documents.get({ documentId: i.id }).then(resp => resp.data),

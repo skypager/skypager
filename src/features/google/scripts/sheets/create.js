@@ -1,1 +1,3 @@
-module.exports = async function create() {}
+async function create(commands = [], options = {}) {}
+
+module.exports = create

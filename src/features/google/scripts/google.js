@@ -14,9 +14,11 @@ async function main() {
   const options = runtime.argv
   const { clear, randomBanner, print } = runtime.cli
 
-  clear()
-  randomBanner('Skypager')
-  print('Google Integration CLI')
+  if (!runtime.argv.json) {
+    clear()
+    randomBanner('Skypager')
+    print('Google Integration CLI')
+  }
 
   switch (subcommand) {
     case 'authorize':
