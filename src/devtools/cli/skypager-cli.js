@@ -58,6 +58,11 @@ if (args.indexOf('--inspect') !== -1) {
   args = args.filter(arg => arg !== '--inspect')
 }
 
+if (args.indexOf('--enable-require-context') !== -1 || process.env.ENABLE_REQUIRE_CONTEXT) {
+  runtimeArgs.push(require.resolve('babel-plugin-require-context-hook/register'))
+  args = args.filter(arg => arg !== '--enable-require-context')
+}
+
 if (args.indexOf('--global-sandbox') !== -1) {
   runtimeArgs.push('--require')
   runtimeArgs.push('@skypager/node/context.js')

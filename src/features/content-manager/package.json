@@ -1,0 +1,63 @@
+{
+  "name": "@skypager/content-manager",
+  "version": "1.1.5",
+  "description": "skypager content manager",
+  "keywords": [],
+  "author": "Jon Soeder <jon@chicago.com>",
+  "main": "lib/index.js",
+  "module": "lib/es/index.js",
+  "browser": "lib/skypager-content-manager.min.js",
+  "react-native": "lib/index.js",
+  "scripts": {
+    "prebuild": "rimraf lib",
+    "build": "yarn build:node && yarn build:es && skypager run-all build:web build:editor",
+    "build:node": "cross-env BUILD_ENV=build babel --comments --source-maps -d lib src",
+    "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src",
+    "build:web": "skypager build --app-only --no-clean --include-unminified",
+    "build:editor": "skypager build --app-only --app-entry src/editor --no-clean --include-unminified --library-name=SkypagerEditor --app-name skypager-document-editor",
+    "watch:web": "skypager watch --app-only --no-clean --include-unminified",
+    "watch:editor": "skypager watch --app-only --app-entry src/editor --library-name=SkypagerEditor --no-clean --include-unminified --app-name skypager-document-editor",
+    "test": "skypager test --mocha test/**/*.spec.js",
+    "console": "skypager console",
+    "postbuild": "skypager hash-build",
+    "prepare": "yarn build"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@skypager/google": "^1.2.3",
+    "@skypager/helpers-sheet": "^1.2.3",
+    "@skypager/helpers-google-doc": "^1.2.3"
+  },
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/skypager/skypager"
+  },
+  "homepage": "https://skypager.io",
+  "gitHead": "9392473e420c7a46eb0be31bc7739ca16c8eb130",
+  "contributors": [],
+  "skypager": {
+    "category": "helpers",
+    "projectType": "helper",
+    "buildFolder": "lib",
+    "providesScripts": [
+      "cms"
+    ],
+    "externals": {
+      "react": "React",
+      "react-dom": "ReactDOM"
+    },
+    "webpack": {
+      "appName": "skypager-content-manager",
+      "libraryName": "SkypagerContentManager"
+    }
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie < 11",
+    "not op_mini all"
+  ]
+}
