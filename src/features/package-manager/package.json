@@ -32,8 +32,8 @@
   },
   "dependencies": {
     "@skypager/clients-npm": "^1.1.1",
-    "@skypager/helpers-client": "^0.2.7",
-    "@skypager/helpers-server": "^0.2.7",
+    "@skypager/helpers-client": "^1.1.1",
+    "@skypager/helpers-server": "^1.1.1",
     "npm-packlist": "^1.4.1",
     "pacote": "^9.5.0",
     "tar": "^4.4.8"
