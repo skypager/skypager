@@ -15,6 +15,10 @@
 import runtime from '@skypager/runtime'
 import * as NodeFeature from './feature'
 
+try {
+  require('babel-plugin-require-context-hook/register')()
+} catch (error) {}
+
 runtime.features.register('runtimes/node', () => NodeFeature)
 
 runtime.feature('runtimes/node').enable()
