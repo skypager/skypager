@@ -1,6 +1,6 @@
 {
   "name": "@skypager/node",
-  "version": "1.1.5",
+  "version": "1.3.0",
   "description": "the skypager node runtime",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
@@ -20,9 +20,9 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@skypager/features-file-manager": "^1.1.4",
+    "@skypager/features-file-manager": "^1.3.0",
     "@skypager/features-module-manager": "^1.1.4",
-    "@skypager/features-package-manager": "^1.1.1",
+    "@skypager/features-package-manager": "^1.3.0",
     "@skypager/helpers-client": "^1.1.1",
     "@skypager/helpers-repl": "^1.1.1",
     "@skypager/helpers-server": "^1.1.1",

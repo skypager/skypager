@@ -1,6 +1,6 @@
 {
   "name": "@skypager/google-helpers-docs",
-  "version": "1.1.5",
+  "version": "1.3.0",
   "description": "skypager documentation for the google helpers",
   "author": "Jon Soeder <jon@chicago.com>",
   "scripts": {
@@ -24,7 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "@skypager/helpers-document": "^1.1.5",
-    "@skypager/node": "^1.1.5",
+    "@skypager/node": "^1.3.0",
     "compromise": "^11.13.2",
     "prism-react-renderer": "^0.1.6",
     "react-json-view": "^1.19.1",
