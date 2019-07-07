@@ -25,8 +25,8 @@ The following script can run in node, you need `sketchtool` in your path.
 const runtime = require('@skypager/node')
 // tell the runtime to use the sketch helper so that we can create modules to represent them
 runtime.use(require('@skypager/helpers-sketch'))
-// create an instance of the sketch helper by telling us the path
-const sketch = runtime.sketch({ path: '/path/to/file.sketch' }) 
+// create an instance of the sketch helper by giving us a name for it, and telling us the path
+const sketch = runtime.sketch('my-sketch-doc', { path: '/path/to/file.sketch' }) 
 
 async function main() {
   // returns an array of layer objects
@@ -52,7 +52,7 @@ async function main() {
 ### Webpack Loader
 
 [@skypager/helpers-sketch/sketchtool-loader](./sketchtool-loader.js) can be used to process `.sketch` files and turn them
-into JSON structures that can be used to hydrate the Sketch helper instances with the same metadata we rely on `sketchtool` to provide us with 
+into JSON structures that can be used to hydrate the Sketch helper instances in the browser, with the same metadata we rely on `sketchtool` to provide us with 
 directly in the node runtime. 
 
 This will enable you to build, for example, a React App whose state is powered by a Sketch Helper instance.
