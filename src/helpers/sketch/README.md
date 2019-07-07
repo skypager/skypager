@@ -16,6 +16,24 @@ organizes their design.  If the Designer uses naming conventions for their pages
 
 [API Docs](docs/api/Sketch.md)
 
+## Usage
+
+To enable the sketch helper in the skypager runtime, just `use` it the way you would any other extension
+
+```javascript
+const runtime = require('@skypager/node')
+  .use(require('@skypager/helpers-sketch'))
+```
+
+If you want to build a custom runtime module which automatically has the sketch helper enabled for any consumers
+
+```javascript
+import runtime from '@skypager/node'
+import Sketch, { attach } from '@skypager/helpers-sketch'
+
+export default runtime.use({ attach })
+```
+
 ## Example
 
 The following script can run in node, you need `sketchtool` in your path.
@@ -27,6 +45,8 @@ const runtime = require('@skypager/node')
 runtime.use(require('@skypager/helpers-sketch'))
 // create an instance of the sketch helper by giving us a name for it, and telling us the path
 const sketch = runtime.sketch('my-sketch-doc', { path: '/path/to/file.sketch' }) 
+
+main()
 
 async function main() {
   // returns an array of layer objects
@@ -47,6 +67,26 @@ async function main() {
   // get literally everything there is about the document
   await sketch.dump()
 }
+```
+
+In this example, we know about the path to the sketch file, and we can create it by passing it as an argument.
+
+If you wanted to just discover all of the sketchfiles in your current project folder
+
+```javascript
+main()
+
+async function main() {
+  await runtime.sketches.discover()
+  console.log(runtime.sketches.available)
+}
+```
+
+then you could access them with something like:
+
+```javascript
+const webappSketch = runtime.sketch('test/fixtures/WebApplication')
+const styleguideSketch = runtime.sketch('test/fixtures/StyleGuide')
 ```
 
 ### Webpack Loader

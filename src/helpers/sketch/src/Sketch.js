@@ -467,6 +467,20 @@ export class Sketch extends Helper {
     Helper.attach(runtime, Sketch, {
       registry: Helper.createContextRegistry('sketches', {
         context: Helper.createMockContext(),
+        api: {
+          async discover() {
+            await runtime.fileManager.startAsync()
+            const sketchFiles = runtime.fileManager.chains.patterns('**/*.sketch')
+              .map(({ relative, path }) => ({ relative, path }))
+              .value()
+
+            return sketchFiles.map(({ relative, path }) => {
+              const name = relative.replace('.sketch', '')
+              runtime.sketches.register(name, () => ({ path }))
+              return name
+            })
+          } 
+        }
       }),
       lookupProp: 'sketch',
       registryProp: 'sketches',
