@@ -14,6 +14,7 @@ It should also be able to export `.png` and `.svg` assets.
 With this metadata, it is possible to use `.sketch` files to build an object graph that is organized the way a Designer / Sketch User  
 organizes their design.  If the Designer uses naming conventions for their pages, artboards, and layers , this object graph can be easily navigated, making it possible to do all sorts of crazy things!
 
+[API Docs](docs/api/Sketch.md)
 
 ## Example
 
