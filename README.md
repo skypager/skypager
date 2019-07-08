@@ -24,7 +24,7 @@ The goal is to enable you, as a an author of many JavaScript projects, to just s
 
 ## Build-time and Runtime modules 
 
-Modules like [@skypager/cli](src/devtools/cli) provide you with commands that can be used to in the build / run / publish / deploy phases of your JavaScript projects.
+Modules like [@skypager/cli](src/devtools/cli) provide you with commands that can be used in the build / run / publish / deploy phases of your JavaScript projects.
 
 [@skypager/cli](src/devtools/cli) is a script runner that will 
 
