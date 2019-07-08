@@ -56,8 +56,10 @@ $ yarn add skypager --save
 Or if you prefer you can install the individual packages you need.
 
 ```shell
-$ yarn add @skypager/cli @skypager/node --dev # for single page apps and not servers, these can be devDependencies
-$ yarn add @skypager/web --save # for the browser builds, this is a runtime / production dependency
+# for single page apps and node servers or scripts
+$ yarn add @skypager/cli @skypager/node --dev 
+# for the browser builds, this is a runtime / production dependency
+$ yarn add @skypager/web --save 
 ```
 
 **Optional**
@@ -130,7 +132,7 @@ which ever you want to use is up to you.  If you don't know the difference, `--b
 
 If you pass the `--debug` flag to any `skypager` command, it will enable the node debugger.
 
-See [The CLI Docs for more information)[docs/how-the-skypager-cli-works.md]
+See [The CLI Docs for more information][docs/how-the-skypager-cli-works.md]
 
 ## Usage
 
@@ -376,7 +378,12 @@ The `Feature` helper is something your program can call `enable()` on, and then 
 Skypager is a powerful framework which can be used to build any kind of app, here are some examples.
 
 - [Sheets Server](src/examples/sheets-server) A REST API that lets you browse your google spreadsheets, and request them in JSON form
-- [Conceptual Example](docs/conceptual-example.md)
+- [Voice Commander App](src/examples/voice) literally you can just talk to skypager, this project uses mdx to present a a tutorial for building your own skypager feature for working with voice synthesis / speech recognition engines.
+- [Runnable / Renderable Code Blocks](src/examples/runnable-mdx) an example of using the document helper to build live editable React documentation.
+- [Portfolio Browser](src/apps/portfolio-browser) visually explore the skypager monorepo dependencies, or node_module dependency graphs with different cytoscape.js layouts. 
+- [Full Stack Skypager Application](https://github.com/soederpop/skypager-fullstack-boilerplate)
+- [Full Stack Skypager Application with Google Helpers](https://github.com/soederpop/skypager-google-project-boilerplate)
+- [Conceptual Example](docs/conceptual-example.md) describes a conceptual project you can build using the concepts / tools provided by the skypager framework.
 
 ## Local Development
 
