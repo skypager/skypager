@@ -1,47 +1,59 @@
 # Skypager
-> Universal, Fully Integrated, Cross Platform JavaScript Container 
+> Universal, Fully Integrated, Cross Platform JavaScript Container that you can talk to.
 
 [![CircleCI](https://circleci.com/gh/skypager/skypager/tree/master.svg?style=svg)](https://circleci.com/gh/skypager/skypager/master) [![Windows Build status](https://ci.appveyor.com/api/projects/status/j83kh674nbsl3us1/branch/master?svg=true)](https://ci.appveyor.com/project/soederpop/skypager/branch/master)
 
 ![Logo](docs/skypager-logo-nobg.svg)
 
-Skypager provides you with a batteries included CLI and JavaScript API for creating, building, running, publishing, and deploying cross platform JavaScript applications and modules. Designed for modules which work in node.js, the browser, React Native, and electron.  
+Skypager is a framework agnostic library and toolchain for creating, building, publishing, deploying, and running JavaScript projects **that you can talk to**.
 
-With Skypager, everything can potentially be a module.  A single file. A folder, a Google Spreadsheet or Document, a Sketch File.
+By talk to, [I don't just mean literally](https://voice.skypager.io), but more importantly conceptually.  It provides you with concepts and modules that follow natural language patterns,
+which allow your code to take on a conversational style that happens to fit very well with the way JavaScript runs in all environments.  
 
-Every module can be can be composed together and declaratively wired up, and lazy loaded.
+As an author of code, you only want to have to say the minimum, and still achieve the desired effect.  This is much harder to do than it sounds, and so this library is an attempt to make that easier.
 
-## Build and Runtime Integration
+## Skypager's Structure
 
-In addition to scripts which automate the build / run / publish / deploy phases of your JavaScript projects,
+This project is a monorepo which publishes many different packages, some are useful only when authoring JavaScript programs, some which only run in node.  
 
-Skypager provides a runtime framework that provides convenient APIs which help you develop reusable application modules that can package up and lazy load different features and capabilities, especially those which rely on third party dependencies, in a highly cacheable way.
+The [Core Framework](src/runtime) has a [Node Variant](src/runtimes/node) as well as a [Web Variant](src/runtimes/web), which load [Specific Features](src/features) that might only be relevant to that particular platform (e.g. [node](src/runtimes/node/src/features) or [web only](src/runtimes/web/src/features)) 
 
-The goal is to enable you to be able to build light weight applications that only contain what is unique about them, but which can still leverage features that are provided by underlying modules that you might also maintain yourself, or download from NPM.  
+It also has [specific helper classes](src/helpers) that may work differently depending on the platform, but are designed to let your code say the same thing anyway. 
 
-Skypager makes it easy to identify which modules should act as a sort of reusable framework, or a curated set of modules and scripts for you or your team to rely on.  At the same time, it makes it clear which modules are specific to this project. 
+The goal is to enable you, as a an author of many JavaScript projects, to just simply talk to your code and tell it what you want, and let the runtime figure out what to do with that information.
 
-Your light weight applications will only deliver what is unique about them to the end user, and rely on shared caches for common code for everything else.
+## Build-time and Runtime modules 
 
-As a developer, you'll benefit from easily being able to manage your boilerplate in one place, separate from the things that make each project unique. 
+Modules like [@skypager/cli](src/devtools/cli) provide you with commands that can be used to in the build / run / publish / deploy phases of your JavaScript projects.
 
-For a team of developers, Skypager's module boundaries, since they are based on where code is stored, makes it easier to solve problems in isolation, and incorporate that solution in multiple projects, which only depend on the specific versions you have released. 
+[@skypager/cli](src/devtools/cli) is a script runner that will 
 
-Applicatons might depend on various combinations of `@myscope/servers-*` and `@myscope/themes-*`.  Whoever is developing the servers and the whoever is developing themes, could very well be completely different departments or companies.
+- run scripts found in your current project's `scripts` folder first 
+- if your project is a monorepo, it will search your own @scope for `scripts/`
+- run any built in scripts from any of the `@skypager/*` modules you have installed that "provide" those scripts.  
 
-The Skypager framework allows us to specify how the scripts and modules provided by a `server` module, get combined with the static css and image assets provided by a `theme` module, to provide a total user experience. 
+When your code is running, Skypager provides a global runtime singleton (like `document` or `window` in the browser) that has different APIs which can be used to build all of 
+the components that are needed to power a modern JavaScript application, whose state and logic might be spread across the browser and node APIs.  
 
-Projects which use the Skypager framework only need to have access to the modules, which can be installed globally, or as a project dependency.  
+In node requiring `skypager` will always return the same object, with the same state.  Similarly, in the browser, the skypager global is a singleton.
+
+These instances of the runtime are designed to work together.  
+
+The build environment and run environment can be connected in several different ways, all of which make all different phases of the application development cycle more productive.
 
 ## Installation
 
-You can install the single package `skypager` which provides the latest versions from the '@skypager/*' portfolio
+You can install the single package [skypager](src/main) which provides you with the latest versions of the [@skypager/cli](src/devtools/cli) [@skypager/runtime](src/runtime) [@skypager/node](src/runtimes/node) and [@skypager/web](src/runtimes/web) modules.  
+
+This package has been around the longest, and is version `40.x.x`. 
+
+It is a single package to install that depends on the scoped `@skypager/*` modules which are version `1.x.x`, and released from the master branch of this repository. 
 
 ```shell
 $ yarn add skypager --save 
 ```
 
-Or you can install the inividual packages directly:
+Or if you prefer you can install the individual packages you need.
 
 ```shell
 $ yarn add @skypager/cli @skypager/node --dev # for single page apps and not servers, these can be devDependencies
@@ -63,109 +75,62 @@ runnable, editable websites from your README.md
 $ yarn add @skypager/helpers-document --save
 ```
 
+If you wish to use various [Google Services](src/features/google), which let you treat [Google Spreadsheets as a Database](src/helpers/sheet) or [Google Docs as a CMS](src/helpers/google-doc) 
+
+```shell
+$ yarn add @skypager/google @skypager/helpers-sheet @skypager/helpers-google-doc --save
+```
+
 ## CLI
 
-Installing `@skypager/cli` will provide an executable `skypager`.
+Installing [@skypager/cli](src/devtools/cli) will provide an executable `skypager`.
 
-If you pass either the `--esm` or `--babel` flags, it will enable ES module support in any of the modules your script requires. Scripts run with `skypager --babel` can import es6 modules, including JSX natively.
+It is designed to run `scripts/*.js` in the context of the current project (which is the nearest package.json it can find.)
+
+- run scripts found in your current project's `scripts` folder first 
+- if your project is a monorepo, it will search your own @scope for `scripts/`
+- run any built in scripts from any of the `@skypager/*` modules you have installed that "provide" those scripts.  
+
+In addition to this, it provides you with a few other convenience flags that make it easier to write and run es6 code that usually needs to be transpiled before running natively.
+
+So If you pass either the `--esm` or `--babel` flags, it will enable ES module support in any of the modules your script requires. Scripts run with `skypager --babel` can import es6 modules, including JSX natively.
+
+```shell
+$ skypager my-script --babel 
+```
+
+So if you had `scripts/my-script.js`
+
+```javascript
+import runtime, { cli } from 'skypager'
+
+const { print, colors, randomBanner, clear, ask } = cli
+
+async function main() {
+  clear()
+  randomBanner('Skypager')
+
+  const { name } = await ask({
+    name: {
+      description: 'What is your name?'
+    }
+  })
+
+  print(`Hello ${colors.green(name)}`)
+}
+
+main()
+```
+
+skypager would process this with babel first.
 
 Setting `process.env.SKYPAGER_BABEL=true` is the same as always passing `--babel`.  Likewise setting `process.env.SKYPAGER_ESM=true` is the same as always passing `--esm` to the `skypager` CLI.
 
+which ever you want to use is up to you.  If you don't know the difference, `--babel` is probably a safe bet.
+
 If you pass the `--debug` flag to any `skypager` command, it will enable the node debugger.
 
-The `skypager` CLI is a node.js script runner that provides the above conveniences when running any script, but it also is designed to make it easier to share re-usable script commands across an entire portfolio of JavaScript projects.  
-
-By this I mean, for any `skypager command`
-
-- It will scan your current project for scripts to run in `scripts/command.js`, 
-- it will scan your monorepo or scoped packages if your project name includes a `@scope` prefix, for any modules which have a `scripts/command.js` file. 
-- it will scan any `@skypager/*` module found in `node_modules` for `scripts/command.js`.  
-
-Any time any of these scripts uses the `@skypager/runtime` module (or `@skypager/node` or `@skypager/react`), 
-these runtime instances will run in the context of the nearest `package.json` file, and will have access to `process.argv` as an object `runtime.argv` as well as node's `process.env`
-
-This makes it easy for extensions to configure themselves based on the current project.
-
-- `skypager.cwd` will point to the directory of the nearest `package.json`
-- `skypager.gitInfo.root` will point to the directory of the nearest `.git` folder
-
-This behavior makes it so that the current `package.json` can be used to store settings for the current project.  Whatever is in the `skypager` property in the `package.json` will be treated as `runtime.argv` as a convenience.  
-
-So the `runtime` object you import can be used to tell you info about this specific project. 
-
-If that project has a `skypager.js` file, that file will automatically be loaded and can be used to customize the node.js runtime for that project even further.
-
-These behaviors allow you to write scripts which adapt to the current project they are in.  
-
-This makes it so when you develop a script for one project, it can easily be used by another, either by copy and pasting and duplicating it, or relying on it as a module dependency.
-
-This means you can trend toward less copying and pasting and duplication of code, because you can write scripts and servers which are flexible and rely on the current `package.json`, or on other files following a similar file name conventions.
-
-**How it works:**
-
-When you run 
-
-```shell
-$ skypager whatever
-```
-
-the CLI will search in the current project folder for `scripts/whatever.js` and run that.
-
-if there is no such file, it will search your package scope.  so for example, if your current `package.json` has a scoped package name `@myscope/my-package`, then it will 
-attempt to search every package in your node_modules that starts with `@myscope/`, and for each one that meets the following criteria, possibly run the script: 
-
-- 1) has a `scripts/whatever.js` file 
-- 2) has a `myscope.providesScripts` property in the package.json which includes `"whatever"`
-
-  ```javascript
-  {
-    "name": "@myscope/my-reusable-helper",
-    "myscope": {
-      "providesScripts": [
-        "whatever"
-      ]
-    }
-  }
-  ```
-
-if there is no such file in any of your scoped packages, then it will search the `@skypager/*` scope using the same logic.  
-
-Packages like `@skypager/webpack` provide scripts `build`, `start`, and `watch` because it [includes the following scripts](https://github.com/skypager/skypager/tree/master/src/devtools/webpack/scripts).  If this package is installed, it will be added to the search path
-
-if none of the @skypager/* scoped packages has the command, it will search the scripts provided by [@skypager/cli itself](https://github.com/skypager/skypager/tree/master/src/devtools/cli/scripts)
-
-Skypager's CLI is designed with, and uses node's native module resolution, so any of the per project scripts, or reusable scripts, will use the same version of the dependencies and scripts that your package.json and yarn.lock install.
-
-### Skypager CLI Commands
-
-- [console](https://github.com/skypager/skypager/blob/master/src/devtools/cli/scripts/console.js) an enhanced node REPL which auto-resolves promises and loads the skypager node runtime for the current project
-- [hash-build](https://github.com/skypager/skypager/blob/master/src/devtools/cli/scripts/hash-build.js) generate a JSON build manifest of all of your build artifacts, their size, hash, timestamps, etc.  calculate a source hash from the current state of your source files.
-- [list-all-scripts](https://github.com/skypager/skypager/blob/master/src/devtools/cli/scripts/list-all-scripts.js) provides information about the available scripts that the skypager cli finds in the current project
-- [run-all](https://github.com/skypager/skypager/blob/master/src/devtools/cli/scripts/run-all.js) run multiple tasks, including inside of a monorepo, in parallel or sequentially, with various options for managing their output
-- [serve](https://github.com/skypager/skypager/blob/master/src/devtools/cli/scripts/serve.js) start a server
-- [socket](https://github.com/skypager/skypager/blob/master/src/devtools/cli/scripts/socket.js) spawn a long running runtime process which communicates over a cross-platform domain socket 
-- [start-and-test](https://github.com/skypager/skypager/blob/master/src/devtools/cli/scripts/start-and-test.js) a utility for starting one process, and then running another as a test script. will stop the initial process when the test script finishes.
-
-If you've installed [@skypager/webpack](https://github.com/skypager/skypager/tree/master/src/devtools/webpack) you'll get
-
-- [build](https://github.com/skypager/skypager/blob/master/src/devtools/webpack/scripts/build.js) generate a webpack build for the current project.
-- [start](https://github.com/skypager/skypager/blob/master/src/devtools/webpack/scripts/start.js) starts a local HMR webpack server for the current project
-- [watch](https://github.com/skypager/skypager/blob/master/src/devtools/webpack/scripts/watch.js) run the webpack build compiler in watch mode
-
-If you've installed [@skypager/helpers-document](https://github.com/skypager/skypager/tree/master/src/helpers/document) you'll get
-
-- [generate-api-docs](https://github.com/skypager/skypager/tree/master/src/helpers/document/scripts/generate-api-docs.js) generate markdown from your JSDOC comment blocks 
-- [test-code-blocks](https://github.com/skypager/skypager/tree/master/src/helpers/document/scripts/test-code-blocks.js) parses and evaluates your javascript codeblocks in your markdown.  can be used to test your markdown documentation to ensure it is valid.
-- [inspect-docs](https://github.com/skypager/skypager/tree/master/src/helpers/document/scripts/inspect-docs.js) provides information about the markdown documents found in the project
-
-Running any of the above commands with the `--help` flag or with the word help, will get you detailed command usage information
-
-example:
-
-```shell
-$ skypager socket help
-$ skypager socket --help
-```
+See [The CLI Docs for more information)[docs/how-the-skypager-cli-works.md]
 
 ## Usage
 
@@ -245,7 +210,7 @@ export function attach(runtime) {
 
 this style allows for extensions to take effect right away.
 
-- **export a function** to run asynchronously
+- **export a function** to run asynchronously, when ever the runtime is `started` by the program.
 
 ```javascript
 export default function initializer(next) {
@@ -264,20 +229,10 @@ import asyncInitializer from './async-initializer'
 import * as syncAttach from './sync-attach'
 
 runtime
+  // runs right away
   .use(syncAttach)
+  // runs whenever runtime.start() is called
   .use((next) => asyncInitializer(next))
-```
-
-The code that was part of the `attach` function above ran immediately.
-
-the code that war part of `asyncInitializer` above won't run until later on in my script, when I call
-
-```javascript
-async function main() {
-  await runtime.start()
-}
-
-main()
 ```
 
 This extension API gives you full control, in your application, or in reusable components, for when code and dependencies can be loaded and how they are to be configured.  
@@ -400,50 +355,13 @@ The Runtime has a `state` observable, and a React like `setState` API
 
 Helper subclasses can provide their own observable state as well, and really any mobx primitive
 
-## Motivation
+## Helper Classes
 
-In 2019, JavaScript has become a universal language that empowers people to deploy applications on every platform, device, or form factor you can imagine.  There is an open source package for almost any thing you could need help building.  We can write code once in the most modern form of the language, and transpile code to support the oldest browsers out there.  This is a somewhat recent development in JavaScript, but it eliminates any tradeoffs we once had to make when choosing how we write JavaScript, given that it might be run on older browsers which don't support our features. 
+[Helper Classes](docs/about-helpers.md) are used to define types of modules, or modules which should export predictably named values that adhere to some schema that the helper class expects.  
 
-All of these capabilities come with a cost in complexity, and can become barriers that prevent people from being able to contribute to a project.  Many tools have emerged to address this problem in the time I have spent developing Skypager: tools which aim to provide developers with a single dependency solution offering zero config developer experiences.  Skypager also provides a similar tool, however I think that zero config single dependency tools address this problem from a very limited perspective since once build tooling is standardized, there is still an entire universe of other things which multiple projects have in common, and not only is it tedious to keep repeating them, it makes software development much more expensive than it needs to be, and forces us to spend more time on things which our users don't really care about. With JavaScript we have very little in the way of standardizing and re-using these patterns.  At best they live in a coding standards document and are taught to every developer who joins the project.
+For example the `Server` helper is something your program can call `start` and `stop` on.  The underlying provider module is in control of whatever that means.
 
-Skypager is my attempt to codify and modularize all of the things I've seen my applications have in common in the 20 years I have been developing JavaScript applications.
-
-## Runtime Concept
-
-Regardless of which framework you are using, if you're using a single page app, or rendering pages on the server, you're probably using some routing DSL (like Express, Hapi, or React-Router, or many others) to declare which URLs map to which pages.  Even if you're building a completely static website, your folder organization is itself a routing DSL.
-
-If you have multiple apps which use the same libraries, chances are most of the project's source trees are very similar to each other.  The code which is different in each app, odds are, can be understood quickest by looking at the routes and seeing which modules are used to render them in response to a user's request.  (If you've used Webpack or any other module bundler, these are your "entry" points.)
-
-Each of the pages in your app, should generally not know or care about how they were rendered.  This is especially true when you want to render a page first on the server, and then let client side JS handle the rest, without changing the code.  
-
-The `runtime` idea exists to provide the code in this top level UX layer with a single object to talk to which behaves the same way regardless of which environment you're running.  It takes care of abstracting the many differences away, so your code can focus on what makes it unique for your user.
-
-Skypager provides a few base runtimes:
-
-- [@skypager/runtime](src/runtime) - universal platform agnostic base runtime, which provides observable state, and other utilities which are useful in any context
-- [@skypager/node](src/runtimes/node) - the universal runtime extended with node specific features and helpers, used in server side scripts / long running processes (e.g. web or api servers)
-- [@skypager/web](src/runtimes/web) - the browser runtime extended with browser specific features and helpers, used in your browser builds
-
-And the following runtimes are being ported over from older versions of skypager
-
-- [@skypager/electron](ROADMAP.md) - either the node or web runtime, extended with electron specific libraries and utilities depending if you're in the renderer or main electron process
-- [@skypager/native](ROADMAP.md) - the universal runtime extended with react-native specific features 
-
-The value of this approach means when you're developing React Components, you can have them talk to the runtime instead of the platform.  When you want to re-use this component in another platform or process, it should be no big deal to do so.
-
-Similarly, when you want to reuse these components across different apps which also use the `runtime`, you don't need to make so many changes as your apps will have a uniform pattern for how they get their state.
-
-## Docker for the Frontend
-
-I think of Skypager as being the equivalent of Docker for JavaScript applications running in the browser, on the server, on phones, desktops, in space.  It provides you with a system for working with JavaScript modules in cacheable layers, just like Docker.  This makes it possible to separate your work into layers, where the things which change the least, but are most foundational, are at the bottom.  The things which change the most, and are at the top.
-
-![Layers](docs/layers.png)
-
-Using this approach makes releasing cross platform JavaScript much easier, because your top level application layer is abstracted away from the underlying platform layer.  These underlying platform layers are aware of this, and perform dependency injection
-
-### Layers are just collections of modules 
-
-A Layer is just a group of dependencies that work together.  Skypager provides a [Helper Base Class](docs/about-helpers.md) for standardizing different types of modules based on when and where in the application process they are used:
+The `Feature` helper is something your program can call `enable()` on, and then use to do whatever it is the underlying provider module allows.
 
 - [The Rest Client Helper](src/helpers/client) - a wrapper around the axios REST client.  As a developer you can write a friendly, cross-platform interface for making calls with axios.
 - [The Server Helper](src/helpers/server) - a wrapper around any server that can be started and stopped.  By default provides an express server with history api fallback and static file serving enabled.
@@ -452,8 +370,6 @@ A Layer is just a group of dependencies that work together.  Skypager provides a
 - [The Google Documents Helper](src/helpers/google-doc) - a module that loads data as JSON from a google document.  It loads all of your content, and document stylesheets, in an traversable AST form.
 - [The Sketch Document Helper](src/helpers/sketch) - a module that lets you load a designers sketch files as javascript modules.  This can be used to power various code generation apps, as well as anything else you can think of.
 - [The Document Helper](src/helpers/document) - provides helpers for loading markdown and javascript source modules as queryable entities, useful for automated codemods, code generation, documentation websites, and building databases from markdown or javascript module collections
-
-The Runtime is responsible for activating each of these layers for you, relying on [The Inversion of Control Technique](docs/inversion-of-control-framework.md) for your modules.  (aka Don't call me, I'll call you.)
 
 ## Example Projects
 
