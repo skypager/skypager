@@ -35,11 +35,13 @@ Modules like [@skypager/cli](src/devtools/cli) provide you with commands that ca
 When your code is running, Skypager provides a global runtime singleton (like `document` or `window` in the browser) that has different APIs which can be used to build all of 
 the components that are needed to power a modern JavaScript application, whose state and logic might be spread across the browser and node APIs.  
 
-In node requiring `skypager` will always return the same object, with the same state.  Similarly, in the browser, the skypager global is a singleton.
+In node requiring `skypager` will always return the same object, with the same state.  It will be rooted in the current project, the nearest package.json in your current working directory.  It will also be tied to the current git repository.
 
-These instances of the runtime are designed to work together.  
+Similarly, in the browser, the skypager global is a singleton that is tied to the current URL (the hostname and pathname components of the URL at least.)  
 
-The build environment and run environment can be connected in several different ways, all of which make all different phases of the application development cycle more productive.
+These instances of the runtime are designed to work together.  (Consider that there's often a one to one relationship between some package.json in your portfolio, and some URL or domain that you own.)  
+
+The build environment and run environment can be connected in many different ways, all of which make all different phases of the application development cycle more productive.
 
 ## Installation
 
