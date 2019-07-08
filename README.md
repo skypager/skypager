@@ -87,50 +87,26 @@ $ yarn add @skypager/google @skypager/helpers-sheet @skypager/helpers-google-doc
 
 Installing [@skypager/cli](src/devtools/cli) will provide an executable `skypager`.
 
-It is designed to run `scripts/*.js` in the context of the current project (which is the nearest package.json it can find.)
+Typing `skypager help` will show you all of the commands available, these commands are simple node.js scripts that live in a `scripts/` folder in various packages.
 
-- run scripts found in your current project's `scripts` folder first 
-- if your project is a monorepo, it will search your own @scope for `scripts/`
-- run any built in scripts from any of the `@skypager/*` modules you have installed that "provide" those scripts.  
+It searches:
 
-In addition to this, it provides you with a few other convenience flags that make it easier to write and run es6 code that usually needs to be transpiled before running natively.
+- scripts found in your current project's `scripts` folder
+- if your project is a monorepo, it will search your node_modules paths for projects in your @scope, to see if they "provide" any `scripts/`
+- it will search your node_modules paths for any `@skypager/*` modules that ["provide" those scripts](src/helpers/server/package.json).  
 
-So If you pass either the `--esm` or `--babel` flags, it will enable ES module support in any of the modules your script requires. Scripts run with `skypager --babel` can import es6 modules, including JSX natively.
+You might want to write your project scripts with es6 style imports, or with language features that require transpilation before running natively.
 
-```shell
-$ skypager my-script --babel 
-```
+So the `skypager` executable will look for the following flags, or environment variables, to enable transpilation of your es6 code so it runs in node.
 
-So if you had `scripts/my-script.js`
+When you run `skypager`
 
-```javascript
-import runtime, { cli } from 'skypager'
+- with the `--babel` CLI flag, we enable `@babel/register`
+- with the `SKYPAGER_BABEL=true` environment variable set, we do the same
+- with the `--esm` CLI flag we enable the [esm module](https://github.com/standard-things/esm) 
+- with the `SKYPAGER_ESM=true` environment variable set, we do the same. 
 
-const { print, colors, randomBanner, clear, ask } = cli
-
-async function main() {
-  clear()
-  randomBanner('Skypager')
-
-  const { name } = await ask({
-    name: {
-      description: 'What is your name?'
-    }
-  })
-
-  print(`Hello ${colors.green(name)}`)
-}
-
-main()
-```
-
-skypager would process this with babel first.
-
-Setting `process.env.SKYPAGER_BABEL=true` is the same as always passing `--babel`.  Likewise setting `process.env.SKYPAGER_ESM=true` is the same as always passing `--esm` to the `skypager` CLI.
-
-which ever you want to use is up to you.  If you don't know the difference, `--babel` is probably a safe bet.
-
-If you pass the `--debug` flag to any `skypager` command, it will enable the node debugger.
+Which you use is up to you. `esm` is great if you don't want non-standard language features but still want es6 import / export 
 
 See [The CLI Docs for more information][docs/how-the-skypager-cli-works.md]
 
@@ -162,7 +138,11 @@ runtime.start().then(() => {
 
 The `runtime`, while useful by itelf, is designed to be extended.  
 
-When you solve a problem that all of the applications in your portfolio can benefit from, you can solve it in a separate module and create a runtime which automatically has access to this module and can lazy load it when needed.
+We can extend the runtime with different [Helper Classes](docs/about-helpers.md).  Helpers are classes which represent any kind of source code document that you can eventually require as a JavaScript module (which if you use webpack, is literally everything.) 
+
+Examples of helpers that are currently provided by skypager include [servers](src/helpers/server), [clients](src/clients), [features](src/features), [spreadsheets](src/helpers/sheet), [markdown documents](src/helpers/document). 
+
+In the example below, we start with the core JS runtime and add some features.
 
 ```javascript
 import runtime from '@skypager/runtime'
@@ -180,21 +160,31 @@ const myRuntime = runtime
 export default myRuntime 
 ```
 
-With this module, you have encoded a standard base layer that all of your apps can share.  These apps should never need to solve authentication, notifications, logging, or analytics on their own.  They get the benefit of these features just by using your runtime.
+With this module, you have encoded a standard base layer that all of your apps can share.  
 
-In any application
+These apps should never need to solve authentication, notifications, logging, or analytics on their own.  They get the benefit of these features just by using your runtime.
+
+Just tell the runtime what it needs to configure your authentication feature for the current environment 
+
+```js
+runtime.feature('authentication').enable({
+  provider: 'firebase',
+  options: { ... }
+})
+```
+
+and then any application can do what it usually does
 
 ```javascript
-import React from 'react'
-import { render } from 'react-dom'
-import runtime from 'myRuntime'
+import runtime from 'my-example-runtime'
+const auth = runtime.feature('authentication')
 
-const App = ({ runtime }) =>
-  <pre>{JSON.stringify(runtime.currentState, null, 2 ) }</pre>
+const loginButton = document.getElementById('login-button')
 
-runtime.start()
-.then(() => render(<App runtime={runtime} />, document.getElementById('app')) )
+loginButton.addEventListener('click', () => auth.login({ username, password }))
 ```
+
+you can see how the application code can easily use aws or google or your own custom auth, and it never needs to change.
 
 ### Extensions API 
 
@@ -212,7 +202,7 @@ export function attach(runtime) {
 
 this style allows for extensions to take effect right away.
 
-- **export a function** to run asynchronously, when ever the runtime is `started` by the program.
+- **export a function** to run asynchronously, which you can delay until you're ready to call `runtime.start()`
 
 ```javascript
 export default function initializer(next) {
@@ -221,20 +211,29 @@ export default function initializer(next) {
 }
 ```
 
-this style allows for extensions to take effect whenever `runtime.start()` is called.
-
-Using an extension is possible with:
+For example
 
 ```javascript
-import runtime from '@skypager/runtime'
-import asyncInitializer from './async-initializer'
-import * as syncAttach from './sync-attach'
+import skypager from '@skypager/runtime'
 
-runtime
-  // runs right away
-  .use(syncAttach)
-  // runs whenever runtime.start() is called
-  .use((next) => asyncInitializer(next))
+skypager
+  .use({
+    // runtime is generic, could be any instance of the runtime if you have multiple.
+    // in most cases skypager.uuid === runtime.uuid
+    attach(runtime) {
+      runtime.log(`Extending runtime ${runtime.uuid} with a synchronous extension`)
+    }
+  })
+  .use(function (next) {
+    // extensions should always operate on the current runtime, since you can create multiple instances in certain scenarios
+    const runtime = this
+    runtime.log(`Extending the runtime ${runtime.uuid} with an asynchronous extension`)
+    
+    Promise.resolve().then(() => {
+      runtime.log(`Connected, finishing.`)
+      next()
+    })
+  })
 ```
 
 This extension API gives you full control, in your application, or in reusable components, for when code and dependencies can be loaded and how they are to be configured.  
@@ -289,38 +288,43 @@ export default runtime.use(loadAtRuntime)
 
 In the above example, I've packaged up a runtime that comes complete with a firebase integration, a github and npm integration.
 
-All of the code needed to power these integrations is bundled with the runtime, and is lazy loaded when needed from unpkg.  
+All of the code needed to power these integrations is lazy loaded when needed from unpkg.  You could substitute your own CDN, or use webpack's 
+dynamic imports to lazy load, whatever works for your situation. 
 
 This reusable module expects that it will be dynamically configured at runtime via `settings` that is pulled from the runtime's state.
 
-The runtime's state is data that can easily be controlled to be project specific, deployment specific, or dynamically controlled based on node's `process.env` or `process.argv` variables. (If you're deploying the same project to multiple URLs for example.)
+This is generally a good practice, if you're familiar with [12 Factor Apps](https://12factor.net). You generally don't bundle these "secrets" with your source code, or you have different settings in development, staging, and production. 
 
-The extension itself just passes this data as arguments when enabling each feature.
+The runtime's extensions API makes it easy to combine the cached source code you load from disk, with the runtime specific configuration for that app.
+
+The runtime's state is data that can easily be controlled to be project specific, deployment specific, or dynamically controlled based.
+
+It can be based on any combination of
+
+- node's `process.env` or `process.argv` variables. 
+- the current directory
+- the current package.json or git repo
+- the current URL or hostname 
+
+The extension API and runtime make all of this environment and process specific data available as the runtime loads and enables the features it needs to run your program.
 
 ## Beyond Boilerplates 
 
 The idea of using boilerplate projects, or even most recently, Github template repositories, is appealing because github repositories are free and unlimited and disk space is cheap.  Duplicating npm dependencies, and boilerplate code for wiring up React with
 React Router, and with express and server side redering, is a manageable side effect as you begin to accumulate projects and repositories.
 
-Instead, when developing using a monorepo, or portfolio, the boilerplate is managed by conventions for project types and module exports (what we define in the `main` or `browser` `module` `style` or `unpkg` properties in our package.json )
+With Skypager, you are encouraged to developing using a monorepo, or portfolio. The boilerplate in your application can be managed by conventions for project types and module exports that are specified at a portfolio level and shared across all of the projects.
 
-So it is possible to abstract things which provide build scripts in and say
+So it is possible to abstract things which provide build scripts and say
 
-modules which provide build scripts are named `@myscope/build-scripts-*`
+- all of my modules which provide build scripts are named `@myscope/build-scripts-*`
+- all of my modules which provide servers are named `@myscope/servers-*` 
 
-modules which provide features are named `@myscope/features-*` 
-
-modules which provide servers are named `@myscope/servers-*` 
-
-In a monorepo, there can be multiple providers of `build-scripts`, `servers` and `features`.  
-
-Which one a particular project relies on, is better left to be determined by incorporating that specific project's `package.json` and combining it with `process.argv` or `process.env`. 
+In a monorepo, there can be multiple providers of `build-scripts` and `servers`,  but your project code never needs to know or say more than `skypager build` or `skypager serve`. 
 
 Skypager makes this just in time module composition a first class citizen in your projects.
 
-That being said, boilerplates are still good and have their place. 
-
-Here are a couple to use:
+That being said, boilerplates are still good and have their place.
 
 - [Full Stack Skypager Application](https://github.com/soederpop/skypager-fullstack-boilerplate)
 - [Full Stack Skypager Application with Google Helpers](https://github.com/soederpop/skypager-google-project-boilerplate)
