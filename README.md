@@ -12,15 +12,19 @@ which allow your code to take on a conversational style that happens to fit very
 
 As an author of code, you only want to have to say the minimum, and still achieve the desired effect.  This is much harder to do than it sounds, and so this library is an attempt to make that easier.
 
+> If you are a familiar with [JAMstack](https://jamstack.org/) style applications, skypager can be considered a batteries included framework for building applications in this style.  But you can also develop React Native and Desktop applications with it, so its not a 100% overlap.
+
 ## Skypager's Structure
 
-This project is a monorepo which publishes many different packages, some are useful only when authoring JavaScript programs, some which only run in node.  
+This project is a monorepo which publishes many different packages, some are useful only when authoring JavaScript programs, some only run in node, some only run in the browser.  
 
 The [Core Framework](src/runtime) has a [Node Variant](src/runtimes/node) as well as a [Web Variant](src/runtimes/web), which load [Specific Features](src/features) that might only be relevant to that particular platform (e.g. [node](src/runtimes/node/src/features) or [web only](src/runtimes/web/src/features)) 
 
 It also has [specific helper classes](src/helpers) that may work differently depending on the platform, but are designed to let your code say the same thing anyway. 
 
-The goal is to enable you, as a an author of many JavaScript projects, to just simply talk to your code and tell it what you want, and let the runtime figure out what to do with that information.
+The goal of the core framework is to enable you, as a an author of many JavaScript projects, to just simply talk to your code and tell it what you want, and let the runtime figure out what to do with that information.
+
+The goal of the [extended, optional elements of the framework](#optional-modules), is to make it as easy as possible to work with many different types of modules in a consistent way on top of the core runtime.
 
 ## Build-time and Runtime modules 
 
@@ -64,7 +68,7 @@ $ yarn add @skypager/cli @skypager/node --dev
 $ yarn add @skypager/web --save 
 ```
 
-**Optional**
+#### Optional Modules
 
 If you wish to take advantage of webpack `build` `start` and `watch` scripts, modeled after [Create React App](https://github.com/facebook/create-react-app), you can install `@skypager/webpack`
 
@@ -110,7 +114,7 @@ When you run `skypager`
 
 Which you use is up to you. `esm` is great if you don't want non-standard language features but still want es6 import / export 
 
-See [The CLI Docs for more information][docs/how-the-skypager-cli-works.md]
+See [The CLI Docs for more information](docs/how-the-skypager-cli-works.md)
 
 ## Usage
 
