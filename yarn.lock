@@ -1114,7 +1114,7 @@
     "@babel/helper-plugin-utils" "^7.0.0"
     "@babel/plugin-transform-typescript" "^7.1.0"
 
-"@babel/register@^7.2.0":
+"@babel/register@^7.2.0", "@babel/register@^7.4.4":
   version "7.4.4"
   resolved "https://registry.yarnpkg.com/@babel/register/-/register-7.4.4.tgz#370a68ba36f08f015a8b35d4864176c6b65d7a23"
   integrity sha512-sn51H88GRa00+ZoMqCVgOphmswG4b7mhf9VOB0LUBAieykq2GnRFerlN+JQkO/ntT7wz4jaHNSRPg9IdMPEUkA==
@@ -2156,19 +2156,6 @@
   integrity sha512-sTSws96Kq2GIZh01ElxNFs1U+7VTanoppYvgQilb4+v4kxB5inpUjgkmQFjJGZqx+Xc3X6rjQ4tUx8vW+Z808A==
   dependencies:
     axios "github:axios/axios"
-
-"@skypager/helpers-server@^0.2.7":
-  version "0.2.8"
-  resolved "https://registry.yarnpkg.com/@skypager/helpers-server/-/helpers-server-0.2.8.tgz#d360a647ffe2a64aa34ac46bdfe71106a4978ed6"
-  integrity sha512-HEgw0e3K6vASx1px0H6v19csmm6jXFDvis9Wxh/rhGz8r8xeYdXy49MW5VGkQl+4jqLssIbEVq6H4lY/MwqMDg==
-  dependencies:
-    body-parser "^1.18.3"
-    cors "^2.8.4"
-    express "^4.15.2"
-    express-history-api-fallback "^2.2.1"
-    express-prettify "^0.1.0"
-    express-winston "^3.0.1"
-    winston "^3.1.0"
 
 "@svgr/babel-plugin-add-jsx-attribute@^4.2.0":
   version "4.2.0"
