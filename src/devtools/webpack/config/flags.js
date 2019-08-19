@@ -1,4 +1,5 @@
 const fs = require('fs-extra')
+const castArray = require('lodash/castArray')
 
 module.exports = function getFlags(currentProject, isEnvProduction, options = {}) {
   const { paths } = currentProject
@@ -112,6 +113,8 @@ module.exports = function getFlags(currentProject, isEnvProduction, options = {}
     hmrEntryPath = hmrEntry
   }
 
+  const sourcePaths = castArray(argv.sourcePath).filter(b => b && b.length)
+
   return Object.assign(
     {},
     {
@@ -137,6 +140,7 @@ module.exports = function getFlags(currentProject, isEnvProduction, options = {}
       shouldCopyPublic,
       hmrEntry,
       hmrEntryPath,
+      sourcePaths,
     },
     options
   )

@@ -108,12 +108,14 @@ module.exports = function(webpackEnv, options = {}) {
 
     watchPaths = argv.watchPaths || [paths.appSrc],
 
-    sourcePaths = argv.sourcePaths || [paths.appSrc],
-
     mdxPaths = argv.mdxPaths || [paths.appSrc, paths.docsFolder].filter(Boolean),
 
     disableMinification = argv.disableMinification || argv.minify === false,
+
+    sourcePaths = [],
   } = require('./flags')(currentProject, webpackEnv, options)
+
+  sourcePaths.unshift(paths.appSrc)
 
   // We automatically include html-webpack-plugin for every index.html found in the root of the public folder
   const htmlPlugins = !useHtml
