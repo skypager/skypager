@@ -51,6 +51,20 @@ async function handler() {
   let server = runtime.argv.server
   let serverInstance
 
+  let port = parseInt(runtime.argv.port || process.env.PORT || process.env.SERVER_PORT || 3000, 10)
+  const hostname =
+    runtime.argv.host ||
+    runtime.argv.hostname ||
+    process.env.HOST ||
+    process.env.SERVER_HOST ||
+    '0.0.0.0'
+
+  const isPortOpen = await runtime.networking.isPortOpen(port)
+
+  if (!isPortOpen && !runtime.isProduction && !runtime.isTest) {
+    port = await runtime.networking.findOpenPort(port)
+  }
+
   if (request && request.length) {
     const requestPath = runtime.resolve(request)
     const fileExists = await runtime.fsx.existsAsync(requestPath)
@@ -58,19 +72,24 @@ async function handler() {
 
     if (isDirectory && !server) {
       // we're going to setup a static file server using the provided directory
-      serverInstance = createStaticFileServer({ buildFolder: requestPath })
+      serverInstance = createStaticFileServer({ port, hostname, buildFolder: requestPath })
     } else if (!isDirectory && !server && fileExists) {
       // they must have passed a reference to a server file
-      serverInstance = createServer(requestPath)
+      serverInstance = createServer(requestPath, { hostname, port })
     }
   } else if (!request && !server) {
     // we're going to setup a static file server using the default build directory
     serverInstance = createStaticFileServer({
       buildFolder: runtime.argv.buildFolder || runtime.resolve('build'),
+      hostname,
+      port,
     })
   } else if (server) {
     // they passed a reference to a file server
-    serverInstance = createServer(server)
+    serverInstance = createServer(server, {
+      hostname,
+      port,
+    })
   }
 
   await serverInstance.start()
@@ -82,23 +101,23 @@ async function handler() {
   }
 
   if (runtime.argv.interactive) {
-    runtime.repl('interactive').launch({ server: serverInstance })
+    runtime.repl('interactive').launch({ runtime, server: serverInstance, l: runtime.lodash })
   }
 }
 
-function createServer(helperPath) {
+function createServer(helperPath, options = {}) {
   runtime.servers.register('server', () => require(runtime.resolve(helperPath)))
-  return runtime.server('server')
+  return runtime.server('server', options)
 }
 
-function createStaticFileServer({ buildFolder = runtime.resolve('build') }) {
+function createStaticFileServer({ buildFolder = runtime.resolve('build'), ...options }) {
   runtime.servers.register('static-server', () => ({
     history: runtime.argv.history !== false && runtime.argv.single !== false,
     serveStatic: buildFolder,
     cors: runtime.argv.cors !== false,
   }))
 
-  return runtime.server('static-server')
+  return runtime.server('static-server', options)
 }
 
 main()
