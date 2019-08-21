@@ -3,6 +3,10 @@ module.exports = {
     process: 'mock',
     global: false,
   },
+  output: {
+    library: 'skypager',
+    libraryExport: 'default',
+  },
   resolve: {
     alias: {
       lodash: require.resolve('lodash/lodash.min.js'),

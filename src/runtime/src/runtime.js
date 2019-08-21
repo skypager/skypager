@@ -2187,7 +2187,15 @@ export class Runtime {
    * @returns {Runtime} the runtime singleton
    */
   static createSingleton(options, context, middlewareFn) {
-    return (singleton = singleton || new this(options, context, middlewareFn))
+    if (typeof global === 'undefined' && typeof window !== 'undefined') {
+      global = window
+    }
+
+    if (global.skypager) {
+      return global.skypager
+    }
+
+    return (global.skypager = singleton = singleton || new this(options, context, middlewareFn))
   }
 
   /**

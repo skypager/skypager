@@ -1,14 +1,3 @@
-if (typeof window !== 'undefined') {
-  window.global = window
+import runtime from './index'
 
-  if (typeof process === 'undefined') {
-    window.process = { env: {} }
-  }
-}
-
-const { createSingleton } = require('./runtime')
-
-/**
- * The runtime singleton
- */
-module.exports = createSingleton()
+export default runtime
