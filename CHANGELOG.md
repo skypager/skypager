@@ -2,6 +2,13 @@
 
 ## Releases
 
+### 1.3.1
+
+- [@skypager/features-file-db] added a feature for using nedb
+- [@skypager/web] assetLoaders feature will use a hack when dynamically loading babel scripts with babel-standalone
+- [@skypager/web, @skypager-runtime] fixed module exports to use es6, web builds use webpack libraryExport config
+- [@skypager/react] added useRuntimeState and useClientRequest hooks
+
 ### 1.2.2
 
 - [@skypager/google] ships a `skypager google` command that provides a tree of subcommands for working with google drive and calendar apis
