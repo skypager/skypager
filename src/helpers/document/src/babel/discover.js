@@ -3,10 +3,11 @@ export async function discover(options = {}) {
     await this.runtime.fileManager.startAsync()
   }
 
+  const { test = /\.js$/i } = options
   await this.runtime.fileManager.readAllContent({ include: [/\.js$/], ...options })
 
   this.add(
-    this.runtime.requireContext(/\.js$/i, {
+    this.runtime.requireContext(test, {
       keyBy: 'relative',
       requireFn: path => {
         const file = this.runtime.file(path)
