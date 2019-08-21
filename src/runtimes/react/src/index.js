@@ -1,10 +1,19 @@
-import runtime from '@skypager/node'
+import runtime from '@skypager/runtime'
 import ServerRenderer from './features/server.renderer'
 import * as BrowserVm from '@skypager/features-browser-vm'
+import * as hooks from './hooks'
 
 runtime.features.register('react-renderer', () => ServerRenderer)
 
-runtime.feature('react-renderer').enable()
-runtime.use(BrowserVm)
+const renderer = runtime.feature('react-renderer')
 
-export default runtime
+export { renderer, hooks } 
+
+export function attach(runtime, options = {}) {
+  runtime.use(BrowserVm, options)
+  renderer.enable(options)
+}
+
+runtime.hooks = hooks
+
+export default runtime.use({ attach })

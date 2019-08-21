@@ -17,11 +17,12 @@
     "build:es": "cross-env BUILD_ENV=build-es NODE_ENV=production babel --comments --source-maps -d lib/es src",
     "build:lib": "cross-env BUILD_ENV=build NODE_ENV=production babel --comments --source-maps -d lib src",
     "watch:lib": "cross-env NODE_ENV=production babel --comments --source-maps -d lib src --watch",
-    "build:web": "cross-env NODE_ENV=production webpack --config webpack.config.js",
+    "build:web": "cross-env INJECT_JS_BUNDLE=false NODE_ENV=production webpack --config webpack.config.js",
     "watch:web": "cross-env NODE_ENV=production webpack --config webpack.config.js --watch",
     "prepare": "yarn build",
     "test": "skypager test --mocha --timeout 10000 test/**/*.spec.js",
-    "test:watch": "skypager test --webpack-config webpack.config.test.js --watch"
+    "test:watch": "skypager test --webpack-config webpack.config.test.js --watch",
+    "demo": "skypager serve --open"
   },
   "dependencies": {
     "@babel/runtime": "^7.3.1",

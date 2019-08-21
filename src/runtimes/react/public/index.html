@@ -28,13 +28,20 @@
     You need to enable JavaScript to run this app.
   </noscript>
   <div id="root"></div>
+  <script type="text/javascript" src="/react.development.js"></script>
+  <script type="text/javascript" src="/react-dom.development.js"></script>
+  <script type="text/javascript" src="/prop-types.min.js"></script>
   <script type="text/javascript" src="/skypager-runtimes-react.js"></script>
-  <script type="text/javascript" src="/static/js/bundle.js"></script>
   <script>
-    skypager.feature('babel').enable({ presets: ['es2015','react','stage-2'] })
-      .then(() => 
-        skypager.assetLoader.script('/App.js', { babel: true })
-      )
+    const babel = skypager.feature('babel')
+    babel.enable({ presets: ['es2015','react','stage-2'] }).then((babel) => babel.whenReady())
+      .then(() =>  {
+        skypager.feature('react-renderer').enable()
+        Promise.resolve(skypager.assetLoader.script('/App.js', { babel: true }))
+      })
+    skypager.once('appLoaded', (App) => {
+      skypager.feature('react-renderer').render(App)
+    })
   </script>
 </body>
 

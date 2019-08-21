@@ -17,13 +17,13 @@ export default class DomRenderer extends Feature {
     const version = env === 'production' ? 'production.min' : 'development'
 
     const response = await assetLoader.unpkg({
-      ReactDOM: `react-dom@16.7.0/umd/react-dom.${version}.js`,
-      React: `react@16.7.0/umd/react.${version}.js`,
+      ...!window.ReactDOM && { ReactDOM: `react-dom/umd/react-dom.${version}.js` },
+      ...!window.React && { React: `react/umd/react.${version}.js` },
     })
 
     Object.assign(this, {
-      React: response.React,
-      ReactDOM: response.ReactDOM,
+      React: response.React || window.React,
+      ReactDOM: response.ReactDOM || window.ReactDOM,
     })
 
     return response
