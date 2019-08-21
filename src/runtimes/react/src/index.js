@@ -7,7 +7,7 @@ runtime.features.register('react-renderer', () => ServerRenderer)
 
 const renderer = runtime.feature('react-renderer')
 
-export { renderer, hooks } 
+export { renderer, hooks }
 
 export function attach(runtime, options = {}) {
   runtime.use(BrowserVm, options)

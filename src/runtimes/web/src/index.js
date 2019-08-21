@@ -1,4 +1,4 @@
-import runtime, { Runtime } from '@skypager/runtime'
+import runtime from '@skypager/runtime'
 import * as ClientHelper from '@skypager/helpers-client'
 import AssetLoaders from './features/asset-loaders'
 import Babel from './features/babel'

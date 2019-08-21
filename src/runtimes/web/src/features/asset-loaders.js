@@ -56,11 +56,21 @@ export default class AssetLoader extends Feature {
    *
    * @param {String} url - the url of the stylesheet
    * @param {Object} [options={}] - options for element creation
-   * @returns {PromiseLike<HtmlElement>}
+   * @param {Boolean} [options.babel=false] - add type=text/babel attribute, also fire a hack event to support lazy loading scripts
+   * @param {Number} [options.delay=400] - how long to wait until firing the fake DOMContentLoaded event to trick babel-standalone
+   * @returns {Promise<HTMLElement>}
    * @memberof AssetLoader
    */
   script(url, options = {}) {
-    return this.inject.js(url, options)
+    const result = this.inject.js(url, options)
+
+    if (options.babel) {
+      setTimeout(() => {
+        window.dispatchEvent(new Event('DOMContentLoaded'))
+      }, options.delay || 400)
+    }
+
+    return result
   }
 
   /**

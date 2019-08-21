@@ -11,7 +11,7 @@ as well as helpers for loading javascript packages into the global scope from un
     * [.image(url, [options])](#AssetLoader.image) ⇒ <code>PromiseLike.&lt;HtmlElement&gt;</code>
     * [.css(url, [options])](#AssetLoader.css) ⇒ <code>PromiseLike.&lt;HtmlElement&gt;</code>
     * [.stylesheet(url, [options])](#AssetLoader.stylesheet) ⇒ <code>PromiseLike.&lt;HtmlElement&gt;</code>
-    * [.script(url, [options])](#AssetLoader.script) ⇒ <code>PromiseLike.&lt;HtmlElement&gt;</code>
+    * [.script(url, [options])](#AssetLoader.script) ⇒ <code>Promise.&lt;HTMLElement&gt;</code>
     * [.unpkg(dependencies, options)](#AssetLoader.unpkg) ⇒ <code>Object.&lt;String, Object&gt;</code>
 
 <a name="AssetLoader.image"></a>
@@ -52,7 +52,7 @@ Injects a stylesheet link tag into the DOM
 
 <a name="AssetLoader.script"></a>
 
-### AssetLoader.script(url, [options]) ⇒ <code>PromiseLike.&lt;HtmlElement&gt;</code>
+### AssetLoader.script(url, [options]) ⇒ <code>Promise.&lt;HTMLElement&gt;</code>
 Injects a script tag into the DOM
 
 **Kind**: static method of [<code>AssetLoader</code>](#AssetLoader)  
@@ -61,6 +61,8 @@ Injects a script tag into the DOM
 | --- | --- | --- | --- |
 | url | <code>String</code> |  | the url of the stylesheet |
 | [options] | <code>Object</code> | <code>{}</code> | options for element creation |
+| [options.babel] | <code>Boolean</code> | <code>false</code> | add type=text/babel attribute, also fire a hack event to support lazy loading scripts |
+| [options.delay] | <code>Number</code> | <code>400</code> | how long to wait until firing the fake DOMContentLoaded event to trick babel-standalone |
 
 <a name="AssetLoader.unpkg"></a>
 

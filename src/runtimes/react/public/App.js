@@ -8,7 +8,7 @@ skypager.clients.register('test', () => ({
     return useClientRequest(this, method, ...args)
   },
   async loadManifest() {
-    await new Promise((resolve) => setTimeout(resolve, 3000))
+    await new Promise(resolve => setTimeout(resolve, 3000))
     return this.client.get('/build-manifest.json')
   },
 }))
@@ -17,7 +17,7 @@ const client = skypager.client('test')
 
 function App() {
   const { stage } = useRuntimeState(skypager, 'stage')
-  const { data, loading, error } = client.useRequest('loadManifest') 
+  const { data, loading, error } = client.useRequest('loadManifest')
 
   if (loading) {
     return `loading... ${stage}`

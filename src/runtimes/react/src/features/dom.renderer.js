@@ -17,8 +17,8 @@ export default class DomRenderer extends Feature {
     const version = env === 'production' ? 'production.min' : 'development'
 
     const response = await assetLoader.unpkg({
-      ...!window.ReactDOM && { ReactDOM: `react-dom/umd/react-dom.${version}.js` },
-      ...!window.React && { React: `react/umd/react.${version}.js` },
+      ...(!window.ReactDOM && { ReactDOM: `react-dom/umd/react-dom.${version}.js` }),
+      ...(!window.React && { React: `react/umd/react.${version}.js` }),
     })
 
     Object.assign(this, {

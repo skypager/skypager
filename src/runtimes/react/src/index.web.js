@@ -1,6 +1,6 @@
 import runtime from '@skypager/web'
 import * as DomRenderer from './features/dom.renderer'
-import * as hooks from './hooks' 
+import * as hooks from './hooks'
 
 runtime.features.register('react-renderer', () => DomRenderer)
 

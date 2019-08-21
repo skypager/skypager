@@ -5,7 +5,11 @@ import { useEffect, useContext, createContext, useState } from 'react'
 export const RuntimeContext = createContext(runtime)
 
 export function useClientRequest(client, clientMethod, ...args) {
-  const [requestState, updateRequestState] = useState({ loading: true, data: undefined, error: undefined })
+  const [requestState, updateRequestState] = useState({
+    loading: true,
+    data: undefined,
+    error: undefined,
+  })
 
   const makeRequest = async () => {
     try {
@@ -32,9 +36,9 @@ export function useRuntimeState(runtimeInstance = runtime, ...keys) {
   useEffect(() => {
     const disposer = runtime.state.observe(({ name, object }) => {
       if (keys.length) {
-        updateState(object.toJSON())  
+        updateState(object.toJSON())
       } else if (keys.indexOf(name) > -1) {
-        updateState(pick(object.toJSON(), keys))        
+        updateState(pick(object.toJSON(), keys))
       }
     })
 
