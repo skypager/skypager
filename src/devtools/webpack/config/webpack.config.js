@@ -956,7 +956,9 @@ function createHtmlPlugin(
     Object.assign(
       {},
       {
-        inject: true,
+        inject:
+          currentProject.config.injectBundle !== false &&
+          String(process.env.INJECT_JS_BUNDLE) !== 'false',
         filename,
         template,
         chunks: [
