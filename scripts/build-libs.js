@@ -24,6 +24,9 @@ async function main() {
   }).catch(error => {
     process.exit(1)
   })
+  await spawn('yarn', ['workspace', '@skypager/runtime', 'build:es'], {
+    stdio: 'inherit'
+  })
 }
 
 main().then(() => process.exit(0))
