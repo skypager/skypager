@@ -470,7 +470,8 @@ export class Sketch extends Helper {
         api: {
           async discover() {
             await runtime.fileManager.startAsync()
-            const sketchFiles = runtime.fileManager.chains.patterns('**/*.sketch')
+            const sketchFiles = runtime.fileManager.chains
+              .patterns('**/*.sketch')
               .map(({ relative, path }) => ({ relative, path }))
               .value()
 
@@ -479,8 +480,8 @@ export class Sketch extends Helper {
               runtime.sketches.register(name, () => ({ path }))
               return name
             })
-          } 
-        }
+          },
+        },
       }),
       lookupProp: 'sketch',
       registryProp: 'sketches',
