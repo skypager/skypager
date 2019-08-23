@@ -37,7 +37,7 @@ export class GoogleIntegration extends Feature {
     }
 
     if (typeof options.query === 'string') {
-      query = `and (${options.query})`
+      query = `${query} and ${options.query}`
     }
 
     const teamDriveOptions =
@@ -46,13 +46,15 @@ export class GoogleIntegration extends Feature {
         ? { supportsTeamDrives: true, includeTeamDriveItems: true }
         : {})
 
-    const files = await drive.files
-      .list({
-        maxResults,
-        q: query,
-        ...teamDriveOptions,
-      })
-      .then(r => r.data)
+    const listParams = {
+      maxResults,
+      q: query,
+      ...teamDriveOptions,
+    }
+
+    this.runtime.debug(`Querying Google Drive Files`, listParams)
+
+    const files = await drive.files.list(listParams).then(r => r.data)
 
     const { pick } = this.lodash
 

@@ -20,6 +20,8 @@ export async function main(commands = [], options = {}) {
   print(`Listing sheets`)
   const items = await google.listSpreadsheets({
     ...(!options.server && { auth: google.oauthClient }),
+    ...(options.mine && { sharedWithMe: false }),
+    ...(options.title && { query: `title contains '${options.title}'` }),
     ...options,
   })
 

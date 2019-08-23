@@ -25,6 +25,7 @@ export async function main(commands = [], options = {}) {
 
   const spreadsheets = await runtime.google.listSpreadsheets({
     ...(!options.server && { auth: runtime.google.oauthClient }),
+    ...(options.mine && { sharedWithMe: false }),
   })
 
   const found = spreadsheets.find(sheet => {
