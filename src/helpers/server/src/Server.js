@@ -1,6 +1,10 @@
 import { Helper } from '@skypager/runtime'
 import express from 'express'
+import helmetSecurity from 'helmet'
 
+const DEFAULT_HELMET_SETTINGS = {
+  referrerPolicy: true  
+}
 /**
  * The Server Helper provides a generic interface on top of any server process that can be
  * created, configured, started, and stopped.  By default we provide an instance of an express app
@@ -224,8 +228,8 @@ export class Server extends Helper {
 
     let {
       cors = this.tryResult('cors'),
-      pretty = this.tryResult('pretty') ||
-        this.tryResult('pretty', () => process.env.NODE_ENV !== 'production'),
+      helmet = this.tryResult('helmet', DEFAULT_HELMET_SETTINGS),
+      pretty = this.tryResult('pretty', () => process.env.NODE_ENV !== 'production'),
     } = options
 
     let app
@@ -240,10 +244,16 @@ export class Server extends Helper {
       serverWasCreated.call(this, app, options, context)
     }
 
+    if (helmet !== false) {
+      this.runtime.debug('Setting up helmet security middleware')
+      app.use(helmetSecurity(typeof helmet === 'object' ? helmet : DEFAULT_HELMET_SETTINGS))
+    }
+
     if (cors) {
       this.runtime.debug('Enabling CORS', { cors })
       setupCors.call(this, app, cors)
     }
+
 
     if (pretty) {
       this.runtime.debug('Enabling pretty printing of JSON responses')
