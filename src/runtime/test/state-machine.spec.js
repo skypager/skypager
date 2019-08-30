@@ -23,11 +23,11 @@ describe('@skypager/runtime state machine', function() {
       runtime.setState({ patientlyWaiting: false })
     }, 30)
 
-    runtime.currentState.should.have.property("patientlyWaiting", true)
+    runtime.currentState.should.have.property('patientlyWaiting', true)
 
-    await runtime.nextStateChange("patientlyWaiting")
+    await runtime.nextStateChange('patientlyWaiting')
 
-    runtime.currentState.should.have.property("patientlyWaiting", false)
+    runtime.currentState.should.have.property('patientlyWaiting', false)
   })
 
   it('has a hash of the state values', function() {

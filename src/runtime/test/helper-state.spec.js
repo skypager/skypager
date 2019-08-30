@@ -7,25 +7,25 @@ describe('helper state', function() {
   runtime.features.register('stateful-test', () => ({
     isObservable: true,
     initialState: {
-      yoYo: 'what up'
-    }  
+      yoYo: 'what up',
+    },
   }))
 
   const helperInstance = runtime.feature('stateful-test')
 
   it('can await for an event to fire', async function() {
-    helperInstance.setState({ patience: 0})
-    
+    helperInstance.setState({ patience: 0 })
+
     setTimeout(() => {
-      helperInstance.setState({ patience: 1})
+      helperInstance.setState({ patience: 1 })
       helperInstance.emit('doneWaiting')
     }, 15)
-    
-    helperInstance.currentState.should.have.property('patience', 0)   
+
+    helperInstance.currentState.should.have.property('patience', 0)
 
     await helperInstance.nextEvent('doneWaiting')
 
-    helperInstance.currentState.should.have.property('patience', 1)   
+    helperInstance.currentState.should.have.property('patience', 1)
   })
 
   it('can await for the state to match', async function() {
@@ -34,7 +34,7 @@ describe('helper state', function() {
     setTimeout(() => {
       helperInstance.setState({ patientlyWaiting: false })
     }, 15)
-    
+
     await helperInstance.untilStateMatches({ patientlyWaiting: false })
 
     helperInstance.currentState.should.have.property('patientlyWaiting', false)
@@ -101,5 +101,4 @@ describe('helper state', function() {
     helperInstance.currentState.should.not.have.property('value1')
     helperInstance.currentState.should.have.property('value3', 'value3')
   })
-
 })
