@@ -112,9 +112,11 @@ export class Helper {
       runtime.beforeHelperCreate(this, options, context, this.constructor)
     }
 
-    if (options.initialize !== false) {
-      this.doInitialize()
-    }
+    /**
+      if (options.initialize !== false) {
+        this.doInitialize()
+      }
+    */
   }
 
   /**
@@ -1027,6 +1029,9 @@ export function _attach(host, helperClass, options = {}) {
 
     if (!usedCache) {
       helperClass.didCreateHelper(host, helperInstance, opts)
+      if (opts.initialize !== false) {
+        helperInstance.doInitialize()
+      }
     }
 
     return helperInstance
