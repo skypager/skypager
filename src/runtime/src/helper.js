@@ -583,7 +583,28 @@ export class Helper {
     return this.get('options.cacheKey')
   }
 
-  /** */
+  /** 
+   * This hook will get called by the helper factory method that gets created on runtime.
+   * 
+   * It needs to happen after the Helper constructor runs, and after the helper's observable
+   * property interface (mobx actions, computed properties, observables, etc) has been wired up.
+   * 
+   * The initialize life cycle is:
+   * 
+   * the factory method is called: runtime.feature(helperId) 
+   * 
+   * the instance is created
+   * 
+   * mobx observables are wired up
+   *
+   * Helper subclass can define a didCreateHelper hook 
+   * 
+   * beforeInitialize - a sync function
+   * initialize - an async function
+   * afterInitialize - a sync function
+   * 
+   * @private 
+  */
   async doInitialize() {
     const initializer = this.tryGet('initialize', this.initialize)
     this.fireHook('beforeInitialize')
@@ -602,9 +623,25 @@ export class Helper {
    *
    * @private
    */
-  setInitialState(initialState = this.initialState || {}) {
+  async setInitialState() {
     const { defaultsDeep } = this.lodash
+    let { initialState = this.provider.initialState || this.initialState || this.constructor.initialState } = this.options
 
+    try {
+      if (typeof initialState === 'function') {
+        initialState = await initialState.call(this, this.options, this.context)
+      }
+  
+      if (this.state && this.state.merge && initialState) {
+        this.state.merge(initialState)      
+      }
+    } catch(error) {
+      this.runtime.error(`Error setting initial state`, { error: error.message, })
+      this.runtime.error(error.stack)
+      this.initialStateError = error
+    }
+
+    /*
     if (this.state && this.tryGet('initialState')) {
       return Promise.resolve(this.attemptMethodAsync('initialState'))
         .then(i => {
@@ -617,6 +654,7 @@ export class Helper {
           this.initialStateError = error
         })
     }
+    */
   }
 
   fireHook(hookName, ...args) {
@@ -986,10 +1024,8 @@ export function _attach(host, helperClass, options = {}) {
     if (helperClass.willCreateHelper(host, opts) === false) {
       return false
     }
-    
-    let usedCache = (!!cacheable) === false
-      ? false
-      : host.cache.has(cacheKey)
+
+    let usedCache = !!cacheable === false ? false : host.cache.has(cacheKey)
 
     const helperInstance = cacheable
       ? host.cache.fetch(cacheKey, () =>
@@ -1011,7 +1047,6 @@ export function _attach(host, helperClass, options = {}) {
       return true
     })
 
-
     if (
       helperClass.isObservable ||
       provider.isObservable ||
@@ -1022,7 +1057,7 @@ export function _attach(host, helperClass, options = {}) {
     ) {
       host.fireHook('didCreateObservableHelper', helperInstance, helperClass)
     }
-    
+
     if (!usedCache && host.didCreateHelper) {
       host.didCreateHelper(helperInstance, opts)
     }
