@@ -1167,8 +1167,12 @@ export class Runtime {
    */
   get isReactNative() {
     try {
-      return !isUndefined(global) && typeof navigator !== 'undefined' && navigator.product === 'ReactNative'
-    } catch(error) {
+      return (
+        !isUndefined(global) &&
+        typeof navigator !== 'undefined' &&
+        navigator.product === 'ReactNative'
+      )
+    } catch (error) {
       return false
     }
   }
@@ -1266,7 +1270,7 @@ export class Runtime {
   get initialState() {
     return defaults(
       { stage: 'CREATED' },
-      this.get('argv.initialState'),
+      this.get('argv.initialState', {}),
       global.__INITIAL_STATE__,
       result(global, 'SkypagerInitialState'),
       this.constructor.initialState
@@ -1278,8 +1282,6 @@ export class Runtime {
   }
 
   getCurrentState() {
-    const { convertToJS } = this
-    const { mapValues } = this.lodash
     return this.state.toJSON()
   }
 
@@ -1516,6 +1518,80 @@ export class Runtime {
    * @abstract
    */
   stateDidChange() {}
+
+  /**
+   * Go to sleep.
+   */
+  sleep(delay) {
+    return new Promise(resolve => setTimeout(resolve, delay))
+  }
+
+  /**
+   * Returns a promise which will resolve whenever the runtime's state
+   * receives an update.
+   *
+   * @example
+   *
+   * // wait until the finished event fires
+   * await runtime.nextEvent("finished")
+   */
+  nextEvent(event) {
+    return new Promise(resolve => {
+      this.once(event, resolve)
+    })
+  }
+
+  /**
+   * Returns a promise which will resolve whenever the runtime's state
+   * receives an update.
+   *
+   * @example
+   *
+   * // any state change
+   * await runtime.nextStateChange()
+   * // only if the finished state property changes
+   * await runtime.nextStateChange("finished")
+   */
+  nextStateChange(property, filter = this.lodash.identity) {
+    return new Promise(resolve => {
+      this.once('stateWasUpdated', update => {
+        const pass = filter(update)
+
+        if (!pass) {
+          return
+        }
+
+        if (update.name === property) {
+          resolve(update)
+        } else {
+          resolve(update)
+        }
+      })
+    })
+  }
+
+  untilStateMatches(validator) {
+    const { pick, isFunction, isEqual, isObject } = this.lodash
+
+    return new Promise((resolve) => {
+      const disposer = this.observeState(({ object }) => {
+        const currentState = object.toJSON() 
+        
+        if (isFunction(validator)) {
+          if (validator(currentState)) {
+            disposer()
+            resolve(currentState)
+          }
+        } else if (isObject(validator)) {
+          const checkAgainst = pick(currentState, Object.keys(validator))
+          if (isEqual(checkAgainst, validator)) {
+            disposer()
+            resolve(currentState)
+          }
+        }
+      })
+    })
+  }
 
   observe(listener, prop = 'state') {
     return observe(prop ? this.get(prop) : this, change => listener.call(this, change))
@@ -2350,9 +2426,20 @@ export async function startSequence(runtime, startMethod) {
 export function makeStateful(obj = {}) {
   obj.stateVersion = 0
 
+  let initialState = {}
+
+  if (typeof obj.initialState === 'object') {
+    initialState = obj.initialState
+  }
+
   extendObservable(obj, {
-    state: observable.shallowMap(toPairs(obj.initialState || {})),
+    state: observable.shallowMap(toPairs(initialState)),
     currentState: computed(() => obj.state.toJSON()),
+    setState: action(Runtime.prototype.setState.bind(obj)),
+    replaceState: action(Runtime.prototype.replaceState.bind(obj)),
+    observeState: action(Runtime.prototype.observeState.bind(obj)),
+    nextStateChange: action(Runtime.prototype.nextStateChange.bind(obj)),
+    untilStateMatches: action(Runtime.prototype.untilStateMatches.bind(obj)),
   })
 
   autorun((...args) => {

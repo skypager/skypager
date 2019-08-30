@@ -422,7 +422,19 @@ export class Helper {
    * @memberof Helper#
    */
   get context() {
-    return this._context
+    return {
+      ...this._context,
+      /** 
+       * These references allow you to take advantage of context being the right most argument to helper methods
+       * 
+       * const providerMethod = (options, { my }) => {
+       *  const { active } = my.currentState
+       *  const { config } = my.settings
+       * }
+      */
+      me: this,
+      my: this
+    }
   }
 
   get provider() {
@@ -583,28 +595,28 @@ export class Helper {
     return this.get('options.cacheKey')
   }
 
-  /** 
+  /**
    * This hook will get called by the helper factory method that gets created on runtime.
-   * 
+   *
    * It needs to happen after the Helper constructor runs, and after the helper's observable
    * property interface (mobx actions, computed properties, observables, etc) has been wired up.
-   * 
+   *
    * The initialize life cycle is:
-   * 
-   * the factory method is called: runtime.feature(helperId) 
-   * 
+   *
+   * the factory method is called: runtime.feature(helperId)
+   *
    * the instance is created
-   * 
+   *
    * mobx observables are wired up
    *
-   * Helper subclass can define a didCreateHelper hook 
-   * 
+   * Helper subclass can define a didCreateHelper hook
+   *
    * beforeInitialize - a sync function
    * initialize - an async function
    * afterInitialize - a sync function
-   * 
-   * @private 
-  */
+   *
+   * @private
+   */
   async doInitialize() {
     const initializer = this.tryGet('initialize', this.initialize)
     this.fireHook('beforeInitialize')
@@ -620,42 +632,60 @@ export class Helper {
 
   /**
    * Sets the initial state of the object.  This is called in the Helper constructor
+   * 
+   * A Helper can provide initialState as an Object literal,
+   * a sync function that returns an object literal, a static
+   * function on the Helper subclass, or as a provider function
+   * in a registered helper module.
+   * 
+   * The function can also be asynchronous, but you will need to
+   * make sure not to use currentState until after that has been set.
    *
-   * @private
    */
-  async setInitialState() {
-    const { defaultsDeep } = this.lodash
-    let { initialState = this.provider.initialState || this.initialState || this.constructor.initialState } = this.options
+  setInitialState() {
+    let {
+      initialState = this.provider.initialState ||
+        this.initialState ||
+        this.constructor.initialState,
+    } = this.options
 
     try {
       if (typeof initialState === 'function') {
-        initialState = await initialState.call(this, this.options, this.context)
+        initialState = initialState.call(this, this.options, this.context)
+
+        if (typeof initialState.then === 'function') {
+          Promise.resolve(initialState).then((result) => {
+            this.state.merge(result)
+            this.emit('didSetInitialState')
+          })
+          return
+        }
       }
-  
+
       if (this.state && this.state.merge && initialState) {
-        this.state.merge(initialState)      
+        this.state.merge(initialState)
+        this.emit('didSetInitialState')
       }
-    } catch(error) {
-      this.runtime.error(`Error setting initial state`, { error: error.message, })
+    } catch (error) {
+      this.runtime.error(`Error setting initial state`, { error: error.message })
       this.runtime.error(error.stack)
       this.initialStateError = error
     }
-
-    /*
-    if (this.state && this.tryGet('initialState')) {
-      return Promise.resolve(this.attemptMethodAsync('initialState'))
-        .then(i => {
-          if (typeof i === 'object') {
-            this.state.merge(defaultsDeep({}, i, initialState))
-          }
-        })
-        .catch(error => {
-          console.error('Error setting initial state', this, error)
-          this.initialStateError = error
-        })
-    }
-    */
   }
+
+   /** 
+   * Returns a promise which will resolve whenever the event fires 
+   * @example
+   * 
+   * // wait until the finished event fires 
+   * await runtime.nextEvent("finished")
+  */
+  nextEvent(event) {
+    return new Promise(resolve => {
+      this.once(event, resolve)
+    })
+  }
+ 
 
   fireHook(hookName, ...args) {
     this.helperEvents.emit(`${this.registryName}:${hookName}`, this, ...args)
@@ -777,6 +807,20 @@ export class Helper {
     return this
   }
 
+  /** 
+   * This will look for a function on the helper instance options,
+   * the helper instance provider, or the helper instance itself.
+   * 
+   * If found, it will call that function in the context of the helper
+   * instance, and pass the helper context as the final arg.  If no args
+   * are passed, an empty options object will be passed.
+   * 
+   * If the method throws an error, this will return false.  This is 
+   * intended to be used to control fire and forget functions, without
+   * disrupting the execution of other hooks / event handlers
+   * 
+   * @param {String} methodName
+  */
   attemptMethod(methodName, ...args) {
     const handler = this.tryGet(methodName, this[methodName])
 
@@ -807,11 +851,24 @@ export class Helper {
     return handler
   }
 
-  attemptMethodAsync(name, ...args) {
-    const result = this.attemptMethod(name, ...args)
-    return Promise.resolve(result || null)
+  /** 
+   * Same as attemptMethod but will automatically resolve the promise.
+   * 
+   * @param {String} methodName
+  */
+  attemptMethodAsync(methodName, ...args) {
+    return Promise.resolve(this.attemptMethod(methodName, ...args)).catch(e => false)
   }
 
+  /** 
+   * Works similar to attemptMethod but does not swallow errors.
+   * 
+   * Looks for method name on this.options, this.provider, then this
+   * 
+   * Calls that method with helper context as the final arg.
+   * 
+   * @param {String} methodName
+  */
   callMethod(methodName, ...args) {
     const handler = this.tryGet(methodName, this[methodName])
 
@@ -824,6 +881,15 @@ export class Helper {
     }
 
     return handler.call(this, ...[...args, this.context])
+  }
+
+  /** 
+   * Works the same as callMethod but will resolve a returned promise.
+   * 
+   * @param {String} methodName
+  */
+  callMethodAsync(methodName, ...args) {
+    return Promise.resolve(this.callMethod(methodName, ...args))
   }
 
   get invalidOptionKeys() {

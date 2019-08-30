@@ -2,6 +2,20 @@
 
 ## Releases
 
+### 1.4.0
+
+- [@skypager/runtime] low level api improvements
+    - you can now await runtime.nextStateChange() or runtime.nextStateChange("someProperty")
+    - Helper classes can define static initialState functions
+    - Helper initialization lifecycle and statefulness happens in a better order
+
+- [@skypager/runtime] helper state improvements, convenience methods 
+    - helper instances get setState, replaceState, which has the same semantics as runtime's, (and React)
+    - `await runtime.nextEvent(event)` will return a promise which resolves when the next event fires
+    - `await runtime.nextStateChange(attributeName?)` will return a promise which resolves when the next state change occurs. pass an optional attribute name to listen for only changes to one key 
+    - `await runtime.untilStateMatches(validatorObjectOrFunction)` will return a promise which resolves when the validator matches current state 
+    - all of the above also work on helper instances
+    
 ### 1.3.1
 
 - [@skypager/features-file-db] added a feature for using nedb
