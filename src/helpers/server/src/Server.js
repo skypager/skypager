@@ -3,7 +3,7 @@ import express from 'express'
 import helmetSecurity from 'helmet'
 
 const DEFAULT_HELMET_SETTINGS = {
-  referrerPolicy: true  
+  referrerPolicy: true,
 }
 /**
  * The Server Helper provides a generic interface on top of any server process that can be
@@ -253,7 +253,6 @@ export class Server extends Helper {
       this.runtime.debug('Enabling CORS', { cors })
       setupCors.call(this, app, cors)
     }
-
 
     if (pretty) {
       this.runtime.debug('Enabling pretty printing of JSON responses')

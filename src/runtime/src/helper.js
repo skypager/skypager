@@ -984,6 +984,10 @@ export function _attach(host, helperClass, options = {}) {
     if (helperClass.willCreateHelper(host, opts) === false) {
       return false
     }
+    
+    let usedCache = (!!cacheable) === false
+      ? false
+      : host.cache.has(cacheKey)
 
     const helperInstance = cacheable
       ? host.cache.fetch(cacheKey, () =>
@@ -1005,11 +1009,6 @@ export function _attach(host, helperClass, options = {}) {
       return true
     })
 
-    if (host.didCreateHelper) {
-      host.didCreateHelper(helperInstance, opts)
-    }
-
-    helperClass.didCreateHelper(host, helperInstance, opts)
 
     if (
       helperClass.isObservable ||
@@ -1020,6 +1019,14 @@ export function _attach(host, helperClass, options = {}) {
       (helperClass.prototype && helperClass.prototype.observables)
     ) {
       host.fireHook('didCreateObservableHelper', helperInstance, helperClass)
+    }
+    
+    if (!usedCache && host.didCreateHelper) {
+      host.didCreateHelper(helperInstance, opts)
+    }
+
+    if (!usedCache) {
+      helperClass.didCreateHelper(host, helperInstance, opts)
     }
 
     return helperInstance
