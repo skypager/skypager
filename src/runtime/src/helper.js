@@ -4,6 +4,9 @@ import { attach as attachEmitter } from './utils/emitter'
 import { camelCase, snakeCase, singularize, pluralize } from './utils/string'
 import ContextRegistry from './registries/context'
 import uuid from 'uuid'
+import { check as checkTypes, types } from '@skypager/prop-types'
+
+export { types }
 
 /**
  * @typedef { import("./runtime").Runtime } Runtime
@@ -22,8 +25,8 @@ import uuid from 'uuid'
  * @property {String} lookupProp the property name to use for the factory function that will be attached to the Helper's host.
  * @property {String} registryProp the property name to use for the registry that will know about each of the Helpers available.
  * @property {ContextRegistry} registry an instance of a registry that will contain references to each of the Helper modules.
- * @property {Boolean} cacheHelper whether to cache the helper instance.
- * @property {Boolean} isCacheable whether to cache the helper instance.
+ * @property {Boolean} [cacheHelper=true] whether to cache the helper instance.
+ * @property {Boolean} [isCacheable=true] whether to cache the helper instance.
  */
 const {
   flatten,
@@ -196,6 +199,61 @@ export class Helper {
     return helperInstance
   }
 
+  convertTypes(typeSpecsWithStrings) {
+    return Helper.convertTypes(typeSpecsWithStrings)
+  }
+
+  checkTypes(location = 'option') {
+    location = String(location).toLowerCase()
+
+    if (location.endsWith('s')) {
+      location = location.replace(/s$/i, '')
+    }
+
+    if (location === 'all') {
+      return ['options', 'provider', 'context'].reduce(
+        (memo, location) => ({
+          ...memo,
+          [location]: this.checkTypes(location),
+        }),
+        {}
+      )
+    }
+
+    let typeSpecs = this.optionTypes
+    let subject = this.options
+
+    if (location === 'provider') {
+      subject = this.provider
+      typeSpecs = this.providerTypes
+    } else if (location === 'context') {
+      subject = this.context
+      typeSpecs = this.contextTypes
+    }
+
+    const convertedTypeSpecs = this.convertTypes(typeSpecs)
+
+    return checkTypes(subject, convertedTypeSpecs, {
+      location,
+      componentName: this.constructor.name,
+    })
+  }
+
+  static convertTypes(typeSpecsWithStrings) {
+    const { pickBy, isFunction, mapValues, isString } = lodash
+
+    return pickBy(
+      mapValues(typeSpecsWithStrings, spec => {
+        if (isString(spec)) {
+          return types[spec]
+        } else {
+          return spec
+        }
+      }),
+      v => isFunction(v)
+    )
+  }
+
   /**
    * Helper classes can specify attributes that individual helper modules are
    * expected to provide or export.
@@ -219,8 +277,8 @@ export class Helper {
   static contextTypes = {
     project: 'object',
     reg: 'object',
-    host: 'object',
-    runtime: 'object',
+    host: 'runtime',
+    runtime: 'runtime',
   }
 
   /**
@@ -422,8 +480,12 @@ export class Helper {
    * @memberof Helper#
    */
   get context() {
+    const builder = this.tryGet('getChildContext', this.getChildContext)
+    const built = typeof builder === 'function' ? builder.call(this) : builder || {}
+
     return {
       ...this._context,
+      ...built,
       /**
        * These references allow you to take advantage of context being the right most argument to helper methods
        *
@@ -450,7 +512,7 @@ export class Helper {
    */
   get registryName() {
     return (
-      this.constructor.registryName ||
+      (this.constructor.registryName && this.constructor.registryName()) ||
       Helper.propNames(this.constructor.helperName || this.constructor.name).registryProp
     )
   }

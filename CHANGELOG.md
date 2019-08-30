@@ -4,6 +4,12 @@
 
 ### 1.4.0
 
+- [@skypager/runtime] prop-types support & getChildContext
+    - Helper classes can declare optionTypes, providerTypes, contextTypes using the prop-types library    
+    - Helper instances can `checkTypes('options|context|provider')` and get a report back if the helpers `options|context|provider` object matches the expected shape
+    - Helpers can define a `getChildContext` function to dynamically set the helpers `context` 
+    - We can enforce validation of the types at runtime with a strictMode flag enabled
+
 - [@skypager/runtime] low level api improvements
     - you can now await runtime.nextStateChange() or runtime.nextStateChange("someProperty")
     - Helper classes can define static initialState functions

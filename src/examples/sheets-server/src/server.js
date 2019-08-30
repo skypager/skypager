@@ -3,7 +3,7 @@ export function history() {
 }
 
 export function serveStatic() {
-  return !this.runtime.isDevelopment
+  return !this.runtime.isDevelopment ? this.runtime.resolve('lib') : false
 }
 
 export const cors = true

@@ -12,7 +12,7 @@ import {
   Table,
   Grid,
 } from 'semantic-ui-react'
-import Readme from '../README.md'
+import Readme from './README.md'
 
 class ListSheets extends Component {
   render() {
@@ -42,11 +42,6 @@ class ListSheets extends Component {
                   </Card>
                 ))}
               </Card.Group>
-            </Segment>
-          </Grid.Column>
-          <Grid.Column width={10}>
-            <Segment piled>
-              <Readme />
             </Segment>
           </Grid.Column>
         </Grid>

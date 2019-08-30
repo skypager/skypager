@@ -1,0 +1,35 @@
+{
+  "name": "@skypager/prop-types",
+  "version": "1.1.1",
+  "description": "using prop-types outside of react",
+  "author": "Jon Soeder <jon@chicago.com>",
+  "main": "lib/index.js",
+  "publishConfig": {
+    "registryAccess": "public"
+  },
+  "scripts": {
+    "prebuild": "rimraf lib && yarn docs:api",
+    "build": "yarn build:lib && yarn build:es",
+    "build:lib": "cross-env BUILD_ENV=build babel -d lib src --source-maps --comments",
+    "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src",
+    "postbuild": "skypager hash-build",
+    "docs:api": "skypager generate-api-docs",
+    "watch": "babel --watch --comments --source-maps -d lib src",
+    "prepare": "yarn docs:api && yarn build",
+    "test": "skypager test --mocha --timeout 10000 test/**/*.spec.js"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "prop-types": "^15.7.2",
+    "check-prop-types": "^1.1.2"
+  },
+  "gitHead": "9392473e420c7a46eb0be31bc7739ca16c8eb130",
+  "keywords": [],
+  "contributors": [],
+  "skypager": {
+    "category": "features",
+    "projectType": "feature"
+  },
+  "module": "lib/es/index.js",
+  "homepage": "https://skypager.io"
+}
