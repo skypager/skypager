@@ -4,46 +4,16 @@ import { Runtime } from './Runtime'
 import { getter, hideGetter } from './utils/prop-utils'
 import types, { check as checkTypes } from './PropTypes'
 
-/**
- * The Helper class defines a module type, or pattern.  A module is any JavaScript object that is loaded once,
- * and cached in memory so that subsequent requires of that module are instant.  A module type or pattern simply states,
- * this module can have exports named a, b, and c.  It must have exports named x, y, and z.  Additionally,
- * export a should be a function, export b should be a number, etc.
- *
- * It takes as part of its constructor, an arbitrary shaped object, called 'provider'
- *
- * These objects can be any individual JavaScript module, whether a single
- * file, a directory, a package on npm, a web assembly module built in rust.  These modules "provide" the implementation of
- * a Helpers defined hook functions.  Typically you'll have folders in your JavaScript project,
- * clients, pages, features, servers, etc.  A Helper can be used to load all of these modules in
- * a consistent way.
- *
- * The Helper class will use its knowledge about the module's shape (which properties it can or must export)
- * to build any common, universal interface for working with all modules of this type.
- *
- * A hypothetical example would be a Server Helper which any consumer can just
- *
- * - start()
- * - stop()
- * - configure()
- *
- * This adapter pattern can be used to incorporate literally any implementation of
- * a server process in node.js, without having the consumer care about the particular
- * details of how express, hapi, feathers, etc do these things under the hood.
- *
- * You can wrap every server API there is with this one common interface. Helpers allow us to
- * define project components and standardize the way they are composed into a larger application.
- *
- * Helpers can attach a function, a.k.a a factory, to the runtime singleton.  For example,
- * a server function which creates instances of server helpers powered by express, hapi, or whatever.
- *
- */
+
 export class Helper extends Entity {
   /**
    * This is used to identify that this is a Helper.  When you subclass Helper,
    * this will still return true and allow us to identify when Helper subclasses
    * are registered with the parent Helper class' registry.  This should still work,
    * we will just make sure to create an instance of the subclass in the factory function.
+   * 
+   * This enables e.g. the Feature class providers to subclass Feature.  The way you might
+   * subclass React.Component.
    */
   static get isHelper() {
     return true
@@ -110,6 +80,7 @@ export class Helper extends Entity {
 
   constructor(options = {}, context = {}) {
     const { provider = {} } = options
+    const { host, runtime = host } = context
 
     const withoutProvider = Object.keys(options).reduce(
       (memo, prop) => ({
@@ -121,17 +92,19 @@ export class Helper extends Entity {
 
     super(withoutProvider)
 
-    runtimes.set(this, context.runtime)
+    if (!this.constructor.isValidRuntime(runtime).pass) {
+      throw new InvalidRuntimeError()
+    }
+
+    runtimes.set(this, runtime)
 
     this._context = context
     hideGetter(this, '_context', () => context)
 
-    this._provider = provider
+    this._provider = Object.assign({}, provider)
     hideGetter(this, '_provider', () => provider)
 
-    const baseClass = this.constructor
-
-    if (baseClass.isObservable) {
+    if (this.constructor.isObservable) {
       setTimeout(() => this.startObservingState(), 0)
     }
   }
@@ -147,20 +120,27 @@ export class Helper extends Entity {
     return Helper.checkTypes(this, location)
   }
 
-  /**
-   * @private
-   */
-  static checkTypes(subject, location, options = {}) {
-    let typeSpecs = subject[`${location}Types`]
 
-    return checkTypes(subject, typeSpecs, {
-      componentName:
-        subject.componentName || subject.name || (subject.constructor && subject.constructor.name),
-      ...options,
-      location,
-    })
+  /** 
+   * A Helper can dynamically modify the provider object it was created with.  This can be useful to,
+   * for example, wrap certain provider hooks or methods with logging or profiling, or to delegate similar
+   * functionality (e.g login / logout) to different providers of that service.
+  */
+  set provider(patch) {
+    Object.assign(this._provider, patch)
   }
 
+  /** 
+   * Dynamic method delegation.
+   * 
+   * When a helper is created against a module in a helper registry, this cached module object
+   * is referred to as the helper's provider.  This object will contain functions that a helper
+   * can delegate responsibility to.  An Authentication feature can provide a single `login` function
+   * that works with all of the different auth providers, or an  EmailNotification feature can provide
+   * a single `sendEmail` function that works with all the things.
+   * 
+   * The provider is the "private" implementation.  The Helper is the public API.
+  */
   get provider() {
     return {
       ...this.constructor.defaultProvider,
@@ -266,6 +246,10 @@ export class Helper extends Entity {
   }
 
   /**
+   * Returns a function which will create instances of the Helper class
+   * with the context argument populated with a reference to the helper's
+   * parent runtime container.
+   *  
    * @param {Object} options
    * @param {Registry} [options.registry]
    * @param {Helper|Runtime} [options.host]
@@ -291,10 +275,47 @@ export class Helper extends Entity {
     }
   }
 
+  /** 
+   * A Helper registry is an observable, queryable database that contains information
+   * about all of the available modules that are of the same Helper type.  You might have
+   * a Registry that has information about all of the servers you have available to you,
+   * or a Registry that has information about all the clients or features, etc. 
+   * 
+   * @param {Object} options
+   * @param {Function} [options.formatId] a function which will format the ID to a standard format.
+   * @returns {Registry}
+  */
   static createRegistry(options = {}) {
     return new Registry(options)
   }
+  
+  static get types() {
+    return types
+  }
+
+  static isValidRuntime(runtime) {
+    return checkTypes({ runtime }, { runtime: types.runtime })
+  }
+
+  /**
+   * @private
+   */
+  static checkTypes(subject, location, options = {}) {
+    let typeSpecs = subject[`${location}Types`]
+
+    return checkTypes(subject, typeSpecs, {
+      componentName:
+        subject.componentName || subject.name || (subject.constructor && subject.constructor.name),
+      ...options,
+      location,
+    })
+  }
+
 }
+
+export class InvalidRuntimeError extends Error {}
+
+export { types, checkTypes }
 
 export default Helper
 

@@ -179,9 +179,11 @@ export function hideProperties(target, properties = {}) {
  * @param {Object} target  The target object to define the hidden getter
  * @param {String} name    The name of the property
  * @param {Function} fn      A function to call to return the desired value
- * @param {Object} options =             {} Additional options
- * @param {Object} options.scope The scope / binding for the function will be called in, defaults to target
- * @param {Array} options.args arguments that will be passed to the function
+ * @param {Object} [options={}] Additional options
+ * @param {Object} [options.scope=target] The scope / binding for the function will be called in, defaults to target
+ * @param {Array}  [options.args=[]] arguments that will be passed to the function
+ * @param {Boolean} [options.configurable=true]
+ * @param {Boolean} [options.writable=true]
 
  * @return {Object}          Returns the target object
  */
@@ -217,11 +219,11 @@ export function hideGetter(target, name, fn, options = {}) {
 /**
  * creates a non enumerable property on the target object
  *
- * @name hideProperty
+ * @name getter 
  * @param {Object} target the target object
- * @param {String} attributeName
- * @param {Function} function which returns a value
- * @param {Object} definePropertyOptions
+ * @param {String} name 
+ * @param {Function} fn which returns a value
+ * @param {Object} [options={}]
  *
  */
 export function getter(target, name, fn, options = {}) {

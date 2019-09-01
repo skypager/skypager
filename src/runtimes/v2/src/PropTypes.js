@@ -1,7 +1,9 @@
-import types from 'prop-types'
+import propTypes from 'prop-types'
 import checkPropTypes from 'check-prop-types'
 
-types.runtime = types.shape({
+const types = propTypes
+
+export const runtimeType = types.shape({
   currentState: types.object,
   setState: types.func,
   replaceState: types.func,
@@ -19,6 +21,8 @@ types.runtime = types.shape({
     observe: types.func,
   }).isRequired,
 })
+
+Object.assign(types, { runtime: runtimeType })
 
 export { types }
 

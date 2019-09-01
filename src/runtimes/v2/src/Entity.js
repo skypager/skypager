@@ -10,18 +10,29 @@ import Bus from './Bus'
 export class Entity {
   static defaultOptions = {}
 
-  constructor(options = {}) {
-    this.uuid = uuid()
+  initialState = {}
+
+  constructor({ uuid = undefined, initialState = undefined, ...options } = {}) {
     this._options = options
-
-    hide(this, 'uuid', this.uuid)
-
-    this.state = new State()
-    hide(this, 'state', this.state)
-
-    this.emitter = new Bus()
-    hide(this, 'emitter', this.emitter)
     hideGetter(this, '_options', () => options)
+
+    this.uuid = uuid || uuid()
+    hide(this, 'uuid', this.uuid)
+    
+    initialState = initialState || this.initialState || this.constructor.initialState
+
+    if (typeof initialState === 'function') {
+      initialState = initialState.bind(this)
+    }
+
+    this.state = new State({ initialState })
+    // non-configurable
+    hide(this, 'state', this.state, { configurable: false, writable: false })
+    hide(this, 'initialState', initialState, { configurable: false, writable: false })
+
+    // non-configurable
+    this.emitter = new Bus()
+    hide(this, 'emitter', this.emitter, { configurable: false, writable: false })
 
     let disposer
 

@@ -26,6 +26,10 @@
     "vm-browserify": "^1.1.0",
     "lodash-es": "^4.17.15"
   },
+  "devDependencies": {
+    "lodash-decorators": "^6.0.1",
+    "core-decorators": "^0.20.0"
+  },
   "repository": {
     "type": "github",
     "url": "https://github.com/skypager/skypager"
