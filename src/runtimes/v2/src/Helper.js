@@ -3,7 +3,7 @@ import Registry from './Registry'
 import { Runtime } from './Runtime'
 import { getter, hideGetter } from './utils/prop-utils'
 import types, { check as checkTypes } from './PropTypes'
-// import { nonenumerable, nonconfigurable } from 'core-decorators'  
+// import { nonenumerable, nonconfigurable } from 'core-decorators'
 
 export class Helper extends Entity {
   /**
@@ -11,11 +11,11 @@ export class Helper extends Entity {
    * this will still return true and allow us to identify when Helper subclasses
    * are registered with the parent Helper class' registry.  This should still work,
    * we will just make sure to create an instance of the subclass in the factory function.
-   * 
+   *
    * This enables e.g. the Feature class providers to subclass Feature.  The way you might
    * subclass React.Component.
    */
-  static isHelper = true 
+  static isHelper = true
 
   /**
    * Helpers which operate in strict mode will validate the options, provider, and context
@@ -107,12 +107,12 @@ export class Helper extends Entity {
     }
   }
 
-  /** 
+  /**
    * Component name will be whatever the Helper instance options.name,
-   * provider.name, or class constructor name is. 
-   * 
+   * provider.name, or class constructor name is.
+   *
    * @type {String}
-  */
+   */
   get componentName() {
     const { name = this.provider.name } = this.options.name
     return name || this.constructor.name
@@ -125,27 +125,26 @@ export class Helper extends Entity {
     return Helper.checkTypes(this, location)
   }
 
-
-  /** 
+  /**
    * A Helper can dynamically modify the provider object it was created with.  This can be useful to,
    * for example, wrap certain provider hooks or methods with logging or profiling, or to delegate similar
    * functionality (e.g login / logout) to different providers of that service.
-  */
+   */
   set provider(patch) {
     Object.assign(this._provider, patch)
   }
 
-  /** 
+  /**
    * Dynamic method delegation.
-   * 
+   *
    * When a helper is created against a module in a helper registry, this cached module object
    * is referred to as the helper's provider.  This object will contain functions that a helper
    * can delegate responsibility to.  An Authentication feature can provide a single `login` function
    * that works with all of the different auth providers, or an  EmailNotification feature can provide
    * a single `sendEmail` function that works with all the things.
-   * 
+   *
    * The provider is the "private" implementation.  The Helper is the public API.
-  */
+   */
   get provider() {
     return {
       ...this.constructor.defaultProvider,
@@ -201,21 +200,21 @@ export class Helper extends Entity {
 
   /**
    * Helper classes are designed to be attached to an instance of Runtime,
-   * or to another helper instance (e.g. an instance of Server might depend on Feature or Endpoint helpers) 
+   * or to another helper instance (e.g. an instance of Server might depend on Feature or Endpoint helpers)
    *
    * If you're using the runtime.use(Helper) API, it will look for an attach function and pass an instance
-   * of the runtime as a first argument, and any options as the second. 
-   * 
+   * of the runtime as a first argument, and any options as the second.
+   *
    * When a Helper attaches itself to something, it does two things:
-   * 
+   *
    * 1) creates a factory function, which creates instances of Helper with a context argument that is used to
    *    link to the runtime's dependency injection, event bus, and global state functions
-   * 
+   *
    * 2) creates a Registry, where the providers / implementations of a Helper can register themselves. This
    *    allows developers to create instances of that helper (e.g. an instance Server you want to start) by
    *    name
-   * 
-   * 
+   *
+   *
    * @name attach
    * @param {Entity} entity
    * @param {Object} [options={}]
@@ -248,7 +247,7 @@ export class Helper extends Entity {
     const { host, runtime = host } = context
 
     if (typeof runtime === 'undefined') {
-      throw new InvalidRuntimeError(HelperClass.name)   
+      throw new InvalidRuntimeError(HelperClass.name)
     }
 
     let { provider = HelperClass.defaultProvider } = options
@@ -262,28 +261,34 @@ export class Helper extends Entity {
       })
     }
 
-    /** 
-     * If the HelperClass is in strict mode, you won't even be able to 
+    /**
+     * If the HelperClass is in strict mode, you won't even be able to
      * create an instance without the valid options, context, provider values
      * known ahead of time.  You can use helperInstance.checkTypes() after it is
      * created to handle errors more gracefully (if e.g. certain values cant be truly validated
      * until runtime code is executed.)
-    */
+     */
     if (HelperClass.strictMode) {
-      const subject = { 
-        provider, 
-        options, 
+      const subject = {
+        provider,
+        options,
         context,
-        componentName: options.name || provider.name || HelperClass.name
+        componentName: options.name || provider.name || HelperClass.name,
       }
 
       const optionsResults = HelperClass.checkTypes(subject, 'options')
       const providerResults = HelperClass.checkTypes(subject, 'provider')
       const contextResults = HelperClass.checkTypes(subject, 'context')
 
-      if (!optionsResults.pass) { throw new InvalidOptions(optionsResults) }
-      if (!providerResults.pass) { throw new InvalidProvider(providerResults) }
-      if (!contextResults.pass) { throw new InvalidContext(contextResults) }
+      if (!optionsResults.pass) {
+        throw new InvalidOptions(optionsResults)
+      }
+      if (!providerResults.pass) {
+        throw new InvalidProvider(providerResults)
+      }
+      if (!contextResults.pass) {
+        throw new InvalidContext(contextResults)
+      }
     }
 
     const instance = new HelperClass(options, context)
@@ -295,7 +300,7 @@ export class Helper extends Entity {
    * Returns a function which will create instances of the Helper class
    * with the context argument populated with a reference to the helper's
    * parent runtime container.
-   *  
+   *
    * @param {Object} options
    * @param {Registry} [options.registry]
    * @param {Helper|Runtime} [options.host]
@@ -321,44 +326,44 @@ export class Helper extends Entity {
     }
   }
 
-  /** 
+  /**
    * A Helper registry is an observable, queryable database that contains information
    * about all of the available modules that are of the same Helper type.  You might have
    * a Registry that has information about all of the servers you have available to you,
-   * or a Registry that has information about all the clients or features, etc. 
-   * 
+   * or a Registry that has information about all the clients or features, etc.
+   *
    * @param {Object} options
    * @param {Function} [options.formatId] a function which will format the ID to a standard format.
    * @returns {Registry}
-  */
+   */
   static createRegistry(options = {}) {
     return new Registry(options)
   }
-  
+
   static get types() {
     return types
   }
 
-  /** 
+  /**
    * You can override this in your own Helper, if you have your own requirements of the runtime
    * (e.g. certain features need to be enabled, can only run in node, etc.)
-  */
+   */
   static isValidRuntime(runtime) {
     return !!checkTypes({ runtime }, { runtime: types.runtime }).pass
   }
 
   /**
    * Use type specifications (named prop-types) to test an object for
-   * supplying the appropriate values.  Helper instances have 
-   * 
+   * supplying the appropriate values.  Helper instances have
+   *
    * - options (what the developer creates them with)
    * - context (what the framework automatically passes down)
    * - provider (what the underlying provider module is expected to include in its exports)
-   * 
-   * This function can be used to test all three: 
-   * 
+   *
+   * This function can be used to test all three:
+   *
    * Helper.checkTypes(instance, 'options')
-   * 
+   *
    * @param {Object} subject the object whose properties you want to validate.
    * @param {String} location the name of the (whatever)Types property that contains the type specs
    * @param {Object} options options
@@ -369,7 +374,10 @@ export class Helper extends Entity {
 
     const report = checkTypes(subject[location], typeSpecs, {
       componentName:
-        options.componentName || subject.componentName || subject.name || (subject.constructor && subject.constructor.name),
+        options.componentName ||
+        subject.componentName ||
+        subject.name ||
+        (subject.constructor && subject.constructor.name),
       ...options,
       location,
     })
@@ -378,10 +386,9 @@ export class Helper extends Entity {
       ...report,
       typeSpecs,
       location,
-      subject
+      subject,
     }
   }
-
 }
 
 export class InvalidProvider extends Error {
@@ -401,15 +408,17 @@ export class InvalidOptions extends Error {
     super(result)
   }
 }
-/** 
+/**
  * This error will get thrown if when somebody uses the Helper class constructor
  * directly, they forget to pass the host / runtime context as a second argument.  Generally
  * you shouldn't create helper instances directly, but use the attach API and its factory
  * functions instead (e.g. runtime.server("app", { port: 3000 }) instead of new Server({ port: 3000, name: "app" }, { runtime }))
-*/
+ */
 export class InvalidRuntimeError extends Error {
   constructor(helperClassName) {
-    super(`Could not find a reference to the parent runtime in the context argument that was passed to the constructor of ${helperClassName}.  If you are calling ${helperClassName}.create or new ${helperClassName}() make sure to pass options, and context.  Context needs to have a reference to the parent runtime.`)
+    super(
+      `Could not find a reference to the parent runtime in the context argument that was passed to the constructor of ${helperClassName}.  If you are calling ${helperClassName}.create or new ${helperClassName}() make sure to pass options, and context.  Context needs to have a reference to the parent runtime.`
+    )
   }
 }
 

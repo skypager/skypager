@@ -1,22 +1,21 @@
 import Feature from './Feature'
 import vm from 'vm'
 
-/** 
+/**
  * The VirtalMachine uses node's vm module to allow you to create scripts and contexts
  * (predefined global variables) (as well as modules) from strings of code at runtime.
- * 
+ *
  * This can be useful if you are writing a test runner (like jest) or if you are providing
  * a code editing environment (like with runnable, live-editable React component examples),
  * or if you have a collection of scripts which you want to provide global context to.
-*/
+ */
 export class VirtualMachine extends Feature {
-
-  /** 
+  /**
    * Registers the VM feature with the runtime
-   * 
+   *
    * @param {import("./Runtime").Runtime} runtime
    * @param {Object} options
-  */
+   */
   static attach(runtime, options = {}) {
     runtime.features.register('vm', () => VirtualMachine)
 
@@ -36,22 +35,14 @@ export class VirtualMachine extends Feature {
     return this.vm.createScript(fromCode)
   }
 
-  createContext(fromObject) {
+  createContext(fromObject) {}
 
-  }
+  runCode(code, context = {}) {}
 
-  runCode(code, context = {}) {
+  createModule(fromCode, context = {}, options = {}) {}
 
-  }
-
-  createModule(fromCode, context = {}, options = {}) {
-
-  }
-
-  /** 
+  /**
    * Returns a function which will run any supplied code in a specified vm context.
-  */
-  createCodeRunner() {
-
-  }
+   */
+  createCodeRunner() {}
 }

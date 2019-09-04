@@ -18,7 +18,7 @@ export class Entity {
 
     this.uuid = uuid || uuid()
     hide(this, 'uuid', this.uuid)
-    
+
     initialState = initialState || this.initialState || this.constructor.initialState
 
     if (typeof initialState === 'function') {

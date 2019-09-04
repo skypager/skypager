@@ -213,9 +213,9 @@ export function hideGetter(target, name, fn, options = {}) {
 /**
  * creates a non enumerable property on the target object
  *
- * @name getter 
+ * @name getter
  * @param {Object} target the target object
- * @param {String} name 
+ * @param {String} name
  * @param {Function} fn which returns a value
  * @param {Object} [options={}]
  *
