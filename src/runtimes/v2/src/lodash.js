@@ -21,4 +21,6 @@ lodash.result = lodash.result || result
 lodash.partial = lodash.partial || partial
 lodash.partialRight = lodash.partialRight || partialRight
 
+export { omit, pick, get, result, partial, partialRight, isObject, isFunction }
+
 export default lodash

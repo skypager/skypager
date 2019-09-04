@@ -244,6 +244,7 @@ export class Helper extends Entity {
   static create(options = {}, context = {}) {
     const HelperClass = this
 
+    const { async = HelperClass.asyncMode } = options
     const { host, runtime = host } = context
 
     if (typeof runtime === 'undefined') {
@@ -252,12 +253,9 @@ export class Helper extends Entity {
 
     let { provider = HelperClass.defaultProvider } = options
 
-    if (HelperClass.asyncMode) {
+    if (async) {
       return Promise.resolve(provider).then(resolved => {
-        return new HelperClass({
-          provider: resolved,
-          ...options,
-        })
+        this.create({ ...options, provider, async: false }, context)
       })
     }
 
