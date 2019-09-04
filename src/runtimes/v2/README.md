@@ -102,3 +102,9 @@ And a factory function which creates instances of [Feature](docs/Feature.md)
 // anything that has been registered with the registry can be created by name
 const vm = runtime.feature('vm')
 ```
+
+## Guides
+
+### Create your own runtime
+
+

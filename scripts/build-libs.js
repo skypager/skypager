@@ -4,6 +4,7 @@
 const { spawn } = require('child-process-promise')
 
 const packages = [
+  '@skypager/prop-types',
   '@skypager/runtime',
   '@skypager/node',
   '@skypager/helpers-client',
