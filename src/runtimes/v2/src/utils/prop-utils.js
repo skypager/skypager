@@ -1,15 +1,9 @@
-import {
-  pickBy,
-  mapValues,
-  partial,
-  isFunction,
-  isArray,
-  isObject,
-  has,
-  camelCase,
-  cloneDeep,
-  lowerFirst,
-} from 'lodash'
+import pickBy from 'lodash-es/pickBy'
+import mapValues from 'lodash-es/mapValues'
+import partial from 'lodash-es/partial'
+import isFunction from 'lodash-es/isFunction'
+import camelCase from 'lodash-es/camelCase'
+import lowerFirst from 'lodash-es/lowerFirst'
 
 const { defineProperty } = Object
 

@@ -2,7 +2,8 @@
   "compilerOptions": {
     "target": "ES6",
     "checkJs": true,
-    "module": "system"
+    "module": "system",
+    "experimentalDecorators": true
   },
   "include": [ 
     "scripts",

@@ -3,7 +3,7 @@ import Registry from './Registry'
 import { Runtime } from './Runtime'
 import { getter, hideGetter } from './utils/prop-utils'
 import types, { check as checkTypes } from './PropTypes'
-
+// import { nonenumerable, nonconfigurable } from 'core-decorators'  
 
 export class Helper extends Entity {
   /**
@@ -15,9 +15,7 @@ export class Helper extends Entity {
    * This enables e.g. the Feature class providers to subclass Feature.  The way you might
    * subclass React.Component.
    */
-  static get isHelper() {
-    return true
-  }
+  static isHelper = true 
 
   /**
    * Helpers which operate in strict mode will validate the options, provider, and context
@@ -92,8 +90,8 @@ export class Helper extends Entity {
 
     super(withoutProvider)
 
-    if (!this.constructor.isValidRuntime(runtime).pass) {
-      throw new InvalidRuntimeError()
+    if (!this.constructor.isValidRuntime(runtime)) {
+      throw new InvalidRuntimeError(this.constructor.name)
     }
 
     runtimes.set(this, runtime)
@@ -109,8 +107,15 @@ export class Helper extends Entity {
     }
   }
 
+  /** 
+   * Component name will be whatever the Helper instance options.name,
+   * provider.name, or class constructor name is. 
+   * 
+   * @type {String}
+  */
   get componentName() {
-    return this.constructor.name
+    const { name = this.provider.name } = this.options.name
+    return name || this.constructor.name
   }
 
   /**
@@ -182,10 +187,6 @@ export class Helper extends Entity {
     return this.runtime.lodash
   }
 
-  get chain() {
-    return this.runtime.lodash.chain(this)
-  }
-
   get(path, defaultValue) {
     return this.lodash.get(this, path, defaultValue)
   }
@@ -199,7 +200,22 @@ export class Helper extends Entity {
   tryResult() {}
 
   /**
-   * Cr
+   * Helper classes are designed to be attached to an instance of Runtime,
+   * or to another helper instance (e.g. an instance of Server might depend on Feature or Endpoint helpers) 
+   *
+   * If you're using the runtime.use(Helper) API, it will look for an attach function and pass an instance
+   * of the runtime as a first argument, and any options as the second. 
+   * 
+   * When a Helper attaches itself to something, it does two things:
+   * 
+   * 1) creates a factory function, which creates instances of Helper with a context argument that is used to
+   *    link to the runtime's dependency injection, event bus, and global state functions
+   * 
+   * 2) creates a Registry, where the providers / implementations of a Helper can register themselves. This
+   *    allows developers to create instances of that helper (e.g. an instance Server you want to start) by
+   *    name
+   * 
+   * 
    * @name attach
    * @param {Entity} entity
    * @param {Object} [options={}]
@@ -229,6 +245,12 @@ export class Helper extends Entity {
   static create(options = {}, context = {}) {
     const HelperClass = this
 
+    const { host, runtime = host } = context
+
+    if (typeof runtime === 'undefined') {
+      throw new InvalidRuntimeError(HelperClass.name)   
+    }
+
     let { provider = HelperClass.defaultProvider } = options
 
     if (HelperClass.asyncMode) {
@@ -238,6 +260,30 @@ export class Helper extends Entity {
           ...options,
         })
       })
+    }
+
+    /** 
+     * If the HelperClass is in strict mode, you won't even be able to 
+     * create an instance without the valid options, context, provider values
+     * known ahead of time.  You can use helperInstance.checkTypes() after it is
+     * created to handle errors more gracefully (if e.g. certain values cant be truly validated
+     * until runtime code is executed.)
+    */
+    if (HelperClass.strictMode) {
+      const subject = { 
+        provider, 
+        options, 
+        context,
+        componentName: options.name || provider.name || HelperClass.name
+      }
+
+      const optionsResults = HelperClass.checkTypes(subject, 'options')
+      const providerResults = HelperClass.checkTypes(subject, 'provider')
+      const contextResults = HelperClass.checkTypes(subject, 'context')
+
+      if (!optionsResults.pass) { throw new InvalidOptions(optionsResults) }
+      if (!providerResults.pass) { throw new InvalidProvider(providerResults) }
+      if (!contextResults.pass) { throw new InvalidContext(contextResults) }
     }
 
     const instance = new HelperClass(options, context)
@@ -293,27 +339,79 @@ export class Helper extends Entity {
     return types
   }
 
+  /** 
+   * You can override this in your own Helper, if you have your own requirements of the runtime
+   * (e.g. certain features need to be enabled, can only run in node, etc.)
+  */
   static isValidRuntime(runtime) {
-    return checkTypes({ runtime }, { runtime: types.runtime })
+    return !!checkTypes({ runtime }, { runtime: types.runtime }).pass
   }
 
   /**
-   * @private
+   * Use type specifications (named prop-types) to test an object for
+   * supplying the appropriate values.  Helper instances have 
+   * 
+   * - options (what the developer creates them with)
+   * - context (what the framework automatically passes down)
+   * - provider (what the underlying provider module is expected to include in its exports)
+   * 
+   * This function can be used to test all three: 
+   * 
+   * Helper.checkTypes(instance, 'options')
+   * 
+   * @param {Object} subject the object whose properties you want to validate.
+   * @param {String} location the name of the (whatever)Types property that contains the type specs
+   * @param {Object} options options
+   * @param {String} [options.componentName=subject.componentName] the name of the component who is being tested
    */
   static checkTypes(subject, location, options = {}) {
     let typeSpecs = subject[`${location}Types`]
 
-    return checkTypes(subject, typeSpecs, {
+    const report = checkTypes(subject[location], typeSpecs, {
       componentName:
-        subject.componentName || subject.name || (subject.constructor && subject.constructor.name),
+        options.componentName || subject.componentName || subject.name || (subject.constructor && subject.constructor.name),
       ...options,
       location,
     })
+
+    return {
+      ...report,
+      typeSpecs,
+      location,
+      subject
+    }
   }
 
 }
 
-export class InvalidRuntimeError extends Error {}
+export class InvalidProvider extends Error {
+  constructor({ result }) {
+    super(result)
+  }
+}
+
+export class InvalidContext extends Error {
+  constructor({ result }) {
+    super(result)
+  }
+}
+
+export class InvalidOptions extends Error {
+  constructor({ result }) {
+    super(result)
+  }
+}
+/** 
+ * This error will get thrown if when somebody uses the Helper class constructor
+ * directly, they forget to pass the host / runtime context as a second argument.  Generally
+ * you shouldn't create helper instances directly, but use the attach API and its factory
+ * functions instead (e.g. runtime.server("app", { port: 3000 }) instead of new Server({ port: 3000, name: "app" }, { runtime }))
+*/
+export class InvalidRuntimeError extends Error {
+  constructor(helperClassName) {
+    super(`Could not find a reference to the parent runtime in the context argument that was passed to the constructor of ${helperClassName}.  If you are calling ${helperClassName}.create or new ${helperClassName}() make sure to pass options, and context.  Context needs to have a reference to the parent runtime.`)
+  }
+}
 
 export { types, checkTypes }
 

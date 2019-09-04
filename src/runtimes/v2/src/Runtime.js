@@ -1,70 +1,45 @@
-import lodash from 'lodash'
 import Entity from './Entity'
 import Helper from './Helper'
 import Registry from './Registry'
 import Feature, { attach as attachFeature } from './Feature'
 import State from './State'
 import { hideGetter } from './utils/prop-utils'
+import lodash from './lodash'
+
 
 /**
- * @typedef {Object} ExtensionModule
- * @property {Function} attach
- * @property {Boolean} isHelper
- */
-
-/**
- * The Runtime is a container for any JavaScript application in any environment.  All of JavaScript exists from a few
- * global objects. Each object is a potentially infinite tree of objects, with properties that point to other objects,
- * functions, lazy loaded objects, async loading.
+ * The Runtime is a container for any JavaScript application in any environment.  All JavaScript programs exist 
+ * assuming the existence of a few global objects. 
+ * 
+ * - document / window in the browser 
+ * - module / require / process ) in node
+ * 
+ * Each object is a potentially infinite tree of objects, with properties that point to other objects,
+ * or functions, lazy loadable properties, async loading, etc.
  *
- * The Runtime class allows you to define a global service like object (e.g. window, document, global) that can act as
- * a framework for loading and starting any combination of modules your application architecture defines.
+ * The Runtime class allows you to define a global service like object (e.g. window, document, global) that is
+ * a platform agnostic container for "your" code, capable of "dependency injection", and capable of acting as an
+ * inversion of control service.  
+ * 
+ * When you write an application, whether in the browser, or node, the `runtime` singleton is something you can talk to 
+ * to manage the state and lifecycle of an application, to learn about the environment and which features are available 
+ * on the runtime, as well as a module loader for you to interact with so that you can easily build your applications as 
+ * small independent modules or groups of modules for a team to divide responsibility.  
  *
  * You should design your JavaScript application around the fact that 80% of the functionality is derived
  * from open source third party dependencies, which you change less frequently, and can easily load from
- * a cache such as a CDN.  You should also design them around lazy loading, so you only load the code you
- * need to serve the current experience, and lazy load the rest at whatever point it is needed by the application.
+ * a cache such as a CDN.  You don't want a small change in one of your React components to require you to download
+ * the whole React, React DOM, and other libraries.  
+ * 
+ * You should also design them around lazy loading, so you only load the code you need to serve the current 
+ * experience, and lazy load the rest at whatever point it is needed by the application.  There's no sense downloading
+ * code for premium users, when a free trial user is logged into your application.
  *
- * JavaScript Applications can be designed to be containerized, the way Dockerfile containerizes
- * a server application runtime using cacheable layers which can be loaded in order.  Docker can inject
- * environment variables, mount dynamic data at runtime through volume mounts, all from a cached collection
- * of hash identiied layers on disk, and create a living running server with its own unique state and configuration.
- *
- * JavaScript runtimes (such as the browser and node) can leverage the same ideas, since everything
- * gets bundled as a module and served from a cache, and unique / site / deployment specific settings can be injected
- * into the DOM at the last minute (or loaded from the process in node) before booting the application using the 80% third party cached code and the
- * 20% unique code that is your application.
- *
- * Runtime can act as a base container, FROM which you build a unique container that can host any application
- * that can be be described as one or more entry points, which depend on common patterns of modules and components
- * whose implementations live inside of that project.  Imagine a React application
- *
- * layer 1:
- *
- *  - react
- *  - react-dom
- *  - react-router-dom
- *
- * layer 2:
- *  - bootstrap css
- *  - site theme
- *  - project specific dependencies (e.g. google maps, firebase )
- *
- * layer 3:
- *   - pages / app functionality
- *
- * These layers not only represent the dependencies and which ones change the least,
- * they also represent isolated modules that somebody can focus on independently of the others.
- *
- * The Helper class defines some type of component module in the application, and the runtime activates
- * these components using common APIs.  This allows us to express entire compositions of module
- * loading and activation in a declarative way (we can even write skypager applications using JSX)
- *
- * You can write many different applications and re-use layer 1 and layer 2 as long as they never change,
- * just as Dockerfiles let us share a base ubuntu linux image and spawn 100s of unique servers with their own
- * environments, state, and configuration.
+ * The runtime provides you with a system to do all of this in a clean and logical way.
  */
 export class Runtime extends Entity {
+  vm  
+
   constructor(options = {}, context = {}) {
     super(options)
 
@@ -205,17 +180,21 @@ export class Runtime extends Entity {
    * @param {Object} [options={}]
    */
   use(extension, options = {}) {
-    const { isFunction, isPlainObject } = this.lodash
+    const { isFunction, isObject } = this.lodash
 
     if (extension.isHelper && isFunction(extension.attach)) {
       extension.attach.call(this, this, options)
       return this
-    } else if (isPlainObject(extension) && isFunction(extension.attach)) {
+    } else if (isObject(extension) && isFunction(extension.attach)) {
       extension.attach.call(this, this, options)
       return this
     }
   }
 
+  /** 
+   * @param {HelperClass} HelperClass the helper class you wish to create an instance of
+   * @returns {Object}
+  */
   createHelper(HelperClass, options = {}, context = {}) {
     return HelperClass.create(options, {
       runtime: this,
@@ -226,3 +205,22 @@ export class Runtime extends Entity {
 }
 
 export default Runtime
+
+/** 
+ * @typedef {Helper} HelperClass
+ * @property {Function} attach
+ * @property {Function} create
+ * @property {Boolean} [isHelper=true]
+*/
+
+/**
+ * The runtime instance can be extended with plugins.  A plugin is either a function which gets passed a done 
+ * callback that it should call when finished, or an object which has an attach function that runs synchronously.
+ * 
+ * Loading an extension is done through runtime.use(ExtensionModule1).use(ExtensionModule2)
+ * 
+ * @typedef {Object|Function} ExtensionModule
+ * @property {Function} attach
+ * @property {Boolean} isHelper
+ */
+
