@@ -10,13 +10,11 @@ import Bus from './Bus'
 export class Entity {
   static defaultOptions = {}
 
-  initialState = {}
-
-  /** 
+  /**
    * @param {Object} options
    * @param {String} [options.uuid]
    * @param {Object|Function} [options.initialState]
-  */
+   */
   constructor({ initialState = undefined, ...options } = {}) {
     this._options = options
     hideGetter(this, '_options', () => options)
@@ -33,7 +31,7 @@ export class Entity {
     this.state = new State({ initialState })
     // non-configurable
     hide(this, 'state', this.state, { configurable: false, writable: false })
-    hide(this, 'initialState', initialState, { configurable: false, writable: false })
+    hide(this, 'initialState', initialState, { configurable: true, writable: false })
 
     // non-configurable
     this.emitter = new Bus()
@@ -42,6 +40,7 @@ export class Entity {
     let disposer
 
     const startObserving = () => {
+      disposer && disposer()
       disposer = this.state.observe(({ name, oldValue, newValue, type, object }) => {
         this.emit(`${name}DidChangeState`, newValue, oldValue)
         const current = object.toJSON()
@@ -59,8 +58,8 @@ export class Entity {
 
     this.startObservingState = startObserving
     this.stopObservingState = stopObserving
-    getter(this, 'startObservingState', () => startObserving)
-    getter(this, 'stopObservingState', () => stopObserving)
+    hideGetter(this, 'startObservingState', () => startObserving)
+    hideGetter(this, 'stopObservingState', () => stopObserving)
   }
 
   get options() {
@@ -109,6 +108,10 @@ export class Entity {
   on(event, callback) {
     this.emitter.on(event, callback)
 
+    if (event.match(/DidChange/)) {
+      this.startObservingState()
+    }
+
     return () => {
       this.emitter.off(event, callback)
     }
@@ -129,6 +132,24 @@ export class Entity {
 
   off(event, callback) {
     return this.emitter.off(event, callback)
+  }
+
+  /**
+   * @experimental
+   *
+   * I want to have declarative hooks similar to webpack tapable,
+   * should get automatic before / after hooks (e.g. fireHook('initialize') will try beforeInitialize and afterInitialize)
+   */
+  fireHook(hookName, ...args) {
+    this.emit(hookName, ...args)
+
+    if (typeof this[hookName] === 'function') {
+      Promise.resolve(this[hookName].call(this, ...args)).catch(error => {
+        this.emit(`hookFailure`, hookName, error)
+      })
+    }
+
+    return this
   }
 
   /**
@@ -175,7 +196,9 @@ export class Entity {
           disposer()
           resolve(current)
         } else if (typeof validator === 'object') {
-          const nonMatch = !!Object.keys(validator).find(prop => current[prop] !== validator.prop)
+          const nonMatch = !!Object.keys(validator).find(prop => {
+            return current[prop] !== validator[prop]
+          })
           if (!nonMatch) {
             disposer()
             resolve(current)

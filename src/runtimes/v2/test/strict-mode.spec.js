@@ -4,15 +4,15 @@ export class Concept extends Helper {
   static strictMode = true
 
   static optionTypes = {
-    stage: types.string.isRequired
+    stage: types.string.isRequired,
   }
 
   static providerTypes = {
-    checkApproval: types.func.isRequired
+    checkApproval: types.func.isRequired,
   }
 
   static contextTypes = {
-    runtime: types.runtime.isRequired
+    runtime: types.runtime.isRequired,
   }
 }
 
@@ -20,24 +20,22 @@ export class Idea extends Helper {
   static strictMode = false
 
   static optionTypes = {
-    stage: types.string.isRequired
+    stage: types.string.isRequired,
   }
 
   static providerTypes = {
-    checkApproval: types.func.isRequired
+    checkApproval: types.func.isRequired,
   }
 
   static contextTypes = {
-    runtime: types.runtime.isRequired
-  } 
+    runtime: types.runtime.isRequired,
+  }
 }
 
-const runtime = new Runtime()
-  .use(Concept)
-  .use(Idea)
+const runtime = new Runtime().use(Concept).use(Idea)
 
 runtime.ideas.register('wow', () => ({
-  crazy: true
+  crazy: true,
 }))
 
 runtime.concepts.register('valid', () => ({
@@ -57,13 +55,13 @@ describe('Non-strict Helper Mode', function() {
   it('should recognize that invalid provider attributes were provided', function() {
     const idea = runtime.idea('wow')
     idea.checkTypes('provider').pass.should.equal(false)
-  }) 
+  })
 })
 
 describe('Strict Helper Mode', function() {
   it('should work with valid options', function() {
     const concept = runtime.concept('valid', {
-      stage: 'paper napkin'
+      stage: 'paper napkin',
     })
 
     concept.should.be.an('object')
@@ -72,9 +70,9 @@ describe('Strict Helper Mode', function() {
   it('should throw an error on invalid provider when in strict mode', function() {
     try {
       runtime.concept('invalid', {
-        stage: 'paper napkin'
+        stage: 'paper napkin',
       })
-    } catch(error) {
+    } catch (error) {
       error.message.should.match(/invalid provider.*checkApproval/i)
     }
   })
@@ -84,13 +82,12 @@ describe('Strict Helper Mode', function() {
 
     try {
       const concept = runtime.concept('valid', {
-        stage: true
+        stage: true,
       })
-    } catch(error) {
-      threw = error 
-    } 
+    } catch (error) {
+      threw = error
+    }
 
-    threw.should.have.property('message')
-      .that.matches(/invalid options.*boolean.*expected/i)
+    threw.should.have.property('message').that.matches(/invalid options.*boolean.*expected/i)
   })
 })

@@ -83,9 +83,9 @@ export class Registry extends State {
    *
    * @param {String} moduleId
    * @param {Function} loaderFunction
-   * @param {Object} meta
+   * @param {Object} [meta=undefined]
    */
-  register(moduleId, loaderFunction, meta) {
+  register(moduleId, loaderFunction, meta = undefined) {
     const registryId = this.formatId(moduleId)
 
     if (typeof loaderFunction !== 'function') {

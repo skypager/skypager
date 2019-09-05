@@ -10,13 +10,22 @@ import partialRight from 'lodash/partialRight'
 export const lodash = {}
 
 if (typeof global._ !== 'undefined') {
-  Object.assign(lodash, global._)  
+  Object.assign(lodash, global._)
 }
 
 if (typeof global.lodash !== 'undefined') {
-  Object.assign(lodash, global.lodash)  
+  Object.assign(lodash, global.lodash)
 }
 
 export { omit, pick, get, result, partial, partialRight, isObject, isFunction }
 
-export default Object.assign(lodash, { omit, pick, get, result, partial, partialRight, isObject, isFunction })
+export default Object.assign(lodash, {
+  omit,
+  pick,
+  get,
+  result,
+  partial,
+  partialRight,
+  isObject,
+  isFunction,
+})

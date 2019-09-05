@@ -135,7 +135,7 @@ export class Helper extends Entity {
    */
   checkTypes(location) {
     return Helper.checkTypes(this, location, {
-      componentName: this.componentName
+      componentName: this.componentName,
     })
   }
 
@@ -268,7 +268,7 @@ export class Helper extends Entity {
     let { provider = HelperClass.defaultProvider } = options
 
     if (async) {
-      return Promise.resolve(provider).then(resolved => 
+      return Promise.resolve(provider).then(resolved =>
         this.create({ ...options, provider: resolved, async: false }, context)
       )
     }
@@ -285,7 +285,7 @@ export class Helper extends Entity {
         provider,
         options,
         context,
-        optionTypes: HelperClass.optionTypes, 
+        optionTypes: HelperClass.optionTypes,
         contextTypes: HelperClass.contextTypes,
         providerTypes: HelperClass.providerTypes,
         componentName: options.name || provider.name || HelperClass.name,
@@ -304,7 +304,7 @@ export class Helper extends Entity {
       if (!contextResults.pass) {
         throw new InvalidContext(contextResults)
       }
-    } 
+    }
 
     const instance = new HelperClass(options, context)
 
@@ -385,7 +385,7 @@ export class Helper extends Entity {
    * @param {String} [options.componentName=subject.componentName] the name of the component who is being tested
    */
   static checkTypes(subject, location, options = {}) {
-    const key = `${location.replace(/s$/,'')}Types`
+    const key = `${location.replace(/s$/, '')}Types`
     let typeSpecs = subject[key]
 
     const report = checkTypes(subject[location], typeSpecs, {

@@ -68,6 +68,10 @@ export class Runtime extends Entity {
     hideGetter(this, '_feature', () => feature)
 
     setTimeout(() => this.startObservingState(), 0)
+
+    const extensions = []
+    this.extensions = extensions 
+    hideGetter(this, 'extensions', () => extensions)
   }
 
   /**
@@ -137,10 +141,6 @@ export class Runtime extends Entity {
     return lodash
   }
 
-  get chain() {
-    return lodash.chain(this)
-  }
-
   get Helper() {
     return Helper
   }
@@ -164,7 +164,11 @@ export class Runtime extends Entity {
    * @returns {Promise<Runtime>}
    */
   async start() {
-    return this
+    try {
+      await runMiddlewares(this)
+    } catch(error) {
+
+    }
   }
 
   /**
@@ -188,7 +192,11 @@ export class Runtime extends Entity {
     } else if (isObject(extension) && isFunction(extension.attach)) {
       extension.attach(this, options)
       return this
+    } else if (isFunction(extension)) {
+      this.extensions.push([extension.bind(this), options])
     }
+
+    return this
   }
 
   /** 
@@ -224,3 +232,23 @@ export default Runtime
  * @property {Boolean} isHelper
  */
 
+async function runMiddlewares(runtime) {
+  const extensions = runtime.extensions || []
+
+  for(let middleware of extensions.filter(fn => !fn.ran)) {
+    const next = (err) => {
+      if (err) {
+        throw err
+      }      
+    }  
+
+    const [fn, options] = middleware
+
+    try {
+      await fn.call(runtime, next, options)
+    } catch(error) {
+      console.log('error in middleware', error.message)
+      throw error
+    }
+  }
+}
