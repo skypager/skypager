@@ -183,10 +183,10 @@ export class Runtime extends Entity {
     const { isFunction, isObject } = this.lodash
 
     if (extension.isHelper && isFunction(extension.attach)) {
-      extension.attach.call(this, this, options)
+      extension.attach(this, options)
       return this
     } else if (isObject(extension) && isFunction(extension.attach)) {
-      extension.attach.call(this, this, options)
+      extension.attach(this, options)
       return this
     }
   }

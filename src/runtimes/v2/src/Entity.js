@@ -12,11 +12,16 @@ export class Entity {
 
   initialState = {}
 
-  constructor({ uuid = undefined, initialState = undefined, ...options } = {}) {
+  /** 
+   * @param {Object} options
+   * @param {String} [options.uuid]
+   * @param {Object|Function} [options.initialState]
+  */
+  constructor({ initialState = undefined, ...options } = {}) {
     this._options = options
     hideGetter(this, '_options', () => options)
 
-    this.uuid = uuid || uuid()
+    this.uuid = options.uuid || uuid()
     hide(this, 'uuid', this.uuid)
 
     initialState = initialState || this.initialState || this.constructor.initialState

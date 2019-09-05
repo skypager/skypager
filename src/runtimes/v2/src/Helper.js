@@ -62,6 +62,10 @@ export class Helper extends Entity {
    */
   static optionTypes = {}
 
+  get optionTypes() {
+    return this.constructor.optionTypes
+  }
+
   /**
    * An object of prop-types.  This will be used to validate the context this Helper is instantiated
    * with at runtime.  Context is usually automatically passed down and you don't have to worry about it.
@@ -70,11 +74,19 @@ export class Helper extends Entity {
    */
   static contextTypes = {}
 
+  get contextTypes() {
+    return this.constructor.contextTypes
+  }
+
   /**
    * An object of prop-types. Whenever modules of this type are registered with the Helper registry, we can validate the
    * export properties against the prop-types declared here.
    */
   static providerTypes = {}
+
+  get providerTypes() {
+    return this.constructor.providerTypes
+  }
 
   constructor(options = {}, context = {}) {
     const { provider = {} } = options
@@ -114,7 +126,7 @@ export class Helper extends Entity {
    * @type {String}
    */
   get componentName() {
-    const { name = this.provider.name } = this.options.name
+    const { name = this.provider && this.provider.name } = this.options
     return name || this.constructor.name
   }
 
@@ -122,7 +134,9 @@ export class Helper extends Entity {
    * @private
    */
   checkTypes(location) {
-    return Helper.checkTypes(this, location)
+    return Helper.checkTypes(this, location, {
+      componentName: this.componentName
+    })
   }
 
   /**
@@ -254,9 +268,9 @@ export class Helper extends Entity {
     let { provider = HelperClass.defaultProvider } = options
 
     if (async) {
-      return Promise.resolve(provider).then(resolved => {
-        this.create({ ...options, provider, async: false }, context)
-      })
+      return Promise.resolve(provider).then(resolved => 
+        this.create({ ...options, provider: resolved, async: false }, context)
+      )
     }
 
     /**
@@ -271,6 +285,9 @@ export class Helper extends Entity {
         provider,
         options,
         context,
+        optionTypes: HelperClass.optionTypes, 
+        contextTypes: HelperClass.contextTypes,
+        providerTypes: HelperClass.providerTypes,
         componentName: options.name || provider.name || HelperClass.name,
       }
 
@@ -287,7 +304,7 @@ export class Helper extends Entity {
       if (!contextResults.pass) {
         throw new InvalidContext(contextResults)
       }
-    }
+    } 
 
     const instance = new HelperClass(options, context)
 
@@ -368,7 +385,8 @@ export class Helper extends Entity {
    * @param {String} [options.componentName=subject.componentName] the name of the component who is being tested
    */
   static checkTypes(subject, location, options = {}) {
-    let typeSpecs = subject[`${location}Types`]
+    const key = `${location.replace(/s$/,'')}Types`
+    let typeSpecs = subject[key]
 
     const report = checkTypes(subject[location], typeSpecs, {
       componentName:

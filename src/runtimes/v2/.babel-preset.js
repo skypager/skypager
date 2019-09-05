@@ -59,7 +59,7 @@ const plugins = [
   */
 ].filter(Boolean)
 
-module.exports = () => ({
+const config = () => ({
   compact: false,
   presets: [
     [
@@ -86,3 +86,7 @@ module.exports = () => ({
   },
   */
 })
+
+//console.log(JSON.stringify(config(), null, 2))
+//process.exit(0)
+module.exports = config
