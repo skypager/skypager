@@ -17,6 +17,11 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
+    - name: install secrets
+      run: |
+        mkdir -p src/helpers/google-doc/secrets && echo $SERVICE_ACCOUNT_DATA > src/helpers/google-doc/secrets/serviceAccount.json
+        mkdir -p src/features/google/secrets && echo $SERVICE_ACCOUNT_DATA > src/features/google/secrets/serviceAccount.json
+        mkdir -p src/helpers/google-sheet/secrets && echo $SERVICE_ACCOUNT_DATA > src/helpers/google-sheet/secrets/serviceAccount.json
     - name: npm install, build, and test
       run: |
         yarn install
