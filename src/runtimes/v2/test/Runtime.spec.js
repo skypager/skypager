@@ -6,7 +6,16 @@ describe('Runtime', function() {
       runtime.uuid.should.equal(require('../src').default.uuid)
     })
 
-    it('can be extended with async middleware in order', async function() {
+    it('can be extended immediately', function() {
+      runtime.use({
+        attach(h) {
+          h.wow = 1
+        },
+      })
+      runtime.wow.should.equal(1)
+    })
+
+    it('can be extended with async middleware in order when started', async function() {
       const spy = require('sinon').spy()
       runtime
         .use(async function(next) {
@@ -44,6 +53,45 @@ describe('Runtime', function() {
       runtime.should.have.property('state')
       runtime.should.have.property('setState')
       runtime.should.have.property('observe')
+    })
+  })
+
+  describe('centralized logger', function() {
+    it('should use whatever console you give it', function() {
+      const sinon = require('sinon')
+
+      const mock = {
+        log: sinon.spy(),
+        info: sinon.spy(),
+        warn: sinon.spy(),
+        debug: sinon.spy(),
+        error: sinon.spy(),
+      }
+
+      const runtime = new Runtime({ logging: { level: 'debug', console: mock } })
+
+      runtime.info('INFO')
+      runtime.debug('DEBUG')
+      runtime.error('ERROR')
+      runtime.warn('WARN')
+
+      mock.info.should.have.been.called
+      mock.debug.should.have.been.called
+      mock.error.should.have.been.called
+      mock.warn.should.have.been.called
+    })
+
+    it('should share the same logger between helpers and the runtime', function() {
+      const mock = { info: require('sinon').spy() }
+      const runtime = new Runtime({ logging: { console: mock } })
+
+      runtime.features.register('loggable', () => ({}))
+      const loggable = runtime.feature('loggable')
+
+      loggable.info('wow')
+      runtime.info('nice')
+
+      mock.info.should.have.been.calledTwice
     })
   })
 })

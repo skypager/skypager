@@ -1,11 +1,75 @@
 # Skypager Runtime
 > The Helpful JavaScript Framework
 
-The Skypager Runtime library allows you to design a single dependency framework module that works in any JavaScript runtime (web, node.js, electron, react-native, etc.).
+The Skypager Runtime library allows you to design a single dependency framework module that works in any JavaScript runtime (web, node.js, electron, react-native, etc.).  This module can be shared across many different projects.
 
-The module can best be described as a container, and conceptually has a lot in common with Docker containers.
+Skypager provides you with a library, and an opinionated architecture for your JavaScript portfolio.  Using it means you will develop a shared "runtime" that consists of all of the features and capabilities you have in your portfolio(s), which can be enabled as needed on a project by project basis.  Any time you solve a problem in one project, it should be reusable by any other projects you develop in the future, or added to a project you've already developed or are working on currently.    
 
-The container is a per-process singleton. It lets you design Helper classes, which are patterns and adapters which can be loaded by the container.  A Helper is a standard interface for the different types of modules inside your application.  
+## Main Advantages
+
+The main advantages, which I will dive deeper into below, can be summarized:
+
+- [Simpler Project Code](#simpler-project-code)
+- [Feature APIs](#feature-apis)
+- [Reusability across projects](#reusability-across-projects)
+- [Reusability across platforms](#reusability-across-platforms)
+- [Testability](#testability)
+- [Cacheability](#cacheability)
+- [Versionability](#versionability)
+
+### Simpler project code
+
+If you're building a lot of projects, and every project is its own git repo and has its own developer dependencies and things of that nature, that is a lot of weight per project.  By developing a shared runtime module to share between projects, projects which have the same type of source code and same common dependencies (e.g. React, React DOM, React Router, Bootstrap`), can be freed from having to worry about any of this and instead rely on a single dependency module and its APIs to build the unique user experience and value that defines the current project.
+
+Skypager runtime allows your projects to tell you what makes them unique, and hides away the components that make them similar, so you can focus on user value in your code. 
+
+### Feature APIs
+> Features provide common APIs that are provider agnostic (e.g. aws vs google cloud, braintree vs stripe)
+
+Along the lines of simpler project code, imagine the following React component
+
+```javascript
+function LoginForm({ auth }) {
+  const { isLoggedIn, currentUser, login, logout } = auth
+  
+  if (isLoggedIn) {
+    return <div>Logged in as ${currentUser.name}. <button onClick={logout}>Logout</button></div>
+  }
+
+  return (
+    <form>
+      <label for="login">Login</label>
+      <input id="login" type="text" name="login" />
+      <label for="password">Password</label>
+      <input id="password" type="password" name="password" />
+      <button onClick={login} >Login</button>
+    </form>
+  )
+}
+```
+
+A login function that takes a username and password, and logs the user in.  A logout function that logs the user out, and info about the current user if they're logged in.  This is the essence of any authentication feature.  Anyone who has developed their own from scratch knows there is a ton more that goes into it, behind the scenes - setting up users, credentials, all the security, etc.  
+
+The [Feature](docs/Feature.md) class provides you with a way of building features which focus on the essence of what your applications need, and assume 
+you will provide it with some bindings to the underlying implementation which makes everything work.
+
+Your applications code benefits from this abstraction to contain only the essential code that describes the behavior.  The implementation details are neatly tucked away in separate, testable, versionable, cacheable modules. 
+
+### Reusability across projects
+### Reusability across platforms
+### Testability
+### Cacheability 
+### Versionability
+
+## What is a runtime?
+
+The runtime module can best be described as a container, and conceptually has a lot in common with Docker containers.
+
+The container is a per-process singleton. 
+
+It uses Helper classes, which are similar to a React Component, but can be headless (i.e. no render).  A Helper class defines patterns and adapters which can be loaded by the container.  
+
+A Helper is a standard interface for the different types of modules inside your portfolio of applications.
 
 For example, take the following project structure:
 
@@ -24,19 +88,66 @@ For example, take the following project structure:
   - features
 ```
 
+This looks like a Ruby on Rails app.  And like a Ruby on rails app, it encourages you to take advantage of naming conventions.  
+
+The Helper class will align with the naming conventions of most project's source code (pluralized folder names)
+
 You can define a Helper for `models`, `controllers`, `views`, and `features`.  And a runtime which is capable of using all of them
 
 ```javascript
 import runtime, { Helper } from '@skypager/runtime'
 
-class Model extends Helper { }
-class View extends Helper { }
-class Controller extends Helper { }
-
 export default runtime
-  .use(Model)
-  .use(View)
-  .use(Controller)
+  .use(Model, { folder: runtime.resolve('app', 'models') })
+  .use(View, { folder: runtime.resolve('app', 'views') })
+  .use(Controllers, { folder: runtime.resolve('app', 'controllers') })
+
+// framework/helpers/Model.js
+export class Model extends Helper { 
+  get tableName() {
+    const { pluralize } = this.stringUtils
+    return pluralize(this constructor.name).toLowerCase()
+  }  
+
+  async find() {}
+  async findOne() {}
+  async update() {}
+  async delete() {}
+  async create() {}
+
+  // attach the model helper class, then discover all instances of model type modules in the project
+  static attach(runtime, options) {
+    Helper.attach.call(this, runtime, options)
+    
+    runtime.fsx.readdirSync(options.folder).forEach((modelFile) => {
+      runtime.models.register(modelFile, () => require(modelFile))
+    })
+  }
+}
+
+// framework/helpers/View.js
+export class View extends Helper { 
+  get model() {
+    return this.runtime.models.forView(this)
+  }
+}
+
+// framework/helpers/Controller.js
+export class Controller extends Helper { 
+  get model() {
+    return this.runtime.models.forController(this)
+  }
+}
+
+// app/models/book.js
+export class Book extends Model {
+
+}
+
+// app/controllers/books.js
+export class BooksController extends Controller {
+
+}
 ```
 
 This runtime module is essentialy a framework, and can power any other projects which have the same folder / file structure and naming conventions.
@@ -67,7 +178,7 @@ A registry is an observable, queryable directory of named JavaScript objects, e.
 
 Registries power the dynamic, data driven programming techniques , and lazy loading, used by most of Skypager.
 
-## Example Runtime API
+## Runtime API Walkthrough 
 
 The runtime module exports the [Runtime singleton](docs/Runtime.md) as its default export.  The runtime singleton is intended to be a global, root level object (the way window, or document are in the browser.)
 
@@ -75,7 +186,7 @@ The runtime module exports the [Runtime singleton](docs/Runtime.md) as its defau
 import runtime from '@skypager/runtime'
 ```
 
-This is essentially `new Runtime()`.  We rely on the module.cache to ensure this is always the same object. You can call `runtime.observe` to be notified whenever the runtime changes state.  You can call `runtime.setState({ newState: 1 })` to update the state and trigger any observers.  You can `emit` events, you can listen for events.  You can register dependencies for other components in the system to use.
+This is essentially `new Runtime()`.  We rely on the native require.cache to ensure this is always the same object in node, or the window global in the browser. You can call `runtime.observe` to be notified whenever the runtime changes state.  You can call `runtime.setState({ newState: 1 })` to update the state and trigger any observers.  You can `emit` events, you can listen for events.  You can register dependencies for other components in the system to use.
 
 By default, the runtime attaches the [Feature](docs/Feature.md) helper, which is a subclass of [Helper](docs/Helper.md)
 
@@ -88,7 +199,7 @@ This is how every helper is enabled on the runtime.  You can define your own hel
 
 Attaching a helper, creates two properties on the runtime.
 
-An instance of [Registry](docs/Registry.md)
+By default, there is a `runtime.features` that is an an instance of [Registry](docs/Registry.md)
 
 ```javascript
 runtime.features
@@ -96,15 +207,83 @@ runtime.features.available // => ['vm','profiler','logger']
 runtime.feature.register('vm', () => require('./features/vm'))
 ```
 
-And a factory function which creates instances of [Feature](docs/Feature.md)
+And a factory function `runtime.feature` which creates instances of [Feature](docs/Feature.md)
 
 ```javascript
 // anything that has been registered with the registry can be created by name
 const vm = runtime.feature('vm')
 ```
 
-## Guides
+## Example Helper
 
-### Create your own runtime
+Now that we've seen how a standard helper works, Let's look at an example `Server` helper.
 
+First, we define the class by extending Helper.
 
+```javascript
+import { types, Runtime, Helper } from '@skypager/runtime'
+import express from 'express'
+
+export class Server extends Helper { 
+  static optionTypes = {
+    port: types.number
+  }
+
+  static defaultOptions = {
+    port: 3000
+  }
+
+  initialState = {
+    listening: false
+  }
+
+  start() {
+    const { port } = this.options
+    this.setup()
+
+    return new Promise((resolve, reject) => {
+      this.app.listen(port, (err) => {
+        err ? reject(err) : resolve()
+      })
+    }).then(() => {
+      this.emit('started')
+      this.setState({ listening: true })
+    })
+  }
+
+  setup(options = {}) {
+    this.app = express()    
+    const { setup } = provider
+
+    setup.call(this.app, options)
+  }
+} 
+```
+
+Then we extend an instance of the runtime with that Helper
+
+```javascript
+export const runtime = new Runtime()
+
+export default runtime.use(Server)
+```
+
+This allows us to register any server providers with the servers registry.
+
+```javascript
+// runtime.servers is an instance of Registry
+// app is the name of a server module 
+// the module being registered provides the Server defined providerTypes
+runtime.servers.register('app', () => ({
+  setup(app) {
+    app.get('/', (req, res) => res.json({ hello: "world" }))
+  }
+}))
+```
+
+And then create that server by name, pass it options, and start it 
+
+```javascript
+// runtime.server is a factory function which creates instances of Server accepting Server defined optionTypes
+runtime.server('app', { port: 3001 }).start()
+```

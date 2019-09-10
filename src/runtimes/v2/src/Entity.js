@@ -1,5 +1,5 @@
 import uuid from 'uuid'
-import { getter, hideGetter, hide } from './utils/prop-utils'
+import { hideGetter, hide } from './utils/prop-utils'
 import State from './State'
 import Bus from './Bus'
 
@@ -12,10 +12,11 @@ export class Entity {
 
   /**
    * @param {Object} options
+   * @param {String} [options.name]
    * @param {String} [options.uuid]
    * @param {Object|Function} [options.initialState]
    */
-  constructor({ initialState = undefined, ...options } = {}) {
+  constructor({ name, initialState = undefined, ...options } = {}) {
     this._options = options
     hideGetter(this, '_options', () => options)
 
@@ -29,6 +30,7 @@ export class Entity {
     }
 
     this.state = new State({ initialState })
+
     // non-configurable
     hide(this, 'state', this.state, { configurable: false, writable: false })
     hide(this, 'initialState', initialState, { configurable: true, writable: false })
@@ -60,6 +62,13 @@ export class Entity {
     this.stopObservingState = stopObserving
     hideGetter(this, 'startObservingState', () => startObserving)
     hideGetter(this, 'stopObservingState', () => stopObserving)
+
+    this._name = String(name || uniqueName(this))
+    hide(this, '_name', this._name)
+  }
+
+  get name() {
+    return this._name
   }
 
   get options() {
@@ -213,3 +222,15 @@ export class Entity {
 }
 
 export default Entity
+
+const names = new Map()
+function uniqueName(entity) {
+  const name = entity.componentName || entity.constructor.name
+
+  if (!names.has(name)) {
+    names.set(name, 0)
+  }
+
+  names.set(name, names.get(name) + 1)
+  return `${name}${names.get(name)}`
+}

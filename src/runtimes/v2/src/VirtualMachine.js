@@ -35,7 +35,16 @@ export class VirtualMachine extends Feature {
     return this.vm.createScript(fromCode)
   }
 
-  createContext(fromObject) {}
+  /**
+   * @param {import("./Helper").Helper|import("./Runtime").Runtime|Object} fromObject
+   */
+  createContext(fromObject) {
+    if (fromObject.context) {
+      fromObject = fromObject.context
+    }
+
+    return vm.createContext(fromObject)
+  }
 
   runCode(code, context = {}) {}
 

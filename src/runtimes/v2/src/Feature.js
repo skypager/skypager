@@ -88,6 +88,18 @@ export class Feature extends Helper {
   async checkSupport() {
     return true
   }
+
+  /**
+   * The Runtime automatically creates a features registry and factory function, so there isn't any point
+   * in doing that here.  Instead we override it so you can subclass a Feature and say runtime.use(MySubclass)
+   * and this will give you the chance to register the feature ( so other instances of the runtime can also use it ) and enable it.
+   *
+   * Enabling a feature can usually create a reference to that feature on the runtime.
+   */
+  static attach(host, options = {}) {
+    host.features.register(host.componentName, () => this)
+    Promise.resolve(host.feature(host.componentName, options).enable())
+  }
 }
 
 function runEnableHook(feature) {}

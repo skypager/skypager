@@ -119,6 +119,22 @@ export class Helper extends Entity {
     }
   }
 
+  log(...args) {
+    return this.runtime.logger.log(prefix(args, this))
+  }
+  debug(...args) {
+    return this.runtime.logger.debug(prefix(args, this))
+  }
+  info(...args) {
+    return this.runtime.logger.info(prefix(args, this))
+  }
+  warn(...args) {
+    return this.runtime.logger.warn(prefix(args, this))
+  }
+  error(...args) {
+    return this.runtime.logger.error(prefix(args, this))
+  }
+
   /**
    * Component name will be whatever the Helper instance options.name,
    * provider.name, or class constructor name is.
@@ -443,3 +459,15 @@ export { types, checkTypes }
 export default Helper
 
 const runtimes = new WeakMap()
+
+function prefix(logArgs, helper) {
+  const prefix = `[${helper.name}]`
+
+  if (typeof logArgs[0] === 'string') {
+    logArgs[0] = `${prefix} ${logArgs[0]}`
+  } else {
+    logArgs.unshift(`${prefix} `)
+  }
+
+  return logArgs
+}

@@ -3,45 +3,27 @@ import Helper from './Helper'
 import Registry from './Registry'
 import Feature, { attach as attachFeature } from './Feature'
 import State from './State'
+import Logger from './Logger'
 import { hideGetter } from './utils/prop-utils'
 import lodash from './lodash'
 
 
 /**
- * The Runtime is a container for any JavaScript application in any environment.  All JavaScript programs exist 
- * assuming the existence of a few global objects. 
- * 
- * - document / window in the browser 
- * - module / require / process ) in node
- * 
- * Each object is a potentially infinite tree of objects, with properties that point to other objects,
- * or functions, lazy loadable properties, async loading, etc.
- *
- * The Runtime class allows you to define a global service like object (e.g. window, document, global) that is
- * a platform agnostic container for "your" code, capable of "dependency injection", and capable of acting as an
- * inversion of control service.  
- * 
- * When you write an application, whether in the browser, or node, the `runtime` singleton is something you can talk to 
- * to manage the state and lifecycle of an application, to learn about the environment and which features are available 
- * on the runtime, as well as a module loader for you to interact with so that you can easily build your applications as 
- * small independent modules or groups of modules for a team to divide responsibility.  
- *
- * You should design your JavaScript application around the fact that 80% of the functionality is derived
- * from open source third party dependencies, which you change less frequently, and can easily load from
- * a cache such as a CDN.  You don't want a small change in one of your React components to require you to download
- * the whole React, React DOM, and other libraries.  
- * 
- * You should also design them around lazy loading, so you only load the code you need to serve the current 
- * experience, and lazy load the rest at whatever point it is needed by the application.  There's no sense downloading
- * code for premium users, when a free trial user is logged into your application.
- *
- * The runtime provides you with a system to do all of this in a clean and logical way.
+ * The Runtime is intended to act as a global service (like window or document) for cross platform
+ * JavaScript applications 
  */
 export class Runtime extends Entity {
   vm  
 
+  /** 
+   * @param {Object} options
+   * @param {LoggingOptions} [options.logging] options for the logger 
+  */
   constructor(options = {}, context = {}) {
-    super(options)
+    super({
+      ...lodash.omit(options, 'logging'),
+      initialState: global.__INITIAL_STATE__ 
+    })
 
     this._context = context
     hideGetter(this, '_context', () => context)
@@ -72,7 +54,51 @@ export class Runtime extends Entity {
     const extensions = []
     this.extensions = extensions 
     hideGetter(this, 'extensions', () => extensions)
+
+    const loggingOptions = {
+      console,
+      ...options.logging,
+    }
+
+    const logger = new Logger({
+      prefix: `runtime`,
+      level: 'info',
+      ...loggingOptions
+    })
+
+    this.logger = logger
+    hideGetter(this, 'logger', () => logger)
   }
+
+  disableLogging() {
+    this.logger.disable()
+    return this
+  }
+
+  enableLogging(level, options = {}) {
+    this.logger.enable(level)
+
+    if (options.retain) {
+      const store = (level, args) => {
+        this.logger.messages.push({ level, args, timestamp: +new Date() })
+      }
+
+      this.logger.off(':level', store)
+
+      this.disableLogRetention = () => {
+        this.logger.off(':level', store)  
+        delete this.disableLogRetention
+      }
+    }
+
+    return this
+  }
+  
+  log(...args) { return this.logger.log(...args) }
+  debug(...args) { return this.logger.debug(...args) }
+  info(...args) { return this.logger.info(...args) }
+  warn(...args) { return this.logger.warn(...args) }
+  error(...args) { return this.logger.error(...args) }
 
   /**
    * @type {Registry}
@@ -180,7 +206,7 @@ export class Runtime extends Entity {
    * This gives us full control over the boot cycle of applications built against a shared
    * runtime.
    *
-   * @param {*} extension
+   * @param {ExtensionModule|String|Function} extension
    * @param {Object} [options={}]
    */
   use(extension, options = {}) {
@@ -194,6 +220,8 @@ export class Runtime extends Entity {
       return this
     } else if (isFunction(extension)) {
       this.extensions.push([extension.bind(this), options])
+    } else if (typeof extension === 'string' && this.features.has(extension)) {
+      Promise.resolve(this.feature(extension, options).enable())
     }
 
     return this
@@ -228,8 +256,8 @@ export default Runtime
  * Loading an extension is done through runtime.use(ExtensionModule1).use(ExtensionModule2)
  * 
  * @typedef {Object|Function} ExtensionModule
- * @property {Function} attach
- * @property {Boolean} isHelper
+ * @property {Function} [attach]
+ * @property {Boolean} [isHelper]
  */
 
 async function runMiddlewares(runtime) {
@@ -252,3 +280,10 @@ async function runMiddlewares(runtime) {
     }
   }
 }
+
+/** 
+ * @typedef {Object} LoggingOptions
+ * @property {Number} [retain=0] number of messages to retain if any
+ * @property {String|Number} [level=info] one of info,debug,warn,error
+ * @property {Object<String,Function>} [console=console]
+*/

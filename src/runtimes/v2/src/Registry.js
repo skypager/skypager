@@ -10,11 +10,12 @@ import { omit } from './lodash'
 export class Registry extends State {
   /**
    * @param {Object} options
+   * @param {String} options.name
    * @param {Object} [options.api={}] an object of functions to extend this instance of the registry with.
    * @param {Function} [options.formatId] a function which will take an arbitrary id and format it according to the registry's own naming logic requirements.
    */
   constructor(options = {}) {
-    super(omit(options, 'api', 'formatId'))
+    super(omit(options, 'name', 'api', 'formatId'))
 
     const metadata = new State()
     this.metadata = metadata
@@ -24,8 +25,10 @@ export class Registry extends State {
     this.emitter = events
     hide(this, 'emitter', events)
 
-    const { formatId, api } = options
+    const { name, formatId, api } = options
 
+    this._name = name
+    hide(this, '_name', name, false)
     this.idFormatter = typeof formatId === 'function' ? formatId : id => id
 
     if (api) {
@@ -37,6 +40,10 @@ export class Registry extends State {
         configurable: true,
       })
     }
+  }
+
+  get name() {
+    return this._name
   }
 
   /**

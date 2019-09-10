@@ -34,9 +34,15 @@ describe('Helper', function() {
         .that.is.an('object')
         .that.has.property('copies', 0)
     })
-    it('setState w/ object')
-    it('setState w/ function')
-    it('observe state')
-    it('emits state change events')
+    it('emits state change events', function() {
+      const book = runtime.book('1984', { initialState: { copies: 0 } })
+      const spy = require('sinon').spy()
+      book.on('stateDidChange', spy)
+      book.setState(current => ({
+        ...current,
+        copies: current.copies + 1,
+      }))
+      spy.should.have.been.called
+    })
   })
 })
