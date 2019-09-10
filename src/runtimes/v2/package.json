@@ -56,7 +56,7 @@
     "projectType": "runtime"
   },
   "gitHead": "9392473e420c7a46eb0be31bc7739ca16c8eb130",
-  "keywords": [],
+  "keywords": ["skypager", "runtime", "dependency injection", "inversion of control"],
   "contributors": [],
   "browserslist": [
     ">0.2%",
