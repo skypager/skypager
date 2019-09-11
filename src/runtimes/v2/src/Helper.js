@@ -3,6 +3,7 @@ import Registry from './Registry'
 import { Runtime } from './Runtime'
 import { getter, hideGetter } from './utils/prop-utils'
 import types, { check as checkTypes } from './PropTypes'
+import { pick } from './lodash'
 // import { nonenumerable, nonconfigurable } from 'core-decorators'
 
 export class Helper extends Entity {
@@ -119,6 +120,81 @@ export class Helper extends Entity {
     }
   }
 
+  get options() {
+    const base = super.options
+
+    return this.constructor.strictMode ? pick(base, Object.keys(this.optionTypes)) : base
+  }
+  /**
+   * Helpers are designed to be mere interfaces on top of modules and functions which are registered and known ahead of time before
+   * the instances of the Helpers are created by the program.  `this.impl` combines the object they are created with, with
+   * the existing / cached modules that are registered as providers.  In your Helper class implementation, you can refer to `this.impl`
+   * as the combination of provider / options object, where options takes precedence over a provider property of the same name.
+   *
+   * @type {Object}
+   */
+  get impl() {
+    return {
+      ...this.context,
+      ...this.provider,
+      ...this.options,
+    }
+  }
+
+  /**
+   * A Helper can dynamically modify the provider object it was created with.  This can be useful to,
+   * for example, wrap certain provider hooks or methods with logging or profiling, or to delegate similar
+   * functionality (e.g login / logout) to different providers of that service.
+   */
+  set provider(patch) {
+    Object.assign(this._provider, patch)
+  }
+
+  /**
+   * Dynamic method delegation.
+   *
+   * When a helper is created against a module in a helper registry, this cached module object
+   * is referred to as the helper's provider.  This object will contain functions that a helper
+   * can delegate responsibility to.  An Authentication feature can provide a single `login` function
+   * that works with all of the different auth providers, or an  EmailNotification feature can provide
+   * a single `sendEmail` function that works with all the things.
+   *
+   * The provider is the "private" implementation.  The Helper is the public API.
+   */
+  get provider() {
+    const base = {
+      ...this.constructor.defaultProvider,
+      ...this._provider,
+    }
+
+    return this.constructor.strictMode ? pick(base, Object.keys(this.providerTypes)) : base
+  }
+
+  /**
+   * The Context object can be used as the last argument to provider implementation hooks
+   */
+  get context() {
+    const helper = this
+    const { runtime } = this
+
+    const ctx = this.constructor.strictMode
+      ? pick(this._context, Object.keys(this.contextTypes))
+      : this._context
+
+    return {
+      ...ctx,
+      get runtime() {
+        return runtime
+      },
+      get me() {
+        return helper
+      },
+      get my() {
+        return helper
+      },
+    }
+  }
+
   log(...args) {
     return this.runtime.logger.log(prefix(args, this))
   }
@@ -153,54 +229,6 @@ export class Helper extends Entity {
     return Helper.checkTypes(this, location, {
       componentName: this.componentName,
     })
-  }
-
-  /**
-   * A Helper can dynamically modify the provider object it was created with.  This can be useful to,
-   * for example, wrap certain provider hooks or methods with logging or profiling, or to delegate similar
-   * functionality (e.g login / logout) to different providers of that service.
-   */
-  set provider(patch) {
-    Object.assign(this._provider, patch)
-  }
-
-  /**
-   * Dynamic method delegation.
-   *
-   * When a helper is created against a module in a helper registry, this cached module object
-   * is referred to as the helper's provider.  This object will contain functions that a helper
-   * can delegate responsibility to.  An Authentication feature can provide a single `login` function
-   * that works with all of the different auth providers, or an  EmailNotification feature can provide
-   * a single `sendEmail` function that works with all the things.
-   *
-   * The provider is the "private" implementation.  The Helper is the public API.
-   */
-  get provider() {
-    return {
-      ...this.constructor.defaultProvider,
-      ...this._provider,
-    }
-  }
-
-  /**
-   * The Context object can be used as the last argument to provider implementation hooks
-   */
-  get context() {
-    const helper = this
-    const { runtime } = this
-
-    return {
-      ...this._context,
-      get runtime() {
-        return runtime
-      },
-      get me() {
-        return helper
-      },
-      get my() {
-        return helper
-      },
-    }
   }
 
   /**
