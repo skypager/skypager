@@ -1,5 +1,5 @@
 import hashObject from './utils/object-hash'
-import { hideGetter, hide } from './utils/prop-utils'
+import { hide } from './utils/prop-utils'
 
 /**
  * State provides an observable Map implementation
