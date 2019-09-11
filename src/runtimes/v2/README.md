@@ -56,10 +56,55 @@ you will provide it with some bindings to the underlying implementation which ma
 Your applications code benefits from this abstraction to contain only the essential code that describes the behavior.  The implementation details are neatly tucked away in separate, testable, versionable, cacheable modules. 
 
 ### Reusability across projects
+
+The Runtime concept has a lot in common with [Inversion Of Control](https://en.wikipedia.org/wiki/Inversion_of_control) and [Dependency Injection](https://en.wikipedia.org/wiki/Dependency_injection).  You could say it uses forms of both.
+
+Runtimes, the Helpers it has, and the implementations of those helpers generally define a clean module boundary between the code that is specific to your app, and the code which is more general to any app.
+
+This means that you can develop the code on each side of this boundary independently.  One team (or you, on a specific day) can focus on the shared framework, and another on the specific project, and never touch the same files.
+
+This leads to a situation where features and enhancements you make to the project are easier to copy between projects, because they have less hard dependencies to the rest of the project.  
+
 ### Reusability across platforms
-### Testability
-### Cacheability 
+
+When your application / project code does not talk directly to the underlying platform (e.g. to the browser, or to node) but instead talks to an instance of a runtime, this gives you the flexibility to use an API in your application, and implement it differently depending on the current platform.
+
+Imagine you had a React component which was a file editor.  You want this component to work in electron, where it has access to native filesystem APIs, and in the browser, where you rely on a remote file storage system like amazon s3. 
+
+Would you rather have a separate React component for the browser and electron? Or should you have one component that has a file system adapter that does the right thing either way?
+
+By developing your application's logic on top of the runtime concept, you make it easier to reuse code by having an abstraction responsible for cross-platform negotiation behind the scenes instead of in the code you work on actively. 
+
 ### Versionability
+
+Boundaries naturally exist between different modules in a project:
+
+- Underlying 3rd party frameworks
+- the Runtime, common Helpers and their implementations
+- Application Code which uses the runtime and its helpers
+- UI Code and Themes
+
+The Runtime architecture makes it easy to structure your code so that there is minimal overlap and each module can be changed and versioned independently.
+
+This makes it easier as an application grows to isolate bugs, provide backward compatibility, to do A/B testing, and a lot of other things.  
+
+### Testability
+
+With all of the advantages described above, it is hopefully clear that having modules which are easily isolated from one another and from the rest of the dependencies in your project, leads to a general improvement in testability of your code.
+
+There are specific aspects of the Runtime itself, and especially in the [Helper APIs](docs/guides/flexible-helpers.md) that make things even easier to test.
+
+### Cacheability 
+
+To achieve the best user performance, you probably need multi layers of caching.  Every module you import is a cache point.  
+
+You want to be able to cache modules for as long as possible.  
+
+You want to avoid changes in a single component from requiring you to download all of React again, so you'll want to separate them.
+
+Doing this well also effects build performance if you're using tools like Webpack.  Skypager's design helps you follow best practices for this. 
+
+See [This Guide](docs/guides/cacheable-helpers.md) for more info.
 
 ## What is a runtime?
 

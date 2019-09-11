@@ -109,7 +109,6 @@ The Helper class is used to define a module type, or pattern.  A module is any J
 
 A module type or pattern specifies, this module can have exports named a, b, and c.  It must have exports named x, y, and z.  Additionally, export a should be a function, export b should be a number, etc.
 
-
 The instances of the Helper class that get created, have a standard API for working with that module. This says, As a user of the module type, you only need to know about these public functions or properties.
 
 For example:
@@ -122,19 +121,34 @@ Every feature, server, client, under the hood, can be entirely different.
 
 As an Architect, you want to be nevertheless be able to combine different projects / packages together very easily with out having to dive into the details of every component.  You describe what a thing does and how it is used within the program, the Helper's API handles the particulars of offloading the details to an implementation module, letting you use the friendly API you want instead.
 
-Here is an example Helper, called Server.
+## Example Server Helper
 
-We know from the name alone, that we'll have something like the following API
+If the helper is named Server, we can assume the following API will exist.
 
 ```javascript
 runtime.servers.register('app', () => require('./servers/app'))
 runtime.servers.register('app1', () => require('./servers/app1'))
 
-runtime.server('app', { port: 3000 }).start()
-runtime.server('app1', { port: 3001 }).start()
+const server1 = runtime.server('app', { port: 3000 })
+const server2 = runtime.server('app1', { port: 3001 })
 ```
 
-This is powered by a class that might look like
+This is the default behavior
+
+```javascript
+class Server extends Helper {
+  // if left unspecified, will be stringUtils.singularize(this.name).toLowerCase()
+  static factoryName = 'server'
+  // if left unspecified, will be stringUtils.pluralize(this.name).toLowerCase()
+  static registryName = 'servers'
+}
+
+runtime.use(Server)
+```
+
+The Server Helper in this example creates instances of a server, backed by a helper implementation module.
+
+The heler implementation module is responsible for configuring the backend API framework, which by default will be express but can be swapped out for Hapi.
 
 ```javascript
 import { startExpress, createExpress } from 'some-default-express-implementation'
@@ -184,9 +198,11 @@ class Server extends Helper {
 }
 ```
 
-For which any module can provide the implementation.
+Now any module can provide the implementation details which make this heper work.
 
-A module which accepts the default express provider for http routing
+We might have:
+
+1) A module which accepts the default express provider for http routing
 
 ```javascript
 runtime.servers.register('app', () => {
@@ -199,12 +215,12 @@ runtime.servers.register('app', () => {
 })
 ```
 
-An express server which didn't get the memo about getting it for free, or wants to use its own express version
+2) An module that didn't get the memo about getting express for free, or maybe wants to use its own express version
 
 ```javascript
 runtime.servers.register('express-server', () => {
   create: () => {
-    const express = require('express')
+    const express = require('express-fork')
     const app = express()
     // configure some express stuff
     return app
@@ -228,7 +244,7 @@ runtime.servers.register('express-server', () => {
 })
 ```
 
-A Hapi Server
+3) Somebody who just doesn't like express and wants to use Hapi Server instead
 
 ```javascript
 import Hapi from 'hapi'
@@ -262,7 +278,7 @@ runtime.servers.register('hapi-server', () => {
 }
 ```
 
-The `Server` helper lets you work with two completely different implementations with different underlying frameworks in the same way:
+The `Server` helper lets you work with each completely different implementation, even with different underlying frameworks, in the same way:
 
 ```javascript
 const express = runtime.server('express-server', {
@@ -274,22 +290,26 @@ const hapi = runtime.server('hapi-server', {
 })
 ```
 
-and also provides your sensible defaults:
+And without any options at all, you could be providing your own opinionated set of defaults as we are here by choosing express.
 
 ```javascript
 const standardApp = runtime.server('app')
 ```
 
-This was just an example.  This document will contain the specifics on how to build your own helpers
+This was just an example.  This document will contain the specifics on how to build your own helpers.
 
 
 ## What makes a good Helper?
 
 Helpers are designed to make working with JavaScript modules more intentional.  Instead of treating every JavaScript module as the lowest common denominator of some named object that you can import that provides some functions, classes, and APIs, the Helper lets you define your own types of modules which export specific, agreed upon named functions, classes, and data.  Instead of being bound by the limitations of bundlers which discourage dynamic imports in favor of statically analyzable imports, Helpers take care of these concerns for you and let developers use consistent, friendly APIs for loading these specific dependencies.
 
-As an Architect or Framework Author, Helpers can provide observable state, events, pub sub, dependency injection, and a bunch of other useful techniques in the context of any pure low-level module.  This lets you tap into an implementation however you need to, to provide a normalized API, state, and events to any consumer of the helper.    
-   
-As a developer, you would work with an an instance of the Helper and work with the module through that Helper's interface.  Instead of wiring up an express server through module boilerplate, you would just say
+As an Architect or Framework Author, Helpers can provide observable state, events, pub sub, dependency injection, and a bunch of other useful techniques in the context of any pure low-level module.  
+
+This lets you tap into an implementation however you need to, to provide a normalized API, state, and events to any consumer of the helper, or to take advantage of the observability to instrument it for logging, metrics, error monitoring, etc.     
+
+As a developer,   
+
+Instead of wiring up an express server through module boilerplate, you would just say
 
 ```javascript
 const app = runtime.server('express')
@@ -300,6 +320,8 @@ and get something you can start
 ```javascript
 await app.start()
 ```
+
+The helper would read your project, find endpoints, and wire them all up for you.
 
 ## Attaching Helpers
 
@@ -334,13 +356,15 @@ class Server extends Helper {
 }
 ```
 
-which gets attach by
+which gets attached by
 
 ```javascript
 runtime.use({
   attach: Server.attach
 })
 ```
+
+This creates our registry and factory function, which is how we build instances of our helpers.
 
 ## Factory Function
 
