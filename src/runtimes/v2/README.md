@@ -48,12 +48,22 @@ function LoginForm({ auth }) {
 }
 ```
 
-A login function that takes a username and password, and logs the user in.  A logout function that logs the user out, and info about the current user if they're logged in.  This is the essence of any authentication feature.  Anyone who has developed their own from scratch knows there is a ton more that goes into it, behind the scenes - setting up users, credentials, all the security, etc.  
+The auth prop that gets passed in is an instance of the Feature class.  It provides:
+
+- A login function that takes a username and password, and logs the user in.  
+- A logout function that logs the user out. 
+- info about the current user if they're logged in.  
+
+This is the essence of any authentication feature.  
+
+Anyone who has developed their own from scratch knows there is a ton more that goes into it, behind the scenes - setting up users, credentials, all the security, etc.  
 
 The [Feature](docs/Feature.md) class provides you with a way of building features which focus on the essence of what your applications need, and assume 
 you will provide it with some bindings to the underlying implementation which makes everything work.
 
 Your applications code benefits from this abstraction to contain only the essential code that describes the behavior.  The implementation details are neatly tucked away in separate, testable, versionable, cacheable modules. 
+
+This is an example of [The Adapter Pattern](https://en.wikipedia.org/wiki/Adapter_pattern)
 
 ### Reusability across projects
 
@@ -63,7 +73,7 @@ Runtimes, the Helpers it has, and the implementations of those helpers generally
 
 This means that you can develop the code on each side of this boundary independently.  One team (or you, on a specific day) can focus on the shared framework, and another on the specific project, and never touch the same files.
 
-This leads to a situation where features and enhancements you make to the project are easier to copy between projects, because they have less hard dependencies to the rest of the project.  
+This leads to a situation where features and enhancements you make to the project are easier to copy between projects, because they have less hard dependencies to the rest of the project, but instead talk to a common layer. 
 
 ### Reusability across platforms
 
@@ -74,6 +84,8 @@ Imagine you had a React component which was a file editor.  You want this compon
 Would you rather have a separate React component for the browser and electron? Or should you have one component that has a file system adapter that does the right thing either way?
 
 By developing your application's logic on top of the runtime concept, you make it easier to reuse code by having an abstraction responsible for cross-platform negotiation behind the scenes instead of in the code you work on actively. 
+
+Again, this is thanks to [The Adapter Pattern](https://en.wikipedia.org/wiki/Adapter_pattern)
 
 ### Versionability
 
