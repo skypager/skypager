@@ -45,4 +45,12 @@ describe('async helpers runtime', function() {
       .that.is.an('object')
       .that.has.property('path', '/')
   })
+
+  it('accepts an options object with promises and resolves them first', async function() {
+    const homePage = await runtime.page('HomePage', {
+      asyncOption: async () => true,
+    })
+
+    homePage.impl.should.have.property('asyncOption', true)
+  })
 })

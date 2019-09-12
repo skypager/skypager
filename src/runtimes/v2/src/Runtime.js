@@ -13,6 +13,8 @@ const processIsAvailable = typeof process !== 'undefined'
 const isUndefined = val => typeof val === 'undefined'
 
 
+export const features = Feature.createRegistry({ name: 'features', formatId: (id) => id.replace(/\.js$/, '').replace(/[\/\\]?index$/,'') })
+
 /**
  * The Runtime is intended to act as a global service (like window or document) for cross platform
  * JavaScript applications 
@@ -49,17 +51,12 @@ export class Runtime extends Entity {
 
     trackFeatureState(this)
 
-    const features = Feature.createRegistry({ host: this })
-    this._features = features
-
-    features.register('environment-detection', () => environmentDetection)
-
-    hideGetter(this, '_features', () => features)
 
     const feature = Feature.createFactory({
-      registry: features,
+      registry: this.features,
       host: this,
     })
+
     this._feature = feature
     hideGetter(this, '_feature', () => feature)
 
@@ -120,13 +117,6 @@ export class Runtime extends Entity {
   info(...args) { return this.logger.info(...args) }
   warn(...args) { return this.logger.warn(...args) }
   error(...args) { return this.logger.error(...args) }
-
-  /**
-   * @type {Registry}
-   */
-  get features() {
-    return this._features
-  }
 
   /**
    * @returns {Feature}
@@ -406,6 +396,14 @@ export class Runtime extends Entity {
       ...this.context,
       ...context,
     })
+  }
+
+  static get features() {
+    return features  
+  }
+  
+  get features() {
+    return features
   }
 }
 

@@ -4,6 +4,8 @@ import { Runtime } from './Runtime'
 import { getter, hideGetter } from './utils/prop-utils'
 import types, { check as checkTypes } from './PropTypes'
 import { pick } from './lodash'
+import resolveObject from './utils/resolve-object'
+
 // import { nonenumerable, nonconfigurable } from 'core-decorators'
 
 export class Helper extends Entity {
@@ -351,13 +353,13 @@ export class Helper extends Entity {
       throw new InvalidRuntimeError(HelperClass.name)
     }
 
-    let { provider = {} } = options
-
     if (async) {
-      return Promise.resolve(provider).then(resolved =>
-        this.create({ ...options, provider: resolved, async: false }, context)
+      return resolveObject(options).then(resolved =>
+        this.create({ ...resolved, async: false }, context)
       )
     }
+
+    let { provider } = options
 
     if (
       provider &&
@@ -447,11 +449,15 @@ export class Helper extends Entity {
    * or a Registry that has information about all the clients or features, etc.
    *
    * @param {Object} options
+   * @param {String} [options.name]
    * @param {Function} [options.formatId] a function which will format the ID to a standard format.
    * @returns {Registry}
    */
   static createRegistry(options = {}) {
-    return new Registry(options)
+    return new Registry({
+      name: `${this.name}s`.toLowerCase().replace(/ss$/, 's'),
+      ...options,
+    })
   }
 
   static get types() {

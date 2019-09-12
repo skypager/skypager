@@ -10,6 +10,7 @@ import camelCase from 'lodash/camelCase'
 import kebabCase from 'lodash/kebabCase'
 import upperFirst from 'lodash/upperFirst'
 import lowerFirst from 'lodash/lowerFirst'
+import castArray from 'lodash/castArray'
 
 export const lodash = {}
 
@@ -34,6 +35,7 @@ export {
   partialRight,
   isObject,
   isFunction,
+  castArray,
 }
 
 export default Object.assign(lodash, {
@@ -49,4 +51,5 @@ export default Object.assign(lodash, {
   kebabCase,
   upperFirst,
   lowerFirst,
+  castArray,
 })

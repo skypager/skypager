@@ -188,7 +188,7 @@ export class Feature extends Helper {
   }
 
   disable() {
-    return this  
+    return this
   }
 
   /**

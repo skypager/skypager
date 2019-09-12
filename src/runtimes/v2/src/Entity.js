@@ -168,7 +168,7 @@ export class Entity {
   getter(propName, fn, options) {
     return getter(this, propName, fn, options)
   }
-  
+
   hide(propName, value, options) {
     return hide(this, propName, value, options)
   }
