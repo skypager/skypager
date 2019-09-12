@@ -280,6 +280,29 @@ export class State {
     return Array.from(this.members.entries())
   }
 
+  async waitUntil(validator) {
+    return new Promise(resolve => {
+      const disposer = this.observe(update => {
+        const current = update.object.toJSON()
+
+        if (typeof validator === 'function' && validator(current)) {
+          disposer()
+          resolve(current)
+        } else if (typeof validator === 'object') {
+          const nonMatch = !!Object.keys(validator).find(prop => {
+            return current[prop] !== validator[prop]
+          })
+          if (!nonMatch) {
+            disposer()
+            resolve(current)
+          }
+        } else {
+          disposer()
+          resolve(current)
+        }
+      })
+    })
+  }
   /**
    * @returns {Object<String,*>}
    */

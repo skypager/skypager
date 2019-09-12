@@ -150,9 +150,13 @@ export class Entity {
    * should get automatic before / after hooks (e.g. fireHook('initialize') will try beforeInitialize and afterInitialize)
    */
   fireHook(hookName, ...args) {
+    if (!this.emitter) {
+      throw new Error('no emitter present')
+    }
+    
     this.emit(hookName, ...args)
 
-    if (typeof this[hookName] === 'function') {
+    if (this[hookName] && typeof this[hookName] === 'function') {
       Promise.resolve(this[hookName].call(this, ...args)).catch(error => {
         this.emit(`hookFailure`, hookName, error)
       })
@@ -213,27 +217,8 @@ export class Entity {
    * validator that gets passed.
    */
   async untilStateMatches(validator) {
-    return new Promise(resolve => {
-      const disposer = this.state.observe(update => {
-        const current = update.object.toJSON()
-
-        if (typeof validator === 'function' && validator(current)) {
-          disposer()
-          resolve(current)
-        } else if (typeof validator === 'object') {
-          const nonMatch = !!Object.keys(validator).find(prop => {
-            return current[prop] !== validator[prop]
-          })
-          if (!nonMatch) {
-            disposer()
-            resolve(current)
-          }
-        } else {
-          disposer()
-          resolve(current)
-        }
-      })
-    })
+    await this.state.waitUntil(validator)
+    return this
   }
 }
 

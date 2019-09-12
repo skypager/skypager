@@ -1,5 +1,21 @@
 import runtime, { Feature, Runtime } from '../src'
 
+describe('runtime features', function() {
+  it('can await until features are enabled', async function() {
+    runtime.features.register('later-one', () => ({ }))
+    runtime.features.register('later-two', () => ({}))
+
+    setTimeout(() => {
+      runtime.use('later-one').use('later-two')
+    }, 30)
+
+    runtime.isFeatureEnabled('later-one').should.equal(false)
+    await runtime.whenEnabled('later-one', 'later-two')
+    runtime.isFeatureEnabled('later-one').should.equal(true)
+    runtime.isFeatureEnabled('later-two').should.equal(true)
+  })
+})
+
 describe('The Feature Helper', function() {
   it('is automatically attached to all runtimes', function() {
     runtime.should.have

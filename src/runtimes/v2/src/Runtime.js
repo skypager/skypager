@@ -130,7 +130,7 @@ export class Runtime extends Entity {
   }
 
   isFeatureEnabled(featureName) {
-    return this.featureStatus.get(featureName) && this.featureStatus.get(featureName).status === 'enabled'
+    return !!(this.featureStatus.get(featureName) && this.featureStatus.get(featureName).status === 'enabled')
   }
 
   /**
@@ -396,6 +396,46 @@ export class Runtime extends Entity {
       ...this.context,
       ...context,
     })
+  }
+
+  /** 
+   * Returns a promise which will resolve when the listed features are enabled.
+   * 
+   * @param {...String} featureIds
+  */
+  async whenEnabled(...featureIds) {
+    const { get } = this.lodash
+    await this.featureStatus.waitUntil((status) => 
+      featureIds.every(id => get(status, [id, 'status']) === 'enabled')
+    )
+
+    return this
+  }
+
+  /** 
+   * Subscribe to the event when a helper is attached to the runtime. Will fire immediately
+   * if it already is.  This can be used to, for example, allow a feature to supply implementations of 
+   * helpers (e.g. clients, servers) if those helpers are attached
+   * 
+   * @param {String} waitFor the name of the helper you want to wait being attached 
+   * @param {Function} callback a function to run when the helper is attached
+  */
+  onRegistration(waitFor, callback) {
+    if (this[waitFor]) {
+      callback()
+      return this
+    }
+
+    const fn = (name) => {
+      if (name === waitFor) {
+        callback()
+        this.off('registration', fn)
+      }
+    }  
+
+    this.on('registration', fn)
+
+    return this
   }
 
   static get features() {

@@ -3,7 +3,7 @@ import Registry from './Registry'
 import { Runtime } from './Runtime'
 import { getter, hideGetter } from './utils/prop-utils'
 import types, { check as checkTypes } from './PropTypes'
-import { pick } from './lodash'
+import { omit, pick } from './lodash'
 import resolveObject from './utils/resolve-object'
 
 // import { nonenumerable, nonconfigurable } from 'core-decorators'
@@ -124,6 +124,16 @@ export class Helper extends Entity {
     if (this.constructor.isObservable) {
       setTimeout(() => this.startObservingState(), 0)
     }
+  }
+
+  async initialize() {
+    const { initialize } = this.impl
+
+    if (initialize) {
+      await initialize.call(this, this.options, this.context)
+    }
+
+    return this
   }
 
   get options() {
@@ -335,6 +345,8 @@ export class Helper extends Entity {
     getter(entity, registryName, () => registry)
     getter(entity, factoryName, () => factory)
 
+    entity.fireHook('registration', registryName, this)
+
     return entity
   }
 
@@ -345,17 +357,24 @@ export class Helper extends Entity {
    */
   static create(options = {}, context = {}) {
     let HelperClass = this
-
-    const { async = HelperClass.asyncMode } = options
+    
     const { host, runtime = host } = context
+    let { defaultOptions } = HelperClass
+
+    options = {
+      ...defaultOptions,
+      ...options,
+    }
+
+    const { __async = HelperClass.asyncMode } = options
 
     if (typeof runtime === 'undefined') {
       throw new InvalidRuntimeError(HelperClass.name)
     }
 
-    if (async) {
+    if (__async) {
       return resolveObject(options).then(resolved =>
-        this.create({ ...resolved, async: false }, context)
+        this.create({ ...resolved, __async: false }, context)
       )
     }
 
@@ -407,7 +426,27 @@ export class Helper extends Entity {
       }
     }
 
-    const instance = new HelperClass(options, context)
+    const instance = new HelperClass(omit(options, '__async'), context)
+
+    /** 
+     * Post constructor routine.
+     * 
+     * After the 
+    */
+    host.fireHook('helperWasCreated', instance, HelperClass)
+
+    instance.fireHook('beforeInitialize')
+
+    Promise.resolve(instance.initialize())
+      .then(() => {
+        instance.fireHook('afterInitialize')
+        host.fireHook('helperWasInitialized', instance, HelperClass)
+      })
+      .catch((error) => {
+        host.error(`${instance.toString()} afterInitialize error`, error)
+        host.emit('helperFailure', instance, error)
+        instance.setState({ initializeError: error.message })
+      })
 
     return instance
   }
