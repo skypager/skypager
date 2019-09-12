@@ -67,6 +67,10 @@ export class Helper extends Entity {
     return this.constructor.optionTypes
   }
 
+  toString() {
+    return `<${this.componentName}> ${this.name} (${this.uuid})`
+  }
+
   /**
    * An object of prop-types.  This will be used to validate the context this Helper is instantiated
    * with at runtime.  Context is usually automatically passed down and you don't have to worry about it.
@@ -162,9 +166,22 @@ export class Helper extends Entity {
    * The provider is the "private" implementation.  The Helper is the public API.
    */
   get provider() {
-    const base = {
+    let base = {
       ...this.constructor.defaultProvider,
       ...this._provider,
+    }
+
+    // treats static class methods as provider functions
+    if (typeof this._provider === 'function' && this._provider.isHelper) {
+      Object
+        .getOwnPropertyNames(this._provider)
+        .filter(name => ['length','name','prototype'].indexOf(name) === -1)
+        .forEach((prop) => {
+          base = {
+            ...base,
+            [prop]: this._provider[prop]
+          }
+        })
     }
 
     return this.constructor.strictMode ? pick(base, Object.keys(this.providerTypes)) : base
@@ -195,20 +212,30 @@ export class Helper extends Entity {
     }
   }
 
+  get logger() {
+    return this.runtime && this.runtime.logger && this.runtime.logger.warn
+      ? this.runtime.logger
+      : console
+  }
+
   log(...args) {
-    return this.runtime.logger.log(prefix(args, this))
+    return this.logger.log(prefix(args, this))
   }
+  
   debug(...args) {
-    return this.runtime.logger.debug(prefix(args, this))
+    return this.logger.debug(prefix(args, this))
   }
+  
   info(...args) {
-    return this.runtime.logger.info(prefix(args, this))
+    return this.logger.info(prefix(args, this))
   }
+
   warn(...args) {
-    return this.runtime.logger.warn(prefix(args, this))
+    return this.logger.warn(prefix(args, this))
   }
+
   error(...args) {
-    return this.runtime.logger.error(prefix(args, this))
+    return this.logger.error(prefix(args, this))
   }
 
   /**
@@ -244,17 +271,33 @@ export class Helper extends Entity {
     return this.runtime.lodash
   }
 
-  get(path, defaultValue) {
+  get(path, defaultValue=undefined) {
     return this.lodash.get(this, path, defaultValue)
   }
 
-  result(path, defaultValue) {
+  result(path, defaultValue=undefined) {
     return this.lodash.result(this, path, defaultValue)
   }
 
-  tryGet() {}
+  tryGet(keyOrPath, defaultValue) {
+    console.warn(`tryGet is not needed anymore. Use this.impl`, keyOrPath, this)
+    if (typeof keyOrPath !== 'string') {
+      return this.get(['impl', ...keyOrPath], defaultValue)
+    }
 
-  tryResult() {}
+    return this.get(`impl.${keyOrPath}`, defaultValue)
+  }
+
+  tryResult(keyOrPath, defaultValue) {
+    console.warn(`tryResult is not needed anymore. Use this.impl`, keyOrPath, this)
+    const val = this.tryGet(keyOrPath, defaultValue)
+
+    if (typeof val === 'function') {
+      return val.call(this, this.options, this.context)
+    }
+
+    return val
+  }
 
   /**
    * Helper classes are designed to be attached to an instance of Runtime,
@@ -300,7 +343,7 @@ export class Helper extends Entity {
    * as static properties of the Helper class.
    */
   static create(options = {}, context = {}) {
-    const HelperClass = this
+    let HelperClass = this
 
     const { async = HelperClass.asyncMode } = options
     const { host, runtime = host } = context
@@ -309,12 +352,20 @@ export class Helper extends Entity {
       throw new InvalidRuntimeError(HelperClass.name)
     }
 
-    let { provider = HelperClass.defaultProvider } = options
-
+    let { provider = {} } = options
+    
     if (async) {
       return Promise.resolve(provider).then(resolved =>
         this.create({ ...options, provider: resolved, async: false }, context)
       )
+    }
+
+    if (provider && provider.default && typeof provider.default === 'function' && provider.default.isHelper) {
+      HelperClass = provider.default
+    } else if (provider && typeof provider === 'function' && provider.isHelper) {
+      HelperClass = provider
+    } else {
+      provider = { ...HelperClass.defaultProvider || {}, ...provider }
     }
 
     /**
@@ -374,7 +425,7 @@ export class Helper extends Entity {
     return (moduleId, o = {}, c = {}) => {
       const provider = registry.lookup(moduleId)
       return baseFactory(
-        { provider, ...o },
+        { provider, name: moduleId, ...o },
         {
           runtime: host.runtime,
           host,
@@ -424,15 +475,27 @@ export class Helper extends Entity {
    * Helper.checkTypes(instance, 'options')
    *
    * @param {Object} subject the object whose properties you want to validate.
-   * @param {String} location the name of the (whatever)Types property that contains the type specs
+   * @param {String|Array<String>} location the name of the (whatever)Types property that contains the type specs
    * @param {Object} options options
    * @param {String} [options.componentName=subject.componentName] the name of the component who is being tested
    */
   static checkTypes(subject, location, options = {}) {
-    const key = `${location.replace(/s$/, '')}Types`
-    let typeSpecs = subject[key]
+    let typeSpecs = {}
 
-    const report = checkTypes(subject[location], typeSpecs, {
+    if (typeof location === 'string') {
+      typeSpecs = subject[`${location.replace(/s$/, '')}Types`]
+    } else {
+      typeSpecs = location.reduce(
+        (memo, loc) => ({ ...memo, ...subject[`${loc.replace(/s$/, '')}Types`] }),
+        {}
+      )
+    }
+
+    const target = typeof location === 'string' 
+      ? subject[location]
+      : location.reduce((memo,loc) => ({ ...memo, ...subject[loc] }), {})
+
+    const report = checkTypes(target, typeSpecs, {
       componentName:
         options.componentName ||
         subject.componentName ||

@@ -151,6 +151,18 @@ export class State {
     return this
   }
 
+  patch(existingKey, objectUpdate = {}) {
+    if (this.has(existingKey)) {
+      this.set(existingKey, {
+        ...this.get(existingKey),
+        ...objectUpdate
+      })
+    } else {
+      this.set(existingKey, objectUpdate)
+    }
+    
+    return this
+  }
   /**
    * Retrieve a single attribute / value combo.
    *

@@ -38,6 +38,12 @@ export class Runtime extends Entity {
     this._settings = _settings
     hideGetter(this, '_settings', () => _settings)
 
+    const featureStatus = new State()
+    this.featureStatus = featureStatus
+    hideGetter(this, 'featureStatus', () => featureStatus)
+
+    trackFeatureState(this)
+
     const features = Feature.createRegistry({ host: this })
     this._features = features
     hideGetter(this, '_features', () => features)
@@ -112,6 +118,14 @@ export class Runtime extends Entity {
    */
   feature(featureId, options = {}) {
     return this._feature(featureId, options)
+  }
+
+  get enabledFeatureIds() {
+    return this.featureStatus.values().filter(({ status }) => status === 'enabled').map(f => f.name)
+  }
+
+  isFeatureEnabled(featureName) {
+    return this.featureStatus.get(featureName) && this.featureStatus.get(featureName).status === 'enabled'
   }
 
   /**
@@ -279,6 +293,17 @@ async function runMiddlewares(runtime) {
       throw error
     }
   }
+}
+
+function trackFeatureState(runtime) {
+  runtime.on('featureWasEnabled', (feature) => {
+    runtime.debug(`${feature.toString()} was enabled.`)
+
+    runtime.featureStatus.patch(feature.name, {
+      status: 'enabled',
+      name: feature.name
+    })
+  })
 }
 
 /** 

@@ -1,5 +1,6 @@
 import Helper from './Helper'
 import { types } from './PropTypes'
+import { applyInterface } from './utils/prop-utils'
 
 /**
  * The Feature Class provides an API on top of specific / named sets of functionality (e.g. logging, authentication,
@@ -18,6 +19,20 @@ import { types } from './PropTypes'
  * Each feature can, generally, be though of as a code splitting point as well.
  */
 export class Feature extends Helper {
+
+  static defaultProvider = {
+    mixinOptions() {
+      return {
+        partial: [this.context],
+        insertOptions: true,
+        transformKeys: true,
+        scope: this,
+        hidden: false,
+        configurable: true,
+      }  
+    } 
+  }
+
   static providerTypes = {
     /**
      * When using a object provider type (as opposed to a class) you should export an array
@@ -28,6 +43,12 @@ export class Feature extends Helper {
     featureMethods: types.arrayOf(types.string),
     featureWasEnabled: types.func,
     checkSupport: types.func,
+    mixinOptions: types.oneOf([types.func, types.shape({
+      partial: types.array,
+      transformKeys: types.bool,
+      right: types.bool,
+      insertOptions: types.bool
+    })])
   }
 
   /**
@@ -44,7 +65,7 @@ export class Feature extends Helper {
    * with the same state.
    */
   static isCacheable = true
-
+  
   static registryName = 'features'
 
   static factoryName = 'feature'
@@ -55,6 +76,10 @@ export class Feature extends Helper {
 
   constructor(options = {}, context = {}) {
     super(options, context)
+    
+    this.applyInterface(this.mixin, this.mixinOptions)
+
+    this.enable = enableFeature(this, this.enable)
   }
 
   get hasErrors() {
@@ -66,20 +91,90 @@ export class Feature extends Helper {
    * Returns true
    */
   get isEnabled() {
-    return this.state.get('isEnabled')
+    return !!this.state.get('enabled')
   }
 
   get isSupported() {
-    return this.state.get('isSupported')
+    return !!this.state.get('isSupported')
+  }
+
+  /** 
+   * Takes any object of functions, and binds them to this instance of the Feature.
+   * 
+   * This dynamic interface creation at runtime is a big responsibility of the feature class. 
+   * 
+   * If you don't wish to bind, or you wish to use arrow functions, the interface methods will
+   * by default have this.context passed in as the last argument. 
+  */
+  applyInterface(methods = {}, mixinOptions = this.mixinOptions) {
+    applyInterface(this, methods, mixinOptions)  
+    return this
+  }
+  
+  /** 
+   * Returns an object that contains the named set of functions on the feature module 
+   * implementation.  This object of functions will be applied as an interface to this feature
+   * interface, which injects this features settings and state as bound this, or as the last context argument
+   * passed to the function.
+   * 
+   * @type {Object}
+  */
+  get mixin() {
+    const { methods = this.impl.featureMethods || [] } = this.impl
+    return methods.reduce((memo, method) => ({
+      ...memo,
+      ...typeof this.impl[method] === 'function' && { [method]: this.impl[method] }
+    }), {})
+  }
+
+  /** 
+   * Controls how the mixin will behave (e.g. use partialRight to add this.context, transform get/lazy to those property types )
+  */
+  get mixinOptions() {
+    const { mixinOptions = this.impl.featureMixinOptions } = this.impl
+    return typeof mixinOptions === 'function'
+      ? mixinOptions.call(this, this)
+      : mixinOptions || this.constructor.defaultProvider.mixinOptions.call(this, this)
+  }
+
+  /** 
+   * Returns an object that contains the named set of functions on the feature module 
+   * implementation, which are intended to be added to the runtime itself instead of the feature.  
+   * 
+   * This object of functions will be applied as an interface to the runtime.
+   * 
+   * @type {Object}
+  */
+  get hostMixin() {
+    const { hostMethods = this.impl.runtimeMethods || [] } = this.impl
+
+    return hostMethods.reduce((memo, method) => ({
+      ...memo,
+      ...typeof this.impl[method] === 'function' && { [method]: this.impl[method] }
+    }), {})
+  }
+
+  /** 
+   * Controls how the host mixin will behave (e.g. use partialRight to add this.context, transform get/lazy to those property types )
+  */
+  get hostMixinOptions() {
+    const { hostMixinOptions = this.impl.runtimeMixinOptions } = this.impl
+
+    return typeof hostMixinOptions === 'function'
+      ? hostMixinOptions.call(this, this)
+      : hostMixinOptions || { ...this.mixinOptions, scope: this.runtime, partial: [ { ...this.runtime.context, ...this.context }] }
   }
 
   /**
    * Enabling a feature is an opportunity to kick off whichever operation is required
    * to turn this feature on (maybe loading external dependencies from a CDN, connecting to a service, etc).
    *
-   * You're in control of firing this event,
+   * You're in control of calling this function,
    */
-  enable() {}
+  enable(options = {}, callback) {
+
+  }
+
 
   /**
    * Your feature can specify whether it is supported or not, by using whichever feature detection
@@ -102,10 +197,62 @@ export class Feature extends Helper {
   }
 }
 
-function runEnableHook(feature) {}
-
 export function attach(host, options = {}) {
   return Feature.attach(host, options)
 }
 
 export default Feature
+
+export function enableFeature(feature, enableFunction = feature.enable) {
+  const hook = feature.impl.featureWasEnabled
+
+  return enabler.bind(feature)
+
+  async function enabler(options, callback) {
+    if (typeof options === 'function') {
+      callback = options
+      options = feature.options
+    }
+  
+    if (typeof callback !== 'function') {
+      callback = () => {}
+    }
+  
+    try {
+      const isSupported = await feature.checkSupport().catch(error => false)
+
+      feature.state.set('isSupported', isSupported)
+
+      if (!isSupported) {
+        throw new Error(`${feature.toString()} is not supported by this runtime.`)
+      }
+
+      applyInterface(feature.runtime, feature.hostMixin, feature.hostMixinOptions)
+      await enableFunction.call(feature, options, callback)
+
+      if (typeof hook === 'function') {
+        await Promise.resolve(hook.call(feature, options, feature.context))
+      }
+
+      await new Promise((resolve) => {
+        feature.setState({ enabled: true }, () => {
+          feature.runtime.emit('featureWasEnabled', feature)  
+          callback(null, feature)
+          resolve()
+        })      
+      })
+    } catch(error) {
+      this.error(`${feature.toString()} failed to enable`, error)
+
+      await new Promise((resolve) => {
+        feature.setState({ enabled: false, error: error.message }, () => {
+          feature.runtime.emit('featureFailedToEnable', feature)  
+          resolve()
+          callback(error)
+        })       
+      })
+
+      throw error
+    }
+  }
+}
