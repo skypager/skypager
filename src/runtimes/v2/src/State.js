@@ -155,12 +155,12 @@ export class State {
     if (this.has(existingKey)) {
       this.set(existingKey, {
         ...this.get(existingKey),
-        ...objectUpdate
+        ...objectUpdate,
       })
     } else {
       this.set(existingKey, objectUpdate)
     }
-    
+
     return this
   }
   /**

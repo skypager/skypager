@@ -18,7 +18,7 @@ export function propertyUtils(target) {
   /**
    * @mixin PropertyUtils
    */
-  const propertyUtils = {
+  const boundUtils = {
     /**
      * @link lazy
      */
@@ -49,7 +49,7 @@ export function propertyUtils(target) {
     applyInterface: partial(applyInterface, target),
   }
 
-  return propertyUtils
+  return boundUtils
 }
 
 export const transformKey = key =>

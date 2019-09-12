@@ -126,9 +126,9 @@ export class Helper extends Entity {
 
   get options() {
     const base = super.options
-
     return this.constructor.strictMode ? pick(base, Object.keys(this.optionTypes)) : base
   }
+
   /**
    * Helpers are designed to be mere interfaces on top of modules and functions which are registered and known ahead of time before
    * the instances of the Helpers are created by the program.  `this.impl` combines the object they are created with, with
@@ -173,13 +173,12 @@ export class Helper extends Entity {
 
     // treats static class methods as provider functions
     if (typeof this._provider === 'function' && this._provider.isHelper) {
-      Object
-        .getOwnPropertyNames(this._provider)
-        .filter(name => ['length','name','prototype'].indexOf(name) === -1)
-        .forEach((prop) => {
+      Object.getOwnPropertyNames(this._provider)
+        .filter(name => ['length', 'name', 'prototype'].indexOf(name) === -1)
+        .forEach(prop => {
           base = {
             ...base,
-            [prop]: this._provider[prop]
+            [prop]: this._provider[prop],
           }
         })
     }
@@ -221,11 +220,11 @@ export class Helper extends Entity {
   log(...args) {
     return this.logger.log(prefix(args, this))
   }
-  
+
   debug(...args) {
     return this.logger.debug(prefix(args, this))
   }
-  
+
   info(...args) {
     return this.logger.info(prefix(args, this))
   }
@@ -271,11 +270,11 @@ export class Helper extends Entity {
     return this.runtime.lodash
   }
 
-  get(path, defaultValue=undefined) {
+  get(path, defaultValue = undefined) {
     return this.lodash.get(this, path, defaultValue)
   }
 
-  result(path, defaultValue=undefined) {
+  result(path, defaultValue = undefined) {
     return this.lodash.result(this, path, defaultValue)
   }
 
@@ -353,19 +352,24 @@ export class Helper extends Entity {
     }
 
     let { provider = {} } = options
-    
+
     if (async) {
       return Promise.resolve(provider).then(resolved =>
         this.create({ ...options, provider: resolved, async: false }, context)
       )
     }
 
-    if (provider && provider.default && typeof provider.default === 'function' && provider.default.isHelper) {
+    if (
+      provider &&
+      provider.default &&
+      typeof provider.default === 'function' &&
+      provider.default.isHelper
+    ) {
       HelperClass = provider.default
     } else if (provider && typeof provider === 'function' && provider.isHelper) {
       HelperClass = provider
     } else {
-      provider = { ...HelperClass.defaultProvider || {}, ...provider }
+      provider = { ...(HelperClass.defaultProvider || {}), ...provider }
     }
 
     /**
@@ -491,9 +495,10 @@ export class Helper extends Entity {
       )
     }
 
-    const target = typeof location === 'string' 
-      ? subject[location]
-      : location.reduce((memo,loc) => ({ ...memo, ...subject[loc] }), {})
+    const target =
+      typeof location === 'string'
+        ? subject[location]
+        : location.reduce((memo, loc) => ({ ...memo, ...subject[loc] }), {})
 
     const report = checkTypes(target, typeSpecs, {
       componentName:

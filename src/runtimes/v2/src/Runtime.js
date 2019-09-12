@@ -6,6 +6,11 @@ import State from './State'
 import Logger from './Logger'
 import { hideGetter } from './utils/prop-utils'
 import lodash from './lodash'
+const windowIsAvailable = typeof window !== 'undefined'
+const documentIsAvailable = typeof document !== 'undefined'
+const processIsAvailable = typeof process !== 'undefined'
+
+const isUndefined = val => typeof val === 'undefined'
 
 
 /**
@@ -24,7 +29,7 @@ export class Runtime extends Entity {
       ...lodash.omit(options, 'logging'),
       initialState: global.__INITIAL_STATE__ 
     })
-
+    
     this._context = context
     hideGetter(this, '_context', () => context)
 
@@ -46,6 +51,9 @@ export class Runtime extends Entity {
 
     const features = Feature.createRegistry({ host: this })
     this._features = features
+
+    features.register('environment-detection', () => environmentDetection)
+
     hideGetter(this, '_features', () => features)
 
     const feature = Feature.createFactory({
@@ -74,6 +82,13 @@ export class Runtime extends Entity {
 
     this.logger = logger
     hideGetter(this, 'logger', () => logger)
+  }
+
+  get argv() {
+    return {
+      ...this.options,
+      ...this.settings.argv
+    }  
   }
 
   disableLogging() {
@@ -154,6 +169,146 @@ export class Runtime extends Entity {
    */
   get settings() {
     return this._settings.toJSON()
+  }
+  /**
+   * Returns true if the runtime is running inside of a browser.
+   *
+   * @readonly
+   * @memberof Runtime#
+   */
+  get isBrowser() {
+    return windowIsAvailable && documentIsAvailable
+  }
+
+  /**
+   * Returns true if the runtime is running inside of node.
+   *
+   * @readonly
+   * @memberof Runtime#
+   */
+  get isNode() {
+    try {
+      const isNode = Object.prototype.toString.call(global.process) === '[object process]'
+      return isNode
+    } catch (e) {
+      return processIsAvailable && (process.title === 'node' || `${process.title}`.endsWith('.exe'))
+    }
+  }
+
+  /**
+   * Returns true if running node in windows
+   *
+   * @readonly
+   * @memberof Runtime#
+   */
+  get isWindows() {
+    return this.isNode && `${process.title}`.endsWith('.exe')
+  }
+
+  /**
+   * Returns true if the runtime is running inside of electron
+   *
+   * @readonly
+   * @memberof Runtime#
+   */
+  get isElectron() {
+    return (
+      processIsAvailable &&
+      !isUndefined(process.type) &&
+      !isUndefined(process.title) &&
+      (process.title.match(/electron/i) || process.versions['electron'])
+    )
+  }
+
+  /**
+   * Returns true if the runtime is running inside of electron's renderer process
+   *
+   * @readonly
+   * @memberof Runtime#
+   */
+  get isElectronRenderer() {
+    return (
+      !isUndefined(process) &&
+      process.type === 'renderer' &&
+      windowIsAvailable &&
+      documentIsAvailable
+    )
+  }
+
+  /**
+   * Returns true if the runtime is running inside of React-Native
+   *
+   * @readonly
+   * @memberof Runtime#
+   */
+  get isReactNative() {
+    try {
+      return (
+        !isUndefined(global) &&
+        typeof navigator !== 'undefined' &&
+        navigator.product === 'ReactNative'
+      )
+    } catch (error) {
+      return false
+    }
+  }
+
+  /**
+   * Returns true if the process was started with a debug flag
+   *
+   * @readonly
+   * @memberof Runtime#
+   */
+  get isDebug() {
+    const { argv = {} } = this
+    return !!argv.debug || argv.debugBrk || argv.inspect || argv.inspectBrk
+  }
+
+  /**
+   * Returns true if the runtime is running in node process and common CI environment variables are detected
+   *
+   * @readonly
+   * @memberof Runtime#
+   */
+  get isCI() {
+    return this.isNode && (process.env.CI || (process.env.JOB_NAME && process.env.BRANCH_NAME))
+  }
+
+  /**
+   * returns true when running in a process where NODE_ENV is set to development, or in a process started with the development flag
+   *
+   * @readonly
+   * @memberof Runtime#
+   */
+  get isDevelopment() {
+    const { argv = {} } = this
+    return (
+      !this.isProduction &&
+      !this.isTest &&
+      (argv.env === 'development' || process.env.NODE_ENV === 'development')
+    )
+  }
+
+  /**
+   * returns true when running in a process where NODE_ENV is set to test, or in a process started with the test flag
+   *
+   * @readonly
+   * @memberof Runtime#
+   */
+  get isTest() {
+    const { argv = {} } = this
+    return argv.env === 'test' || process.env.NODE_ENV === 'test'
+  }
+
+  /**
+   * returns true when running in a process where NODE_ENV is set to production, or in a process started with the test flag
+   *
+   * @readonly
+   * @memberof Runtime#
+   */
+  get isProduction() {
+    const { argv } = this
+    return argv.env === 'production' || process.env.NODE_ENV === 'production'
   }
 
   /**

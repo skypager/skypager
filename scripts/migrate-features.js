@@ -1,7 +1,7 @@
 const runtime = require('@skypager/node')
 const DocumentHelper = require('@skypager/helpers-document')
 
-const { cli, fsx, fileManager, packageManager } = runtime 
+const { cli, fsx, fileManager, packageManager } = runtime
 
 const { print, colors } = cli
 const { copyAsync: copy, mkdirpAsync: mkdirp, existsAsync: exists, writeFileAsync: writeFile } = fsx

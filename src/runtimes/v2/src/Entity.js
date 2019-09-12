@@ -1,5 +1,5 @@
 import uuid from 'uuid'
-import { hideGetter, hide } from './utils/prop-utils'
+import { lazy, getter, hideGetter, hide } from './utils/prop-utils'
 import State from './State'
 import Bus from './Bus'
 
@@ -159,6 +159,22 @@ export class Entity {
     }
 
     return this
+  }
+
+  lazy(propName, fn, options) {
+    return lazy(this, propName, fn, options)
+  }
+
+  getter(propName, fn, options) {
+    return getter(this, propName, fn, options)
+  }
+  
+  hide(propName, value, options) {
+    return hide(this, propName, value, options)
+  }
+
+  hideGetter(propName, fn, options) {
+    return hideGetter(this, propName, fn, options)
   }
 
   /**

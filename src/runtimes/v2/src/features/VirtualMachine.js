@@ -1,4 +1,4 @@
-import Feature from './Feature'
+import Feature from '../Feature'
 import vm from 'vm'
 
 /**
@@ -13,7 +13,7 @@ export class VirtualMachine extends Feature {
   /**
    * Registers the VM feature with the runtime
    *
-   * @param {import("./Runtime").Runtime} runtime
+   * @param {import("../Runtime").Runtime} runtime
    * @param {Object} options
    */
   static attach(runtime, options = {}) {
@@ -36,7 +36,7 @@ export class VirtualMachine extends Feature {
   }
 
   /**
-   * @param {import("./Helper").Helper|import("./Runtime").Runtime|Object} fromObject
+   * @param {import("../Helper").Helper|import("../Runtime").Runtime|Object} fromObject
    */
   createContext(fromObject) {
     if (fromObject.context) {
