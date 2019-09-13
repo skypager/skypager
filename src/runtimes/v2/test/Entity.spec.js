@@ -124,6 +124,21 @@ describe('Entity', function() {
       entity.currentState.yo.should.equal(1)
     })
 
+    it('awaits the next event with a timeout', async function() {
+      const entity = new Entity()
+      const spy = require('sinon').spy()
+
+      entity.startObservingState()
+
+      setTimeout(() => {
+        entity.setState({ yo: 1 })
+      }, 50)
+
+      await entity.nextEvent('stateDidChange', { timeout: 30 }).catch(spy)
+
+      spy.should.have.been.called
+    })
+
     it('awaits the next matching state', async function() {
       const entity = new Entity()
       setTimeout(() => {

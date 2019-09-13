@@ -186,8 +186,20 @@ export class Entity {
    *
    * @returns {Promise}
    */
-  async nextEvent(event) {
-    return new Promise(resolve => this.once(event, resolve))
+  async nextEvent(event, { timeout = 2000 } = {}) {
+    const waitForEvent = (resolve, reject) => {
+      const timer = setTimeout(() => {
+        reject(new Error(`Timed out waiting for ${event} on ${this.name}`))  
+      }, timeout)
+
+      this.once(event, (...args) => {
+        clearTimeout(timer)
+        resolve(...args)
+      }) 
+
+    }
+
+    return new Promise(waitForEvent)
   }
 
   /**
@@ -199,14 +211,14 @@ export class Entity {
   async nextStateChange(attribute) {
     return new Promise(resolve => {
       const disposer = this.state.observe(update => {
-        const { name } = update
+        const { name, object } = update
 
         if (attribute && attribute === name) {
           disposer()
-          resolve(this.state.toJSON())
+          resolve(object.toJSON())
         } else {
           disposer()
-          resolve(this.state.toJSON())
+          resolve(object.toJSON())
         }
       })
     })
@@ -215,9 +227,14 @@ export class Entity {
   /**
    * Returns a promise which will resolve whenever this entity's state matches the
    * validator that gets passed.
+   * 
+   * @param {Function|Object} validator
+   * @param {Object} options 
+   * @param {Number} [options.timeout=2000] how many ms to wait before throwing an error
+   * @param {Number} [options.interval=20] how often to recheck in ms
    */
-  async untilStateMatches(validator) {
-    await this.state.waitUntil(validator)
+  async untilStateMatches(validator, { timeout = 2000, interval = 20 } = {}) {
+    await this.state.waitUntil(validator, { timeout, interval })
     return this
   }
 }

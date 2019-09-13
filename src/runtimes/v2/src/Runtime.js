@@ -1,17 +1,17 @@
+import lodash from './lodash'
 import Entity from './Entity'
 import Helper from './Helper'
 import Registry from './Registry'
-import Feature, { attach as attachFeature } from './Feature'
+import Feature from './Feature'
 import State from './State'
 import Logger from './Logger'
 import { hideGetter } from './utils/prop-utils'
-import lodash from './lodash'
+
 const windowIsAvailable = typeof window !== 'undefined'
 const documentIsAvailable = typeof document !== 'undefined'
 const processIsAvailable = typeof process !== 'undefined'
 
 const isUndefined = val => typeof val === 'undefined'
-
 
 export const features = Feature.createRegistry({ name: 'features', formatId: (id) => id.replace(/\.js$/, '').replace(/[\/\\]?index$/,'') })
 
@@ -444,6 +444,10 @@ export class Runtime extends Entity {
   
   get features() {
     return features
+  }
+
+  get isRuntime() {
+    return true
   }
 }
 

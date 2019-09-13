@@ -280,29 +280,41 @@ export class State {
     return Array.from(this.members.entries())
   }
 
-  async waitUntil(validator) {
-    return new Promise(resolve => {
-      const disposer = this.observe(update => {
-        const current = update.object.toJSON()
+  async waitUntil(validator, { timeout = 2000, interval = 20 } = {}) {
+    const endTime = Number(new Date()) + timeout
+    let fn
 
-        if (typeof validator === 'function' && validator(current)) {
-          disposer()
-          resolve(current)
-        } else if (typeof validator === 'object') {
-          const nonMatch = !!Object.keys(validator).find(prop => {
-            return current[prop] !== validator[prop]
-          })
-          if (!nonMatch) {
-            disposer()
-            resolve(current)
-          }
-        } else {
-          disposer()
-          resolve(current)
-        }
-      })
-    })
+    if (typeof validator === 'object') {
+      const conditions = Object.entries(validator)
+
+      fn = current => {
+        return conditions.every(([key, value]) => current[key] === value)
+      }
+    } else if (typeof validator === 'function') {
+      fn = validator
+    } else {
+      throw new Error(`Must pass a function or object to compare for equality`)
+    }
+
+    const checkCondition = (resolve, reject) => {
+      // If the condition is met, we're done!
+      const result = fn(this.toJSON())
+      if (result) {
+        resolve(result)
+      }
+      // If the condition isn't met but the timeout hasn't elapsed, go again
+      else if (timeout && Number(new Date()) < endTime) {
+        setTimeout(checkCondition, interval, resolve, reject)
+      }
+      // Didn't match and too much time, reject!
+      else if (timeout) {
+        reject(new Error('timed out for ' + fn + ': ' + arguments))
+      }
+    }
+
+    return new Promise(checkCondition)
   }
+
   /**
    * @returns {Object<String,*>}
    */

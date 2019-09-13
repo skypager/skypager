@@ -269,6 +269,10 @@ export class Helper extends Entity {
     })
   }
 
+  get isHelper() {
+    return true
+  }
+  
   /**
    * Every instance of the helper class is associated with a particular runtime instance.
    * The link to the runtime acts as a global event bus, shared state machine, and dependency

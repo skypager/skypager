@@ -1,6 +1,25 @@
 import State from '../src/State'
+import { spy as createSpy } from 'sinon'
 
 describe('State', function() {
+  it('can wait until matching state', async function() {
+    const state = new State()
+    setTimeout(() => {
+      state.set('condition', 'met')
+    }, 10)
+    await state.waitUntil({ condition: 'met' })
+    const condition = state.get('condition') || {}
+    condition.should.equal('met')
+  })
+
+  it('can wait until matching state with a timeout', async function() {
+    const state = new State()
+    const spy = createSpy()
+
+    await state.waitUntil({ condition: 'met' }, { timeout: 40 }).catch(spy)
+    spy.should.have.been.called
+  })
+
   it('can merge in an object', function() {
     const state = new State()
 
