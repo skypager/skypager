@@ -569,8 +569,8 @@ export class Babel extends Helper {
     return this.body
       .map((node, index) =>
         node.type === 'ExportDeclaration' ||
-          node.type === 'ExportDefaultDeclaration' ||
-          node.type === 'ExportNamedDeclaration'
+        node.type === 'ExportDefaultDeclaration' ||
+        node.type === 'ExportNamedDeclaration'
           ? { node, index }
           : undefined
       )
@@ -662,9 +662,9 @@ export class Babel extends Helper {
       result.node.type === 'ClassDeclaration'
         ? { name: get(result.node, 'id.name'), className: get(result.node, 'id.name') }
         : {
-          name: get(result.node, 'key.name'),
-          className: get(result.parentPath, 'container.id.name'),
-        }
+            name: get(result.node, 'key.name'),
+            className: get(result.parentPath, 'container.id.name'),
+          }
 
     return undocumented.map(result => {
       const { node } = result
@@ -806,12 +806,12 @@ export class Babel extends Helper {
     const decl = node =>
       node.type === 'ImportDeclaration'
         ? get(node, 'specifiers', [])
-          .map(spec => get(spec, 'local.name'))
-          .filter(v => v && v.length)
+            .map(spec => get(spec, 'local.name'))
+            .filter(v => v && v.length)
         : get(node, 'declarations', [])
-          .map(dec => get(dec, 'id.name'))
-          .concat([get(node, 'id.type') === 'Identifier' && get(node, 'id.name')])
-          .filter(id => id && id.length)
+            .map(dec => get(dec, 'id.name'))
+            .concat([get(node, 'id.type') === 'Identifier' && get(node, 'id.name')])
+            .filter(id => id && id.length)
 
     const isInspectable = ({ type }) => runnableTypes.indexOf(type) > -1
 
@@ -835,7 +835,7 @@ export class Babel extends Helper {
         position: node.loc,
         id: `${i}:${node.loc.start.line}:${node.loc.start.column}:${node.loc.end.line}:${
           node.loc.end.column
-          }`,
+        }`,
       })),
     }
 

@@ -397,7 +397,7 @@ export default class MdxNode extends Mdx {
     this.hide('vmContext', vmContext)
 
     return Promise.all(
-      this.body 
+      this.body
         .filter(b => b.type === 'code' && b.lang && b.lang === 'javascript')
         .map((node, i) => {
           const { value, position } = node

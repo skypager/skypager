@@ -125,7 +125,9 @@ async function listAllScripts({ verbose = false } = {}) {
       if (scriptsConfig.length || skip) {
         // we'll search for the valid scripts
       } else if (name.indexOf('@skypager/cli') >= 0) {
-        validScripts = runtime.fsx.readdirAsync(folder).then(names => [name, names.map((e) => runtime.resolve(folder, e))])
+        validScripts = runtime.fsx
+          .readdirAsync(folder)
+          .then(names => [name, names.map(e => runtime.resolve(folder, e))])
       } else if (
         !name.match(
           new RegExp(`${portfolioName}/(cli|features|helpers|devtools|portfolio-manager)`)

@@ -2,7 +2,7 @@ import runtime, { Feature, Runtime } from '../src'
 
 describe('runtime features', function() {
   it('can await until features are enabled', async function() {
-    runtime.features.register('later-one', () => ({ }))
+    runtime.features.register('later-one', () => ({}))
     runtime.features.register('later-two', () => ({}))
 
     setTimeout(() => {

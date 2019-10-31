@@ -281,17 +281,19 @@ export class Mdx extends Helper {
     return nodeToString(node)
   }
 
-  /** 
+  /**
    * @param {RemarkASTNode} beginNode the node to start
-   * @param 
-  */
+   * @param
+   */
   findNodesBetween(beginNode, endNode, options = {}) {
-    const nodes = this.findAllNodesAfter(beginNode).filter((node) => node.position.end.line < endNode.position.end.line)
+    const nodes = this.findAllNodesAfter(beginNode).filter(
+      node => node.position.end.line < endNode.position.end.line
+    )
 
     if (options.wrap && nodes.length) {
       const { length, 0: first, [length - 1]: last } = nodes
 
-      const lines = last.position.end.line = first.position.start.line
+      const lines = (last.position.end.line = first.position.start.line)
 
       const start = {
         ...first.position.start,
@@ -300,13 +302,13 @@ export class Mdx extends Helper {
 
       const end = {
         ...last.position.end,
-        line: last.position.end.line - lines
+        line: last.position.end.line - lines,
       }
 
       return {
         type: 'root',
         children: nodes,
-        position: { start, end }
+        position: { start, end },
       }
     }
 
@@ -404,13 +406,15 @@ export class Mdx extends Helper {
    */
   get codeBlocks() {
     const metaToProps = ({ meta = '' } = {}) =>
-      meta == undefined ? {} : String(meta)
-        .split(' ')
-        .reduce((memo, pair) => {
-          const [name, value] = pair.split('=').map(v => v.trim())
-          memo[name] = value
-          return memo
-        }, {})
+      meta == undefined
+        ? {}
+        : String(meta)
+            .split(' ')
+            .reduce((memo, pair) => {
+              const [name, value] = pair.split('=').map(v => v.trim())
+              memo[name] = value
+              return memo
+            }, {})
 
     return this.body
       .filter(({ type }) => type === 'code')
@@ -457,6 +461,31 @@ export class Mdx extends Helper {
       const content = this.stringify(node)
       return [content, depth, get(position, 'start.line')]
     })
+  }
+
+  /**
+   * Gets all of the nodes under a given heading.  Will search until it finds another heading of the same depth or greater.
+   * @param {String|RemarkASTNode} headingTextOrNode
+   * @returns {Array<RemarkASTNode>}
+   */
+  findUnderParentHeading(headingTextOrNode) {
+    if (typeof headingTextOrNode === 'string') {
+      headingNextOrNode = this.headingNodes.find(
+        heading => this.stringify(heading).toLowerCase() === headingTextOrNode.toLowerCase()
+      )
+    }
+
+    const nextHeading = this.findAllNodesAfter(headingTextOrNode).find(
+      node => node.type === 'heading' && node.depth > headingTextOrNode.depth
+    )
+
+    if (nextHeading) {
+      return this.findAllNodesAfter(headingTextOrNode).filter(
+        node => node.position.end.line < nextHeading.position.start.line
+      )
+    } else {
+      return this.findAllNodesAfter(headingTextOrNode)
+    }
   }
 
   /**

@@ -153,7 +153,7 @@ export class Entity {
     if (!this.emitter) {
       throw new Error('no emitter present')
     }
-    
+
     this.emit(hookName, ...args)
 
     if (this[hookName] && typeof this[hookName] === 'function') {
@@ -189,14 +189,13 @@ export class Entity {
   async nextEvent(event, { timeout = 2000 } = {}) {
     const waitForEvent = (resolve, reject) => {
       const timer = setTimeout(() => {
-        reject(new Error(`Timed out waiting for ${event} on ${this.name}`))  
+        reject(new Error(`Timed out waiting for ${event} on ${this.name}`))
       }, timeout)
 
       this.once(event, (...args) => {
         clearTimeout(timer)
         resolve(...args)
-      }) 
-
+      })
     }
 
     return new Promise(waitForEvent)
@@ -227,9 +226,9 @@ export class Entity {
   /**
    * Returns a promise which will resolve whenever this entity's state matches the
    * validator that gets passed.
-   * 
+   *
    * @param {Function|Object} validator
-   * @param {Object} options 
+   * @param {Object} options
    * @param {Number} [options.timeout=2000] how many ms to wait before throwing an error
    * @param {Number} [options.interval=20] how often to recheck in ms
    */

@@ -272,7 +272,7 @@ export class Helper extends Entity {
   get isHelper() {
     return true
   }
-  
+
   /**
    * Every instance of the helper class is associated with a particular runtime instance.
    * The link to the runtime acts as a global event bus, shared state machine, and dependency
@@ -361,7 +361,7 @@ export class Helper extends Entity {
    */
   static create(options = {}, context = {}) {
     let HelperClass = this
-    
+
     const { host, runtime = host } = context
     let { defaultOptions } = HelperClass
 
@@ -432,11 +432,11 @@ export class Helper extends Entity {
 
     const instance = new HelperClass(omit(options, '__async'), context)
 
-    /** 
+    /**
      * Post constructor routine.
-     * 
-     * After the 
-    */
+     *
+     * After the
+     */
     host.fireHook('helperWasCreated', instance, HelperClass)
 
     instance.fireHook('beforeInitialize')
@@ -446,7 +446,7 @@ export class Helper extends Entity {
         instance.fireHook('afterInitialize')
         host.fireHook('helperWasInitialized', instance, HelperClass)
       })
-      .catch((error) => {
+      .catch(error => {
         host.error(`${instance.toString()} afterInitialize error`, error)
         host.emit('helperFailure', instance, error)
         instance.setState({ initializeError: error.message })
