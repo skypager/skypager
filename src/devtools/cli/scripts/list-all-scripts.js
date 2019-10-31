@@ -69,7 +69,7 @@ async function handler(options = {}) {
   }
 }
 
-async function listAllScripts({ verbose = false }) {
+async function listAllScripts({ verbose = false } = {}) {
   const searchPackagePaths = await runtime.packageFinder
     .find(/@skypager\/.*/)
     .then(results => [runtime.cwd].concat(results))
@@ -124,6 +124,8 @@ async function listAllScripts({ verbose = false }) {
       // then the scripts are private
       if (scriptsConfig.length || skip) {
         // we'll search for the valid scripts
+      } else if (name.indexOf('@skypager/cli') >= 0) {
+        validScripts = runtime.fsx.readdirAsync(folder).then(names => [name, names.map((e) => runtime.resolve(folder, e))])
       } else if (
         !name.match(
           new RegExp(`${portfolioName}/(cli|features|helpers|devtools|portfolio-manager)`)
