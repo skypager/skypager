@@ -64,7 +64,7 @@ export default class MdxNode extends Mdx {
    */
   async run(options = {}) {
     await this.process(options)
-    await this.toRunnable()
+    await this.toRunnable(options)
 
     const blocks =
       typeof options.filter === 'function' ? this.runners.filter(options.filter) : this.runners
@@ -354,7 +354,6 @@ export default class MdxNode extends Mdx {
   async createVMRunners(options = {}) {
     const { runtime } = this
     const { castArray } = this.lodash
-    const { codeBlocks } = this
 
     const script = await this.toScriptHelper(options)
     const prefix = script.name
@@ -398,8 +397,8 @@ export default class MdxNode extends Mdx {
     this.hide('vmContext', vmContext)
 
     return Promise.all(
-      codeBlocks
-        .filter(b => b.lang && b.lang === 'javascript')
+      this.body 
+        .filter(b => b.type === 'code' && b.lang && b.lang === 'javascript')
         .map((node, i) => {
           const { value, position } = node
 

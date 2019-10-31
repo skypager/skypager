@@ -281,6 +281,38 @@ export class Mdx extends Helper {
     return nodeToString(node)
   }
 
+  /** 
+   * @param {RemarkASTNode} beginNode the node to start
+   * @param 
+  */
+  findNodesBetween(beginNode, endNode, options = {}) {
+    const nodes = this.findAllNodesAfter(beginNode).filter((node) => node.position.end.line < endNode.position.end.line)
+
+    if (options.wrap && nodes.length) {
+      const { length, 0: first, [length - 1]: last } = nodes
+
+      const lines = last.position.end.line = first.position.start.line
+
+      const start = {
+        ...first.position.start,
+        line: first.position.start.line - lines,
+      }
+
+      const end = {
+        ...last.position.end,
+        line: last.position.end.line - lines
+      }
+
+      return {
+        type: 'root',
+        children: nodes,
+        position: { start, end }
+      }
+    }
+
+    return nodes
+  }
+
   /**
    * Find all nodes after an index, or after the passed node.
    *
@@ -372,7 +404,7 @@ export class Mdx extends Helper {
    */
   get codeBlocks() {
     const metaToProps = ({ meta = '' } = {}) =>
-      String(meta)
+      meta == undefined ? {} : String(meta)
         .split(' ')
         .reduce((memo, pair) => {
           const [name, value] = pair.split('=').map(v => v.trim())
