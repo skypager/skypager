@@ -70,7 +70,8 @@
   },
   "lint-staged": {
     "src/**/*.{js,json}": [
-      "node scripts/pre-commit.js"
+      "node scripts/pre-commit.js",
+      "git add"
     ]
   },
   "husky": {
