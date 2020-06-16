@@ -78,10 +78,11 @@ export class Registry extends State {
     if (typeof patch === 'object') {
       this.metadata.set(moduleId, {
         ...(this.metadata.get(moduleId) || {}),
+        ...patch,
       })
     }
 
-    return this.metadata.get(moduleId)
+    return this.metadata.get(moduleId) || {}
   }
 
   /**
@@ -121,11 +122,11 @@ export class Registry extends State {
    * @param {String} moduleId
    * @returns {*|Promise<*>}
    */
-  request(moduleId) {
-    moduleId = this.resolve(moduleId)
+  request(requestId) {
+    const moduleId = this.resolve(requestId)
 
     if (!this.has(moduleId)) {
-      throw new ModuleNotRegisteredError(this, moduleId)
+      throw new ModuleNotRegisteredError(this, requestId)
     }
 
     const loader = this.get(moduleId)

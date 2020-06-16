@@ -1,6 +1,6 @@
 {
   "name": "@skypager/runtime2",
-  "version": "1.3.1",
+  "version": "1.3.3",
   "description": "universal javascript application runtime",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
@@ -23,7 +23,9 @@
     "@babel/runtime": "^7.2.2",
     "uuid": "^3.0.1",
     "vm-browserify": "^1.1.0",
-    "lodash-es": "^4.17.15"
+    "lodash-es": "^4.17.15",
+    "check-prop-types": "^1.1.2",
+    "prop-types": "^15.7.2"
   },
   "devDependencies": {
     "lodash-decorators": "^6.0.1",

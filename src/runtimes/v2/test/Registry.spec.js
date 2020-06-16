@@ -25,6 +25,26 @@ describe('Registry', function() {
       registry.available.should.include('theirs')
     })
 
+    it('throws an error when an invalid member is requested', function() {
+      let errorMessage = ''
+      try {
+        registry.request('unavailable')
+      } catch (error) {
+        errorMessage = error.message
+      }
+
+      errorMessage.should.include('available')
+    })
+
+    it('lets me update metadata', function() {
+      expect(registry.meta('nice')).to.be.empty
+      registry.meta('nice', { nice: 1 })
+      registry
+        .meta('nice')
+        .should.be.an('object')
+        .with.property('nice', 1)
+    })
+
     it('emits events when a member is loaded', function() {
       const spy = require('sinon').spy()
       const registry = new Registry()

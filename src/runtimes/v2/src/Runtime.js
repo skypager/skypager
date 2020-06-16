@@ -6,6 +6,7 @@ import Feature from './Feature'
 import State from './State'
 import Logger from './Logger'
 import { hideGetter } from './utils/prop-utils'
+import hashObject from './utils/object-hash'
 
 const windowIsAvailable = typeof window !== 'undefined'
 const documentIsAvailable = typeof document !== 'undefined'
@@ -21,6 +22,8 @@ export const features = Feature.createRegistry({ name: 'features', formatId: (id
  */
 export class Runtime extends Entity {
   vm  
+
+  hashObject = hashObject
 
   /** 
    * @param {Object} options
@@ -89,7 +92,12 @@ export class Runtime extends Entity {
   }
 
   disableLogging() {
-    this.logger.disable()
+    try {
+      this.logger.disable()
+    } catch(error) {
+
+    }
+
     return this
   }
 
