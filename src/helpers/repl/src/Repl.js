@@ -43,7 +43,7 @@ export class Repl extends Helper {
 
     this.hideGetter('replServer', () => {
       this.repl
-      replServer
+      return replServer
     })
 
     this.lazy(
@@ -110,7 +110,7 @@ export class Repl extends Helper {
     this.runtime.fireHook('replDidExit', this, this.repl)
   }
 
-  launch(context = {}) {
+  async launch(context = {}) {
     this.attemptMethod('replWillLaunch')
 
     this.attemptMethod('displayBanner')
@@ -120,6 +120,10 @@ export class Repl extends Helper {
     this.attemptMethod('displayHelp')
 
     this.attemptMethod('replDidLaunch')
+
+    await new Promise(resolve => {
+      this.replServer.on('exit', () => resolve())
+    })
 
     return this
   }
