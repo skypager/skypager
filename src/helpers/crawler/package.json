@@ -1,0 +1,48 @@
+{
+  "name": "@skypager/helpers-crawler",
+  "version": "1.1.1",
+  "description": "skypager crawler helper",
+  "author": "Jon Soeder <jon@chicago.com>",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "lib/index.js",
+  "module": "lib/es/index.js",
+  "scripts": {
+    "prepare": "yarn build",
+    "prebuild": "rimraf lib",
+    "build": "yarn build:lib && yarn build:es",
+    "postbuild": "skypager hash-build",
+    "build:lib": "cross-env BUILD_ENV=build babel --comments --source-maps -d lib src",
+    "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src",
+    "watch": "babel --watch --comments --source-maps -d lib src",
+    "test": "skypager test --mocha test/**/*.spec.js",
+    "prepublish": "skypager smoke-test",
+    "docs:api": "skypager generate-api-docs"
+  },
+  "skypager": {
+    "webpack": {
+      "build": "webpack.config.js"
+    },
+    "category": "helpers",
+    "projectType": "helper",
+    "providesScripts": false
+  },
+  "license": "MIT",
+  "dependencies": {
+    "puppeteer": "^10.1.0",
+    "puppeteer-har": "^1.1.2",
+    "lighthouse": "^8.0.0"
+  },
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/skypager/skypager"
+  },
+  "homepage": "https://skypager.io",
+  "gitHead": "9392473e420c7a46eb0be31bc7739ca16c8eb130",
+  "keywords": [
+    "skypager-helpers",
+    "skypager-node"
+  ],
+  "contributors": []
+}

@@ -1,0 +1,1 @@
+skypager.use(require('.'))
