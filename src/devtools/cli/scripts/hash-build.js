@@ -65,7 +65,7 @@ async function handler() {
 
   const { hashFile: outputFilename = 'build-manifest.json' } = runtime.argv
 
-  const buildFolderNames = ['dist', 'build', 'lib']
+  const { buildFolderNames = ['dist', 'build', 'lib', 'out'] } = runtime.argv
 
   const topLevel = await runtime.fsx.readdirSync(runtime.cwd)
   const directories = await Promise.all(
