@@ -1,7 +1,7 @@
 {
   "name": "@skypager/helpers-repl",
   "version": "1.4.0",
-  "description": "an awesome repl",
+  "description": "an awesome repl!",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
   "module": "lib/es/index.js",
