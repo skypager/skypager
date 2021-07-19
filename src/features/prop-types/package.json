@@ -8,7 +8,6 @@
     "registryAccess": "public"
   },
   "scripts": {
-    "prebuild": "rimraf lib && yarn docs:api",
     "build": "yarn build:lib && yarn build:es",
     "build:lib": "cross-env BUILD_ENV=build babel -d lib src --source-maps --comments",
     "build:es": "cross-env BUILD_ENV=build-es babel --comments --source-maps -d lib/es src",
