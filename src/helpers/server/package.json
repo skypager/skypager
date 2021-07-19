@@ -1,6 +1,6 @@
 {
   "name": "@skypager/helpers-server",
-  "version": "1.1.1",
+  "version": "1.4.0",
   "description": "skypager server helper",
   "author": "Jon Soeder <jon@chicago.com>",
   "publishConfig": {
@@ -36,8 +36,8 @@
     "express-history-api-fallback": "^2.2.1",
     "express-prettify": "^0.1.0",
     "express-winston": "^3.0.1",
-    "winston": "^3.1.0",
-    "helmet": "^3.20.0"
+    "helmet": "^3.20.0",
+    "winston": "^3.1.0"
   },
   "repository": {
     "type": "github",

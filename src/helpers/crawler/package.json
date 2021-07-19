@@ -1,6 +1,6 @@
 {
   "name": "@skypager/helpers-crawler",
-  "version": "1.1.1",
+  "version": "1.4.0",
   "description": "skypager crawler helper",
   "author": "Jon Soeder <jon@chicago.com>",
   "publishConfig": {
@@ -30,9 +30,9 @@
   },
   "license": "MIT",
   "dependencies": {
+    "lighthouse": "^8.0.0",
     "puppeteer": "^10.1.0",
-    "puppeteer-har": "^1.1.2",
-    "lighthouse": "^8.0.0"
+    "puppeteer-har": "^1.1.2"
   },
   "repository": {
     "type": "github",
