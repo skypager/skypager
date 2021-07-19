@@ -1,6 +1,6 @@
 {
   "name": "@skypager/voice-feature",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "skypager voice synthesis example",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
@@ -24,7 +24,7 @@
   "license": "MIT",
   "dependencies": {
     "@skypager/helpers-document": "^1.4.0",
-    "@skypager/node": "^1.4.0"
+    "@skypager/node": "^1.4.1"
   },
   "devDependenies": {
     "@skypager/webpack": "^1.1.1"

@@ -1,6 +1,6 @@
 {
   "name": "@skypager/runtime",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "universal javascript application runtime",
   "author": "Jon Soeder <jon@chicago.com>",
   "main": "lib/index.js",
@@ -21,7 +21,7 @@
   "dependencies": {
     "@babel/polyfill": "^7.2.2",
     "@babel/runtime": "^7.2.2",
-    "@skypager/prop-types": "^1.4.0",
+    "@skypager/prop-types": "^1.4.1",
     "lodash": "^4.17.4",
     "mobx": "3.3.1",
     "uuid": "^3.0.1",
