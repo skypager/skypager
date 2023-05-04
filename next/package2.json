@@ -1,0 +1,42 @@
+{
+  "name": "luca",
+  "version": "1.0.0",
+  "type": "module",
+  "types": "./types/index.d.ts",
+  "scripts": {
+    "console": "scripts/console.ts",
+    "types": "tsc --emitDeclarationOnly --declaration --outDir ./types"
+  },
+  "devDependencies": {
+    "@types/chalk": "^2.2.0",
+    "@types/child-process-promise": "^2.2.2",
+    "@types/detect-port": "^1.3.2",
+    "@types/figlet": "^1.5.5",
+    "@types/inquirer": "^9.0.3",
+    "@types/lodash-es": "^4.17.7",
+    "@types/micromatch": "^4.0.2",
+    "@types/minimist": "^1.2.2",
+    "@types/node": "^18.15.11",
+    "@types/node-uuid": "^0.0.29",
+    "@types/object-hash": "^3.0.2",
+    "@types/uuid": "^9.0.1",
+    "prettier": "^2.8.7",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "axios": "^1.3.5",
+    "chalk": "^5.2.0",
+    "child-process-promise": "^2.2.1",
+    "detect-port": "^1.5.1",
+    "figlet": "^1.6.0",
+    "inflect": "^0.5.0",
+    "inquirer": "^9.1.5",
+    "langchain": "^0.0.59",
+    "lodash-es": "^4.17.21",
+    "micromatch": "^4.0.5",
+    "minimist": "^1.2.8",
+    "node-uuid": "^1.4.8",
+    "object-hash": "^3.0.0"
+  }
+}

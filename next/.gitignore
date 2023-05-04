@@ -1,0 +1,14 @@
+/node_modules/
+/build/
+/lib/
+/dist/
+/docs/
+.idea/*
+
+.DS_Store
+coverage
+*.log
+out/
+prompts/
+loras/
+public/app
